@@ -45,8 +45,11 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
 
     @Override
     public InterpreterValue visit(TernaryConditionalNode ternaryConditional) {
-        val condition = (BooleanValue)eval(ternaryConditional.getCondition());
-        val branch = condition.getValue()
+        val condition = eval(ternaryConditional.getCondition());
+        if (!(condition instanceof BooleanValue)) {
+            throw new ConditionMustBeBoolean(condition);
+        }
+        val branch = ((BooleanValue)condition).getValue()
             ? ternaryConditional.getIfTrue()
             : ternaryConditional.getIfFalse();
         return eval(branch);
