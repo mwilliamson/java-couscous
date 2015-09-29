@@ -1,7 +1,6 @@
 package org.zwobble.couscous.interpreter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -29,10 +28,10 @@ public class Interpreter {
         val clazz = project.findClass(className);
         val method = find(clazz.getMethods(),
             method -> method.getName().equals(methodName));
-        val stackFrame = buildStackFrame(method, arguments);
+        val environment = buildEnvironment(method, arguments);
         
         for (val statement : method.getBody()) {
-            val result = statement.accept(new Executor(new Evaluator(stackFrame)));
+            val result = statement.accept(new Executor(new Evaluator(environment)));
             if (result.isPresent()) {
                 return result.get();
             }
@@ -40,7 +39,7 @@ public class Interpreter {
         return UNIT;
     }
 
-    private Map<Integer, InterpreterValue> buildStackFrame(
+    private Environment buildEnvironment(
         final MethodNode method,
         List<InterpreterValue> arguments) {
         
@@ -48,11 +47,12 @@ public class Interpreter {
             throw new WrongNumberOfArguments(method.getArguments().size(), arguments.size());
         }
         
-        return IntStream.range(0, method.getArguments().size())
+        val stackFrame = IntStream.range(0, method.getArguments().size())
             .boxed()
             .collect(toMap(
                 index -> method.getArguments().get(index).getId(),
                 index -> arguments.get(index)));
+        return new Environment(stackFrame);
     }
     
     private class Executor implements StatementNodeVisitor<Optional<InterpreterValue>> {
