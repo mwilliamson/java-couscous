@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.interpreter;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.values.StringValue;
 
@@ -21,5 +22,23 @@ public class EvaluatorTests {
         val environment = new Environment(ImmutableMap.of(arg.getId(), new StringValue("[initial value]")));
         val result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringValue("[updated value]"), result);
+    }
+    
+    @Test
+    public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
+        val result = eval(emptyEnvironment(),
+            new TernaryConditionalNode(literal(true), literal("T"), literal("F")));
+        assertEquals(new StringValue("T"), result);
+    }
+    
+    @Test
+    public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
+        val result = eval(emptyEnvironment(),
+            new TernaryConditionalNode(literal(false), literal("T"), literal("F")));
+        assertEquals(new StringValue("F"), result);
+    }
+    
+    private static Environment emptyEnvironment() {
+        return new Environment(ImmutableMap.of());
     }
 }

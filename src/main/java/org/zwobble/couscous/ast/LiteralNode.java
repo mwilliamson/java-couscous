@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
+import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InterpreterValue;
 import org.zwobble.couscous.values.StringValue;
@@ -13,8 +14,12 @@ public class LiteralNode implements ExpressionNode {
         return new LiteralNode(new StringValue(value));
     }
     
-    public static LiteralNode of(int value) {
+    public static LiteralNode literal(int value) {
         return new LiteralNode(new IntegerValue(value));
+    }
+    
+    public static LiteralNode literal(boolean value) {
+        return new LiteralNode(new BooleanValue(value));
     }
     
     InterpreterValue value;
