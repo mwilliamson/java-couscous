@@ -29,6 +29,14 @@ import lombok.val;
 
 public class InterpreterTests {
     @Test
+    public void methodWithNoStatementsReturnsUnit() {
+        val method = staticMethod("hello");
+        val result = runMethod(method);
+        
+        assertEquals(UNIT, result);
+    }
+    
+    @Test
     public void canReturnLiteralValue() {
         val method = staticMethod("hello")
             .statement(new ReturnNode(LiteralNode.literal("hello, world!")));
@@ -68,14 +76,6 @@ public class InterpreterTests {
         val result = runMethod(method, new StringValue("[initial value]"));
         
         assertEquals(new StringValue("[updated value]"), result);
-    }
-    
-    @Test
-    public void methodWithNoStatementsReturnsUnit() {
-        val method = staticMethod("hello");
-        val result = runMethod(method);
-        
-        assertEquals(UNIT, result);
     }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {

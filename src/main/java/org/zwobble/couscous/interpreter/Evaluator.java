@@ -3,6 +3,7 @@ package org.zwobble.couscous.interpreter;
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
+import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
@@ -53,5 +54,12 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
             ? ternaryConditional.getIfTrue()
             : ternaryConditional.getIfFalse();
         return eval(branch);
+    }
+
+    @Override
+    public InterpreterValue visit(MethodCallNode methodCall) {
+        val receiver = eval(methodCall.getReceiver());
+        // TODO: handle missing methods
+        return receiver.callMethod(methodCall.getMethodName());
     }
 }

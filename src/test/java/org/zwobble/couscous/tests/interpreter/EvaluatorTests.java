@@ -13,6 +13,7 @@ import com.google.common.collect.ImmutableMap;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.Assignment.assign;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
@@ -47,6 +48,13 @@ public class EvaluatorTests {
             () -> eval(emptyEnvironment(),
                 new TernaryConditionalNode(literal(1), literal("T"), literal("F"))));
         assertEquals(new ConditionMustBeBoolean(new IntegerValue(1)), exception);
+    }
+    
+    @Test
+    public void canCallMethodWithNoArgumentsOnBuiltin() {
+        val result = eval(emptyEnvironment(),
+            methodCall(literal("hello"), "length"));
+        assertEquals(new IntegerValue(5), result);
     }
     
     private static Environment emptyEnvironment() {

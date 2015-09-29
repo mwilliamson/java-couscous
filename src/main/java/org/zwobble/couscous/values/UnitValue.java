@@ -8,4 +8,9 @@ public class UnitValue implements InterpreterValue {
     
     private UnitValue() {
     }
+
+    @Override
+    public InterpreterValue callMethod(String methodName) {
+        throw new UnsupportedOperationException();
+    }
 }

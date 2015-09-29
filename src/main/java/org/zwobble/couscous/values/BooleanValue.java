@@ -12,4 +12,9 @@ public class BooleanValue implements InterpreterValue {
     public boolean getValue() {
         return value;
     }
+
+    @Override
+    public InterpreterValue callMethod(String methodName) {
+        throw new UnsupportedOperationException();
+    }
 }
