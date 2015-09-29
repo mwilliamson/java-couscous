@@ -13,6 +13,7 @@ import org.zwobble.couscous.values.InterpreterValue;
 
 import static com.google.common.collect.Iterables.find;
 import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.values.UnitValue.UNIT;
 
 import lombok.val;
@@ -31,7 +32,7 @@ public class Interpreter {
         val environment = buildEnvironment(method, arguments);
         
         for (val statement : method.getBody()) {
-            val result = statement.accept(new Executor(new Evaluator(environment)));
+            val result = statement.accept(new Executor(environment));
             if (result.isPresent()) {
                 return result.get();
             }
@@ -56,20 +57,20 @@ public class Interpreter {
     }
     
     private class Executor implements StatementNodeVisitor<Optional<InterpreterValue>> {
-        private Evaluator evaluator;
+        private Environment environment;
 
-        public Executor(Evaluator evaluator) {
-            this.evaluator = evaluator;
+        public Executor(Environment environment) {
+            this.environment = environment;
         }
         
         @Override
         public Optional<InterpreterValue> visit(ReturnNode returnNode) {
-            return Optional.of(evaluator.eval(returnNode.getValue()));
+            return Optional.of(eval(environment, returnNode.getValue()));
         }
 
         @Override
         public Optional<InterpreterValue> visit(ExpressionStatementNode expressionStatement) {
-            evaluator.eval(expressionStatement.getExpression());
+            eval(environment, expressionStatement.getExpression());
             return Optional.empty();
         }
     }

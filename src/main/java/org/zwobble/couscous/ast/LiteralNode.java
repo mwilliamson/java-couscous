@@ -9,7 +9,7 @@ import lombok.Value;
 
 @Value
 public class LiteralNode implements ExpressionNode {
-    public static LiteralNode of(String value) {
+    public static LiteralNode literal(String value) {
         return new LiteralNode(new StringValue(value));
     }
     

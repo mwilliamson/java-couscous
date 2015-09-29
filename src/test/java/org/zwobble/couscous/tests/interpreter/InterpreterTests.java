@@ -31,7 +31,7 @@ public class InterpreterTests {
     @Test
     public void canReturnLiteralValue() {
         val method = staticMethod("hello")
-            .statement(new ReturnNode(LiteralNode.of("hello, world!")));
+            .statement(new ReturnNode(LiteralNode.literal("hello, world!")));
         val result = runMethod(method);
         
         assertEquals(new StringValue("hello, world!"), result);
@@ -63,19 +63,8 @@ public class InterpreterTests {
         val arg = new FormalArgumentNode(42, "x");
         val method = staticMethod("hello")
             .argument(arg)
-            .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.of("[updated value]"))))
+            .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.literal("[updated value]"))))
             .statement(new ReturnNode(reference(arg)));
-        val result = runMethod(method, new StringValue("[initial value]"));
-        
-        assertEquals(new StringValue("[updated value]"), result);
-    }
-    
-    @Test
-    public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = new FormalArgumentNode(42, "x");
-        val method = staticMethod("hello")
-            .argument(arg)
-            .statement(new ReturnNode(new Assignment(reference(arg), LiteralNode.of("[updated value]"))));
         val result = runMethod(method, new StringValue("[initial value]"));
         
         assertEquals(new StringValue("[updated value]"), result);

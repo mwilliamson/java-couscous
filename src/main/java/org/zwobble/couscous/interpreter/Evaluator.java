@@ -10,9 +10,13 @@ import org.zwobble.couscous.values.InterpreterValue;
 import lombok.val;
 
 public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
+    public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
+        return new Evaluator(environment).eval(expression);
+    }
+    
     private final Environment environment;
 
-    public Evaluator(Environment environment) {
+    private Evaluator(Environment environment) {
         this.environment = environment;
     }
     
