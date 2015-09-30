@@ -1,8 +1,6 @@
 package org.zwobble.couscous.values;
 
-import java.util.List;
-
-import org.zwobble.couscous.interpreter.NoSuchMethod;
+import java.util.Optional;
 
 import lombok.Value;
 import lombok.val;
@@ -12,15 +10,17 @@ public class StringValue implements InterpreterValue {
     String value;
 
     @Override
-    public InterpreterValue callMethod(String methodName, List<InterpreterValue> arguments) {
+    public Optional<MethodValue> getMethod(String methodName) {
         if (methodName == "length") {
-            return new IntegerValue(value.length());
+            return Optional.of(arguments -> new IntegerValue(value.length()));
         } else if (methodName == "substring") {
-            val startIndex = (IntegerValue)arguments.get(0);
-            val endIndex = (IntegerValue)arguments.get(1);
-            return new StringValue(value.substring(startIndex.getValue(), endIndex.getValue()));
+            return Optional.of(arguments -> {
+                val startIndex = (IntegerValue)arguments.get(0);
+                val endIndex = (IntegerValue)arguments.get(1);
+                return new StringValue(value.substring(startIndex.getValue(), endIndex.getValue()));
+            });
         } else {
-            throw new NoSuchMethod(methodName);
+            return Optional.empty();
         }
     }
 }

@@ -1,6 +1,6 @@
 package org.zwobble.couscous.values;
 
-import java.util.List;
+import java.util.Optional;
 
 import lombok.Value;
 
@@ -9,7 +9,7 @@ public class IntegerValue implements InterpreterValue {
     int value;
 
     @Override
-    public InterpreterValue callMethod(String methodName, List<InterpreterValue> arguments) {
+    public Optional<MethodValue> getMethod(String methodName) {
         throw new UnsupportedOperationException();
     }
 }

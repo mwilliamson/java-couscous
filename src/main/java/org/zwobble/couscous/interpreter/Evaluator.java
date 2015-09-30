@@ -65,7 +65,8 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
             .stream()
             .map(argument -> eval(argument))
             .collect(Collectors.toList());
-        // TODO: handle missing methods
-        return receiver.callMethod(methodCall.getMethodName(), arguments);
+        val method = receiver.getMethod(methodCall.getMethodName())
+            .orElseThrow(() -> new NoSuchMethod(methodCall.getMethodName()));
+        return method.call(arguments);
     }
 }

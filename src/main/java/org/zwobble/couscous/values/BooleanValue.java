@@ -1,6 +1,6 @@
 package org.zwobble.couscous.values;
 
-import java.util.List;
+import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public class BooleanValue implements InterpreterValue {
     }
 
     @Override
-    public InterpreterValue callMethod(String methodName, List<InterpreterValue> arguments) {
+    public Optional<MethodValue> getMethod(String methodName) {
         throw new UnsupportedOperationException();
     }
 }

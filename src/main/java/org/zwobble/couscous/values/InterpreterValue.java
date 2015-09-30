@@ -1,7 +1,7 @@
 package org.zwobble.couscous.values;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface InterpreterValue {
-    InterpreterValue callMethod(String methodName, List<InterpreterValue> arguments);
+    Optional<MethodValue> getMethod(String methodName);
 }
