@@ -40,6 +40,7 @@ public class ConcreteType<T> {
         return new Builder<>();
     }
 
+    @SuppressWarnings("unchecked")
     public InterpreterValue callMethod(InterpreterValue receiver, String methodName, List<InterpreterValue> arguments) {
         if (!methods.containsKey(methodName)) {
             throw new NoSuchMethod(methodName);
