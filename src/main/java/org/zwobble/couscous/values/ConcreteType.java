@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
+import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -13,11 +14,14 @@ import lombok.val;
 
 public class ConcreteType<T> {
     public static class Builder<T> {
-        private final ImmutableMap.Builder<String, BiFunction<T, Arguments, InterpreterValue>> methods =
+        private final ImmutableMap.Builder<String, MethodValue<T>> methods =
             ImmutableMap.builder();
         
-        public Builder<T> method(String name, BiFunction<T, Arguments, InterpreterValue> method) {
-            methods.put(name, method);
+        public Builder<T> method(
+                String name,
+                List<ConcreteType<?>> argumentsTypes,
+                BiFunction<T, Arguments, InterpreterValue> method) {
+            methods.put(name, new MethodValue<T>(argumentsTypes, method));
             return this;
         }
         
@@ -26,9 +30,9 @@ public class ConcreteType<T> {
         }
     }
 
-    private Map<String, BiFunction<T, Arguments, InterpreterValue>> methods;
+    private Map<String, MethodValue<T>> methods;
 
-    public ConcreteType(Map<String, BiFunction<T, Arguments, InterpreterValue>> methods) {
+    public ConcreteType(Map<String, MethodValue<T>> methods) {
         this.methods = methods;
     }
 
@@ -41,6 +45,9 @@ public class ConcreteType<T> {
             throw new NoSuchMethod(methodName);
         }
         val method = methods.get(methodName);
+        if (method.getArgumentTypes().size() != arguments.size()) {
+            throw new WrongNumberOfArguments(method.getArgumentTypes().size(), arguments.size());
+        }
         return method.apply((T)receiver, new Arguments(arguments));
     }
 }

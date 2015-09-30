@@ -4,7 +4,7 @@ import lombok.Value;
 
 @Value
 public class IntegerValue implements InterpreterValue {
-    private static final ConcreteType<?> TYPE = ConcreteType.<IntegerValue>builder()
+    public static final ConcreteType<?> TYPE = ConcreteType.<IntegerValue>builder()
         .build();
     
     int value;

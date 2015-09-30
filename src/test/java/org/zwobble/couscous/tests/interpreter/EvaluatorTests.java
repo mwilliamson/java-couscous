@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
+import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -71,6 +72,14 @@ public class EvaluatorTests {
             () -> eval(emptyEnvironment(),
                 methodCall(literal("hello"), "size")));
         assertEquals(new NoSuchMethod("size"), exception);
+    }
+    
+    @Test
+    public void errorIfWrongNumberOfArgumentsArePassed() {
+        val exception = assertThrows(WrongNumberOfArguments.class,
+            () -> eval(emptyEnvironment(),
+                methodCall(literal("hello"), "substring", literal(1))));
+        assertEquals(new WrongNumberOfArguments(2, 1), exception);
     }
     
     private static Environment emptyEnvironment() {
