@@ -1,13 +1,14 @@
 package org.zwobble.couscous.values;
 
-import java.util.Optional;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Value;
 
 @Value
 public class BooleanValue implements InterpreterValue {
+    private static final ConcreteType<BooleanValue> TYPE = ConcreteType.<BooleanValue>builder()
+        .build();
+    
     @Getter(value = AccessLevel.NONE)
     boolean value;
 
@@ -16,7 +17,7 @@ public class BooleanValue implements InterpreterValue {
     }
 
     @Override
-    public Optional<MethodValue> getMethod(String methodName) {
-        throw new UnsupportedOperationException();
+    public ConcreteType<?> getType() {
+        return TYPE;
     }
 }

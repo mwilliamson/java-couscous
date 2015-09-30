@@ -1,18 +1,19 @@
 package org.zwobble.couscous.values;
 
-import java.util.Optional;
-
 import lombok.ToString;
 
 @ToString
 public class UnitValue implements InterpreterValue {
+    private static final ConcreteType<?> TYPE = ConcreteType.<UnitValue>builder()
+        .build();
+    
     public static final UnitValue UNIT = new UnitValue(); 
     
     private UnitValue() {
     }
 
     @Override
-    public Optional<MethodValue> getMethod(String methodName) {
-        throw new UnsupportedOperationException();
+    public ConcreteType<?> getType() {
+        return TYPE;
     }
 }

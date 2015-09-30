@@ -1,15 +1,16 @@
 package org.zwobble.couscous.values;
 
-import java.util.Optional;
-
 import lombok.Value;
 
 @Value
 public class IntegerValue implements InterpreterValue {
+    private static final ConcreteType<?> TYPE = ConcreteType.<IntegerValue>builder()
+        .build();
+    
     int value;
 
     @Override
-    public Optional<MethodValue> getMethod(String methodName) {
-        throw new UnsupportedOperationException();
+    public ConcreteType<?> getType() {
+        return TYPE;
     }
 }

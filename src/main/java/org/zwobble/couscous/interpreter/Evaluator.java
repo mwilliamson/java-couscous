@@ -61,12 +61,11 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
         val receiver = eval(methodCall.getReceiver());
+        val type = receiver.getType();
         val arguments = methodCall.getArguments()
             .stream()
             .map(argument -> eval(argument))
             .collect(Collectors.toList());
-        val method = receiver.getMethod(methodCall.getMethodName())
-            .orElseThrow(() -> new NoSuchMethod(methodCall.getMethodName()));
-        return method.call(arguments);
+        return type.callMethod(receiver, methodCall.getMethodName(), arguments);
     }
 }
