@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -62,6 +63,14 @@ public class EvaluatorTests {
         val result = eval(emptyEnvironment(),
             methodCall(literal("hello"), "substring", literal(1), literal(4)));
         assertEquals(new StringValue("ell"), result);
+    }
+    
+    @Test
+    public void errorIfMethodDoesNotExist() {
+        val exception = assertThrows(NoSuchMethod.class,
+            () -> eval(emptyEnvironment(),
+                methodCall(literal("hello"), "size")));
+        assertEquals(new NoSuchMethod("size"), exception);
     }
     
     private static Environment emptyEnvironment() {

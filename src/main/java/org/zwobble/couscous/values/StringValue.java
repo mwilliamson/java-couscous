@@ -2,6 +2,8 @@ package org.zwobble.couscous.values;
 
 import java.util.List;
 
+import org.zwobble.couscous.interpreter.NoSuchMethod;
+
 import lombok.Value;
 import lombok.val;
 
@@ -18,7 +20,7 @@ public class StringValue implements InterpreterValue {
             val endIndex = (IntegerValue)arguments.get(1);
             return new StringValue(value.substring(startIndex.getValue(), endIndex.getValue()));
         } else {
-            throw new UnsupportedOperationException();
+            throw new NoSuchMethod(methodName);
         }
     }
 }
