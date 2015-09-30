@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
+import java.util.stream.Collectors;
+
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
@@ -59,7 +61,11 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
         val receiver = eval(methodCall.getReceiver());
+        val arguments = methodCall.getArguments()
+            .stream()
+            .map(argument -> eval(argument))
+            .collect(Collectors.toList());
         // TODO: handle missing methods
-        return receiver.callMethod(methodCall.getMethodName());
+        return receiver.callMethod(methodCall.getMethodName(), arguments);
     }
 }

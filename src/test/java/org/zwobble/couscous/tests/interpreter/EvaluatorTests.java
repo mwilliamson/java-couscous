@@ -57,6 +57,13 @@ public class EvaluatorTests {
         assertEquals(new IntegerValue(5), result);
     }
     
+    @Test
+    public void canCallMethodWithArgumentsOnBuiltin() {
+        val result = eval(emptyEnvironment(),
+            methodCall(literal("hello"), "substring", literal(1), literal(4)));
+        assertEquals(new StringValue("ell"), result);
+    }
+    
     private static Environment emptyEnvironment() {
         return new Environment(ImmutableMap.of());
     }
