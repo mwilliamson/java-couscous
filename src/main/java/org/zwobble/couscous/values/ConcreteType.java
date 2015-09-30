@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
+import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +50,15 @@ public class ConcreteType<T> {
         if (method.getArgumentTypes().size() != arguments.size()) {
             throw new WrongNumberOfArguments(method.getArgumentTypes().size(), arguments.size());
         }
+        
+        for (int index = 0; index < arguments.size(); index++) {
+            val formalArgumentType = method.getArgumentTypes().get(index);
+            val actualArgumentType = arguments.get(index).getType();
+            if (formalArgumentType != actualArgumentType) {
+                throw new UnexpectedValueType(formalArgumentType, actualArgumentType);
+            }
+        }
+        
         return method.apply((T)receiver, new Arguments(arguments));
     }
 }

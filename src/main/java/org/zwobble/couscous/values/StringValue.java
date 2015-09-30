@@ -7,7 +7,7 @@ import lombok.val;
 
 @Value
 public class StringValue implements InterpreterValue {
-    private static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder()
+    public static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder()
         .method("length", asList(), (receiver, arguments) -> new IntegerValue(receiver.value.length()))
         
         .method("substring", asList(IntegerValue.TYPE, IntegerValue.TYPE),
