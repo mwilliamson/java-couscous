@@ -14,6 +14,10 @@ public class StaticMethodCallNode implements ExpressionNode {
         return new StaticMethodCallNode(className, methodName, asList(arguments));
     }
     
+    public static StaticMethodCallNode staticMethodCall(String className, String methodName, List<ExpressionNode> arguments) {
+        return new StaticMethodCallNode(className, methodName, arguments);
+    }
+    
     String className;
     String methodName;
     List<ExpressionNode> arguments;

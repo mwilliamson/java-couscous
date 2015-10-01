@@ -9,6 +9,7 @@ import lombok.Value;
 @Builder
 @Value
 public class ClassNode {
+    String name;
     @Singular
     List<MethodNode> methods;
 }

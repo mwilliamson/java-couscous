@@ -1,7 +1,7 @@
 package org.zwobble.couscous;
 
-import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.values.ConcreteType;
 
 public interface Project {
-    ClassNode findClass(String name);
+    ConcreteType<?> findClass(String name);
 }

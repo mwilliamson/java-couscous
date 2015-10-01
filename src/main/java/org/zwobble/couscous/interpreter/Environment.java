@@ -3,14 +3,16 @@ package org.zwobble.couscous.interpreter;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.zwobble.couscous.Project;
 import org.zwobble.couscous.values.ConcreteType;
-import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InterpreterValue;
 
 public class Environment {
-    private Map<Integer, InterpreterValue> stackFrame;
+    private final Map<Integer, InterpreterValue> stackFrame;
+    private final Project project;
 
-    public Environment(Map<Integer, InterpreterValue> stackFrame) {
+    public Environment(Project project, Map<Integer, InterpreterValue> stackFrame) {
+        this.project = project;
         this.stackFrame = new HashMap<>(stackFrame);
     }
 
@@ -23,10 +25,7 @@ public class Environment {
     }
 
     public ConcreteType<?> findClass(String className) {
-        if (className == "java.lang.Integer") {
-            return IntegerValue.TYPE;
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        // TODO: handle missing classes
+        return project.findClass(className);
     }
 }

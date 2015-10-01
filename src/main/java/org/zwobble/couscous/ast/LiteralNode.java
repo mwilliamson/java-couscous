@@ -10,6 +10,10 @@ import lombok.Value;
 
 @Value
 public class LiteralNode implements ExpressionNode {
+    public static LiteralNode literal(InterpreterValue value) {
+        return new LiteralNode(value);
+    }
+    
     public static LiteralNode literal(String value) {
         return new LiteralNode(new StringValue(value));
     }

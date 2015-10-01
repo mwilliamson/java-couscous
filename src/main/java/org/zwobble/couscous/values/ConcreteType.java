@@ -5,13 +5,22 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.zwobble.couscous.Project;
+import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.interpreter.Arguments;
+import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 
 import com.google.common.collect.ImmutableMap;
+
+import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.interpreter.Executor.exec;
 
 import lombok.val;
 
@@ -47,15 +56,61 @@ public class ConcreteType<T> {
             return new ConcreteType<T>(name, methods.build(), staticMethods.build());
         }
     }
+    
+    public static ConcreteType<?> fromNode(ClassNode classNode) {
+        val staticMethods = classNode.getMethods()
+            .stream()
+            .filter(method -> method.isStatic())
+            .collect(toMap(
+                method -> method.getName(),
+                method -> {
+                    Supplier<List<ConcreteType<?>>> argumentTypes = () -> method.getArguments()
+                        .stream()
+                        .<ConcreteType<?>>map(arg -> arg.getType())
+                        .collect(Collectors.toList());
+                    return new StaticMethodValue(argumentTypes, arguments -> {
+                        val environment = buildEnvironment(method, arguments);
+                      
+                        for (val statement : method.getBody()) {
+                            val result = exec(environment, statement);
+                            if (result.isPresent()) {
+                                return result.get();
+                            }
+                        }
+                        return UnitValue.UNIT;
+                    });
+                }));
+        return new ConcreteType<Void>(
+            classNode.getName(),
+            ImmutableMap.of(),
+            staticMethods);
+    }
+
+    private static Environment buildEnvironment(
+        final MethodNode method,
+        Arguments arguments) {
+        
+        val stackFrame = IntStream.range(0, method.getArguments().size())
+            .boxed()
+            .collect(toMap(
+                index -> method.getArguments().get(index).getId(),
+                index -> arguments.get(index)));
+        return new Environment(new Project() {
+            @Override
+            public ConcreteType<?> findClass(String name) {
+                throw new UnsupportedOperationException();
+            }
+        }, stackFrame);
+    }
 
     private String name;
     private Map<String, MethodValue<T>> methods;
-    private ImmutableMap<String, StaticMethodValue> staticMethods;
+    private Map<String, StaticMethodValue> staticMethods;
 
     public ConcreteType(
             String name,
             Map<String, MethodValue<T>> methods,
-            ImmutableMap<String, StaticMethodValue> staticMethods) {
+            Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
         this.methods = methods;
         this.staticMethods = staticMethods;

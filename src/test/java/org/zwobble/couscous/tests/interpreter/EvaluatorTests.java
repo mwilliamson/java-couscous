@@ -26,8 +26,10 @@ import lombok.val;
 public class EvaluatorTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = new FormalArgumentNode(42, "x");
-        val environment = new Environment(ImmutableMap.of(arg.getId(), new StringValue("[initial value]")));
+        val arg = new FormalArgumentNode(42, () -> StringValue.TYPE, "x");
+        val environment = new Environment(
+            new MapBackedProject(ImmutableMap.of()),
+            ImmutableMap.of(arg.getId(), new StringValue("[initial value]")));
         val result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringValue("[updated value]"), result);
     }
@@ -100,6 +102,8 @@ public class EvaluatorTests {
     }
     
     private static Environment emptyEnvironment() {
-        return new Environment(ImmutableMap.of());
+        return new Environment(
+            new MapBackedProject(ImmutableMap.of("java.lang.Integer", IntegerValue.TYPE)),
+            ImmutableMap.of());
     }
 }
