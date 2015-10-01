@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.Assignment.assign;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
@@ -89,6 +90,13 @@ public class EvaluatorTests {
             () -> eval(emptyEnvironment(),
                 methodCall(literal("hello"), "substring", literal(0), literal(""))));
         assertEquals(new UnexpectedValueType(IntegerValue.TYPE, StringValue.TYPE), exception);
+    }
+    
+    @Test
+    public void canCallStaticMethod() {
+        val result = eval(emptyEnvironment(),
+            staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
+        assertEquals(new IntegerValue(42), result);
     }
     
     private static Environment emptyEnvironment() {

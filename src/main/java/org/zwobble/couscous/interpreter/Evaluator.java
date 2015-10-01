@@ -1,11 +1,13 @@
 package org.zwobble.couscous.interpreter;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
@@ -62,10 +64,21 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     public InterpreterValue visit(MethodCallNode methodCall) {
         val receiver = eval(methodCall.getReceiver());
         val type = receiver.getType();
-        val arguments = methodCall.getArguments()
+        val arguments = evalArguments(methodCall.getArguments());
+        return type.callMethod(receiver, methodCall.getMethodName(), arguments);
+    }
+
+    private List<InterpreterValue> evalArguments(List<ExpressionNode> arguments) {
+        return arguments
             .stream()
             .map(argument -> eval(argument))
             .collect(Collectors.toList());
-        return type.callMethod(receiver, methodCall.getMethodName(), arguments);
+    }
+
+    @Override
+    public InterpreterValue visit(StaticMethodCallNode staticMethodCall) {
+        val clazz = environment.findClass(staticMethodCall.getClassName());
+        val arguments = evalArguments(staticMethodCall.getArguments());
+        return clazz.callStaticMethod(staticMethodCall.getMethodName(), arguments);
     }
 }

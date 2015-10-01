@@ -7,10 +7,11 @@ import lombok.val;
 
 @Value
 public class StringValue implements InterpreterValue {
-    public static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder()
-        .method("length", asList(), (receiver, arguments) -> new IntegerValue(receiver.value.length()))
+    public static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder("String")
+        .method("length", () -> asList(),
+            (receiver, arguments) -> new IntegerValue(receiver.value.length()))
         
-        .method("substring", asList(IntegerValue.TYPE, IntegerValue.TYPE),
+        .method("substring", () -> asList(IntegerValue.TYPE, IntegerValue.TYPE),
             (receiver, arguments) -> {
                 val startIndex = (IntegerValue)arguments.get(0);
                 val endIndex = (IntegerValue)arguments.get(1);

@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 public class BooleanValue implements InterpreterValue {
-    private static final ConcreteType<BooleanValue> TYPE = ConcreteType.<BooleanValue>builder()
+    private static final ConcreteType<BooleanValue> TYPE = ConcreteType.<BooleanValue>builder("Boolean")
         .build();
     
     @Getter(value = AccessLevel.NONE)

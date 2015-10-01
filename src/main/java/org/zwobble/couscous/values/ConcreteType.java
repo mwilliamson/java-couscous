@@ -3,6 +3,8 @@ package org.zwobble.couscous.values;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
@@ -17,32 +19,64 @@ public class ConcreteType<T> {
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, MethodValue<T>> methods =
             ImmutableMap.builder();
+        private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods =
+            ImmutableMap.builder();
+        private final String name;
+        
+        public Builder(String name) {
+            this.name = name;
+        }
         
         public Builder<T> method(
                 String name,
-                List<ConcreteType<?>> argumentsTypes,
+                Supplier<List<ConcreteType<?>>> argumentsTypes,
                 BiFunction<T, Arguments, InterpreterValue> method) {
             methods.put(name, new MethodValue<T>(argumentsTypes, method));
             return this;
         }
         
+        public Builder<T> staticMethod(
+                String name,
+                Supplier<List<ConcreteType<?>>> argumentsTypes,
+                Function<Arguments, InterpreterValue> method) {
+            staticMethods.put(name, new StaticMethodValue(argumentsTypes, method));
+            return this;
+        }
+        
         public ConcreteType<T> build() {
-            return new ConcreteType<T>(methods.build());
+            return new ConcreteType<T>(name, methods.build(), staticMethods.build());
         }
     }
 
+    private String name;
     private Map<String, MethodValue<T>> methods;
+    private ImmutableMap<String, StaticMethodValue> staticMethods;
 
-    public ConcreteType(Map<String, MethodValue<T>> methods) {
+    public ConcreteType(
+            String name,
+            Map<String, MethodValue<T>> methods,
+            ImmutableMap<String, StaticMethodValue> staticMethods) {
+        this.name = name;
         this.methods = methods;
+        this.staticMethods = staticMethods;
     }
 
-    public static <T> ConcreteType.Builder<T> builder() {
-        return new Builder<>();
+    public static <T> ConcreteType.Builder<T> builder(String name) {
+        return new Builder<>(name);
     }
 
     @SuppressWarnings("unchecked")
     public InterpreterValue callMethod(InterpreterValue receiver, String methodName, List<InterpreterValue> arguments) {
+        val method = findMethod(methods, methodName, arguments);
+        return method.apply((T)receiver, new Arguments(arguments));
+    }
+
+    public InterpreterValue callStaticMethod(String methodName, List<InterpreterValue> arguments) {
+        val method = findMethod(staticMethods, methodName, arguments);
+        return method.apply(new Arguments(arguments));
+    }
+    
+    private static <T extends Callable> T findMethod(Map<String, T> methods, String methodName, List<InterpreterValue> arguments) {
         if (!methods.containsKey(methodName)) {
             throw new NoSuchMethod(methodName);
         }
@@ -58,7 +92,11 @@ public class ConcreteType<T> {
                 throw new UnexpectedValueType(formalArgumentType, actualArgumentType);
             }
         }
-        
-        return method.apply((T)receiver, new Arguments(arguments));
+        return method;
+    }
+    
+    @Override
+    public String toString() {
+        return "ConcreteType<" + name + ">";
     }
 }
