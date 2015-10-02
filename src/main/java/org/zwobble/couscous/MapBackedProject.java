@@ -4,12 +4,30 @@ import java.util.Map;
 
 import org.zwobble.couscous.values.ConcreteType;
 
-import lombok.Builder;
-import lombok.Singular;
+import com.google.common.collect.ImmutableMap;
 
-@Builder
 public class MapBackedProject implements Project {
-    @Singular(value="addClass")
+    public static Builder builder() {
+        return new Builder();
+    }
+    
+    public static class Builder {
+        private final ImmutableMap.Builder<String, ConcreteType<?>> classes;
+        
+        private Builder() {
+            classes = ImmutableMap.builder();
+        }
+        
+        public Builder addClass(ConcreteType<?> clazz) {
+            classes.put(clazz.getName(), clazz);
+            return this;
+        }
+        
+        public Project build() {
+            return new MapBackedProject(classes.build());
+        }
+    }
+    
     private Map<String, ConcreteType<?>> classes;
 
     public MapBackedProject(Map<String, ConcreteType<?>> classes) {

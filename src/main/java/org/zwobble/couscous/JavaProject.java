@@ -3,8 +3,8 @@ package org.zwobble.couscous;
 import org.zwobble.couscous.values.IntegerValue;
 
 public class JavaProject {
-    public static MapBackedProject.MapBackedProjectBuilder builder() {
+    public static MapBackedProject.Builder builder() {
         return MapBackedProject.builder()
-            .addClass("java.lang.Integer", IntegerValue.TYPE);
+            .addClass(IntegerValue.TYPE);
     }
 }

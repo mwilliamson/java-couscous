@@ -86,6 +86,10 @@ public class ConcreteType<T> {
         this.methods = methods;
         this.staticMethods = staticMethods;
     }
+    
+    public String getName() {
+        return name;
+    }
 
     public static <T> ConcreteType.Builder<T> builder(String name) {
         return new Builder<>(name);

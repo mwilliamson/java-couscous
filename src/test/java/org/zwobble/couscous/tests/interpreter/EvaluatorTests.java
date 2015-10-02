@@ -116,7 +116,7 @@ public class EvaluatorTests {
             .build();
         val environment = new Environment(
             JavaProject.builder()
-                .addClass("com.example.Program", ConcreteType.fromNode(classNode))
+                .addClass(ConcreteType.fromNode(classNode))
                 .build(),
             ImmutableMap.of());
         val result = eval(environment,
