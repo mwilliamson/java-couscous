@@ -79,6 +79,6 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     public InterpreterValue visit(StaticMethodCallNode staticMethodCall) {
         val clazz = environment.findClass(staticMethodCall.getClassName());
         val arguments = evalArguments(staticMethodCall.getArguments());
-        return clazz.callStaticMethod(staticMethodCall.getMethodName(), arguments);
+        return clazz.callStaticMethod(environment, staticMethodCall.getMethodName(), arguments);
     }
 }

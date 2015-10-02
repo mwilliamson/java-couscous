@@ -9,7 +9,7 @@ import lombok.val;
 public class IntegerValue implements InterpreterValue {
     public static final ConcreteType<?> TYPE = ConcreteType.<IntegerValue>builder("Integer")
         .staticMethod("parseInt", () -> asList(StringValue.TYPE),
-            arguments -> {
+            (environment, arguments) -> {
                 val value = (StringValue)arguments.get(0);
                 return new IntegerValue(Integer.parseInt(value.getValue()));
             })

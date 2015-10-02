@@ -1,13 +1,19 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import org.junit.Test;
+import org.zwobble.couscous.JavaProject;
+import org.zwobble.couscous.MapBackedProject;
+import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.MethodNode;
+import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -101,9 +107,26 @@ public class EvaluatorTests {
         assertEquals(new IntegerValue(42), result);
     }
     
+    @Test
+    public void canCallStaticMethodFromAnotherStaticMethod() {
+        val classNode = ClassNode.builder("com.example.Program")
+            .method(MethodNode.staticMethod("main")
+                .statement(new ReturnNode(staticMethodCall("java.lang.Integer", "parseInt", literal("42"))))
+                .build())
+            .build();
+        val environment = new Environment(
+            JavaProject.builder()
+                .addClass("com.example.Program", ConcreteType.fromNode(classNode))
+                .build(),
+            ImmutableMap.of());
+        val result = eval(environment,
+            staticMethodCall("com.example.Program", "main"));
+        assertEquals(new IntegerValue(42), result);
+    }
+    
     private static Environment emptyEnvironment() {
         return new Environment(
-            new MapBackedProject(ImmutableMap.of("java.lang.Integer", IntegerValue.TYPE)),
+            JavaProject.builder().build(),
             ImmutableMap.of());
     }
 }

@@ -1,11 +1,15 @@
-package org.zwobble.couscous.tests.interpreter;
+package org.zwobble.couscous;
 
 import java.util.Map;
 
-import org.zwobble.couscous.Project;
 import org.zwobble.couscous.values.ConcreteType;
 
+import lombok.Builder;
+import lombok.Singular;
+
+@Builder
 public class MapBackedProject implements Project {
+    @Singular(value="addClass")
     private Map<String, ConcreteType<?>> classes;
 
     public MapBackedProject(Map<String, ConcreteType<?>> classes) {

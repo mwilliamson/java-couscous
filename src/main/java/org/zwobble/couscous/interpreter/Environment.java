@@ -28,4 +28,8 @@ public class Environment {
         // TODO: handle missing classes
         return project.findClass(className);
     }
+
+    public Environment withStackFrame(Map<Integer, InterpreterValue> stackFrame) {
+        return new Environment(project, stackFrame);
+    }
 }

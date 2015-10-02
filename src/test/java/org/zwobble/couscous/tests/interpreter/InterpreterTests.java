@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import org.junit.Test;
+import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -78,10 +79,10 @@ public class InterpreterTests {
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
         val method = methodBuilder.build();
-        val classNode = ClassNode.builder()
+        val className = "com.example.Program";
+        val classNode = ClassNode.builder(className)
             .method(method)
             .build();
-        val className = "com.example.Program";
         val interpreter = new Interpreter(new MapBackedProject(ImmutableMap.of(
             className, ConcreteType.fromNode(classNode))));
         

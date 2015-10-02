@@ -3,11 +3,12 @@ package org.zwobble.couscous.values;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.interpreter.Arguments;
+import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
@@ -42,7 +43,7 @@ public class ConcreteType<T> {
         public Builder<T> staticMethod(
                 String name,
                 Supplier<List<ConcreteType<?>>> argumentsTypes,
-                Function<Arguments, InterpreterValue> method) {
+                BiFunction<Environment, Arguments, InterpreterValue> method) {
             staticMethods.put(name, new StaticMethodValue(argumentsTypes, method));
             return this;
         }
@@ -58,7 +59,15 @@ public class ConcreteType<T> {
             .filter(method -> method.isStatic())
             .collect(toMap(
                 method -> method.getName(),
-                Executor::callMethod));
+                method -> {
+                    Supplier<List<ConcreteType<?>>> argumentTypes = () -> method.getArguments()
+                        .stream()
+                        .<ConcreteType<?>>map(arg -> arg.getType())
+                        .collect(Collectors.toList());
+                    return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
+                        return Executor.callMethod(environment, method, arguments);
+                    });
+                }));
         return new ConcreteType<Void>(
             classNode.getName(),
             ImmutableMap.of(),
@@ -88,9 +97,9 @@ public class ConcreteType<T> {
         return method.apply((T)receiver, new Arguments(arguments));
     }
 
-    public InterpreterValue callStaticMethod(String methodName, List<InterpreterValue> arguments) {
+    public InterpreterValue callStaticMethod(Environment environment, String methodName, List<InterpreterValue> arguments) {
         val method = findMethod(staticMethods, methodName, arguments);
-        return method.apply(new Arguments(arguments));
+        return method.apply(environment, new Arguments(arguments));
     }
     
     private static <T extends Callable> T findMethod(Map<String, T> methods, String methodName, List<InterpreterValue> arguments) {
