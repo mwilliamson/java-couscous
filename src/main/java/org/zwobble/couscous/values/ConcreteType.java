@@ -3,7 +3,6 @@ package org.zwobble.couscous.values;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.ClassNode;
@@ -17,6 +16,7 @@ import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import com.google.common.collect.ImmutableMap;
 
 import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.values.TypeReference.typeRef;
 
 import lombok.val;
 
@@ -34,7 +34,7 @@ public class ConcreteType<T> {
         
         public Builder<T> method(
                 String name,
-                Supplier<List<ConcreteType<?>>> argumentsTypes,
+                List<TypeReference> argumentsTypes,
                 BiFunction<T, Arguments, InterpreterValue> method) {
             methods.put(name, new MethodValue<T>(argumentsTypes, method));
             return this;
@@ -42,7 +42,7 @@ public class ConcreteType<T> {
         
         public Builder<T> staticMethod(
                 String name,
-                Supplier<List<ConcreteType<?>>> argumentsTypes,
+                List<TypeReference> argumentsTypes,
                 BiFunction<Environment, Arguments, InterpreterValue> method) {
             staticMethods.put(name, new StaticMethodValue(argumentsTypes, method));
             return this;
@@ -60,9 +60,9 @@ public class ConcreteType<T> {
             .collect(toMap(
                 method -> method.getName(),
                 method -> {
-                    Supplier<List<ConcreteType<?>>> argumentTypes = () -> method.getArguments()
+                    List<TypeReference> argumentTypes = method.getArguments()
                         .stream()
-                        .<ConcreteType<?>>map(arg -> arg.getType())
+                        .map(arg -> arg.getType())
                         .collect(Collectors.toList());
                     return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
                         return Executor.callMethod(environment, method, arguments);
@@ -89,6 +89,10 @@ public class ConcreteType<T> {
     
     public String getName() {
         return name;
+    }
+
+    public static <T> ConcreteType.Builder<T> builder(TypeReference reference) {
+        return new Builder<>(reference.getName());
     }
 
     public static <T> ConcreteType.Builder<T> builder(String name) {
@@ -118,13 +122,17 @@ public class ConcreteType<T> {
         for (int index = 0; index < arguments.size(); index++) {
             val formalArgumentType = method.getArgumentTypes().get(index);
             val actualArgumentType = arguments.get(index).getType();
-            if (formalArgumentType != actualArgumentType) {
-                throw new UnexpectedValueType(formalArgumentType, actualArgumentType);
+            if (!formalArgumentType.equals(actualArgumentType.getReference())) {
+                throw new UnexpectedValueType(formalArgumentType, actualArgumentType.getReference());
             }
         }
         return method;
     }
     
+    private TypeReference getReference() {
+        return typeRef(name);
+    }
+
     @Override
     public String toString() {
         return "ConcreteType<" + name + ">";

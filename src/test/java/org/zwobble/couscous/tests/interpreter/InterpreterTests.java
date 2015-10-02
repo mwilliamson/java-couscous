@@ -46,7 +46,7 @@ public class InterpreterTests {
     
     @Test
     public void canPassValueToMethod() {
-        val arg = new FormalArgumentNode(42, () -> StringValue.TYPE, "x");
+        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ReturnNode(reference(arg)));
@@ -67,7 +67,7 @@ public class InterpreterTests {
     
     @Test
     public void canReassignValueToArgument() {
-        val arg = new FormalArgumentNode(42, () -> StringValue.TYPE, "x");
+        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.literal("[updated value]"))))

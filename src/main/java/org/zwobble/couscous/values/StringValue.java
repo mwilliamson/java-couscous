@@ -1,17 +1,20 @@
 package org.zwobble.couscous.values;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.values.TypeReference.typeRef;
 
 import lombok.Value;
 import lombok.val;
 
 @Value
 public class StringValue implements InterpreterValue {
-    public static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder("String")
-        .method("length", () -> asList(),
+    public static final TypeReference REF = typeRef("java.lang.String");
+    
+    public static final ConcreteType<?> TYPE = ConcreteType.<StringValue>builder(REF)
+        .method("length", asList(),
             (receiver, arguments) -> new IntegerValue(receiver.value.length()))
         
-        .method("substring", () -> asList(IntegerValue.TYPE, IntegerValue.TYPE),
+        .method("substring", asList(IntegerValue.REF, IntegerValue.REF),
             (receiver, arguments) -> {
                 val startIndex = (IntegerValue)arguments.get(0);
                 val endIndex = (IntegerValue)arguments.get(1);

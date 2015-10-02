@@ -32,7 +32,7 @@ import lombok.val;
 public class EvaluatorTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = new FormalArgumentNode(42, () -> StringValue.TYPE, "x");
+        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
             ImmutableMap.of(arg.getId(), new StringValue("[initial value]")));
@@ -97,7 +97,7 @@ public class EvaluatorTests {
         val exception = assertThrows(UnexpectedValueType.class,
             () -> eval(emptyEnvironment(),
                 methodCall(literal("hello"), "substring", literal(0), literal(""))));
-        assertEquals(new UnexpectedValueType(IntegerValue.TYPE, StringValue.TYPE), exception);
+        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }
     
     @Test
