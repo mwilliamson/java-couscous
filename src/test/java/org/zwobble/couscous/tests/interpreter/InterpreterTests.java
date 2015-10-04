@@ -89,6 +89,19 @@ public class InterpreterTests {
         
         assertEquals(new StringValue("[initial value]"), result);
     }
+    
+    @Test
+    public void canDeclareVariableAndAssignValues() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, StringValue.REF, "x", LiteralNode.literal("[initial value]"));
+        val method = staticMethod("hello")
+            .statement(localVariableDeclaration)
+            .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
+            .statement(new ReturnNode(reference(localVariableDeclaration)));
+        val result = runMethod(method);
+        
+        assertEquals(new StringValue("[updated value]"), result);
+    }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
         val method = methodBuilder.build();
