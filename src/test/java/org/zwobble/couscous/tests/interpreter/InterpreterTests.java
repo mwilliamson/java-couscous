@@ -11,9 +11,11 @@ import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.UnboundVariable;
+import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.values.ConcreteType;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InterpreterValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -79,6 +81,19 @@ public class InterpreterTests {
         val result = runMethod(method, new StringValue("[initial value]"));
         
         assertEquals(new StringValue("[updated value]"), result);
+    }
+    
+    @Test
+    public void errorIfTryingToAssignValueOfWrongTypeToVariable() {
+        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
+        val method = staticMethod("hello")
+            .argument(arg)
+            .statement(new ExpressionStatementNode(new Assignment(reference(arg), literal(0))));
+
+        val exception = assertThrows(UnexpectedValueType.class,
+            () -> runMethod(method, new StringValue("")));
+        
+        assertEquals(new UnexpectedValueType(StringValue.REF, IntegerValue.REF), exception);
     }
     
     @Test

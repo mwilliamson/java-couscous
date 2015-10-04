@@ -129,7 +129,7 @@ public class ConcreteType<T> {
         return method;
     }
     
-    private TypeReference getReference() {
+    public TypeReference getReference() {
         return typeRef(name);
     }
 
