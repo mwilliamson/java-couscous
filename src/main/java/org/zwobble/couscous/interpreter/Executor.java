@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
@@ -60,6 +61,13 @@ public class Executor implements StatementNodeVisitor<Optional<InterpreterValue>
     @Override
     public Optional<InterpreterValue> visit(ExpressionStatementNode expressionStatement) {
         eval(environment, expressionStatement.getExpression());
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<InterpreterValue> visit(LocalVariableDeclarationNode localVariableDeclaration) {
+        val value = eval(environment, localVariableDeclaration.getInitialValue());
+        environment.put(localVariableDeclaration, value);
         return Optional.empty();
     }
 }

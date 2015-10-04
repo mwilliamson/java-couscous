@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.zwobble.couscous.Project;
+import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.InterpreterValue;
 
@@ -20,8 +21,12 @@ public class Environment {
         return stackFrame.get(referentId);
     }
 
-    public void put(int referentId, InterpreterValue value) {
-        stackFrame.put(referentId, value);
+    public void put(int variableId, InterpreterValue value) {
+        stackFrame.put(variableId, value);
+    }
+
+    public void put(VariableNode variable, InterpreterValue value) {
+        stackFrame.put(variable.getId(), value);
     }
 
     public ConcreteType<?> findClass(String className) {

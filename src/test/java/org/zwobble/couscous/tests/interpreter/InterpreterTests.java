@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
@@ -75,6 +76,18 @@ public class InterpreterTests {
         val result = runMethod(method, new StringValue("[initial value]"));
         
         assertEquals(new StringValue("[updated value]"), result);
+    }
+    
+    @Test
+    public void canDeclareVariable() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, StringValue.REF, "x", LiteralNode.literal("[initial value]"));
+        val method = staticMethod("hello")
+            .statement(localVariableDeclaration)
+            .statement(new ReturnNode(reference(localVariableDeclaration)));
+        val result = runMethod(method);
+        
+        assertEquals(new StringValue("[initial value]"), result);
     }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
