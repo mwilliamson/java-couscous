@@ -9,6 +9,8 @@ import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.InterpreterValue;
 
+import lombok.val;
+
 public class Environment {
     private final Map<Integer, Optional<InterpreterValue>> stackFrame;
     private final Project project;
@@ -19,12 +21,13 @@ public class Environment {
     }
 
     public InterpreterValue get(int variableId) {
-        checkVariable(variableId);
-        return stackFrame.get(variableId).get();
+        checkVariableIsInScope(variableId);
+        val value = stackFrame.get(variableId);
+        return value.orElseThrow(() -> new UnboundVariable(variableId));
     }
 
     public void put(int variableId, InterpreterValue value) {
-        checkVariable(variableId);
+        checkVariableIsInScope(variableId);
         stackFrame.put(variableId, Optional.of(value));
     }
 
@@ -41,7 +44,7 @@ public class Environment {
         return new Environment(project, stackFrame);
     }
 
-    private void checkVariable(int variableId) {
+    private void checkVariableIsInScope(int variableId) {
         if (!stackFrame.containsKey(variableId)) {
             throw new VariableNotInScope(variableId);
         }

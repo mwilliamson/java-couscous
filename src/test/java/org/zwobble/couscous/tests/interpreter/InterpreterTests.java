@@ -10,6 +10,7 @@ import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.interpreter.Interpreter;
+import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.values.ConcreteType;
@@ -129,6 +130,20 @@ public class InterpreterTests {
             () -> runMethod(method));
         
         assertEquals(new VariableNotInScope(42), exception);
+    }
+    
+    @Test
+    public void errorIfTryingToGetValueOfUnboundVariable() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, StringValue.REF, "x", literal(""));
+        val method = staticMethod("hello")
+            .statement(new ReturnNode(reference(localVariableDeclaration)))
+            .statement(localVariableDeclaration);
+
+        val exception = assertThrows(UnboundVariable.class,
+            () -> runMethod(method));
+        
+        assertEquals(new UnboundVariable(42), exception);
     }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
