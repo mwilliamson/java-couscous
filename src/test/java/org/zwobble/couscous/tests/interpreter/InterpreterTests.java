@@ -5,7 +5,6 @@ import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
@@ -23,9 +22,11 @@ import com.google.common.collect.ImmutableMap;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 import static org.zwobble.couscous.values.UnitValue.UNIT;
@@ -52,7 +53,7 @@ public class InterpreterTests {
     
     @Test
     public void canPassValueToMethod() {
-        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
+        val arg = formalArg(var(42, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ReturnNode(reference(arg)));
@@ -73,7 +74,7 @@ public class InterpreterTests {
     
     @Test
     public void canReassignValueToArgument() {
-        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
+        val arg = formalArg(var(42, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.literal("[updated value]"))))
@@ -85,7 +86,7 @@ public class InterpreterTests {
     
     @Test
     public void errorIfTryingToAssignValueOfWrongTypeToVariable() {
-        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
+        val arg = formalArg(var(42, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ExpressionStatementNode(new Assignment(reference(arg), literal(0))));
@@ -99,7 +100,7 @@ public class InterpreterTests {
     @Test
     public void canDeclareVariable() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, StringValue.REF, "x", LiteralNode.literal("[initial value]"));
+            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
             .statement(new ReturnNode(reference(localVariableDeclaration)));
@@ -111,7 +112,7 @@ public class InterpreterTests {
     @Test
     public void canDeclareVariableAndThenAssignValues() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, StringValue.REF, "x", LiteralNode.literal("[initial value]"));
+            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
             .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
@@ -124,7 +125,7 @@ public class InterpreterTests {
     @Test
     public void errorIfTryingToAssignToVariableNotInScope() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, StringValue.REF, "x", literal(""));
+            42, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
             .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
 
@@ -137,7 +138,7 @@ public class InterpreterTests {
     @Test
     public void errorIfTryingToGetValueOfVariableNotInScope() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, StringValue.REF, "x", literal(""));
+            42, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
             .statement(new ReturnNode(reference(localVariableDeclaration)));
 
@@ -150,7 +151,7 @@ public class InterpreterTests {
     @Test
     public void errorIfTryingToGetValueOfUnboundVariable() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, StringValue.REF, "x", literal(""));
+            42, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
             .statement(new ReturnNode(reference(localVariableDeclaration)))
             .statement(localVariableDeclaration);

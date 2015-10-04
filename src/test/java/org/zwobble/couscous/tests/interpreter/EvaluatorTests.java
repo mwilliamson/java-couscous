@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.zwobble.couscous.JavaProject;
 import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
@@ -22,9 +21,11 @@ import com.google.common.collect.ImmutableMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.Assignment.assign;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
@@ -33,7 +34,7 @@ import lombok.val;
 public class EvaluatorTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = new FormalArgumentNode(42, StringValue.REF, "x");
+        val arg = formalArg(var(42, "x", StringValue.REF));
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
             new StackFrameBuilder().declare(arg, new StringValue("[initial value]")).build());

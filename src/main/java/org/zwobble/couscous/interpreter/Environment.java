@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.zwobble.couscous.Project;
+import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.InterpreterValue;
@@ -20,7 +21,7 @@ public class Environment {
     private final Project project;
     private final Map<Integer, VariableEntry> stackFrame;
 
-    public Environment(Project project, Map<VariableNode, Optional<InterpreterValue>> stackFrame) {
+    public Environment(Project project, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
         this.project = project;
         this.stackFrame = stackFrame.entrySet()
             .stream()
@@ -42,7 +43,7 @@ public class Environment {
     }
 
     public void put(VariableNode variable, InterpreterValue value) {
-        put(variable.getId(), value);
+        put(variable.getDeclaration().getId(), value);
     }
 
     public ConcreteType<?> findClass(String className) {
@@ -50,7 +51,7 @@ public class Environment {
         return project.findClass(className);
     }
 
-    public Environment withStackFrame(Map<VariableNode, Optional<InterpreterValue>> stackFrame) {
+    public Environment withStackFrame(Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
         return new Environment(project, stackFrame);
     }
 

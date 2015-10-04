@@ -4,9 +4,11 @@ import org.zwobble.couscous.values.TypeReference;
 
 import lombok.Value;
 
-@Value
+@Value(staticConstructor="formalArg")
 public class FormalArgumentNode implements VariableNode {
-    int id;
-    TypeReference type;
-    String name;
+    VariableDeclaration declaration;
+    
+    public TypeReference getType() {
+        return declaration.getType();
+    }
 }

@@ -7,7 +7,7 @@ import lombok.Value;
 @Value
 public class VariableReferenceNode implements ExpressionNode {
     public static VariableReferenceNode reference(VariableNode variable) {
-        return new VariableReferenceNode(variable.getId());
+        return new VariableReferenceNode(variable.getDeclaration().getId());
     }
     
     int referentId;
