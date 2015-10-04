@@ -117,6 +117,19 @@ public class InterpreterTests {
         
         assertEquals(new VariableNotInScope(42), exception);
     }
+    
+    @Test
+    public void errorIfTryingToGetValueOfVariableNotInScope() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, StringValue.REF, "x", literal(""));
+        val method = staticMethod("hello")
+            .statement(new ReturnNode(reference(localVariableDeclaration)));
+
+        val exception = assertThrows(VariableNotInScope.class,
+            () -> runMethod(method));
+        
+        assertEquals(new VariableNotInScope(42), exception);
+    }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
         val method = methodBuilder.build();

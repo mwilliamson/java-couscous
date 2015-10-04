@@ -18,8 +18,9 @@ public class Environment {
         this.stackFrame = new HashMap<>(stackFrame);
     }
 
-    public InterpreterValue get(int referentId) {
-        return stackFrame.get(referentId).get();
+    public InterpreterValue get(int variableId) {
+        checkVariable(variableId);
+        return stackFrame.get(variableId).get();
     }
 
     public void put(int variableId, InterpreterValue value) {
