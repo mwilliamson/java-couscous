@@ -10,6 +10,7 @@ import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.interpreter.Interpreter;
+import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.InterpreterValue;
@@ -19,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -91,7 +93,7 @@ public class InterpreterTests {
     }
     
     @Test
-    public void canDeclareVariableAndAssignValues() {
+    public void canDeclareVariableAndThenAssignValues() {
         val localVariableDeclaration = localVariableDeclaration(
             42, StringValue.REF, "x", LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
@@ -101,6 +103,19 @@ public class InterpreterTests {
         val result = runMethod(method);
         
         assertEquals(new StringValue("[updated value]"), result);
+    }
+    
+    @Test
+    public void errorIfTryingToAssignToVariableNotInScope() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, StringValue.REF, "x", literal(""));
+        val method = staticMethod("hello")
+            .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
+
+        val exception = assertThrows(VariableNotInScope.class,
+            () -> runMethod(method));
+        
+        assertEquals(new VariableNotInScope(42), exception);
     }
 
     private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {

@@ -1,18 +1,19 @@
 package org.zwobble.couscous.interpreter;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
 import org.zwobble.couscous.values.InterpreterValue;
 import org.zwobble.couscous.values.UnitValue;
 
-import static java.util.stream.Collectors.toMap;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 
 import lombok.val;
@@ -35,14 +36,37 @@ public class Executor implements StatementNodeVisitor<Optional<InterpreterValue>
         final MethodNode method,
         Arguments arguments) {
         
-        val stackFrame = IntStream.range(0, method.getArguments().size())
-            .boxed()
-            .collect(toMap(
-                index -> method.getArguments().get(index).getId(),
-                index -> arguments.get(index)));
-        return environment.withStackFrame(stackFrame);
+        val stackFrame = new StackFrameBuilder();
+        for (int index = 0; index < method.getArguments().size(); index++) {
+            stackFrame.declare(method.getArguments().get(index), arguments.get(index));
+        }
+        
+        findDeclarations(method.getBody()).forEach(declaration ->
+            stackFrame.declare(declaration));
+        
+        return environment.withStackFrame(stackFrame.build());
     }
     
+    private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
+        return body.stream()
+            .flatMap(statement -> statement.accept(new StatementNodeVisitor<Stream<VariableNode>>() {
+                @Override
+                public Stream<VariableNode> visit(ReturnNode returnNode) {
+                    return Stream.empty();
+                }
+    
+                @Override
+                public Stream<VariableNode> visit(ExpressionStatementNode expressionStatement) {
+                    return Stream.empty();
+                }
+    
+                @Override
+                public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
+                    return Stream.of(localVariableDeclaration);
+                }
+            }));
+    }
+
     public static Optional<InterpreterValue> exec(Environment environment, StatementNode statement) {
         return statement.accept(new Executor(environment));
     }

@@ -11,6 +11,7 @@ import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
+import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.values.ConcreteType;
@@ -35,7 +36,7 @@ public class EvaluatorTests {
         val arg = new FormalArgumentNode(42, StringValue.REF, "x");
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
-            ImmutableMap.of(arg.getId(), new StringValue("[initial value]")));
+            new StackFrameBuilder().declare(arg, new StringValue("[initial value]")).build());
         val result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringValue("[updated value]"), result);
     }
