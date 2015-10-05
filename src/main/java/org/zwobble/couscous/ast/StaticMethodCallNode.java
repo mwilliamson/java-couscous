@@ -2,7 +2,7 @@ package org.zwobble.couscous.ast;
 
 import java.util.List;
 
-import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.TypeReference;
 
 import static java.util.Arrays.asList;
@@ -24,7 +24,7 @@ public class StaticMethodCallNode implements ExpressionNode {
     List<ExpressionNode> arguments;
     
     @Override
-    public <T> T accept(ExpressionNodeVisitor<T> visitor) {
+    public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
 

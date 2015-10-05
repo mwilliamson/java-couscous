@@ -1,6 +1,6 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
+import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.values.TypeReference;
 
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
@@ -21,7 +21,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     ExpressionNode initialValue;
     
     @Override
-    public <T> T accept(StatementNodeVisitor<T> visitor) {
+    public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
 }

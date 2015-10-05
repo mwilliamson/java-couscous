@@ -11,6 +11,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
@@ -54,6 +55,13 @@ public abstract class BackendEvalTests {
             asList(literal(1), literal(4)),
             StringValue.REF));
         assertEquals(value("ell"), result);
+    }
+    
+    @Test
+    public void canCallBuiltinStaticMethod() {
+        val result = evalExpression(
+            staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
+        assertEquals(value(42), result);
     }
     
     protected abstract PrimitiveValue evalExpression(ExpressionNode expression);

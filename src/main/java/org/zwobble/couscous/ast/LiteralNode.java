@@ -1,6 +1,6 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -33,7 +33,7 @@ public class LiteralNode implements ExpressionNode {
     TypeReference type;
 
     @Override
-    public <T> T accept(ExpressionNodeVisitor<T> visitor) {
+    public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
 }

@@ -7,7 +7,7 @@ import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 
-public interface ExpressionNodeVisitor<T> {
+public interface ExpressionNodeMapper<T> {
     T visit(LiteralNode literal);
     T visit(VariableReferenceNode variableReference);
     T visit(AssignmentNode assignment);

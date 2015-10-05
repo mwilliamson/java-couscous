@@ -2,13 +2,15 @@ package org.zwobble.couscous.ast;
 
 import java.util.List;
 
+import org.zwobble.couscous.ast.visitors.NodeVisitor;
+
 import com.google.common.collect.ImmutableList;
 
 import lombok.Singular;
 import lombok.Value;
 
 @Value
-public class ClassNode {
+public class ClassNode implements Node {
     public static ClassNode.Builder builder(String name) {
         return new Builder(name);
     }
@@ -39,5 +41,10 @@ public class ClassNode {
     public String getLocalName() {
         // TODO Stronger notion of class names? Should look up the terminology
         return name.substring(name.lastIndexOf(".") + 1);
+    }
+
+    @Override
+    public void accept(NodeVisitor visitor) {
+        visitor.visit(this);
     }
 }

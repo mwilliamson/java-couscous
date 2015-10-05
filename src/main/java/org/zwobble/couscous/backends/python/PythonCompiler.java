@@ -15,20 +15,35 @@ import lombok.SneakyThrows;
 import lombok.val;
 
 public class PythonCompiler {
-    public void compile(List<ClassNode> classes, Path path) {
+    private final Path root;
+
+    public PythonCompiler(Path root) {
+        this.root = root;
+    }
+    
+    public void compile(List<ClassNode> classes) {
         for (val classNode : classes) {
-            compileClass(classNode, pathForClass(classNode, path));
+            compileClass(classNode);
         }
+        writeClass("java.lang.Integer",
+            "class Integer(object):\n" +
+            "    def parseInt(value):\n" +
+            "        return int(value)"
+        );
     }
 
-    private Path pathForClass(ClassNode classNode, Path path) {
-        return path.resolve(classNode.getName().replace(".", File.separator) + ".py");
+    private Path pathForClass(String className) {
+        return root.resolve(className.replace(".", File.separator) + ".py");
+    }
+
+    private void compileClass(ClassNode classNode) {
+        writeClass(classNode.getName(), serialize(generateCode(classNode)));
     }
 
     @SneakyThrows
-    private void compileClass(ClassNode classNode, Path path) {
+    private void writeClass(String name, String contents) {
+        val path = pathForClass(name);
         Files.createDirectories(path.getParent());
-        Files.write(path, asList(serialize(generateCode(classNode))));
-        
+        Files.write(path, asList(contents));
     }
 }

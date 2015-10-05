@@ -1,6 +1,6 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.TypeReference;
 
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -17,7 +17,7 @@ public class AssignmentNode implements ExpressionNode {
     ExpressionNode value;
     
     @Override
-    public <T> T accept(ExpressionNodeVisitor<T> visitor) {
+    public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
 

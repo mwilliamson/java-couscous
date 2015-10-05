@@ -1,6 +1,8 @@
 package org.zwobble.couscous.backends.python;
 
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
@@ -16,11 +18,14 @@ import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
-import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
+import org.zwobble.couscous.ast.visitors.NodeVisitors;
+import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
+import org.zwobble.couscous.backends.python.ast.PythonImportNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
@@ -31,6 +36,11 @@ import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.StringValue;
 import org.zwobble.couscous.values.UnitValue;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
+
+import static com.google.common.collect.Iterators.singletonIterator;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
@@ -44,18 +54,37 @@ import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonMo
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
+import static org.zwobble.couscous.util.ExtraLists.foldLeft;
 
 import lombok.val;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
+        val imports = findImports(classNode).stream()
+            .map(PythonImportNode::pythonImport)
+            .iterator();
+        
         val pythonBody = classNode.getMethods()
             .stream()
             .map(PythonCodeGenerator::generateFunction)
             .collect(Collectors.toList());
         
         val pythonClass = pythonClass(classNode.getLocalName(), pythonBody);
-        return pythonModule(asList(pythonClass));
+        
+        return pythonModule(ImmutableList.copyOf(Iterators.concat(
+            imports,
+            singletonIterator(pythonClass))));
+    }
+    
+    private static Set<String> findImports(ClassNode classNode) {
+        val imports = ImmutableSet.<String>builder();
+        NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults() {
+            @Override
+            public void visit(StaticMethodCallNode staticMethodCall) {
+                imports.add(staticMethodCall.getClassName());
+            }
+        });
+        return imports.build();
     }
     
     public static PythonExpressionNode generateCode(PrimitiveValue value) {
@@ -99,7 +128,7 @@ public class PythonCodeGenerator {
         return statement.accept(new StatementGenerator());
     }
     
-    private static class StatementGenerator implements StatementNodeVisitor<PythonStatementNode> {
+    private static class StatementGenerator implements StatementNodeMapper<PythonStatementNode> {
         @Override
         public PythonStatementNode visit(ReturnNode returnNode) {
             return pythonReturn(generateExpression(returnNode.getValue()));
@@ -131,7 +160,7 @@ public class PythonCodeGenerator {
     
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
     
-    private static class ExpressionGenerator implements ExpressionNodeVisitor<PythonExpressionNode> {
+    private static class ExpressionGenerator implements ExpressionNodeMapper<PythonExpressionNode> {
         @Override
         public PythonExpressionNode visit(LiteralNode literal) {
             return generateCode(literal.getValue());
@@ -171,15 +200,35 @@ public class PythonCodeGenerator {
             }
         }
 
+        @Override
+        public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
+            val className = staticMethodCall.getClassName();
+            val moduleParts = asList(className.split(Pattern.quote(".")));
+            
+            val module = foldLeft(
+                moduleParts,
+                part -> (PythonExpressionNode)pythonVariableReference(part),
+                (parent, part) -> pythonAttributeAccess(parent, part));
+            
+            val classReference = pythonAttributeAccess(
+                module,
+                className.substring(className.lastIndexOf(".") + 1));
+
+            val methodReference = pythonAttributeAccess(
+                classReference,
+                staticMethodCall.getMethodName());
+            
+            val arguments = staticMethodCall.getArguments().stream()
+                .map(PythonCodeGenerator::generateExpression)
+                .collect(Collectors.toList());;
+                
+            return pythonCall(methodReference, arguments);
+        }
+
         private List<PythonExpressionNode> generateArguments(MethodCallNode methodCall) {
             return methodCall.getArguments().stream()
                 .map(PythonCodeGenerator::generateExpression)
                 .collect(Collectors.toList());
-        }
-
-        @Override
-        public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
-            throw new UnsupportedOperationException();
         }
     }
     

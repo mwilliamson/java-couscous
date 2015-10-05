@@ -13,6 +13,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
+import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
@@ -142,6 +143,12 @@ public class PythonSerializerTests {
         val output = serialize(pythonAssignment(
             pythonVariableReference("x"), pythonIntegerLiteral(42)));
         assertEquals("x = 42\n", output);
+    }
+    
+    @Test
+    public void importIsSerializedUsingImportKeyword() {
+        val output = serialize(pythonImport("com.example.Program"));
+        assertEquals("import com.example.Program\n", output);
     }
     
     @Test

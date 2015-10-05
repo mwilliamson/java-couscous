@@ -10,7 +10,7 @@ import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.VariableNode;
-import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
+import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
 
@@ -18,7 +18,7 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 
 import lombok.val;
 
-public class Executor implements StatementNodeVisitor<Optional<InterpreterValue>> {
+public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
     public static InterpreterValue callMethod(Environment environment, MethodNode method, Arguments arguments) {
         val innerEnvironment = buildEnvironment(environment, method, arguments);
       
@@ -49,7 +49,7 @@ public class Executor implements StatementNodeVisitor<Optional<InterpreterValue>
     
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
         return body.stream()
-            .flatMap(statement -> statement.accept(new StatementNodeVisitor<Stream<VariableNode>>() {
+            .flatMap(statement -> statement.accept(new StatementNodeMapper<Stream<VariableNode>>() {
                 @Override
                 public Stream<VariableNode> visit(ReturnNode returnNode) {
                     return Stream.empty();

@@ -33,10 +33,10 @@ public class PythonMethodRunner implements MethodRunner {
             ClassNode classNode,
             String methodName,
             List<PrimitiveValue> arguments) {
-        val compiler = new PythonCompiler();
         val directoryPath = Files.createTempDirectory(null);
+        val compiler = new PythonCompiler(directoryPath);
         try {
-            compiler.compile(asList(classNode), directoryPath);
+            compiler.compile(asList(classNode));
             
             val argumentsString = Joiner.on(", ").join(arguments.stream()
                 .map(PythonCodeGenerator::generateCode)

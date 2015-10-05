@@ -13,6 +13,7 @@ import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
+import org.zwobble.couscous.backends.python.ast.PythonImportNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonNode;
@@ -157,6 +158,15 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSpace();
             write(assignment.getValue());
             
+        });
+    }
+
+    @Override
+    public void visit(PythonImportNode importNode) {
+        writer.writeStatement(() -> {
+            writer.writeKeyword("import");
+            writer.writeSpace();
+            writer.writeIdentifier(importNode.getName());
         });
     }
 

@@ -94,13 +94,6 @@ public class EvaluatorTests extends BackendEvalTests {
     }
     
     @Test
-    public void canCallStaticMethod() {
-        val result = eval(emptyEnvironment(),
-            staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
-        assertEquals(new IntegerInterpreterValue(42), result);
-    }
-    
-    @Test
     public void canCallStaticMethodFromAnotherStaticMethod() {
         val classNode = ClassNode.builder("com.example.Program")
             .method(MethodNode.staticMethod("main")
