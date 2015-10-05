@@ -24,6 +24,7 @@ import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.StringValue;
 import org.zwobble.couscous.values.UnitValue;
@@ -35,6 +36,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 
 import lombok.val;
 
@@ -49,12 +51,41 @@ public class PythonCodeGenerator {
         return pythonModule(asList(pythonClass));
     }
     
+    public static PythonExpressionNode generateCode(PrimitiveValue value) {
+        return value.accept(new PrimitiveValueVisitor<PythonExpressionNode>() {
+            @Override
+            public PythonExpressionNode visit(IntegerValue value) {
+                return pythonIntegerLiteral(value.getValue());
+            }
+
+            @Override
+            public PythonExpressionNode visit(StringValue value) {
+                return pythonStringLiteral(value.getValue());
+            }
+
+            @Override
+            public PythonExpressionNode visit(BooleanValue value) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public PythonExpressionNode visit(UnitValue unitValue) {
+                throw new UnsupportedOperationException();
+            }
+        });
+    }
+    
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
+        val argumentNames = method.getArguments().stream()
+            .map(argument -> argument.getName())
+            .collect(Collectors.toList());
+            
         val pythonBody = method.getBody()
             .stream()
             .map(PythonCodeGenerator::generateStatement)
             .collect(Collectors.toList());
-        return pythonFunctionDefinition(method.getName(), asList(), new PythonBlock(pythonBody));
+        
+        return pythonFunctionDefinition(method.getName(), argumentNames, new PythonBlock(pythonBody));
     }
     
     private static PythonStatementNode generateStatement(StatementNode statement) {
@@ -85,33 +116,12 @@ public class PythonCodeGenerator {
     private static class ExpressionGenerator implements ExpressionNodeVisitor<PythonExpressionNode> {
         @Override
         public PythonExpressionNode visit(LiteralNode literal) {
-            return literal.getValue().accept(new PrimitiveValueVisitor<PythonExpressionNode>() {
-                @Override
-                public PythonExpressionNode visit(IntegerValue value) {
-                    return pythonIntegerLiteral(value.getValue());
-                }
-
-                @Override
-                public PythonExpressionNode visit(StringValue value) {
-                    return pythonStringLiteral(value.getValue());
-                }
-
-                @Override
-                public PythonExpressionNode visit(BooleanValue value) {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                public PythonExpressionNode visit(UnitValue unitValue) {
-                    throw new UnsupportedOperationException();
-                }
-            });
+            return generateCode(literal.getValue());
         }
 
         @Override
-        public PythonExpressionNode visit(
-            VariableReferenceNode variableReference) {
-            throw new UnsupportedOperationException();
+        public PythonExpressionNode visit(VariableReferenceNode variableReference) {
+            return pythonVariableReference(variableReference.getReferent().getName());
         }
 
         @Override

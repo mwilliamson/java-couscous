@@ -10,6 +10,7 @@ import org.zwobble.couscous.backends.python.ast.PythonNode;
 import org.zwobble.couscous.backends.python.ast.PythonPassNode;
 import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
+import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 import org.zwobble.couscous.backends.python.ast.PythonWriter;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
@@ -50,6 +51,12 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
     @Override
     public Void visit(PythonBooleanLiteralNode booleanLiteral) {
         writer.writeKeyword(booleanLiteral.getValue() ? "True" : "False");
+        return null;
+    }
+
+    @Override
+    public Void visit(PythonVariableReferenceNode reference) {
+        writer.writeIdentifier(reference.getName());
         return null;
     }
 

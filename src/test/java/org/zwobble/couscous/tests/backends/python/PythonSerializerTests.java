@@ -13,6 +13,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonMo
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 
 import lombok.val;
 
@@ -34,6 +35,11 @@ public class PythonSerializerTests {
     public void booleansAreNotBoxed() {
         assertEquals("True", serialize(pythonBooleanLiteral(true)));
         assertEquals("False", serialize(pythonBooleanLiteral(false)));
+    }
+    
+    @Test
+    public void variableReferenceIsSerializedAsIdentifier() {
+        assertEquals("blah", serialize(pythonVariableReference("blah")));
     }
     
     @Test

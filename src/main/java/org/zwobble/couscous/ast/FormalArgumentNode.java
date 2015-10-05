@@ -11,4 +11,8 @@ public class FormalArgumentNode implements VariableNode {
     public TypeReference getType() {
         return declaration.getType();
     }
+    
+    public String getName() {
+        return declaration.getName();
+    }
 }

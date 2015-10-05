@@ -39,17 +39,6 @@ import lombok.val;
 
 public class InterpreterTests extends BackendTests {
     @Test
-    public void canPassValueToMethod() {
-        val arg = formalArg(var(42, "x", StringValue.REF));
-        val method = staticMethod("hello")
-            .argument(arg)
-            .statement(new ReturnNode(reference(arg)));
-        val result = runMethod(method, value("hello, world!"));
-        
-        assertEquals(value("hello, world!"), result);
-    }
-    
-    @Test
     public void errorIfWrongNumberOfArgumentsArePassed() {
         val method = staticMethod("hello");
         

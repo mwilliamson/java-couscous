@@ -7,13 +7,16 @@ import java.nio.file.Files;
 import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonCompiler;
+import org.zwobble.couscous.backends.python.PythonSerializer;
 import org.zwobble.couscous.tests.BackendTests;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 
 import static java.lang.Integer.parseInt;
@@ -38,9 +41,14 @@ public class PythonCompilerTests extends BackendTests {
                 val directoryPath = Files.createTempDirectory(null);
                 try {
                     compiler.compile(asList(classNode), directoryPath);
-
+                    
+                    val argumentsString = Joiner.on(", ").join(arguments.stream()
+                        .map(PythonCodeGenerator::generateCode)
+                        .map(PythonSerializer::serialize)
+                        .iterator());
+                    
                     val program = "from " + classNode.getName() + " import " + classNode.getLocalName() +
-                        ";print(repr(" + classNode.getLocalName() + "." + methodName + "()))";
+                        ";print(repr(" + classNode.getLocalName() + "." + methodName + "(" + argumentsString + ")))";
                     
                     val process = new ProcessBuilder("python3.4", "-c", program)
                         .directory(directoryPath.toFile())

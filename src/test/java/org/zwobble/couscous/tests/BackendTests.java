@@ -6,11 +6,15 @@ import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
+import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
@@ -29,6 +33,16 @@ public abstract class BackendTests {
         val method = staticMethod("hello")
             .statement(new ReturnNode(literal("hello, world!")));
         val result = runMethod(method);
+        
+        assertEquals(value("hello, world!"), result);
+    }
+    @Test
+    public void canPassValueToMethod() {
+        val arg = formalArg(var(42, "x", StringValue.REF));
+        val method = staticMethod("hello")
+            .argument(arg)
+            .statement(new ReturnNode(reference(arg)));
+        val result = runMethod(method, value("hello, world!"));
         
         assertEquals(value("hello, world!"), result);
     }
