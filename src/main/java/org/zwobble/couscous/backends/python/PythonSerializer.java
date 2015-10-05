@@ -78,59 +78,60 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
 
     @Override
     public Void visit(PythonReturnNode pythonReturn) {
-        writer.startStatement();
-        writer.writeKeyword("return");
-        writer.writeSpace();
-        write(pythonReturn.getValue());
-        writer.endStatement();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("return");
+            writer.writeSpace();
+            write(pythonReturn.getValue());
+        });
         return null;
     }
 
     @Override
     public Void visit(PythonPassNode pass) {
-        writer.startStatement();
-        writer.writeKeyword("pass");
-        writer.endStatement();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("pass");            
+        });
         return null;
     }
 
     @Override
     public Void visit(PythonClassNode pythonClass) {
-        writer.startStatement();
-        writer.writeKeyword("class");
-        writer.writeSpace();
-        writer.writeIdentifier(pythonClass.getName());
-        writer.writeSymbol("(");
-        writer.writeIdentifier("object");
-        writer.writeSymbol(")");
-        writeBlock(pythonClass.getBody());
-        writer.endStatement();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("class");
+            writer.writeSpace();
+            writer.writeIdentifier(pythonClass.getName());
+            writer.writeSymbol("(");
+            writer.writeIdentifier("object");
+            writer.writeSymbol(")");
+            writeBlock(pythonClass.getBody());
+        });
         return null;
     }
 
     @Override
     public Void visit(PythonFunctionDefinitionNode functionDefinition) {
-        writer.startStatement();
-        writer.writeKeyword("def");
-        writer.writeSpace();
-        writer.writeIdentifier(functionDefinition.getName());
-        writer.writeSymbol("(");
-        writeArgumentNames(functionDefinition);
-        writer.writeSymbol(")");
-        writeBlock(functionDefinition.getBody());
-        writer.endStatement();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("def");
+            writer.writeSpace();
+            writer.writeIdentifier(functionDefinition.getName());
+            writer.writeSymbol("(");
+            writeArgumentNames(functionDefinition);
+            writer.writeSymbol(")");
+            writeBlock(functionDefinition.getBody());
+        });
         return null;
     }
 
     @Override
     public Void visit(PythonAssignmentNode assignment) {
-        writer.startStatement();
-        write(assignment.getTarget());
-        writer.writeSpace();
-        writer.writeSymbol("=");
-        writer.writeSpace();
-        write(assignment.getValue());
-        writer.endStatement();
+        writer.writeStatement(() -> {
+            write(assignment.getTarget());
+            writer.writeSpace();
+            writer.writeSymbol("=");
+            writer.writeSpace();
+            write(assignment.getValue());
+            
+        });
         return null;
     }
 

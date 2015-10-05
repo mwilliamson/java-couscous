@@ -47,14 +47,23 @@ public class PythonWriter {
         depth--;
     }
 
-    public void startStatement() {
+    public void writeStatement(Action action) {
+        startStatement();
+        action.run();
+        endStatement();
+    }
+
+    private void startStatement() {
         builder.append(Strings.repeat(" ", depth * SPACES_PER_INDENT));
     }
 
-    public void endStatement() {
+    private void endStatement() {
         if (builder.charAt(builder.length() - 1) != '\n') {
             builder.append("\n");   
         }
     }
-
+    
+    interface Action {
+        void run();
+    }
 }
