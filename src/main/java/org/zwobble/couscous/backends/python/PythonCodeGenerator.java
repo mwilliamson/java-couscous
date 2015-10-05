@@ -156,20 +156,39 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
-            val arguments = methodCall.getArguments().stream()
-                .map(PythonCodeGenerator::generateExpression)
-                .collect(Collectors.toList());
-            return pythonCall(
-                pythonAttributeAccess(
-                    generateExpression(methodCall.getReceiver()),
-                    methodCall.getMethodName()),
-                arguments);
+            if (isPrimitive(methodCall.getReceiver())) {
+                val isStringLength = methodCall.getReceiver().getType().equals(StringValue.REF) &&
+                    methodCall.getMethodName() == "length";
+                if (isStringLength) {
+                    return pythonCall(
+                        pythonVariableReference("len"),
+                        asList(generateExpression(methodCall.getReceiver())));
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            } else {
+                val arguments = methodCall.getArguments().stream()
+                    .map(PythonCodeGenerator::generateExpression)
+                    .collect(Collectors.toList());
+                return pythonCall(
+                    pythonAttributeAccess(
+                        generateExpression(methodCall.getReceiver()),
+                        methodCall.getMethodName()),
+                    arguments);
+            }
         }
 
         @Override
         public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
             throw new UnsupportedOperationException();
         }
-        
+    }
+
+    private static boolean isPrimitive(ExpressionNode value) {
+        val type = value.getType();
+        return type.equals(IntegerValue.REF) || 
+            type.equals(StringValue.REF) ||
+            type.equals(BooleanValue.REF) ||
+            type.equals(UnitValue.REF);
     }
 }
