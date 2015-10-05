@@ -1,6 +1,7 @@
 package org.zwobble.couscous.backends.python;
 
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
+import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
@@ -41,6 +42,12 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
     @Override
     public Void visit(PythonStringLiteralNode stringLiteral) {
         writer.writeStringLiteral(stringLiteral.getValue());
+        return null;
+    }
+
+    @Override
+    public Void visit(PythonBooleanLiteralNode booleanLiteral) {
+        writer.writeKeyword(booleanLiteral.getValue() ? "True" : "False");
         return null;
     }
 

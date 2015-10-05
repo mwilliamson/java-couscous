@@ -6,6 +6,7 @@ import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
+import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
@@ -27,6 +28,12 @@ public class PythonSerializerTests {
         // TODO: escaping
         val output = serialize(pythonStringLiteral("blah"));
         assertEquals("\"blah\"", output);
+    }
+    
+    @Test
+    public void booleansAreNotBoxed() {
+        assertEquals("True", serialize(pythonBooleanLiteral(true)));
+        assertEquals("False", serialize(pythonBooleanLiteral(false)));
     }
     
     @Test
