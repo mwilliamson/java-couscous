@@ -157,38 +157,21 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
+            val receiver = generateExpression(methodCall.getReceiver());
+            val arguments = generateArguments(methodCall);
             if (isPrimitive(methodCall.getReceiver())) {
-                val isStringLength = methodCall.getReceiver().getType().equals(StringValue.REF) &&
-                    methodCall.getMethodName() == "length";
-                val isSubstring = methodCall.getReceiver().getType().equals(StringValue.REF) &&
-                    methodCall.getMethodName() == "substring";
-                if (isStringLength) {
-                    return pythonCall(
-                        pythonVariableReference("len"),
-                        asList(generateExpression(methodCall.getReceiver())));
-                } else if (isSubstring) {
-                    return pythonCall(
-                        pythonAttributeAccess(
-                            generateExpression(methodCall.getReceiver()),
-                            "__getitem__"),
-                        asList(pythonCall(
-                            pythonVariableReference("slice"),
-                            generateArguments(methodCall))));
-                } else {
-                    throw new UnsupportedOperationException();
-                }
+                val primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(
+                    methodCall.getReceiver().getType(),
+                    methodCall.getMethodName()).get();
+                return primitiveMethodGenerator.generate(receiver, arguments);
             } else {
-                val arguments = generateArguments(methodCall);
                 return pythonCall(
-                    pythonAttributeAccess(
-                        generateExpression(methodCall.getReceiver()),
-                        methodCall.getMethodName()),
+                    pythonAttributeAccess(receiver, methodCall.getMethodName()),
                     arguments);
             }
         }
 
-        private List<PythonExpressionNode> generateArguments(
-            MethodCallNode methodCall) {
+        private List<PythonExpressionNode> generateArguments(MethodCallNode methodCall) {
             return methodCall.getArguments().stream()
                 .map(PythonCodeGenerator::generateExpression)
                 .collect(Collectors.toList());
@@ -199,12 +182,8 @@ public class PythonCodeGenerator {
             throw new UnsupportedOperationException();
         }
     }
-
+    
     private static boolean isPrimitive(ExpressionNode value) {
-        val type = value.getType();
-        return type.equals(IntegerValue.REF) || 
-            type.equals(StringValue.REF) ||
-            type.equals(BooleanValue.REF) ||
-            type.equals(UnitValue.REF);
+        return PrimitiveMethods.isPrimitive(value.getType());
     }
 }
