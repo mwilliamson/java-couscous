@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -60,6 +61,18 @@ public abstract class BackendTests {
         val result = runMethod(method, value("[initial value]"));
         
         assertEquals(value("[updated value]"), result);
+    }
+    
+    @Test
+    public void canDeclareVariable() {
+        val localVariableDeclaration = localVariableDeclaration(
+            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
+        val method = staticMethod("hello")
+            .statement(localVariableDeclaration)
+            .statement(new ReturnNode(reference(localVariableDeclaration)));
+        val result = runMethod(method);
+        
+        assertEquals(value("[initial value]"), result);
     }
 
     protected PrimitiveValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, PrimitiveValue... arguments) {

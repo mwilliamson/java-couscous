@@ -113,8 +113,10 @@ public class PythonCodeGenerator {
         }
 
         @Override
-        public PythonStatementNode visit(LocalVariableDeclarationNode localVariableDeclaration) {
-            throw new UnsupportedOperationException();
+        public PythonStatementNode visit(LocalVariableDeclarationNode declaration) {
+            return pythonAssignment(
+                pythonVariableReference(declaration.getDeclaration().getName()),
+                generateExpression(declaration.getInitialValue()));
         }
     }
     

@@ -62,18 +62,6 @@ public class InterpreterTests extends BackendTests {
     }
     
     @Test
-    public void canDeclareVariable() {
-        val localVariableDeclaration = localVariableDeclaration(
-            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
-        val method = staticMethod("hello")
-            .statement(localVariableDeclaration)
-            .statement(new ReturnNode(reference(localVariableDeclaration)));
-        val result = runMethod(method);
-        
-        assertEquals(value("[initial value]"), result);
-    }
-    
-    @Test
     public void canDeclareVariableAndThenAssignValues() {
         val localVariableDeclaration = localVariableDeclaration(
             42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
