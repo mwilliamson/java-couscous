@@ -4,14 +4,14 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.values.InterpreterValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
-import static org.zwobble.couscous.values.UnitValue.UNIT;
+import static org.zwobble.couscous.interpreter.values.UnitValue.UNIT;
 
 import lombok.val;
 

@@ -8,18 +8,18 @@ import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.backends.python.PythonCompiler;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.tests.BackendTests;
 import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.values.InterpreterValue;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.interpreter.values.InterpreterValues.UNIT;
+import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
-import static org.zwobble.couscous.values.InterpreterValues.UNIT;
-import static org.zwobble.couscous.values.InterpreterValues.value;
 
 import lombok.SneakyThrows;
 import lombok.val;

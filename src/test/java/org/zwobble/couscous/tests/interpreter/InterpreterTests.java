@@ -14,12 +14,12 @@ import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.interpreter.values.ConcreteType;
+import org.zwobble.couscous.interpreter.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.StringValue;
 import org.zwobble.couscous.tests.BackendTests;
 import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.values.ConcreteType;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.InterpreterValue;
-import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 

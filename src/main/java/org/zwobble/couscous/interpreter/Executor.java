@@ -11,8 +11,8 @@ import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
-import org.zwobble.couscous.values.InterpreterValue;
-import org.zwobble.couscous.values.UnitValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.UnitValue;
 
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 

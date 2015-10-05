@@ -21,8 +21,8 @@ import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.interpreter.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;

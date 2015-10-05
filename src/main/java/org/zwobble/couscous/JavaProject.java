@@ -1,6 +1,6 @@
 package org.zwobble.couscous;
 
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.IntegerValue;
 
 public class JavaProject {
     public static MapBackedProject.Builder builder() {

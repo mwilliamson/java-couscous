@@ -1,10 +1,11 @@
-package org.zwobble.couscous.values;
+package org.zwobble.couscous.interpreter.values;
 
 import java.util.List;
 import java.util.function.BiFunction;
 
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.values.TypeReference;
 
 import lombok.AccessLevel;
 import lombok.Getter;

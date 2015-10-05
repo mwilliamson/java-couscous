@@ -1,10 +1,10 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.InterpreterValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.interpreter.values.BooleanValue;
+import org.zwobble.couscous.interpreter.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.StringValue;
 
 import lombok.Value;
 

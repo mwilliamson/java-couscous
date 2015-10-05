@@ -13,9 +13,9 @@ import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
-import org.zwobble.couscous.values.ConcreteType;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.interpreter.values.ConcreteType;
+import org.zwobble.couscous.interpreter.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 

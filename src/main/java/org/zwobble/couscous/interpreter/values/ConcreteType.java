@@ -1,4 +1,4 @@
-package org.zwobble.couscous.values;
+package org.zwobble.couscous.interpreter.values;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +12,7 @@ import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.values.TypeReference;
 
 import com.google.common.collect.ImmutableMap;
 

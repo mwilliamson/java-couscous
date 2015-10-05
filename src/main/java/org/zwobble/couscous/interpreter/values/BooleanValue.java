@@ -1,4 +1,4 @@
-package org.zwobble.couscous.values;
+package org.zwobble.couscous.interpreter.values;
 
 import lombok.AccessLevel;
 import lombok.Getter;

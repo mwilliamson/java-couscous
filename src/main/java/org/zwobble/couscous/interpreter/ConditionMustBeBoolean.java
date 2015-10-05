@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter;
 
-import org.zwobble.couscous.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;

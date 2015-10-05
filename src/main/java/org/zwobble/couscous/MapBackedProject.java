@@ -2,7 +2,7 @@ package org.zwobble.couscous;
 
 import java.util.Map;
 
-import org.zwobble.couscous.values.ConcreteType;
+import org.zwobble.couscous.interpreter.values.ConcreteType;
 
 import com.google.common.collect.ImmutableMap;
 

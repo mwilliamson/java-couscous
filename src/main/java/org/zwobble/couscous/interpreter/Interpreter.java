@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.zwobble.couscous.Project;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 import com.google.common.collect.ImmutableMap;
 

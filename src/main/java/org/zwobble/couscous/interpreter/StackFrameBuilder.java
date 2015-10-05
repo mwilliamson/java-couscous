@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
-import org.zwobble.couscous.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 import com.google.common.collect.ImmutableMap;
 

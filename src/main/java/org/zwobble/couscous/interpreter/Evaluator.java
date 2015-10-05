@@ -11,8 +11,8 @@ import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.BooleanValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 import lombok.val;
 

@@ -2,7 +2,7 @@ package org.zwobble.couscous.interpreter;
 
 import java.util.List;
 
-import org.zwobble.couscous.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 public class Arguments {
     private List<InterpreterValue> values;
