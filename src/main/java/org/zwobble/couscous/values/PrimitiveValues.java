@@ -2,6 +2,8 @@ package org.zwobble.couscous.values;
 
 public class PrimitiveValues {
     public static final PrimitiveValue UNIT = UnitValue.UNIT;
+    public static final PrimitiveValue TRUE = new BooleanValue(true);
+    public static final PrimitiveValue FALSE = new BooleanValue(false);
     
     public static PrimitiveValue value(String value) {
         return new StringValue(value);
@@ -12,6 +14,6 @@ public class PrimitiveValues {
     }
     
     public static PrimitiveValue value(boolean value) {
-        return new BooleanValue(value);
+        return value ? TRUE : FALSE;
     }
 }

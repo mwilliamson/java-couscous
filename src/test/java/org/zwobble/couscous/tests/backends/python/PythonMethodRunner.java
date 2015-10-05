@@ -67,6 +67,10 @@ public class PythonMethodRunner implements MethodRunner {
             return PrimitiveValues.UNIT;
         } else if (output.startsWith("'")) {
             return value(output.substring(1, output.length() - 1));
+        } else if (output.equals("True")) {
+            return value(true);
+        } else if (output.equals("False")) {
+            return value(false);
         } else {
             return value(parseInt(output));
         }

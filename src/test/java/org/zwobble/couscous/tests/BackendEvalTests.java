@@ -13,6 +13,14 @@ import lombok.val;
 
 public abstract class BackendEvalTests {
     @Test
+    public void canEvaluateLiterals() {
+        assertEquals(value("hello"), evalExpression(literal("hello")));
+        assertEquals(value(true), evalExpression(literal(true)));
+        assertEquals(value(false), evalExpression(literal(false)));
+        assertEquals(value(42), evalExpression(literal(42)));
+    }
+    
+    @Test
     public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
         val result = evalExpression(new TernaryConditionalNode(literal(true), literal("T"), literal("F")));
         assertEquals(value("T"), result);
