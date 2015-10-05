@@ -58,17 +58,6 @@ public class EvaluatorTests extends BackendEvalTests {
     }
     
     @Test
-    public void canCallMethodWithArgumentsOnBuiltin() {
-        val result = eval(emptyEnvironment(),
-            methodCall(
-                literal("hello"),
-                "substring",
-                asList(literal(1), literal(4)),
-                StringValue.REF));
-        assertEquals(new StringInterpreterValue("ell"), result);
-    }
-    
-    @Test
     public void errorIfMethodDoesNotExist() {
         val exception = assertThrows(NoSuchMethod.class,
             () -> eval(emptyEnvironment(),

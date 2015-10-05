@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
@@ -159,23 +160,38 @@ public class PythonCodeGenerator {
             if (isPrimitive(methodCall.getReceiver())) {
                 val isStringLength = methodCall.getReceiver().getType().equals(StringValue.REF) &&
                     methodCall.getMethodName() == "length";
+                val isSubstring = methodCall.getReceiver().getType().equals(StringValue.REF) &&
+                    methodCall.getMethodName() == "substring";
                 if (isStringLength) {
                     return pythonCall(
                         pythonVariableReference("len"),
                         asList(generateExpression(methodCall.getReceiver())));
+                } else if (isSubstring) {
+                    return pythonCall(
+                        pythonAttributeAccess(
+                            generateExpression(methodCall.getReceiver()),
+                            "__getitem__"),
+                        asList(pythonCall(
+                            pythonVariableReference("slice"),
+                            generateArguments(methodCall))));
                 } else {
                     throw new UnsupportedOperationException();
                 }
             } else {
-                val arguments = methodCall.getArguments().stream()
-                    .map(PythonCodeGenerator::generateExpression)
-                    .collect(Collectors.toList());
+                val arguments = generateArguments(methodCall);
                 return pythonCall(
                     pythonAttributeAccess(
                         generateExpression(methodCall.getReceiver()),
                         methodCall.getMethodName()),
                     arguments);
             }
+        }
+
+        private List<PythonExpressionNode> generateArguments(
+            MethodCallNode methodCall) {
+            return methodCall.getArguments().stream()
+                .map(PythonCodeGenerator::generateExpression)
+                .collect(Collectors.toList());
         }
 
         @Override

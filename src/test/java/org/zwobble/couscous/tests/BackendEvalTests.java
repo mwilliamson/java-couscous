@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -43,6 +44,16 @@ public abstract class BackendEvalTests {
             asList(),
             IntegerValue.REF));
         assertEquals(value(5), result);
+    }
+    
+    @Test
+    public void canCallMethodWithArgumentsOnBuiltin() {
+        val result = evalExpression(methodCall(
+            literal("hello"),
+            "substring",
+            asList(literal(1), literal(4)),
+            StringValue.REF));
+        assertEquals(value("ell"), result);
     }
     
     protected abstract PrimitiveValue evalExpression(ExpressionNode expression);
