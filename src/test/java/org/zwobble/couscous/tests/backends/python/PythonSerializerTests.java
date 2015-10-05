@@ -7,6 +7,7 @@ import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
+import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
@@ -80,13 +81,6 @@ public class PythonSerializerTests {
     }
     
     @Test
-    public void moduleIsSerializedStatements() {
-        val classNode = pythonModule(asList(PASS));
-        val output = serialize(classNode);
-        assertEquals("pass\n", output);
-    }
-    
-    @Test
     public void bodiesOfBlocksAreIndented() {
         val classNode = PythonClassNode.builder("Foo")
             .statement(PythonFunctionDefinitionNode.builder("one").build())
@@ -100,5 +94,19 @@ public class PythonSerializerTests {
             "    def two():\n" +
             "        pass\n";
         assertEquals(expectedOutput, output);
+    }
+    
+    @Test
+    public void assignmentIsSerializedWithEqualsSymbolSeparatingTargetAndValue() {
+        val output = serialize(pythonAssignment(
+            pythonVariableReference("x"), pythonIntegerLiteral(42)));
+        assertEquals("x = 42\n", output);
+    }
+    
+    @Test
+    public void moduleIsSerializedStatements() {
+        val classNode = pythonModule(asList(PASS));
+        val output = serialize(classNode);
+        assertEquals("pass\n", output);
     }
 }

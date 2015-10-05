@@ -7,9 +7,9 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import lombok.Value;
 
 @Value
-public class Assignment implements ExpressionNode {
-    public static Assignment assign(VariableNode target, ExpressionNode value) {
-        return new Assignment(reference(target), value);
+public class AssignmentNode implements ExpressionNode {
+    public static AssignmentNode assign(VariableNode target, ExpressionNode value) {
+        return new AssignmentNode(reference(target), value);
     }
     
     VariableReferenceNode target;

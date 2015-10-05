@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python.ast.visitors;
 
+import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
@@ -20,6 +21,7 @@ public interface PythonNodeVisitor<T> {
     T visit(PythonPassNode pass);
     T visit(PythonClassNode pythonClass);
     T visit(PythonFunctionDefinitionNode functionDefinition);
+    T visit(PythonAssignmentNode assignment);
 
     T visit(PythonModuleNode module);
 

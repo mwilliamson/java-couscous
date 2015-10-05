@@ -22,7 +22,7 @@ import org.zwobble.couscous.values.StringValue;
 import com.google.common.collect.ImmutableMap;
 
 import static org.junit.Assert.assertEquals;
-import static org.zwobble.couscous.ast.Assignment.assign;
+import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;

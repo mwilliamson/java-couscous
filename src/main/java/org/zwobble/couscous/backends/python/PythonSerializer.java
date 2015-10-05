@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python;
 
+import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
@@ -102,6 +103,18 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
         writeArgumentNames(functionDefinition);
         writer.writeSymbol(")");
         writeBlock(functionDefinition.getBody());
+        writer.endStatement();
+        return null;
+    }
+
+    @Override
+    public Void visit(PythonAssignmentNode assignment) {
+        writer.startStatement();
+        write(assignment.getTarget());
+        writer.writeSpace();
+        writer.writeSymbol("=");
+        writer.writeSpace();
+        write(assignment.getValue());
         writer.endStatement();
         return null;
     }

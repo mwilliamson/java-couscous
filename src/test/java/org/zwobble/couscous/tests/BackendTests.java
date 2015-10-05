@@ -1,7 +1,10 @@
 package org.zwobble.couscous.tests;
 
 import org.junit.Test;
+import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -45,6 +48,18 @@ public abstract class BackendTests {
         val result = runMethod(method, value("hello, world!"));
         
         assertEquals(value("hello, world!"), result);
+    }
+    
+    @Test
+    public void canReassignValueToArgument() {
+        val arg = formalArg(var(42, "x", StringValue.REF));
+        val method = staticMethod("hello")
+            .argument(arg)
+            .statement(new ExpressionStatementNode(new AssignmentNode(reference(arg), LiteralNode.literal("[updated value]"))))
+            .statement(new ReturnNode(reference(arg)));
+        val result = runMethod(method, value("[initial value]"));
+        
+        assertEquals(value("[updated value]"), result);
     }
 
     protected PrimitiveValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, PrimitiveValue... arguments) {

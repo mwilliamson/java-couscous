@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.zwobble.couscous.MapBackedProject;
-import org.zwobble.couscous.ast.Assignment;
+import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
@@ -49,23 +49,11 @@ public class InterpreterTests extends BackendTests {
     }
     
     @Test
-    public void canReassignValueToArgument() {
-        val arg = formalArg(var(42, "x", StringValue.REF));
-        val method = staticMethod("hello")
-            .argument(arg)
-            .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.literal("[updated value]"))))
-            .statement(new ReturnNode(reference(arg)));
-        val result = runMethod(method, value("[initial value]"));
-        
-        assertEquals(value("[updated value]"), result);
-    }
-    
-    @Test
     public void errorIfTryingToAssignValueOfWrongTypeToVariable() {
         val arg = formalArg(var(42, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
-            .statement(new ExpressionStatementNode(new Assignment(reference(arg), literal(0))));
+            .statement(new ExpressionStatementNode(new AssignmentNode(reference(arg), literal(0))));
 
         val exception = assertThrows(UnexpectedValueType.class,
             () -> runMethod(method, value("")));
@@ -91,7 +79,7 @@ public class InterpreterTests extends BackendTests {
             42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
-            .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
+            .statement(new ExpressionStatementNode(new AssignmentNode(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
             .statement(new ReturnNode(reference(localVariableDeclaration)));
         val result = runMethod(method);
         
@@ -103,7 +91,7 @@ public class InterpreterTests extends BackendTests {
         val localVariableDeclaration = localVariableDeclaration(
             42, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
-            .statement(new ExpressionStatementNode(new Assignment(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
+            .statement(new ExpressionStatementNode(new AssignmentNode(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
 
         val exception = assertThrows(VariableNotInScope.class,
             () -> runMethod(method));

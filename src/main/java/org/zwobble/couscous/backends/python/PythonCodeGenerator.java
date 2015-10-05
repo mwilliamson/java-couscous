@@ -2,7 +2,7 @@ package org.zwobble.couscous.backends.python;
 
 import java.util.stream.Collectors;
 
-import org.zwobble.couscous.ast.Assignment;
+import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -22,6 +22,7 @@ import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
+import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -30,6 +31,7 @@ import org.zwobble.couscous.values.StringValue;
 import org.zwobble.couscous.values.UnitValue;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
@@ -100,7 +102,14 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
-            throw new UnsupportedOperationException();
+            if (expressionStatement.getExpression() instanceof AssignmentNode) {
+                val assignment = (AssignmentNode) expressionStatement.getExpression();
+                return pythonAssignment(
+                    EXPRESSION_GENERATOR.visit(assignment.getTarget()),
+                    generateExpression(assignment.getValue()));
+            } else {
+                throw new UnsupportedOperationException();   
+            }
         }
 
         @Override
@@ -110,8 +119,10 @@ public class PythonCodeGenerator {
     }
     
     private static PythonExpressionNode generateExpression(ExpressionNode expression) {
-        return expression.accept(new ExpressionGenerator());
+        return expression.accept(EXPRESSION_GENERATOR);
     }
+    
+    private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
     
     private static class ExpressionGenerator implements ExpressionNodeVisitor<PythonExpressionNode> {
         @Override
@@ -120,12 +131,12 @@ public class PythonCodeGenerator {
         }
 
         @Override
-        public PythonExpressionNode visit(VariableReferenceNode variableReference) {
+        public PythonVariableReferenceNode visit(VariableReferenceNode variableReference) {
             return pythonVariableReference(variableReference.getReferent().getName());
         }
 
         @Override
-        public PythonExpressionNode visit(Assignment assignment) {
+        public PythonExpressionNode visit(AssignmentNode assignment) {
             throw new UnsupportedOperationException();
         }
 

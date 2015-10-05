@@ -3,7 +3,7 @@ package org.zwobble.couscous.interpreter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.zwobble.couscous.ast.Assignment;
+import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -43,7 +43,7 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     }
 
     @Override
-    public InterpreterValue visit(Assignment assignment) {
+    public InterpreterValue visit(AssignmentNode assignment) {
         val value = eval(assignment.getValue());
         environment.put(assignment.getTarget().getReferentId(), value);
         return value;
