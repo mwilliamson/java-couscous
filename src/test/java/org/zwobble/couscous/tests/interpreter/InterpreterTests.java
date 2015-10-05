@@ -1,18 +1,21 @@
 package org.zwobble.couscous.tests.interpreter;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.Assignment;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.tests.BackendTests;
+import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.ConcreteType;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InterpreterValue;
@@ -20,7 +23,6 @@ import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
@@ -29,28 +31,10 @@ import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
-import static org.zwobble.couscous.values.UnitValue.UNIT;
 
 import lombok.val;
 
-public class InterpreterTests {
-    @Test
-    public void methodWithNoStatementsReturnsUnit() {
-        val method = staticMethod("hello");
-        val result = runMethod(method);
-        
-        assertEquals(UNIT, result);
-    }
-    
-    @Test
-    public void canReturnLiteralValue() {
-        val method = staticMethod("hello")
-            .statement(new ReturnNode(LiteralNode.literal("hello, world!")));
-        val result = runMethod(method);
-        
-        assertEquals(new StringValue("hello, world!"), result);
-    }
-    
+public class InterpreterTests extends BackendTests {
     @Test
     public void canPassValueToMethod() {
         val arg = formalArg(var(42, "x", StringValue.REF));
@@ -162,15 +146,19 @@ public class InterpreterTests {
         assertEquals(new UnboundVariable(42), exception);
     }
 
-    private InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
-        val method = methodBuilder.build();
-        val className = "com.example.Program";
-        val classNode = ClassNode.builder(className)
-            .method(method)
-            .build();
-        val interpreter = new Interpreter(new MapBackedProject(ImmutableMap.of(
-            className, ConcreteType.fromNode(classNode))));
-        
-        return interpreter.run(className, method.getName(), asList(arguments));
+    @Override
+    protected MethodRunner buildMethodRunner() {
+        return new MethodRunner() {
+            @Override
+            public InterpreterValue runMethod(
+                    ClassNode classNode,
+                    String methodName,
+                    List<InterpreterValue> arguments) {
+                val interpreter = new Interpreter(new MapBackedProject(ImmutableMap.of(
+                    classNode.getName(), ConcreteType.fromNode(classNode))));
+                
+                return interpreter.run(classNode.getName(), methodName, arguments);
+            }
+        };
     }
 }

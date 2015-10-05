@@ -35,4 +35,9 @@ public class ClassNode {
     String name;
     @Singular
     List<MethodNode> methods;
+    
+    public String getLocalName() {
+        // TODO Stronger notion of class names? Should look up the terminology
+        return name.substring(name.lastIndexOf(".") + 1);
+    }
 }
