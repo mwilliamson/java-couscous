@@ -12,19 +12,19 @@ import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 
-public interface PythonNodeVisitor<T> {
-    T visit(PythonIntegerLiteralNode integerLiteral);
-    T visit(PythonStringLiteralNode stringLiteral);
-    T visit(PythonBooleanLiteralNode booleanLiteral);
-    T visit(PythonVariableReferenceNode reference);
-    T visit(PythonConditionalExpressionNode conditional);
+public interface PythonNodeVisitor {
+    void visit(PythonIntegerLiteralNode integerLiteral);
+    void visit(PythonStringLiteralNode stringLiteral);
+    void visit(PythonBooleanLiteralNode booleanLiteral);
+    void visit(PythonVariableReferenceNode reference);
+    void visit(PythonConditionalExpressionNode conditional);
     
-    T visit(PythonReturnNode pythonReturn);
-    T visit(PythonPassNode pass);
-    T visit(PythonClassNode pythonClass);
-    T visit(PythonFunctionDefinitionNode functionDefinition);
-    T visit(PythonAssignmentNode assignment);
+    void visit(PythonReturnNode pythonReturn);
+    void visit(PythonPassNode pass);
+    void visit(PythonClassNode pythonClass);
+    void visit(PythonFunctionDefinitionNode functionDefinition);
+    void visit(PythonAssignmentNode assignment);
 
-    T visit(PythonModuleNode module);
+    void visit(PythonModuleNode module);
 
 }

@@ -11,7 +11,7 @@ public class PythonConditionalExpressionNode implements PythonExpressionNode {
     PythonExpressionNode falseValue;
     
     @Override
-    public <T> T accept(PythonNodeVisitor<T> visitor) {
-        return visitor.visit(this);
+    public void accept(PythonNodeVisitor visitor) {
+        visitor.visit(this);
     }
 }

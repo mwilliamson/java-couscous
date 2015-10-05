@@ -20,7 +20,7 @@ import static com.google.common.collect.Iterables.skip;
 
 import lombok.val;
 
-public class PythonSerializer implements PythonNodeVisitor<Void> {
+public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
         val writer = new PythonWriter();
         val serializer = new PythonSerializer(writer);
@@ -39,31 +39,27 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
     }
     
     @Override
-    public Void visit(PythonIntegerLiteralNode integerLiteral) {
+    public void visit(PythonIntegerLiteralNode integerLiteral) {
         writer.writeInteger(integerLiteral.getValue());
-        return null;
     }
 
     @Override
-    public Void visit(PythonStringLiteralNode stringLiteral) {
+    public void visit(PythonStringLiteralNode stringLiteral) {
         writer.writeStringLiteral(stringLiteral.getValue());
-        return null;
     }
 
     @Override
-    public Void visit(PythonBooleanLiteralNode booleanLiteral) {
+    public void visit(PythonBooleanLiteralNode booleanLiteral) {
         writer.writeKeyword(booleanLiteral.getValue() ? "True" : "False");
-        return null;
     }
 
     @Override
-    public Void visit(PythonVariableReferenceNode reference) {
+    public void visit(PythonVariableReferenceNode reference) {
         writer.writeIdentifier(reference.getName());
-        return null;
     }
 
     @Override
-    public Void visit(PythonConditionalExpressionNode conditional) {
+    public void visit(PythonConditionalExpressionNode conditional) {
         writeParenthesised(conditional.getTrueValue());
         writer.writeSpace();
         writer.writeKeyword("if");
@@ -73,29 +69,26 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
         writer.writeKeyword("else");
         writer.writeSpace();
         writeParenthesised(conditional.getFalseValue());
-        return null;
     }
 
     @Override
-    public Void visit(PythonReturnNode pythonReturn) {
+    public void visit(PythonReturnNode pythonReturn) {
         writer.writeStatement(() -> {
             writer.writeKeyword("return");
             writer.writeSpace();
             write(pythonReturn.getValue());
         });
-        return null;
     }
 
     @Override
-    public Void visit(PythonPassNode pass) {
+    public void visit(PythonPassNode pass) {
         writer.writeStatement(() -> {
             writer.writeKeyword("pass");            
         });
-        return null;
     }
 
     @Override
-    public Void visit(PythonClassNode pythonClass) {
+    public void visit(PythonClassNode pythonClass) {
         writer.writeStatement(() -> {
             writer.writeKeyword("class");
             writer.writeSpace();
@@ -105,11 +98,10 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
             writer.writeSymbol(")");
             writeBlock(pythonClass.getBody());
         });
-        return null;
     }
 
     @Override
-    public Void visit(PythonFunctionDefinitionNode functionDefinition) {
+    public void visit(PythonFunctionDefinitionNode functionDefinition) {
         writer.writeStatement(() -> {
             writer.writeKeyword("def");
             writer.writeSpace();
@@ -119,11 +111,10 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
             writer.writeSymbol(")");
             writeBlock(functionDefinition.getBody());
         });
-        return null;
     }
 
     @Override
-    public Void visit(PythonAssignmentNode assignment) {
+    public void visit(PythonAssignmentNode assignment) {
         writer.writeStatement(() -> {
             write(assignment.getTarget());
             writer.writeSpace();
@@ -132,7 +123,6 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
             write(assignment.getValue());
             
         });
-        return null;
     }
 
     private void writeParenthesised(PythonExpressionNode expression) {
@@ -153,11 +143,10 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
     }
 
     @Override
-    public Void visit(PythonModuleNode module) {
+    public void visit(PythonModuleNode module) {
         for (val statement : module.getStatements()) {
             write(statement);
         }
-        return null;
     }
 
     private void writeBlock(PythonBlock body) {

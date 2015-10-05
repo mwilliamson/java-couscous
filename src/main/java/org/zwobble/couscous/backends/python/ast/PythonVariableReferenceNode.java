@@ -9,7 +9,7 @@ public class PythonVariableReferenceNode implements PythonExpressionNode {
     String name;
 
     @Override
-    public <T> T accept(PythonNodeVisitor<T> visitor) {
-        return visitor.visit(this);
+    public void accept(PythonNodeVisitor visitor) {
+        visitor.visit(this);
     }
 }

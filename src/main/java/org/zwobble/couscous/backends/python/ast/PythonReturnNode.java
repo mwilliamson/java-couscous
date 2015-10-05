@@ -9,8 +9,8 @@ public class PythonReturnNode implements PythonStatementNode {
     PythonExpressionNode value;
     
     @Override
-    public <T> T accept(PythonNodeVisitor<T> visitor) {
-        return visitor.visit(this);
+    public void accept(PythonNodeVisitor visitor) {
+        visitor.visit(this);
     }
     
 }
