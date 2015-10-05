@@ -14,7 +14,6 @@ import org.zwobble.couscous.backends.python.ast.PythonPassNode;
 import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
-import org.zwobble.couscous.backends.python.ast.PythonWriter;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
 import static com.google.common.collect.Iterables.skip;

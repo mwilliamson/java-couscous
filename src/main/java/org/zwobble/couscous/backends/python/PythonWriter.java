@@ -1,4 +1,4 @@
-package org.zwobble.couscous.backends.python.ast;
+package org.zwobble.couscous.backends.python;
 
 import com.google.common.base.Strings;
 
