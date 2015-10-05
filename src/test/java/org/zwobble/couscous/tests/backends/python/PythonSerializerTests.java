@@ -12,6 +12,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
+import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
@@ -68,8 +69,19 @@ public class PythonSerializerTests {
         assertEquals("(f)(x, y)", serialize(
             pythonCall(
                 pythonVariableReference("f"),
-                asList(pythonVariableReference("x"),
+                asList(
+                    pythonVariableReference("x"),
                     pythonVariableReference("y")))));
+    }
+    
+    @Test
+    public void getSliceIsSerializedUsingParenthesisedSubExpression() {
+        assertEquals("(x)[y:z]", serialize(
+            pythonGetSlice(
+                pythonVariableReference("x"),
+                asList(
+                    pythonVariableReference("y"),
+                    pythonVariableReference("z")))));
     }
     
     @Test

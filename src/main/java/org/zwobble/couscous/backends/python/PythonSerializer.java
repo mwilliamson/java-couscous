@@ -9,6 +9,7 @@ import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
+import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonNode;
@@ -93,6 +94,21 @@ public class PythonSerializer implements PythonNodeVisitor {
             }
         }
         writer.writeSymbol(")");
+    }
+
+    @Override
+    public void visit(PythonGetSliceNode getSlice) {
+        writeParenthesised(getSlice.getReceiver());
+        writer.writeSymbol("[");
+        // TODO: remove this duplication
+        if (!getSlice.getArguments().isEmpty()) {
+            write(getSlice.getArguments().get(0));
+            for (val argumentName : skip(getSlice.getArguments(), 1)) {
+                writer.writeSymbol(":");
+                write(argumentName);
+            }
+        }
+        writer.writeSymbol("]");
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.zwobble.couscous.backends.python.ast.PythonCallNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
+import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonPassNode;
@@ -22,6 +23,7 @@ public interface PythonNodeVisitor {
     void visit(PythonConditionalExpressionNode conditional);
     void visit(PythonAttributeAccessNode attributeAccess);
     void visit(PythonCallNode call);
+    void visit(PythonGetSliceNode getSlice);
     
     void visit(PythonReturnNode pythonReturn);
     void visit(PythonPassNode pass);

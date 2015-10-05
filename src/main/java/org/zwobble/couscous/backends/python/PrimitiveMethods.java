@@ -11,8 +11,8 @@ import org.zwobble.couscous.values.TypeReference;
 import com.google.common.collect.ImmutableMap;
 
 import static java.util.Arrays.asList;
-import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
+import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 
 public class PrimitiveMethods {
@@ -25,13 +25,7 @@ public class PrimitiveMethods {
                     asList(receiver)))
             
             .put("substring", (receiver, arguments) ->
-                pythonCall(
-                    pythonAttributeAccess(
-                        receiver,
-                        "__getitem__"),
-                    asList(pythonCall(
-                        pythonVariableReference("slice"),
-                        arguments))))
+                pythonGetSlice(receiver, arguments))
             
             .build();
     
