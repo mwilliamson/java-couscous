@@ -4,6 +4,8 @@ import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
+import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
+import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
@@ -58,6 +60,20 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
     @Override
     public Void visit(PythonVariableReferenceNode reference) {
         writer.writeIdentifier(reference.getName());
+        return null;
+    }
+
+    @Override
+    public Void visit(PythonConditionalExpressionNode conditional) {
+        writeParenthesised(conditional.getTrueValue());
+        writer.writeSpace();
+        writer.writeKeyword("if");
+        writer.writeSpace();
+        writeParenthesised(conditional.getCondition());
+        writer.writeSpace();
+        writer.writeKeyword("else");
+        writer.writeSpace();
+        writeParenthesised(conditional.getFalseValue());
         return null;
     }
 
@@ -117,6 +133,12 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
         write(assignment.getValue());
         writer.endStatement();
         return null;
+    }
+
+    private void writeParenthesised(PythonExpressionNode expression) {
+        writer.writeSymbol("(");
+        write(expression);
+        writer.writeSymbol(")");
     }
 
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {

@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.zwobble.couscous.JavaProject;
 import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
@@ -16,7 +17,9 @@ import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
+import org.zwobble.couscous.tests.BackendEvalTests;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
@@ -34,7 +37,7 @@ import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
 import lombok.val;
 
-public class EvaluatorTests {
+public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
         val arg = formalArg(var(42, "x", StringValue.REF));
@@ -43,20 +46,6 @@ public class EvaluatorTests {
             new StackFrameBuilder().declare(arg, value("[initial value]")).build());
         val result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringInterpreterValue("[updated value]"), result);
-    }
-    
-    @Test
-    public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
-        val result = eval(emptyEnvironment(),
-            new TernaryConditionalNode(literal(true), literal("T"), literal("F")));
-        assertEquals(new StringInterpreterValue("T"), result);
-    }
-    
-    @Test
-    public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
-        val result = eval(emptyEnvironment(),
-            new TernaryConditionalNode(literal(false), literal("T"), literal("F")));
-        assertEquals(new StringInterpreterValue("F"), result);
     }
     
     @Test
@@ -133,5 +122,10 @@ public class EvaluatorTests {
         return new Environment(
             JavaProject.builder().build(),
             ImmutableMap.of());
+    }
+
+    @Override
+    protected PrimitiveValue evalExpression(ExpressionNode expression) {
+        return eval(emptyEnvironment(), expression).toPrimitiveValue().get();
     }
 }

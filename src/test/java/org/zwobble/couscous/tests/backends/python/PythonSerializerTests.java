@@ -9,6 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
@@ -41,6 +42,15 @@ public class PythonSerializerTests {
     @Test
     public void variableReferenceIsSerializedAsIdentifier() {
         assertEquals("blah", serialize(pythonVariableReference("blah")));
+    }
+    
+    @Test
+    public void conditionalExpressionIsSerializedUsingParens() {
+        assertEquals("(1) if (True) else (2)", serialize(
+            pythonConditionalExpression(
+                pythonBooleanLiteral(true),
+                pythonIntegerLiteral(1),
+                pythonIntegerLiteral(2))));
     }
     
     @Test

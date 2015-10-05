@@ -3,6 +3,7 @@ package org.zwobble.couscous.backends.python.ast.visitors;
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
+import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
@@ -16,6 +17,7 @@ public interface PythonNodeVisitor<T> {
     T visit(PythonStringLiteralNode stringLiteral);
     T visit(PythonBooleanLiteralNode booleanLiteral);
     T visit(PythonVariableReferenceNode reference);
+    T visit(PythonConditionalExpressionNode conditional);
     
     T visit(PythonReturnNode pythonReturn);
     T visit(PythonPassNode pass);

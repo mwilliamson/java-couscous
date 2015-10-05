@@ -32,7 +32,9 @@ import org.zwobble.couscous.values.UnitValue;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
+import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
+import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
@@ -67,7 +69,7 @@ public class PythonCodeGenerator {
 
             @Override
             public PythonExpressionNode visit(BooleanValue value) {
-                throw new UnsupportedOperationException();
+                return pythonBooleanLiteral(value.getValue());
             }
 
             @Override
@@ -144,7 +146,10 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(TernaryConditionalNode ternaryConditional) {
-            throw new UnsupportedOperationException();
+            return pythonConditionalExpression(
+                generateExpression(ternaryConditional.getCondition()),
+                generateExpression(ternaryConditional.getIfTrue()),
+                generateExpression(ternaryConditional.getIfFalse()));
         }
 
         @Override
