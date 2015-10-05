@@ -17,6 +17,7 @@ import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
+import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
@@ -53,7 +54,7 @@ public class PythonCodeGenerator {
             .stream()
             .map(PythonCodeGenerator::generateStatement)
             .collect(Collectors.toList());
-        return pythonFunctionDefinition(method.getName(), pythonBody);
+        return pythonFunctionDefinition(method.getName(), asList(), new PythonBlock(pythonBody));
     }
     
     private static PythonStatementNode generateStatement(StatementNode statement) {

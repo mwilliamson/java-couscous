@@ -2,12 +2,12 @@ package org.zwobble.couscous.tests.backends.python;
 
 import org.junit.Test;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
+import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
-import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
@@ -50,8 +50,19 @@ public class PythonSerializerTests {
     
     @Test
     public void emptyFunctionHasPassStatement() {
-        val output = serialize(pythonFunctionDefinition("empty", asList()));
+        val function = PythonFunctionDefinitionNode.builder("empty").build();
+        val output = serialize(function);
         assertEquals("def empty():\n    pass\n", output);
+    }
+    
+    @Test
+    public void functionArgumentsAreSerializedWithName() {
+        val function = PythonFunctionDefinitionNode.builder("empty")
+            .argument("one")
+            .argument("two")
+            .build();
+        val output = serialize(function);
+        assertEquals("def empty(one, two):\n    pass\n", output);
     }
     
     @Test
@@ -72,8 +83,8 @@ public class PythonSerializerTests {
     @Test
     public void bodiesOfBlocksAreIndented() {
         val classNode = PythonClassNode.builder("Foo")
-            .statement(pythonFunctionDefinition("one", asList()))
-            .statement(pythonFunctionDefinition("two", asList()))
+            .statement(PythonFunctionDefinitionNode.builder("one").build())
+            .statement(PythonFunctionDefinitionNode.builder("two").build())
             .build();
         val output = serialize(classNode);
         val expectedOutput =

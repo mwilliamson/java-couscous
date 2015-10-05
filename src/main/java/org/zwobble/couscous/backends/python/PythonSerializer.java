@@ -13,6 +13,8 @@ import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonWriter;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
+import static com.google.common.collect.Iterables.skip;
+
 import lombok.val;
 
 public class PythonSerializer implements PythonNodeVisitor<Void> {
@@ -90,10 +92,22 @@ public class PythonSerializer implements PythonNodeVisitor<Void> {
         writer.writeSpace();
         writer.writeIdentifier(functionDefinition.getName());
         writer.writeSymbol("(");
+        writeArgumentNames(functionDefinition);
         writer.writeSymbol(")");
         writeBlock(functionDefinition.getBody());
         writer.endStatement();
         return null;
+    }
+
+    private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {
+        if (!functionDefinition.getArgumentNames().isEmpty()) {
+            writer.writeIdentifier(functionDefinition.getArgumentNames().get(0));
+            for (val argumentName : skip(functionDefinition.getArgumentNames(), 1)) {
+                writer.writeSymbol(",");
+                writer.writeSpace();
+                writer.writeIdentifier(argumentName);
+            }
+        }
     }
 
     @Override
