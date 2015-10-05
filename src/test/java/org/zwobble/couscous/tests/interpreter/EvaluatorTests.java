@@ -24,6 +24,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -59,7 +60,11 @@ public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void canCallMethodWithArgumentsOnBuiltin() {
         val result = eval(emptyEnvironment(),
-            methodCall(literal("hello"), "substring", literal(1), literal(4)));
+            methodCall(
+                literal("hello"),
+                "substring",
+                asList(literal(1), literal(4)),
+                StringValue.REF));
         assertEquals(new StringInterpreterValue("ell"), result);
     }
     
@@ -67,7 +72,11 @@ public class EvaluatorTests extends BackendEvalTests {
     public void errorIfMethodDoesNotExist() {
         val exception = assertThrows(NoSuchMethod.class,
             () -> eval(emptyEnvironment(),
-                methodCall(literal("hello"), "size")));
+                methodCall(
+                    literal("hello"),
+                    "size",
+                    asList(),
+                    IntegerValue.REF)));
         assertEquals(new NoSuchMethod("size"), exception);
     }
     
@@ -75,7 +84,11 @@ public class EvaluatorTests extends BackendEvalTests {
     public void errorIfWrongNumberOfArgumentsArePassed() {
         val exception = assertThrows(WrongNumberOfArguments.class,
             () -> eval(emptyEnvironment(),
-                methodCall(literal("hello"), "substring", literal(1))));
+                methodCall(
+                    literal("hello"),
+                    "substring",
+                    asList(literal(1)),
+                    StringValue.REF)));
         assertEquals(new WrongNumberOfArguments(2, 1), exception);
     }
     
@@ -83,7 +96,11 @@ public class EvaluatorTests extends BackendEvalTests {
     public void errorIfArgumentIsWrongType() {
         val exception = assertThrows(UnexpectedValueType.class,
             () -> eval(emptyEnvironment(),
-                methodCall(literal("hello"), "substring", literal(0), literal(""))));
+                methodCall(
+                    literal("hello"),
+                    "substring",
+                    asList(literal(0), literal("")),
+                    StringValue.REF)));
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }
     

@@ -14,4 +14,9 @@ public class IntegerValue implements PrimitiveValue {
     public <T> T accept(PrimitiveValueVisitor<T> visitor) {
         return visitor.visit(this);
     }
+
+    @Override
+    public TypeReference getType() {
+        return REF;
+    }
 }

@@ -3,8 +3,10 @@ package org.zwobble.couscous.tests;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -35,7 +37,11 @@ public abstract class BackendEvalTests {
     
     @Test
     public void canCallMethodWithNoArgumentsOnBuiltin() {
-        val result = evalExpression(methodCall(literal("hello"), "length"));
+        val result = evalExpression(methodCall(
+            literal("hello"),
+            "length",
+            asList(),
+            IntegerValue.REF));
         assertEquals(value(5), result);
     }
     

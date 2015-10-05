@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
+import org.zwobble.couscous.values.TypeReference;
 
 import lombok.Value;
 
@@ -19,5 +20,10 @@ public class VariableReferenceNode implements ExpressionNode {
     
     public int getReferentId() {
         return referent.getId();
+    }
+
+    @Override
+    public TypeReference getType() {
+        return referent.getType();
     }
 }

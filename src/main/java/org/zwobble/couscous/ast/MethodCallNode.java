@@ -3,8 +3,7 @@ package org.zwobble.couscous.ast;
 import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
-
-import static java.util.Arrays.asList;
+import org.zwobble.couscous.values.TypeReference;
 
 import lombok.Value;
 
@@ -13,9 +12,14 @@ public class MethodCallNode implements ExpressionNode {
     ExpressionNode receiver;
     String methodName;
     List<ExpressionNode> arguments;
+    TypeReference type;
     
-    public static MethodCallNode methodCall(ExpressionNode receiver, String methodName, ExpressionNode... arguments) {
-        return new MethodCallNode(receiver, methodName, asList(arguments));
+    public static MethodCallNode methodCall(
+            ExpressionNode receiver,
+            String methodName,
+            List<ExpressionNode> arguments,
+            TypeReference type) {
+        return new MethodCallNode(receiver, methodName, arguments, type);
     }
     
     @Override
