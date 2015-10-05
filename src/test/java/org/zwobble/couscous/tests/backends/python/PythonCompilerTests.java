@@ -58,15 +58,21 @@ public class PythonCompilerTests extends BackendTests {
                     val stderrOutput = readString(process.getErrorStream());
                     if (exitCode != 0) {
                         throw new RuntimeException("stderr was: " + stderrOutput);
-                    } else if (output.equals("None")) {
-                        return PrimitiveValues.UNIT;
-                    } else if (output.startsWith("'")) {
-                        return value(output.substring(1, output.length() - 1));
                     } else {
-                        return value(parseInt(output));
+                        return readPrimitive(output);
                     }
                 } finally {
                     deleteRecursively(directoryPath.toFile());
+                }
+            }
+
+            private PrimitiveValue readPrimitive(String output) {
+                if (output.equals("None")) {
+                    return PrimitiveValues.UNIT;
+                } else if (output.startsWith("'")) {
+                    return value(output.substring(1, output.length() - 1));
+                } else {
+                    return value(parseInt(output));
                 }
             }
 
