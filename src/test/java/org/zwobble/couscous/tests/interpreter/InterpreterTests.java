@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.zwobble.couscous.MapBackedProject;
@@ -15,11 +16,12 @@ import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
-import org.zwobble.couscous.interpreter.values.IntegerValue;
-import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.interpreter.values.StringValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendTests;
 import org.zwobble.couscous.tests.MethodRunner;
+import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -31,6 +33,7 @@ import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
+import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
 
@@ -41,9 +44,9 @@ public class InterpreterTests extends BackendTests {
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ReturnNode(reference(arg)));
-        val result = runMethod(method, new StringValue("hello, world!"));
+        val result = runMethod(method, value("hello, world!"));
         
-        assertEquals(new StringValue("hello, world!"), result);
+        assertEquals(value("hello, world!"), result);
     }
     
     @Test
@@ -51,7 +54,7 @@ public class InterpreterTests extends BackendTests {
         val method = staticMethod("hello");
         
         val exception = assertThrows(WrongNumberOfArguments.class,
-            () -> runMethod(method, new StringValue("hello, world!")));
+            () -> runMethod(method, value("hello, world!")));
         
         assertEquals(new WrongNumberOfArguments(0, 1), exception);
     }
@@ -63,9 +66,9 @@ public class InterpreterTests extends BackendTests {
             .argument(arg)
             .statement(new ExpressionStatementNode(new Assignment(reference(arg), LiteralNode.literal("[updated value]"))))
             .statement(new ReturnNode(reference(arg)));
-        val result = runMethod(method, new StringValue("[initial value]"));
+        val result = runMethod(method, value("[initial value]"));
         
-        assertEquals(new StringValue("[updated value]"), result);
+        assertEquals(value("[updated value]"), result);
     }
     
     @Test
@@ -76,7 +79,7 @@ public class InterpreterTests extends BackendTests {
             .statement(new ExpressionStatementNode(new Assignment(reference(arg), literal(0))));
 
         val exception = assertThrows(UnexpectedValueType.class,
-            () -> runMethod(method, new StringValue("")));
+            () -> runMethod(method, value("")));
         
         assertEquals(new UnexpectedValueType(StringValue.REF, IntegerValue.REF), exception);
     }
@@ -90,7 +93,7 @@ public class InterpreterTests extends BackendTests {
             .statement(new ReturnNode(reference(localVariableDeclaration)));
         val result = runMethod(method);
         
-        assertEquals(new StringValue("[initial value]"), result);
+        assertEquals(value("[initial value]"), result);
     }
     
     @Test
@@ -103,7 +106,7 @@ public class InterpreterTests extends BackendTests {
             .statement(new ReturnNode(reference(localVariableDeclaration)));
         val result = runMethod(method);
         
-        assertEquals(new StringValue("[updated value]"), result);
+        assertEquals(value("[updated value]"), result);
     }
     
     @Test
@@ -150,14 +153,18 @@ public class InterpreterTests extends BackendTests {
     protected MethodRunner buildMethodRunner() {
         return new MethodRunner() {
             @Override
-            public InterpreterValue runMethod(
+            public PrimitiveValue runMethod(
                     ClassNode classNode,
                     String methodName,
-                    List<InterpreterValue> arguments) {
+                    List<PrimitiveValue> arguments) {
                 val interpreter = new Interpreter(new MapBackedProject(ImmutableMap.of(
                     classNode.getName(), ConcreteType.fromNode(classNode))));
+                val argumentValues = arguments.stream()
+                    .map(InterpreterValues::value)
+                    .collect(Collectors.toList());
                 
-                return interpreter.run(classNode.getName(), methodName, arguments);
+                return interpreter.run(classNode.getName(), methodName, argumentValues)
+                    .toPrimitiveValue().get();
             }
         };
     }

@@ -3,8 +3,8 @@ package org.zwobble.couscous.tests;
 import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.values.PrimitiveValue;
 
 public interface MethodRunner {
-    InterpreterValue runMethod(ClassNode classNode, String methodName, List<InterpreterValue> arguments);
+    PrimitiveValue runMethod(ClassNode classNode, String methodName, List<PrimitiveValue> arguments);
 }

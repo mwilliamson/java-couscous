@@ -1,10 +1,10 @@
 package org.zwobble.couscous;
 
-import org.zwobble.couscous.interpreter.values.IntegerValue;
+import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 
 public class JavaProject {
     public static MapBackedProject.Builder builder() {
         return MapBackedProject.builder()
-            .addClass(IntegerValue.TYPE);
+            .addClass(IntegerInterpreterValue.TYPE);
     }
 }

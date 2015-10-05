@@ -12,7 +12,7 @@ import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.visitors.StatementNodeVisitor;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.interpreter.values.UnitValue;
+import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
 
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 
@@ -28,7 +28,7 @@ public class Executor implements StatementNodeVisitor<Optional<InterpreterValue>
                 return result.get();
             }
         }
-        return UnitValue.UNIT;
+        return UnitInterpreterValue.UNIT;
     }
 
     private static Environment buildEnvironment(

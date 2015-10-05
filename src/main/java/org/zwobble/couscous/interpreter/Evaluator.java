@@ -11,8 +11,9 @@ import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeVisitor;
-import org.zwobble.couscous.interpreter.values.BooleanValue;
+import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValues;
 
 import lombok.val;
 
@@ -33,7 +34,7 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
 
     @Override
     public InterpreterValue visit(LiteralNode literal) {
-        return literal.getValue();
+        return InterpreterValues.value(literal.getValue());
     }
 
     @Override
@@ -51,10 +52,10 @@ public class Evaluator implements ExpressionNodeVisitor<InterpreterValue> {
     @Override
     public InterpreterValue visit(TernaryConditionalNode ternaryConditional) {
         val condition = eval(ternaryConditional.getCondition());
-        if (!(condition instanceof BooleanValue)) {
+        if (!(condition instanceof BooleanInterpreterValue)) {
             throw new ConditionMustBeBoolean(condition);
         }
-        val branch = ((BooleanValue)condition).getValue()
+        val branch = ((BooleanInterpreterValue)condition).getValue()
             ? ternaryConditional.getIfTrue()
             : ternaryConditional.getIfFalse();
         return eval(branch);

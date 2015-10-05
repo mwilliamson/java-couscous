@@ -14,8 +14,10 @@ import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
-import org.zwobble.couscous.interpreter.values.IntegerValue;
-import org.zwobble.couscous.interpreter.values.StringValue;
+import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
+import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
+import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -27,6 +29,7 @@ import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
+import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
 import lombok.val;
@@ -37,23 +40,23 @@ public class EvaluatorTests {
         val arg = formalArg(var(42, "x", StringValue.REF));
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
-            new StackFrameBuilder().declare(arg, new StringValue("[initial value]")).build());
+            new StackFrameBuilder().declare(arg, value("[initial value]")).build());
         val result = eval(environment, assign(arg, literal("[updated value]")));
-        assertEquals(new StringValue("[updated value]"), result);
+        assertEquals(new StringInterpreterValue("[updated value]"), result);
     }
     
     @Test
     public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
         val result = eval(emptyEnvironment(),
             new TernaryConditionalNode(literal(true), literal("T"), literal("F")));
-        assertEquals(new StringValue("T"), result);
+        assertEquals(new StringInterpreterValue("T"), result);
     }
     
     @Test
     public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
         val result = eval(emptyEnvironment(),
             new TernaryConditionalNode(literal(false), literal("T"), literal("F")));
-        assertEquals(new StringValue("F"), result);
+        assertEquals(new StringInterpreterValue("F"), result);
     }
     
     @Test
@@ -61,21 +64,21 @@ public class EvaluatorTests {
         val exception = assertThrows(ConditionMustBeBoolean.class,
             () -> eval(emptyEnvironment(),
                 new TernaryConditionalNode(literal(1), literal("T"), literal("F"))));
-        assertEquals(new ConditionMustBeBoolean(new IntegerValue(1)), exception);
+        assertEquals(new ConditionMustBeBoolean(new IntegerInterpreterValue(1)), exception);
     }
     
     @Test
     public void canCallMethodWithNoArgumentsOnBuiltin() {
         val result = eval(emptyEnvironment(),
             methodCall(literal("hello"), "length"));
-        assertEquals(new IntegerValue(5), result);
+        assertEquals(new IntegerInterpreterValue(5), result);
     }
     
     @Test
     public void canCallMethodWithArgumentsOnBuiltin() {
         val result = eval(emptyEnvironment(),
             methodCall(literal("hello"), "substring", literal(1), literal(4)));
-        assertEquals(new StringValue("ell"), result);
+        assertEquals(new StringInterpreterValue("ell"), result);
     }
     
     @Test
@@ -106,7 +109,7 @@ public class EvaluatorTests {
     public void canCallStaticMethod() {
         val result = eval(emptyEnvironment(),
             staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
-        assertEquals(new IntegerValue(42), result);
+        assertEquals(new IntegerInterpreterValue(42), result);
     }
     
     @Test
@@ -123,7 +126,7 @@ public class EvaluatorTests {
             ImmutableMap.of());
         val result = eval(environment,
             staticMethodCall("com.example.Program", "main"));
-        assertEquals(new IntegerValue(42), result);
+        assertEquals(new IntegerInterpreterValue(42), result);
     }
     
     private static Environment emptyEnvironment() {

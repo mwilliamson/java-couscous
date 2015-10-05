@@ -8,18 +8,18 @@ import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.backends.python.PythonCompiler;
-import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.tests.BackendTests;
 import org.zwobble.couscous.tests.MethodRunner;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValues;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
 import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
-import static org.zwobble.couscous.interpreter.values.InterpreterValues.UNIT;
-import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -30,10 +30,10 @@ public class PythonCompilerTests extends BackendTests {
         return new MethodRunner() {
             @Override
             @SneakyThrows
-            public InterpreterValue runMethod(
+            public PrimitiveValue runMethod(
                     ClassNode classNode,
                     String methodName,
-                    List<InterpreterValue> arguments) {
+                    List<PrimitiveValue> arguments) {
                 val compiler = new PythonCompiler();
                 val directoryPath = Files.createTempDirectory(null);
                 try {
@@ -51,7 +51,7 @@ public class PythonCompilerTests extends BackendTests {
                     if (exitCode != 0) {
                         throw new RuntimeException("stderr was: " + stderrOutput);
                     } else if (output.equals("None")) {
-                        return UNIT;
+                        return PrimitiveValues.UNIT;
                     } else if (output.startsWith("'")) {
                         return value(output.substring(1, output.length() - 1));
                     } else {

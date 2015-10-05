@@ -21,8 +21,11 @@ import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
-import org.zwobble.couscous.interpreter.values.IntegerValue;
-import org.zwobble.couscous.interpreter.values.StringValue;
+import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.PrimitiveValueVisitor;
+import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.UnitValue;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
@@ -81,14 +84,27 @@ public class PythonCodeGenerator {
     private static class ExpressionGenerator implements ExpressionNodeVisitor<PythonExpressionNode> {
         @Override
         public PythonExpressionNode visit(LiteralNode literal) {
-            // TODO: use visitor
-            if (literal.getValue() instanceof IntegerValue) {
-                return pythonIntegerLiteral(((IntegerValue)literal.getValue()).getValue());
-            } else if (literal.getValue() instanceof StringValue) {
-                    return pythonStringLiteral(((StringValue)literal.getValue()).getValue());
-            } else {
-                throw new UnsupportedOperationException();
-            }
+            return literal.getValue().accept(new PrimitiveValueVisitor<PythonExpressionNode>() {
+                @Override
+                public PythonExpressionNode visit(IntegerValue value) {
+                    return pythonIntegerLiteral(value.getValue());
+                }
+
+                @Override
+                public PythonExpressionNode visit(StringValue value) {
+                    return pythonStringLiteral(value.getValue());
+                }
+
+                @Override
+                public PythonExpressionNode visit(BooleanValue value) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public PythonExpressionNode visit(UnitValue unitValue) {
+                    throw new UnsupportedOperationException();
+                }
+            });
         }
 
         @Override

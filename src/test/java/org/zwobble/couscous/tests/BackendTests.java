@@ -4,14 +4,14 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.interpreter.values.StringValue;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValues;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
-import static org.zwobble.couscous.interpreter.values.UnitValue.UNIT;
+import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
 
@@ -21,7 +21,7 @@ public abstract class BackendTests {
         val method = staticMethod("hello");
         val result = runMethod(method);
         
-        assertEquals(UNIT, result);
+        assertEquals(PrimitiveValues.UNIT, result);
     }
     
     @Test
@@ -30,10 +30,10 @@ public abstract class BackendTests {
             .statement(new ReturnNode(literal("hello, world!")));
         val result = runMethod(method);
         
-        assertEquals(new StringValue("hello, world!"), result);
+        assertEquals(value("hello, world!"), result);
     }
 
-    protected InterpreterValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, InterpreterValue... arguments) {
+    protected PrimitiveValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, PrimitiveValue... arguments) {
         val method = methodBuilder.build();
         val className = "com.example.Program";
         val classNode = ClassNode.builder(className)
