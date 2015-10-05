@@ -1,8 +1,10 @@
 package org.zwobble.couscous.backends.python;
 
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
+import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
+import org.zwobble.couscous.backends.python.ast.PythonCallNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
@@ -69,6 +71,28 @@ public class PythonSerializer implements PythonNodeVisitor {
         writer.writeKeyword("else");
         writer.writeSpace();
         writeParenthesised(conditional.getFalseValue());
+    }
+
+    @Override
+    public void visit(PythonAttributeAccessNode attributeAccess) {
+        writeParenthesised(attributeAccess.getLeft());
+        writer.writeSymbol(".");
+        writer.writeIdentifier(attributeAccess.getAttributeName());
+    }
+
+    @Override
+    public void visit(PythonCallNode call) {
+        writeParenthesised(call.getCallee());
+        writer.writeSymbol("(");
+        if (!call.getArguments().isEmpty()) {
+            write(call.getArguments().get(0));
+            for (val argumentName : skip(call.getArguments(), 1)) {
+                writer.writeSymbol(",");
+                writer.writeSpace();
+                write(argumentName);
+            }
+        }
+        writer.writeSymbol(")");
     }
 
     @Override

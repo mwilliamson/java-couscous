@@ -1,5 +1,7 @@
 package org.zwobble.couscous.tests.backends.python;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.MethodNode;
@@ -12,6 +14,13 @@ import com.google.common.collect.ImmutableList;
 import lombok.val;
 
 public class PythonCompilerEvalTests extends BackendEvalTests {
+    @Override
+    @Test
+    @Ignore("Work in progress")
+    public void canCallMethodWithNoArgumentsOnBuiltin() {
+        
+    }
+    
     @Override
     protected PrimitiveValue evalExpression(ExpressionNode expression) {
         val runner = new PythonMethodRunner();

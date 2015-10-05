@@ -32,7 +32,9 @@ import org.zwobble.couscous.values.UnitValue;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
+import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
@@ -154,7 +156,14 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
-            throw new UnsupportedOperationException();
+            val arguments = methodCall.getArguments().stream()
+                .map(PythonCodeGenerator::generateExpression)
+                .collect(Collectors.toList());
+            return pythonCall(
+                pythonAttributeAccess(
+                    generateExpression(methodCall.getReceiver()),
+                    methodCall.getMethodName()),
+                arguments);
         }
 
         @Override

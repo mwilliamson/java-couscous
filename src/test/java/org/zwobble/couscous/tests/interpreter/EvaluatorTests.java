@@ -57,13 +57,6 @@ public class EvaluatorTests extends BackendEvalTests {
     }
     
     @Test
-    public void canCallMethodWithNoArgumentsOnBuiltin() {
-        val result = eval(emptyEnvironment(),
-            methodCall(literal("hello"), "length"));
-        assertEquals(new IntegerInterpreterValue(5), result);
-    }
-    
-    @Test
     public void canCallMethodWithArgumentsOnBuiltin() {
         val result = eval(emptyEnvironment(),
             methodCall(literal("hello"), "substring", literal(1), literal(4)));

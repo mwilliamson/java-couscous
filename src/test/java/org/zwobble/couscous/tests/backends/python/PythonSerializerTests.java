@@ -8,7 +8,9 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
+import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
@@ -45,12 +47,29 @@ public class PythonSerializerTests {
     }
     
     @Test
-    public void conditionalExpressionIsSerializedUsingParens() {
+    public void conditionalExpressionIsSerializedUsingParenthesisedSubExpression() {
         assertEquals("(1) if (True) else (2)", serialize(
             pythonConditionalExpression(
                 pythonBooleanLiteral(true),
                 pythonIntegerLiteral(1),
                 pythonIntegerLiteral(2))));
+    }
+    
+    @Test
+    public void attributeAccessIsSerializedUsingParenthesisedSubExpression() {
+        assertEquals("(x).y", serialize(
+            pythonAttributeAccess(
+                pythonVariableReference("x"),
+                "y")));
+    }
+    
+    @Test
+    public void callIsSerializedUsingParenthesisedSubExpression() {
+        assertEquals("(f)(x, y)", serialize(
+            pythonCall(
+                pythonVariableReference("f"),
+                asList(pythonVariableReference("x"),
+                    pythonVariableReference("y")))));
     }
     
     @Test
