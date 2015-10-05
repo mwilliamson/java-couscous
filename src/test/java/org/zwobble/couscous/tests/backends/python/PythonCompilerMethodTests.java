@@ -10,7 +10,7 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonCompiler;
 import org.zwobble.couscous.backends.python.PythonSerializer;
-import org.zwobble.couscous.tests.BackendTests;
+import org.zwobble.couscous.tests.BackendMethodTests;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
@@ -27,7 +27,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 import lombok.SneakyThrows;
 import lombok.val;
 
-public class PythonCompilerTests extends BackendTests {
+public class PythonCompilerMethodTests extends BackendMethodTests {
     @Override
     protected MethodRunner buildMethodRunner() {
         return new MethodRunner() {

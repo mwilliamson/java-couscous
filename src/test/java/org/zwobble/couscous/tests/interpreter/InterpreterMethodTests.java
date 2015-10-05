@@ -17,7 +17,7 @@ import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
-import org.zwobble.couscous.tests.BackendTests;
+import org.zwobble.couscous.tests.BackendMethodTests;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -37,7 +37,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
 
-public class InterpreterTests extends BackendTests {
+public class InterpreterMethodTests extends BackendMethodTests {
     @Test
     public void errorIfWrongNumberOfArgumentsArePassed() {
         val method = staticMethod("hello");

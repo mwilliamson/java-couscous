@@ -23,7 +23,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
 
-public abstract class BackendTests {
+public abstract class BackendMethodTests {
     @Test
     public void methodWithNoStatementsReturnsUnit() {
         val method = staticMethod("hello");
