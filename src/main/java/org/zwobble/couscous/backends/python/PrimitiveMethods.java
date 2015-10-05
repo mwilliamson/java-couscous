@@ -31,7 +31,7 @@ public class PrimitiveMethods {
                         "__getitem__"),
                     asList(pythonCall(
                         pythonVariableReference("slice"),
-                    arguments))))
+                        arguments))))
             
             .build();
     
