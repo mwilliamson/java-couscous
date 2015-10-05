@@ -1,5 +1,8 @@
 package org.zwobble.couscous.backends.python;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
@@ -18,6 +21,7 @@ import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
+import org.zwobble.couscous.util.Action;
 
 import static com.google.common.collect.Iterables.skip;
 
@@ -85,14 +89,10 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonCallNode call) {
         writeParenthesised(call.getCallee());
         writer.writeSymbol("(");
-        if (!call.getArguments().isEmpty()) {
-            write(call.getArguments().get(0));
-            for (val argumentName : skip(call.getArguments(), 1)) {
-                writer.writeSymbol(",");
-                writer.writeSpace();
-                write(argumentName);
-            }
-        }
+        writeWithSeparator(call.getArguments(), this::write, () -> {
+            writer.writeSymbol(",");
+            writer.writeSpace();
+        });
         writer.writeSymbol(")");
     }
 
@@ -100,14 +100,9 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonGetSliceNode getSlice) {
         writeParenthesised(getSlice.getReceiver());
         writer.writeSymbol("[");
-        // TODO: remove this duplication
-        if (!getSlice.getArguments().isEmpty()) {
-            write(getSlice.getArguments().get(0));
-            for (val argumentName : skip(getSlice.getArguments(), 1)) {
-                writer.writeSymbol(":");
-                write(argumentName);
-            }
-        }
+        writeWithSeparator(getSlice.getArguments(), this::write, () -> {
+            writer.writeSymbol(":");
+        });
         writer.writeSymbol("]");
     }
 
@@ -172,16 +167,25 @@ public class PythonSerializer implements PythonNodeVisitor {
     }
 
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {
-        if (!functionDefinition.getArgumentNames().isEmpty()) {
-            writer.writeIdentifier(functionDefinition.getArgumentNames().get(0));
-            for (val argumentName : skip(functionDefinition.getArgumentNames(), 1)) {
+        writeWithSeparator(
+            functionDefinition.getArgumentNames(),
+            writer::writeIdentifier,
+            () -> {
                 writer.writeSymbol(",");
                 writer.writeSpace();
-                writer.writeIdentifier(argumentName);
+            });
+    }
+
+    private <T> void writeWithSeparator(List<T> values, Consumer<T> writeValue, Action separator) {
+        if (!values.isEmpty()) {
+            writeValue.accept(values.get(0));
+            for (val value : skip(values, 1)) {
+                separator.run();
+                writeValue.accept(value);
             }
         }
     }
-
+    
     @Override
     public void visit(PythonModuleNode module) {
         for (val statement : module.getStatements()) {

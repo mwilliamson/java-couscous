@@ -1,5 +1,7 @@
 package org.zwobble.couscous.backends.python;
 
+import org.zwobble.couscous.util.Action;
+
 import com.google.common.base.Strings;
 
 public class PythonWriter {
@@ -61,9 +63,5 @@ public class PythonWriter {
         if (builder.charAt(builder.length() - 1) != '\n') {
             builder.append("\n");   
         }
-    }
-    
-    interface Action {
-        void run();
     }
 }
