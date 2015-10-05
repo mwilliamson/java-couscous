@@ -62,19 +62,6 @@ public class InterpreterTests extends BackendTests {
     }
     
     @Test
-    public void canDeclareVariableAndThenAssignValues() {
-        val localVariableDeclaration = localVariableDeclaration(
-            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
-        val method = staticMethod("hello")
-            .statement(localVariableDeclaration)
-            .statement(new ExpressionStatementNode(new AssignmentNode(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
-            .statement(new ReturnNode(reference(localVariableDeclaration)));
-        val result = runMethod(method);
-        
-        assertEquals(value("[updated value]"), result);
-    }
-    
-    @Test
     public void errorIfTryingToAssignToVariableNotInScope() {
         val localVariableDeclaration = localVariableDeclaration(
             42, "x", StringValue.REF, literal(""));
