@@ -110,7 +110,6 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
 
     @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
-        // TODO: handle unbound fields
         val left = eval(fieldAccess.getLeft());
         return left.getField(fieldAccess.getFieldName());
     }
