@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
@@ -49,6 +50,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
+import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
@@ -60,9 +62,7 @@ import lombok.val;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
-        val imports = findImports(classNode).stream()
-            .map(PythonImportNode::pythonImport)
-            .iterator();
+        val imports = generateImports(classNode).iterator();
         
         val pythonBody = classNode.getMethods()
             .stream()
@@ -76,7 +76,13 @@ public class PythonCodeGenerator {
             singletonIterator(pythonClass))));
     }
     
-    private static Set<String> findImports(ClassNode classNode) {
+    private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
+        val classes = findReferencedClasses(classNode);
+        return classes.stream()
+            .map(name -> pythonImport(name));
+    }
+    
+    private static Set<String> findReferencedClasses(ClassNode classNode) {
         val imports = ImmutableSet.<String>builder();
         NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults() {
             @Override
