@@ -180,6 +180,11 @@ public class PythonCodeGenerator {
         return expression.accept(EXPRESSION_GENERATOR);
     }
     
+    private static List<PythonExpressionNode> generateExpressions(Iterable<ExpressionNode> expressions) {
+        return ImmutableList.copyOf(
+            Iterables.transform(expressions, PythonCodeGenerator::generateExpression));
+    }
+    
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
     
     private static class ExpressionGenerator implements ExpressionNodeMapper<PythonExpressionNode> {
@@ -209,7 +214,7 @@ public class PythonCodeGenerator {
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
             val receiver = generateExpression(methodCall.getReceiver());
-            val arguments = generateArguments(methodCall);
+            val arguments = generateExpressions(methodCall.getArguments());
             if (isPrimitive(methodCall.getReceiver())) {
                 val primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(
                     methodCall.getReceiver().getType(),
@@ -230,10 +235,8 @@ public class PythonCodeGenerator {
             val methodReference = pythonAttributeAccess(
                 classReference,
                 staticMethodCall.getMethodName());
-            
-            val arguments = staticMethodCall.getArguments().stream()
-                .map(PythonCodeGenerator::generateExpression)
-                .collect(Collectors.toList());
+
+            val arguments = generateExpressions(staticMethodCall.getArguments());
                 
             return pythonCall(methodReference, arguments);
         }
@@ -242,18 +245,9 @@ public class PythonCodeGenerator {
         public PythonExpressionNode visit(ConstructorCallNode call) {
             val className = call.getType();
             val classReference = pythonVariableReference(className.getSimpleName());
-
-            val arguments = call.getArguments().stream()
-                .map(PythonCodeGenerator::generateExpression)
-                .collect(Collectors.toList());
+            val arguments = generateExpressions(call.getArguments());
                 
             return pythonCall(classReference, arguments);
-        }
-
-        private List<PythonExpressionNode> generateArguments(MethodCallNode methodCall) {
-            return methodCall.getArguments().stream()
-                .map(PythonCodeGenerator::generateExpression)
-                .collect(Collectors.toList());
         }
     }
     
