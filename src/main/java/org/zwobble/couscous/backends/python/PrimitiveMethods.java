@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.TypeReference;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -29,16 +29,16 @@ public class PrimitiveMethods {
             
             .build();
     
-    private static final Map<TypeReference, Map<String, PrimitiveMethodGenerator>> METHODS = 
-        ImmutableMap.<TypeReference, Map<String, PrimitiveMethodGenerator>>builder()
+    private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS = 
+        ImmutableMap.<TypeName, Map<String, PrimitiveMethodGenerator>>builder()
             .put(StringValue.REF, STRING_METHODS)
             .build();
     
-    public static boolean isPrimitive(TypeReference type) {
+    public static boolean isPrimitive(TypeName type) {
         return METHODS.containsKey(type);
     }
     
-    public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(TypeReference type, String methodName) {
+    public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(TypeName type, String methodName) {
         return Optional.ofNullable(METHODS.get(type))
             .flatMap(methodsForType -> Optional.ofNullable(methodsForType.get(methodName)));
     }

@@ -1,7 +1,9 @@
 package org.zwobble.couscous.values;
 
+import org.zwobble.couscous.ast.TypeName;
+
 public class UnitValue implements PrimitiveValue {
-    public static final TypeReference REF = TypeReference.typeRef("org.zwobble.couscous.runtime.Unit");
+    public static final TypeName REF = TypeName.of("org.zwobble.couscous.runtime.Unit");
     
     static final UnitValue UNIT = new UnitValue();
     
@@ -14,7 +16,7 @@ public class UnitValue implements PrimitiveValue {
     }
 
     @Override
-    public TypeReference getType() {
+    public TypeName getType() {
         return REF;
     }
 }

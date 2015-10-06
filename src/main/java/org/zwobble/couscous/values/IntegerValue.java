@@ -1,12 +1,12 @@
 package org.zwobble.couscous.values;
 
-import static org.zwobble.couscous.values.TypeReference.typeRef;
+import org.zwobble.couscous.ast.TypeName;
 
 import lombok.Value;
 
 @Value
 public class IntegerValue implements PrimitiveValue {
-    public static final TypeReference REF = typeRef("java.lang.Integer");
+    public static final TypeName REF = TypeName.of("java.lang.Integer");
     
     int value;
 
@@ -16,7 +16,7 @@ public class IntegerValue implements PrimitiveValue {
     }
 
     @Override
-    public TypeReference getType() {
+    public TypeName getType() {
         return REF;
     }
 }

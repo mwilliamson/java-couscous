@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ClassName;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -83,8 +83,8 @@ public class PythonCodeGenerator {
             .map(name -> pythonImport(name));
     }
     
-    private static Set<ClassName> findReferencedClasses(ClassNode classNode) {
-        val imports = ImmutableSet.<ClassName>builder();
+    private static Set<TypeName> findReferencedClasses(ClassNode classNode) {
+        val imports = ImmutableSet.<TypeName>builder();
         NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults() {
             @Override
             public void visit(StaticMethodCallNode staticMethodCall) {

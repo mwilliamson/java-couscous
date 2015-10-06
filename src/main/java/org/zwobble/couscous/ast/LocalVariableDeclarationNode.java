@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
-import org.zwobble.couscous.values.TypeReference;
 
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
@@ -12,7 +11,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     public static LocalVariableDeclarationNode localVariableDeclaration(
             int id,
             String name,
-            TypeReference type,
+            TypeName type,
             ExpressionNode initialValue) {
         return localVariableDeclaration(var(id, name, type), initialValue);
     }

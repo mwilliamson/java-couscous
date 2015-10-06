@@ -2,8 +2,8 @@ package org.zwobble.couscous.interpreter.values;
 
 import java.util.List;
 
-import org.zwobble.couscous.values.TypeReference;
+import org.zwobble.couscous.ast.TypeName;
 
 public interface Callable {
-    List<TypeReference> getArgumentTypes();
+    List<TypeName> getArgumentTypes();
 }

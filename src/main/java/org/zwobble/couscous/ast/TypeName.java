@@ -6,9 +6,9 @@ import lombok.Value;
 
 @Value
 @AllArgsConstructor(access=AccessLevel.PRIVATE)
-public class ClassName {
-    public static ClassName of(String qualifiedName) {
-        return new ClassName(
+public class TypeName {
+    public static TypeName of(String qualifiedName) {
+        return new TypeName(
             qualifiedName,
             qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1));
     }

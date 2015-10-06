@@ -5,7 +5,6 @@ import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.TypeReference;
 
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
@@ -30,7 +29,7 @@ public class LiteralNode implements ExpressionNode {
     }
     
     PrimitiveValue value;
-    TypeReference type;
+    TypeName type;
 
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {

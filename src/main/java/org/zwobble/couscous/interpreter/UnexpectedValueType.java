@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter;
 
-import org.zwobble.couscous.values.TypeReference;
+import org.zwobble.couscous.ast.TypeName;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -10,6 +10,6 @@ import lombok.Value;
 public class UnexpectedValueType extends InterpreterException {
     private static final long serialVersionUID = 1L;
 
-    TypeReference expected;
-    TypeReference actual;
+    TypeName expected;
+    TypeName actual;
 }

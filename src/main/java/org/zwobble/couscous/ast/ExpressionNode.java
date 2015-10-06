@@ -2,10 +2,9 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
-import org.zwobble.couscous.values.TypeReference;
 
 public interface ExpressionNode extends Node {
-    TypeReference getType();
+    TypeName getType();
     <T> T accept(ExpressionNodeMapper<T> visitor);
     
     @Override

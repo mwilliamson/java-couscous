@@ -3,7 +3,6 @@ package org.zwobble.couscous.ast;
 import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.TypeReference;
 
 import static java.util.Arrays.asList;
 
@@ -16,10 +15,10 @@ public class StaticMethodCallNode implements ExpressionNode {
     }
     
     public static StaticMethodCallNode staticMethodCall(String className, String methodName, List<ExpressionNode> arguments) {
-        return staticMethodCall(ClassName.of(className), methodName, arguments);
+        return staticMethodCall(TypeName.of(className), methodName, arguments);
     }
     
-    ClassName className;
+    TypeName className;
     String methodName;
     List<ExpressionNode> arguments;
     
@@ -29,7 +28,7 @@ public class StaticMethodCallNode implements ExpressionNode {
     }
 
     @Override
-    public TypeReference getType() {
+    public TypeName getType() {
         throw new UnsupportedOperationException();
     }
 }

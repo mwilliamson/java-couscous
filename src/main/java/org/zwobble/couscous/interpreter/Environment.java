@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.zwobble.couscous.Project;
-import org.zwobble.couscous.ast.ClassName;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.values.TypeReference;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -47,7 +46,7 @@ public class Environment {
         put(variable.getDeclaration().getId(), value);
     }
 
-    public ConcreteType<?> findClass(ClassName className) {
+    public ConcreteType<?> findClass(TypeName className) {
         // TODO: handle missing classes
         return project.findClass(className);
     }
@@ -64,7 +63,7 @@ public class Environment {
 
     private void checkVariableType(int variableId, InterpreterValue value) {
         val variableType = stackFrame.get(variableId).getType();
-        val valueType = value.getType().getReference();
+        val valueType = value.getType().getName();
         if (!variableType.equals(valueType)) {
             throw new UnexpectedValueType(variableType, valueType);
         }
@@ -74,7 +73,7 @@ public class Environment {
     @Getter
     @Setter
     private static class VariableEntry {
-        private final TypeReference type;
+        private final TypeName type;
         private Optional<InterpreterValue> value;
     }
 }

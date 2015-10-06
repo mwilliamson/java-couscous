@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.zwobble.couscous.ast.ClassName;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.ClassNode;
 
 import static java.util.Arrays.asList;
@@ -26,14 +26,14 @@ public class PythonCompiler {
         for (val classNode : classes) {
             compileClass(classNode);
         }
-        writeClass(ClassName.of("java.lang.Integer"),
+        writeClass(TypeName.of("java.lang.Integer"),
             "class Integer(object):\n" +
             "    def parseInt(value):\n" +
             "        return int(value)"
         );
     }
 
-    private Path pathForClass(ClassName className) {
+    private Path pathForClass(TypeName className) {
         return root.resolve(className.getQualifiedName().replace(".", File.separator) + ".py");
     }
 
@@ -42,7 +42,7 @@ public class PythonCompiler {
     }
 
     @SneakyThrows
-    private void writeClass(ClassName name, String contents) {
+    private void writeClass(TypeName name, String contents) {
         val path = pathForClass(name);
         Files.createDirectories(path.getParent());
         Files.write(path, asList(contents));

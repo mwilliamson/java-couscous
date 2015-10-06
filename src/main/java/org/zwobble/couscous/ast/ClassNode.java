@@ -30,11 +30,11 @@ public class ClassNode implements Node {
         }
         
         public ClassNode build() {
-            return new ClassNode(ClassName.of(name), methods.build());
+            return new ClassNode(TypeName.of(name), methods.build());
         }
     }
     
-    ClassName name;
+    TypeName name;
     @Singular
     List<MethodNode> methods;
     

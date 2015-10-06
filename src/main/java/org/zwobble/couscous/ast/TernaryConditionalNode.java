@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.TypeReference;
 
 import lombok.Value;
 
@@ -17,7 +16,7 @@ public class TernaryConditionalNode implements ExpressionNode {
     }
 
     @Override
-    public TypeReference getType() {
+    public TypeName getType() {
         return ifTrue.getType();
     }
 }

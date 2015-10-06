@@ -5,20 +5,18 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.zwobble.couscous.ast.ClassName;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
-import org.zwobble.couscous.values.TypeReference;
 
 import com.google.common.collect.ImmutableMap;
 
 import static java.util.stream.Collectors.toMap;
-import static org.zwobble.couscous.values.TypeReference.typeRef;
 
 import lombok.val;
 
@@ -28,15 +26,15 @@ public class ConcreteType<T> {
             ImmutableMap.builder();
         private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods =
             ImmutableMap.builder();
-        private final ClassName name;
+        private final TypeName name;
         
-        public Builder(ClassName name) {
+        public Builder(TypeName name) {
             this.name = name;
         }
         
         public Builder<T> method(
                 String name,
-                List<TypeReference> argumentsTypes,
+                List<TypeName> argumentsTypes,
                 BiFunction<T, Arguments, InterpreterValue> method) {
             methods.put(name, new MethodValue<T>(argumentsTypes, method));
             return this;
@@ -44,7 +42,7 @@ public class ConcreteType<T> {
         
         public Builder<T> staticMethod(
                 String name,
-                List<TypeReference> argumentsTypes,
+                List<TypeName> argumentsTypes,
                 BiFunction<Environment, Arguments, InterpreterValue> method) {
             staticMethods.put(name, new StaticMethodValue(argumentsTypes, method));
             return this;
@@ -62,7 +60,7 @@ public class ConcreteType<T> {
             .collect(toMap(
                 method -> method.getName(),
                 method -> {
-                    List<TypeReference> argumentTypes = method.getArguments()
+                    List<TypeName> argumentTypes = method.getArguments()
                         .stream()
                         .map(arg -> arg.getType())
                         .collect(Collectors.toList());
@@ -76,12 +74,12 @@ public class ConcreteType<T> {
             staticMethods);
     }
 
-    private ClassName name;
+    private TypeName name;
     private Map<String, MethodValue<T>> methods;
     private Map<String, StaticMethodValue> staticMethods;
 
     public ConcreteType(
-            ClassName name,
+            TypeName name,
             Map<String, MethodValue<T>> methods,
             Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
@@ -89,16 +87,16 @@ public class ConcreteType<T> {
         this.staticMethods = staticMethods;
     }
     
-    public ClassName getName() {
+    public TypeName getName() {
         return name;
     }
 
-    public static <T> ConcreteType.Builder<T> builder(TypeReference reference) {
-        return builder(reference.getName());
+    public static <T> ConcreteType.Builder<T> builder(TypeName reference) {
+        return new Builder<>(reference);
     }
 
     public static <T> ConcreteType.Builder<T> builder(String name) {
-        return new Builder<>(ClassName.of(name));
+        return builder(TypeName.of(name));
     }
 
     @SuppressWarnings("unchecked")
@@ -124,17 +122,13 @@ public class ConcreteType<T> {
         for (int index = 0; index < arguments.size(); index++) {
             val formalArgumentType = method.getArgumentTypes().get(index);
             val actualArgumentType = arguments.get(index).getType();
-            if (!formalArgumentType.equals(actualArgumentType.getReference())) {
-                throw new UnexpectedValueType(formalArgumentType, actualArgumentType.getReference());
+            if (!formalArgumentType.equals(actualArgumentType.getName())) {
+                throw new UnexpectedValueType(formalArgumentType, actualArgumentType.getName());
             }
         }
         return method;
     }
     
-    public TypeReference getReference() {
-        return typeRef(name.getQualifiedName());
-    }
-
     @Override
     public String toString() {
         return "ConcreteType<" + name + ">";

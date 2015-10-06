@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.Project;
-import org.zwobble.couscous.ast.ClassName;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
@@ -23,7 +23,7 @@ public class Interpreter {
         this.project = project;
     }
     
-    public InterpreterValue run(ClassName className, String methodName, List<InterpreterValue> arguments) {
+    public InterpreterValue run(TypeName className, String methodName, List<InterpreterValue> arguments) {
         val argumentExpressions = arguments
             .stream()
             .<ExpressionNode>map(argument -> literal(argument.toPrimitiveValue().get()))
