@@ -43,8 +43,8 @@ public class PythonMethodRunner implements MethodRunner {
                 .map(PythonSerializer::serialize)
                 .iterator());
             
-            val program = "from " + classNode.getName() + " import " + classNode.getLocalName() +
-                ";print(repr(" + classNode.getLocalName() + "." + methodName + "(" + argumentsString + ")))";
+            val program = "from " + classNode.getName().getQualifiedName() + " import " + classNode.getSimpleName() +
+                ";print(repr(" + classNode.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
             
             val process = new ProcessBuilder("python3.4", "-c", program)
                 .directory(directoryPath.toFile())

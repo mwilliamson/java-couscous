@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.zwobble.couscous.Project;
+import org.zwobble.couscous.ast.ClassName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
@@ -46,7 +47,7 @@ public class Environment {
         put(variable.getDeclaration().getId(), value);
     }
 
-    public ConcreteType<?> findClass(String className) {
+    public ConcreteType<?> findClass(ClassName className) {
         // TODO: handle missing classes
         return project.findClass(className);
     }

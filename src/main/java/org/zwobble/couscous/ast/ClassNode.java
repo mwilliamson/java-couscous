@@ -30,17 +30,16 @@ public class ClassNode implements Node {
         }
         
         public ClassNode build() {
-            return new ClassNode(name, methods.build());
+            return new ClassNode(ClassName.of(name), methods.build());
         }
     }
     
-    String name;
+    ClassName name;
     @Singular
     List<MethodNode> methods;
     
-    public String getLocalName() {
-        // TODO Stronger notion of class names? Should look up the terminology
-        return name.substring(name.lastIndexOf(".") + 1);
+    public String getSimpleName() {
+        return name.getSimpleName();
     }
 
     @Override

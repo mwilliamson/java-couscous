@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import org.zwobble.couscous.ast.ClassName;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
@@ -27,9 +28,9 @@ public class ConcreteType<T> {
             ImmutableMap.builder();
         private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods =
             ImmutableMap.builder();
-        private final String name;
+        private final ClassName name;
         
-        public Builder(String name) {
+        public Builder(ClassName name) {
             this.name = name;
         }
         
@@ -75,12 +76,12 @@ public class ConcreteType<T> {
             staticMethods);
     }
 
-    private String name;
+    private ClassName name;
     private Map<String, MethodValue<T>> methods;
     private Map<String, StaticMethodValue> staticMethods;
 
     public ConcreteType(
-            String name,
+            ClassName name,
             Map<String, MethodValue<T>> methods,
             Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
@@ -88,16 +89,16 @@ public class ConcreteType<T> {
         this.staticMethods = staticMethods;
     }
     
-    public String getName() {
+    public ClassName getName() {
         return name;
     }
 
     public static <T> ConcreteType.Builder<T> builder(TypeReference reference) {
-        return new Builder<>(reference.getName());
+        return builder(reference.getName());
     }
 
     public static <T> ConcreteType.Builder<T> builder(String name) {
-        return new Builder<>(name);
+        return new Builder<>(ClassName.of(name));
     }
 
     @SuppressWarnings("unchecked")
@@ -131,7 +132,7 @@ public class ConcreteType<T> {
     }
     
     public TypeReference getReference() {
-        return typeRef(name);
+        return typeRef(name.getQualifiedName());
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.zwobble.couscous;
 
 import java.util.Map;
 
+import org.zwobble.couscous.ast.ClassName;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 
 import com.google.common.collect.ImmutableMap;
@@ -12,7 +13,7 @@ public class MapBackedProject implements Project {
     }
     
     public static class Builder {
-        private final ImmutableMap.Builder<String, ConcreteType<?>> classes;
+        private final ImmutableMap.Builder<ClassName, ConcreteType<?>> classes;
         
         private Builder() {
             classes = ImmutableMap.builder();
@@ -28,14 +29,14 @@ public class MapBackedProject implements Project {
         }
     }
     
-    private Map<String, ConcreteType<?>> classes;
+    private Map<ClassName, ConcreteType<?>> classes;
 
-    public MapBackedProject(Map<String, ConcreteType<?>> classes) {
+    public MapBackedProject(Map<ClassName, ConcreteType<?>> classes) {
         this.classes = classes;
     }
     
     @Override
-    public ConcreteType<?> findClass(String name) {
+    public ConcreteType<?> findClass(ClassName name) {
         return classes.get(name);
     }
 }

@@ -9,17 +9,17 @@ import static java.util.Arrays.asList;
 
 import lombok.Value;
 
-@Value
+@Value(staticConstructor="staticMethodCall")
 public class StaticMethodCallNode implements ExpressionNode {
     public static StaticMethodCallNode staticMethodCall(String className, String methodName, ExpressionNode... arguments) {
-        return new StaticMethodCallNode(className, methodName, asList(arguments));
+        return staticMethodCall(className, methodName, asList(arguments));
     }
     
     public static StaticMethodCallNode staticMethodCall(String className, String methodName, List<ExpressionNode> arguments) {
-        return new StaticMethodCallNode(className, methodName, arguments);
+        return staticMethodCall(ClassName.of(className), methodName, arguments);
     }
     
-    String className;
+    ClassName className;
     String methodName;
     List<ExpressionNode> arguments;
     

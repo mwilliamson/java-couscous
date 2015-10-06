@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.AssignmentNode;
+import org.zwobble.couscous.ast.ClassName;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -69,7 +70,7 @@ public class PythonCodeGenerator {
             .map(PythonCodeGenerator::generateFunction)
             .collect(Collectors.toList());
         
-        val pythonClass = pythonClass(classNode.getLocalName(), pythonBody);
+        val pythonClass = pythonClass(classNode.getSimpleName(), pythonBody);
         
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             imports,
@@ -82,8 +83,8 @@ public class PythonCodeGenerator {
             .map(name -> pythonImport(name));
     }
     
-    private static Set<String> findReferencedClasses(ClassNode classNode) {
-        val imports = ImmutableSet.<String>builder();
+    private static Set<ClassName> findReferencedClasses(ClassNode classNode) {
+        val imports = ImmutableSet.<ClassName>builder();
         NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults() {
             @Override
             public void visit(StaticMethodCallNode staticMethodCall) {
@@ -209,7 +210,7 @@ public class PythonCodeGenerator {
         @Override
         public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
             val className = staticMethodCall.getClassName();
-            val moduleParts = asList(className.split(Pattern.quote(".")));
+            val moduleParts = asList(className.getQualifiedName().split(Pattern.quote(".")));
             
             val module = foldLeft(
                 moduleParts,
@@ -218,7 +219,7 @@ public class PythonCodeGenerator {
             
             val classReference = pythonAttributeAccess(
                 module,
-                className.substring(className.lastIndexOf(".") + 1));
+                className.getSimpleName());
 
             val methodReference = pythonAttributeAccess(
                 classReference,
