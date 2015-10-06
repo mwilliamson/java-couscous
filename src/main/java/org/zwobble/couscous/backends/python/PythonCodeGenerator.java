@@ -80,7 +80,7 @@ public class PythonCodeGenerator {
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
         val classes = findReferencedClasses(classNode);
         return classes.stream()
-            .map(name -> pythonImport(name));
+            .map(name -> pythonImport(name.getQualifiedName()));
     }
     
     private static Set<TypeName> findReferencedClasses(ClassNode classNode) {

@@ -166,7 +166,7 @@ public class PythonSerializer implements PythonNodeVisitor {
         writer.writeStatement(() -> {
             writer.writeKeyword("import");
             writer.writeSpace();
-            writer.writeIdentifier(importNode.getName().getQualifiedName());
+            writer.writeIdentifier(importNode.getName());
         });
     }
 
