@@ -77,15 +77,22 @@ public class ClassNodeBuilder {
     
     public class MethodBuilder {
         private final String methodName;
+        private final ImmutableList.Builder<FormalArgumentNode> arguments;
         private final ImmutableList.Builder<StatementNode> statements;
 
         public MethodBuilder(String name) {
             this.methodName = name;
+            this.arguments = ImmutableList.builder();
             this.statements = ImmutableList.builder();
         }
         
         public ThisReferenceNode thisReference() {
             return ThisReferenceNode.thisReference(name);
+        }
+        
+        public MethodBuilder argument(FormalArgumentNode argument) {
+            arguments.add(argument);
+            return this;
         }
         
         public MethodBuilder statement(StatementNode statement) {
@@ -96,6 +103,7 @@ public class ClassNodeBuilder {
         public MethodNode build() {
             return MethodNode.builder()
                 .name(methodName)
+                .arguments(arguments.build())
                 .body(statements.build())
                 .build();
         }

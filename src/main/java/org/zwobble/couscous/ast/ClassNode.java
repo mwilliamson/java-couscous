@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 
-import lombok.Singular;
 import lombok.Value;
 
 @Value
@@ -15,7 +14,6 @@ public class ClassNode implements Node {
     
     TypeName name;
     ConstructorNode constructor;
-    @Singular
     List<MethodNode> methods;
     
     public String getSimpleName() {

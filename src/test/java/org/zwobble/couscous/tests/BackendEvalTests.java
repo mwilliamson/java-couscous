@@ -92,9 +92,8 @@ public abstract class BackendEvalTests {
     @Test
     public void canCallInstanceMethodWithNoArgumentsOnUserDefinedClass() {
         val classNode = ClassNode.builder("com.example.Example")
-            .method(MethodNode.method("main")
-                .statement(new ReturnNode(literal(42)))
-                .build())
+            .method("main", method -> method
+                .statement(new ReturnNode(literal(42))))
             .build();
         val result = evalExpression(asList(classNode),
             methodCall(constructorCall(classNode.getName(), asList()), "main", asList(), IntegerValue.REF));
@@ -105,10 +104,9 @@ public abstract class BackendEvalTests {
     public void canCallInstanceMethodWithArgumentsOnUserDefinedClass() {
         val argument = formalArg(var(42, "x", IntegerValue.REF));
         val classNode = ClassNode.builder("com.example.Example")
-            .method(MethodNode.method("main")
+            .method("main", method -> method
                 .argument(argument)
-                .statement(new ReturnNode(reference(argument)))
-                .build())
+                .statement(new ReturnNode(reference(argument))))
             .build();
         
         val result = evalExpression(
