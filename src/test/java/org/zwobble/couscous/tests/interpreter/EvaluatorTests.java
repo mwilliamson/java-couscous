@@ -11,6 +11,7 @@ import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
@@ -27,7 +28,9 @@ import com.google.common.collect.ImmutableMap;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -110,6 +113,25 @@ public class EvaluatorTests extends BackendEvalTests {
                     asList(literal("")))));
         
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+    }
+    
+    @Test
+    public void cannotSetValueOfUndeclaredField() {
+        val classNode = ClassNode.builder("com.example.Example")
+            .constructor(constructor -> constructor
+                .statement(assignStatement(
+                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    literal(42))))
+            .build();
+        
+        val exception = assertThrows(NoSuchField.class,
+            () -> evalExpression(
+                asList(classNode),
+                constructorCall(
+                    classNode.getName(),
+                    asList())));
+        
+        assertEquals(new NoSuchField("value"), exception);
     }
     
     private static Environment emptyEnvironment() {

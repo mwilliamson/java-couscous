@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.interpreter.PositionalArguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
+import org.zwobble.couscous.interpreter.PositionalArguments;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.util.Casts;
@@ -62,6 +62,7 @@ public class ConcreteType {
         public ConcreteType build() {
             return new ConcreteType(
                 name,
+                ImmutableMap.of(),
                 new MethodValue(
                     ImmutableList.of(),
                     (environment, arguments) -> InterpreterValues.UNIT),
@@ -71,6 +72,11 @@ public class ConcreteType {
     }
     
     public static ConcreteType fromNode(ClassNode classNode) {
+        val fields = classNode.getFields().stream()
+            .collect(toMap(
+                field -> field.getName(),
+                field -> new FieldValue(field.getName(), field.getType())));
+        
         val constructor = new MethodValue(
             getArgumentTypes(classNode.getConstructor().getArguments()),
             (environment, arguments) -> Executor.callMethod(
@@ -113,6 +119,7 @@ public class ConcreteType {
                 }));
         return new ConcreteType(
             classNode.getName(),
+            fields,
             constructor,
             methods,
             staticMethods);
@@ -126,16 +133,19 @@ public class ConcreteType {
     }
 
     private final TypeName name;
+    private final Map<String, FieldValue> fields;
     private final MethodValue constructor;
     private final Map<String, MethodValue> methods;
     private final Map<String, StaticMethodValue> staticMethods;
 
     public ConcreteType(
             TypeName name,
+            Map<String, FieldValue> fields,
             MethodValue constructor,
             Map<String, MethodValue> methods,
             Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
+        this.fields = fields;
         this.constructor = constructor;
         this.methods = methods;
         this.staticMethods = staticMethods;
@@ -143,6 +153,10 @@ public class ConcreteType {
     
     public TypeName getName() {
         return name;
+    }
+    
+    public Optional<FieldValue> getField(String fieldName) {
+        return Optional.ofNullable(fields.get(fieldName));
     }
 
     public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {

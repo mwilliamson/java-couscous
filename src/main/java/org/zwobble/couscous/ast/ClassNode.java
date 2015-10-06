@@ -13,6 +13,7 @@ public class ClassNode implements Node {
     }
     
     TypeName name;
+    List<FieldDeclarationNode> fields;
     ConstructorNode constructor;
     List<MethodNode> methods;
     

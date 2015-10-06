@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 public class ObjectInterpreterValue implements InterpreterValue {
@@ -35,6 +36,7 @@ public class ObjectInterpreterValue implements InterpreterValue {
     }
 
     public void setField(String fieldName, InterpreterValue value) {
-        fields.put(fieldName, value);
+        type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
+        fields.put(fieldName, value);   
     }
 }
