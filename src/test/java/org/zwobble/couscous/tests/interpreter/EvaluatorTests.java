@@ -1,12 +1,12 @@
 package org.zwobble.couscous.tests.interpreter;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.zwobble.couscous.JavaProject;
 import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
@@ -14,7 +14,6 @@ import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
@@ -30,7 +29,6 @@ import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
@@ -93,23 +91,6 @@ public class EvaluatorTests extends BackendEvalTests {
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }
     
-    @Test
-    public void canCallStaticMethodFromAnotherStaticMethod() {
-        val classNode = ClassNode.builder("com.example.Program")
-            .method(MethodNode.staticMethod("main")
-                .statement(new ReturnNode(staticMethodCall("java.lang.Integer", "parseInt", literal("42"))))
-                .build())
-            .build();
-        val environment = new Environment(
-            JavaProject.builder()
-                .addClass(ConcreteType.fromNode(classNode))
-                .build(),
-            ImmutableMap.of());
-        val result = eval(environment,
-            staticMethodCall("com.example.Program", "main"));
-        assertEquals(new IntegerInterpreterValue(42), result);
-    }
-    
     private static Environment emptyEnvironment() {
         return new Environment(
             JavaProject.builder().build(),
@@ -117,7 +98,13 @@ public class EvaluatorTests extends BackendEvalTests {
     }
 
     @Override
-    protected PrimitiveValue evalExpression(ExpressionNode expression) {
-        return eval(emptyEnvironment(), expression).toPrimitiveValue().get();
+    protected PrimitiveValue evalExpression(
+            List<ClassNode> classes,
+            ExpressionNode expression) {
+        
+        val environment = new Environment(
+            JavaProject.of(classes),
+            ImmutableMap.of());
+        return eval(environment, expression).toPrimitiveValue().get();
     }
 }

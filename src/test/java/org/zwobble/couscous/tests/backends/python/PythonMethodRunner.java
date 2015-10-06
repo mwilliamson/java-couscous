@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonCompiler;
 import org.zwobble.couscous.backends.python.PythonSerializer;
@@ -19,7 +20,6 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 
 import static java.lang.Integer.parseInt;
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
@@ -30,21 +30,22 @@ public class PythonMethodRunner implements MethodRunner {
     @Override
     @SneakyThrows
     public PrimitiveValue runMethod(
-            ClassNode classNode,
+            List<ClassNode> classNodes,
+            TypeName className,
             String methodName,
             List<PrimitiveValue> arguments) {
         val directoryPath = Files.createTempDirectory(null);
         val compiler = new PythonCompiler(directoryPath);
         try {
-            compiler.compile(asList(classNode));
+            compiler.compile(classNodes);
             
             val argumentsString = Joiner.on(", ").join(arguments.stream()
                 .map(PythonCodeGenerator::generateCode)
                 .map(PythonSerializer::serialize)
                 .iterator());
             
-            val program = "from " + classNode.getName().getQualifiedName() + " import " + classNode.getSimpleName() +
-                ";print(repr(" + classNode.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
+            val program = "from " + className.getQualifiedName() + " import " + className.getSimpleName() +
+                ";print(repr(" + className.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
             
             val process = new ProcessBuilder("python3.4", "-c", program)
                 .directory(directoryPath.toFile())

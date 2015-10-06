@@ -96,7 +96,11 @@ public abstract class BackendMethodTests {
             .build();
         
         val runner = buildMethodRunner();
-        return runner.runMethod(classNode, method.getName(), asList(arguments));
+        return runner.runMethod(
+            asList(classNode),
+            classNode.getName(),
+            method.getName(),
+            asList(arguments));
     }
     
     protected abstract MethodRunner buildMethodRunner();

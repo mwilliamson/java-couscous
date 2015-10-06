@@ -7,6 +7,8 @@ import org.zwobble.couscous.interpreter.values.ConcreteType;
 
 import com.google.common.collect.ImmutableMap;
 
+import lombok.val;
+
 public class MapBackedProject implements Project {
     public static Builder builder() {
         return new Builder();
@@ -21,6 +23,13 @@ public class MapBackedProject implements Project {
         
         public Builder addClass(ConcreteType<?> clazz) {
             classes.put(clazz.getName(), clazz);
+            return this;
+        }
+        
+        public Builder addClasses(Iterable<ConcreteType<?>> classes) {
+            for (val clazz : classes) {
+                addClass(clazz);
+            }
             return this;
         }
         

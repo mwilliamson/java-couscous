@@ -4,26 +4,24 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.zwobble.couscous.MapBackedProject;
+import org.zwobble.couscous.JavaProject;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.ReturnNode;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendMethodTests;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
-
-import com.google.common.collect.ImmutableMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -106,16 +104,18 @@ public class InterpreterMethodTests extends BackendMethodTests {
         return new MethodRunner() {
             @Override
             public PrimitiveValue runMethod(
-                    ClassNode classNode,
+                    List<ClassNode> classNodes,
+                    TypeName className,
                     String methodName,
                     List<PrimitiveValue> arguments) {
-                val interpreter = new Interpreter(new MapBackedProject(ImmutableMap.of(
-                    classNode.getName(), ConcreteType.fromNode(classNode))));
+                
+                val project = JavaProject.of(classNodes);
+                val interpreter = new Interpreter(project);
                 val argumentValues = arguments.stream()
                     .map(InterpreterValues::value)
                     .collect(Collectors.toList());
                 
-                return interpreter.run(classNode.getName(), methodName, argumentValues)
+                return interpreter.run(className, methodName, argumentValues)
                     .toPrimitiveValue().get();
             }
         };
