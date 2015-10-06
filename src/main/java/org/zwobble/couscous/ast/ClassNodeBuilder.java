@@ -23,9 +23,16 @@ public class ClassNodeBuilder {
         return this;
     }
     
-    public ClassNodeBuilder constructor(Function<ConstructorBuilder, ConstructorBuilder> build) {
-        this.constructor = Optional.of(build.apply(new ConstructorBuilder()).build());
+    public ClassNodeBuilder constructor(Function<MethodBuilder<ConstructorNode>, MethodBuilder<ConstructorNode>> build) {
+        this.constructor = Optional.of(build.apply(constructorBuilder()).build());
         return this;
+    }
+
+    private MethodBuilder<ConstructorNode> constructorBuilder() {
+        return new MethodBuilder<ConstructorNode>(builder ->
+            ConstructorNode.constructor(
+                builder.arguments.build(),
+                builder.statements.build()));
     }
     
     public ClassNodeBuilder method(MethodNode method) {
@@ -33,23 +40,33 @@ public class ClassNodeBuilder {
         return this;
     }
     
-    public ClassNodeBuilder method(String name, Function<MethodBuilder, MethodBuilder> build) {
-        this.methods.add(build.apply(new MethodBuilder(name)).build());
+    public ClassNodeBuilder method(String name, Function<MethodBuilder<MethodNode>, MethodBuilder<MethodNode>> build) {
+        this.methods.add(build.apply(methodBuilder(name)).build());
         return this;
+    }
+
+    private MethodBuilder<MethodNode> methodBuilder(String name) {
+        return new MethodBuilder<MethodNode>(builder -> MethodNode.builder()
+            .name(name)
+            .arguments(builder.arguments.build())
+            .body(builder.statements.build())
+            .build());
     }
     
     public ClassNode build() {
         return new ClassNode(
             name,
-            constructor.orElse(new ConstructorBuilder().build()),
+            constructor.orElse(constructorBuilder().build()),
             methods.build());
     }
     
-    public class ConstructorBuilder {
+    public class MethodBuilder<T> {
+        private final Function<MethodBuilder<?>, T> build;
         private final ImmutableList.Builder<FormalArgumentNode> arguments;
         private final ImmutableList.Builder<StatementNode> statements;
-        
-        public ConstructorBuilder() {
+
+        public MethodBuilder(Function<MethodBuilder<?>, T> build) {
+            this.build = build;
             this.arguments = ImmutableList.builder();
             this.statements = ImmutableList.builder();
         }
@@ -58,54 +75,18 @@ public class ClassNodeBuilder {
             return ThisReferenceNode.thisReference(name);
         }
         
-        public ConstructorBuilder argument(FormalArgumentNode argument) {
+        public MethodBuilder<T> argument(FormalArgumentNode argument) {
             arguments.add(argument);
             return this;
         }
         
-        public ConstructorBuilder statement(StatementNode statement) {
-            statements.add(statement);
-            return this;
-        }
-        
-        public ConstructorNode build() {
-            return ConstructorNode.constructor(
-                arguments.build(),
-                statements.build());
-        }
-    }
-    
-    public class MethodBuilder {
-        private final String methodName;
-        private final ImmutableList.Builder<FormalArgumentNode> arguments;
-        private final ImmutableList.Builder<StatementNode> statements;
-
-        public MethodBuilder(String name) {
-            this.methodName = name;
-            this.arguments = ImmutableList.builder();
-            this.statements = ImmutableList.builder();
-        }
-        
-        public ThisReferenceNode thisReference() {
-            return ThisReferenceNode.thisReference(name);
-        }
-        
-        public MethodBuilder argument(FormalArgumentNode argument) {
-            arguments.add(argument);
-            return this;
-        }
-        
-        public MethodBuilder statement(StatementNode statement) {
+        public MethodBuilder<T> statement(StatementNode statement) {
             statements.add(statement);
             return this;
         }
 
-        public MethodNode build() {
-            return MethodNode.builder()
-                .name(methodName)
-                .arguments(arguments.build())
-                .body(statements.build())
-                .build();
+        public T build() {
+            return this.build.apply(this);
         }
     }
 }
