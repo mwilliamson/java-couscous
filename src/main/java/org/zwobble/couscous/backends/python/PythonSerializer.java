@@ -164,9 +164,21 @@ public class PythonSerializer implements PythonNodeVisitor {
     @Override
     public void visit(PythonImportNode importNode) {
         writer.writeStatement(() -> {
+            writer.writeKeyword("from");
+            writer.writeSpace();
+            writer.writeIdentifier(importNode.getModuleName());
+            writer.writeSpace();
             writer.writeKeyword("import");
             writer.writeSpace();
-            writer.writeIdentifier(importNode.getName());
+            writeWithSeparator(
+                importNode.getAliases(),
+                alias -> {
+                    writer.writeIdentifier(alias.getName());
+                },
+                () -> {
+                    writer.writeSymbol(",");
+                    writer.writeSpace();
+                });
         });
     }
 

@@ -8,11 +8,12 @@ import lombok.Value;
 @AllArgsConstructor(access=AccessLevel.PRIVATE)
 public class TypeName {
     public static TypeName of(String qualifiedName) {
-        return new TypeName(
-            qualifiedName,
-            qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1));
+        return new TypeName(qualifiedName);
     }
     
     String qualifiedName;
-    String simpleName;
+    
+    public String getSimpleName() {
+        return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
+    }
 }

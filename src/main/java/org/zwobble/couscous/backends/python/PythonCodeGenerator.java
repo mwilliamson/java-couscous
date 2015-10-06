@@ -2,12 +2,10 @@ package org.zwobble.couscous.backends.python;
 
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -19,6 +17,7 @@ import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
@@ -51,13 +50,13 @@ import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
+import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pythonImportAlias;
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
-import static org.zwobble.couscous.util.ExtraLists.foldLeft;
 
 import lombok.val;
 
@@ -80,7 +79,9 @@ public class PythonCodeGenerator {
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
         val classes = findReferencedClasses(classNode);
         return classes.stream()
-            .map(name -> pythonImport(name.getQualifiedName()));
+            .map(name -> pythonImport(
+                name.getQualifiedName(),
+                asList(pythonImportAlias(name.getSimpleName()))));
     }
     
     private static Set<TypeName> findReferencedClasses(ClassNode classNode) {
@@ -210,16 +211,7 @@ public class PythonCodeGenerator {
         @Override
         public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
             val className = staticMethodCall.getClassName();
-            val moduleParts = asList(className.getQualifiedName().split(Pattern.quote(".")));
-            
-            val module = foldLeft(
-                moduleParts,
-                part -> (PythonExpressionNode)pythonVariableReference(part),
-                (parent, part) -> pythonAttributeAccess(parent, part));
-            
-            val classReference = pythonAttributeAccess(
-                module,
-                className.getSimpleName());
+            val classReference = pythonVariableReference(className.getSimpleName());
 
             val methodReference = pythonAttributeAccess(
                 classReference,

@@ -13,6 +13,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
+import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pythonImportAlias;
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
@@ -147,8 +148,18 @@ public class PythonSerializerTests {
     
     @Test
     public void importIsSerializedUsingImportKeyword() {
-        val output = serialize(pythonImport("com.example.Program"));
-        assertEquals("import com.example.Program\n", output);
+        val output = serialize(pythonImport(
+            "com.example",
+            asList(pythonImportAlias("Program"))));
+        assertEquals("from com.example import Program\n", output);
+    }
+    
+    @Test
+    public void importAliasesAreSeparatedByCommas() {
+        val output = serialize(pythonImport(
+            "com.example",
+            asList(pythonImportAlias("Program"), pythonImportAlias("Runner"))));
+        assertEquals("from com.example import Program, Runner\n", output);
     }
     
     @Test
