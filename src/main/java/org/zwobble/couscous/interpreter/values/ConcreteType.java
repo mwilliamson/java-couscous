@@ -30,7 +30,7 @@ public class ConcreteType {
             ImmutableMap.builder();
         private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods =
             ImmutableMap.builder();
-        private Class<T> interpreterValueType;
+        private final Class<T> interpreterValueType;
         private final TypeName name;
         
         public Builder(Class<T> interpreterValueType, TypeName name) {
