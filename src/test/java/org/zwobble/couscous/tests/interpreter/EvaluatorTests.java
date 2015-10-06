@@ -134,6 +134,26 @@ public class EvaluatorTests extends BackendEvalTests {
         assertEquals(new NoSuchField("value"), exception);
     }
     
+    @Test
+    public void cannotSetValueOfFieldWithWrongType() {
+        val classNode = ClassNode.builder("com.example.Example")
+            .field("value", IntegerValue.REF)
+            .constructor(constructor -> constructor
+                .statement(assignStatement(
+                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    literal(""))))
+            .build();
+        
+        val exception = assertThrows(UnexpectedValueType.class,
+            () -> evalExpression(
+                asList(classNode),
+                constructorCall(
+                    classNode.getName(),
+                    asList())));
+        
+        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+    }
+    
     private static Environment emptyEnvironment() {
         return new Environment(
             JavaProject.builder().build(),
