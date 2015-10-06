@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.zwobble.couscous.interpreter.InterpreterTypes;
 import org.zwobble.couscous.interpreter.NoSuchField;
-import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import lombok.val;
@@ -40,9 +40,7 @@ public class ObjectInterpreterValue implements InterpreterValue {
 
     public void setField(String fieldName, InterpreterValue value) {
         val field = type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
-        if (!field.getType().equals(value.getType().getName())) {
-            throw new UnexpectedValueType(field.getType(), value.getType().getName());
-        }
+        InterpreterTypes.checkIsInstance(field.getType(), value);
         fields.put(fieldName, value);   
     }
 }

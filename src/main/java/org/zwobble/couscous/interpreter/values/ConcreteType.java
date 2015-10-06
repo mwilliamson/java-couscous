@@ -11,9 +11,9 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
+import org.zwobble.couscous.interpreter.InterpreterTypes;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.PositionalArguments;
-import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.util.Casts;
 
@@ -208,10 +208,7 @@ public class ConcreteType {
         
         for (int index = 0; index < arguments.size(); index++) {
             val formalArgumentType = method.getArgumentTypes().get(index);
-            val actualArgumentType = arguments.get(index).getType();
-            if (!formalArgumentType.equals(actualArgumentType.getName())) {
-                throw new UnexpectedValueType(formalArgumentType, actualArgumentType.getName());
-            }
+            InterpreterTypes.checkIsInstance(formalArgumentType, arguments.get(index));
         }
     }
     

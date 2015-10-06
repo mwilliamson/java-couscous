@@ -72,10 +72,7 @@ public class Environment {
 
     private void checkVariableType(int variableId, InterpreterValue value) {
         val variableType = stackFrame.get(variableId).getType();
-        val valueType = value.getType().getName();
-        if (!variableType.equals(valueType)) {
-            throw new UnexpectedValueType(variableType, valueType);
-        }
+        InterpreterTypes.checkIsInstance(variableType, value);
     }
     
     @AllArgsConstructor(staticName="of")
