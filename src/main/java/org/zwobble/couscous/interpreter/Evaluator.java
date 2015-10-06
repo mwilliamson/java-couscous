@@ -18,8 +18,6 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
-import org.zwobble.couscous.interpreter.values.ObjectInterpreterValue;
-import org.zwobble.couscous.util.Casts;
 
 import lombok.val;
 
@@ -59,10 +57,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         assignment.getTarget().accept(new AssignableExpressionNodeVisitor() {
             @Override
             public void visit(FieldAccessNode fieldAccess) {
-                val maybeLeft = Casts.tryCast(
-                    ObjectInterpreterValue.class,
-                    eval(fieldAccess.getLeft()));
-                val left = maybeLeft.orElseThrow(() -> new UnsupportedOperationException());
+                val left = eval(fieldAccess.getLeft());
                 left.setField(fieldAccess.getFieldName(), value);
             }
             

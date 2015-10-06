@@ -8,4 +8,5 @@ public interface InterpreterValue {
     ConcreteType getType();
     Optional<PrimitiveValue> toPrimitiveValue();
     InterpreterValue getField(String fieldName);
+    void setField(String fieldName, InterpreterValue value);
 }

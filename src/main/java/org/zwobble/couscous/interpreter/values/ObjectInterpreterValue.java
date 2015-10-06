@@ -40,6 +40,7 @@ public class ObjectInterpreterValue implements InterpreterValue {
         }
     }
 
+    @Override
     public void setField(String fieldName, InterpreterValue value) {
         val field = type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
         InterpreterTypes.checkIsInstance(field.getType(), value);

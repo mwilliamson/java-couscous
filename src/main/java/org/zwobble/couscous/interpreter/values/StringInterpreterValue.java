@@ -45,4 +45,9 @@ public class StringInterpreterValue implements InterpreterValue {
     public InterpreterValue getField(String fieldName) {
         throw new NoSuchField(fieldName);
     }
+
+    @Override
+    public void setField(String fieldName, InterpreterValue value) {
+        throw new NoSuchField(fieldName);
+    }
 }
