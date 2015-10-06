@@ -169,6 +169,7 @@ public class ConcreteType {
             Environment environment,
             List<InterpreterValue> arguments) {
         val object = new ObjectInterpreterValue(this);
+        checkMethodArguments(constructor, arguments);
         constructor.apply(
             environment,
             MethodCallArguments.of(object, new PositionalArguments(arguments)));
@@ -180,6 +181,13 @@ public class ConcreteType {
             throw new NoSuchMethod(methodName);
         }
         val method = methods.get(methodName);
+        checkMethodArguments(method, arguments);
+        return method;
+    }
+
+    private static void checkMethodArguments(
+            final Callable method,
+            List<InterpreterValue> arguments) {
         if (method.getArgumentTypes().size() != arguments.size()) {
             throw new WrongNumberOfArguments(method.getArgumentTypes().size(), arguments.size());
         }
@@ -191,7 +199,6 @@ public class ConcreteType {
                 throw new UnexpectedValueType(formalArgumentType, actualArgumentType.getName());
             }
         }
-        return method;
     }
     
     @Override

@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -90,6 +91,24 @@ public class EvaluatorTests extends BackendEvalTests {
                     "substring",
                     asList(literal(0), literal("")),
                     StringValue.REF)));
+        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+    }
+    
+    @Test
+    public void errorIfConstructorArgumentIsWrongType() {
+        val argument = formalArg(var(42, "x", IntegerValue.REF));
+        val classNode = ClassNode.builder("com.example.Example")
+            .constructor(constructor -> constructor
+                .argument(argument))
+            .build();
+        
+        val exception = assertThrows(UnexpectedValueType.class,
+            () -> evalExpression(
+                asList(classNode),
+                constructorCall(
+                    classNode.getName(),
+                    asList(literal("")))));
+        
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }
     
