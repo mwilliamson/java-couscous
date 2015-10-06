@@ -16,6 +16,7 @@ import com.google.common.collect.ImmutableList;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
@@ -80,6 +81,18 @@ public abstract class BackendEvalTests {
             .build();
         val result = evalExpression(asList(classNode),
             staticMethodCall("com.example.Example", "main"));
+        assertEquals(value(42), result);
+    }
+    
+    @Test
+    public void canCallInstanceMethodOnUserDefinedClass() {
+        val classNode = ClassNode.builder("com.example.Example")
+            .method(MethodNode.method("main")
+                .statement(new ReturnNode(literal(42)))
+                .build())
+            .build();
+        val result = evalExpression(asList(classNode),
+            methodCall(constructorCall(classNode.getName(), asList()), "main", asList(), IntegerValue.REF));
         assertEquals(value(42), result);
     }
     

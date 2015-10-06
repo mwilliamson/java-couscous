@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
-public class Arguments {
+public class PositionalArguments {
     private List<InterpreterValue> values;
     
-    public Arguments(List<InterpreterValue> values) {
+    public PositionalArguments(List<InterpreterValue> values) {
         this.values = values;
     }
     

@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast.visitors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
@@ -14,4 +15,5 @@ public interface ExpressionNodeMapper<T> {
     T visit(TernaryConditionalNode ternaryConditional);
     T visit(MethodCallNode methodCall);
     T visit(StaticMethodCallNode staticMethodCall);
+    T visit(ConstructorCallNode call);
 }

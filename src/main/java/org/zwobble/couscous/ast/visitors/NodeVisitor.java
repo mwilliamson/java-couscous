@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast.visitors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
@@ -19,6 +20,7 @@ public interface NodeVisitor {
     void visit(TernaryConditionalNode ternaryConditional);
     void visit(MethodCallNode methodCall);
     void visit(StaticMethodCallNode staticMethodCall);
+    void visit(ConstructorCallNode call);
 
     void visit(ReturnNode returnNode);
     void visit(ExpressionStatementNode expressionStatement);

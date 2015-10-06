@@ -19,7 +19,7 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import lombok.val;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
-    public static InterpreterValue callMethod(Environment environment, MethodNode method, Arguments arguments) {
+    public static InterpreterValue callMethod(Environment environment, MethodNode method, PositionalArguments arguments) {
         val innerEnvironment = buildEnvironment(environment, method, arguments);
       
         for (val statement : method.getBody()) {
@@ -34,7 +34,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     private static Environment buildEnvironment(
         final Environment environment,
         final MethodNode method,
-        Arguments arguments) {
+        PositionalArguments arguments) {
         
         val stackFrame = new StackFrameBuilder();
         for (int index = 0; index < method.getArguments().size(); index++) {

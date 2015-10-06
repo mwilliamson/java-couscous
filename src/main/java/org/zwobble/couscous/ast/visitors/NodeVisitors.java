@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast.visitors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
@@ -56,6 +57,14 @@ public class NodeVisitors {
             public void visit(StaticMethodCallNode staticMethodCall) {
                 visitor.visit(staticMethodCall);
                 for (val argument : staticMethodCall.getArguments()) {
+                    argument.accept(this);
+                }
+            }
+
+            @Override
+            public void visit(ConstructorCallNode call) {
+                visitor.visit(call);
+                for (val argument : call.getArguments()) {
                     argument.accept(this);
                 }
             }

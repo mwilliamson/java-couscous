@@ -45,6 +45,12 @@ public interface ExpressionNode extends Node {
                 visitor.visit(staticMethodCall);
                 return null;
             }
+
+            @Override
+            public Void visit(ConstructorCallNode call) {
+                visitor.visit(call);
+                return null;
+            }
         });
     }
 }

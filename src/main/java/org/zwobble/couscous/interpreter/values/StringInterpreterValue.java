@@ -16,13 +16,14 @@ import lombok.val;
 public class StringInterpreterValue implements InterpreterValue {
     public static final ConcreteType TYPE = ConcreteType.builder(StringInterpreterValue.class, StringValue.REF)
         .method("length", asList(),
-            (receiver, arguments) -> new IntegerInterpreterValue(receiver.value.length()))
+            (environment, arguments) ->
+                new IntegerInterpreterValue(arguments.getReceiver().value.length()))
         
         .method("substring", asList(IntegerValue.REF, IntegerValue.REF),
-            (receiver, arguments) -> {
+            (environment, arguments) -> {
                 val startIndex = (IntegerInterpreterValue)arguments.get(0);
                 val endIndex = (IntegerInterpreterValue)arguments.get(1);
-                return new StringInterpreterValue(receiver.value.substring(startIndex.getValue(), endIndex.getValue()));
+                return new StringInterpreterValue(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
             })
         
         .build();

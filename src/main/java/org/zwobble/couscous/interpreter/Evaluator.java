@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -66,14 +67,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         val receiver = eval(methodCall.getReceiver());
         val type = receiver.getType();
         val arguments = evalArguments(methodCall.getArguments());
-        return type.callMethod(receiver, methodCall.getMethodName(), arguments);
-    }
-
-    private List<InterpreterValue> evalArguments(List<ExpressionNode> arguments) {
-        return arguments
-            .stream()
-            .map(argument -> eval(argument))
-            .collect(Collectors.toList());
+        return type.callMethod(environment, receiver, methodCall.getMethodName(), arguments);
     }
 
     @Override
@@ -81,5 +75,19 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         val clazz = environment.findClass(staticMethodCall.getClassName());
         val arguments = evalArguments(staticMethodCall.getArguments());
         return clazz.callStaticMethod(environment, staticMethodCall.getMethodName(), arguments);
+    }
+
+    @Override
+    public InterpreterValue visit(ConstructorCallNode call) {
+        val clazz = environment.findClass(call.getType());
+        val arguments = evalArguments(call.getArguments());
+        return clazz.callConstructor(environment, arguments);
+    }
+
+    private List<InterpreterValue> evalArguments(List<ExpressionNode> arguments) {
+        return arguments
+            .stream()
+            .map(argument -> eval(argument))
+            .collect(Collectors.toList());
     }
 }

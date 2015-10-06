@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
@@ -39,6 +40,7 @@ import org.zwobble.couscous.values.UnitValue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
 import static com.google.common.collect.Iterators.singletonIterator;
@@ -91,6 +93,11 @@ public class PythonCodeGenerator {
             public void visit(StaticMethodCallNode staticMethodCall) {
                 imports.add(staticMethodCall.getClassName());
             }
+            
+            @Override
+            public void visit(ConstructorCallNode call) {
+                imports.add(call.getType());
+            }
         });
         return imports.build();
     }
@@ -120,16 +127,23 @@ public class PythonCodeGenerator {
     }
     
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
-        val argumentNames = method.getArguments().stream()
-            .map(argument -> argument.getName())
-            .collect(Collectors.toList());
-            
+        val explicitArgumentNames = Iterables.transform(
+            method.getArguments(),
+            argument -> argument.getName());
+        
+        val argumentNames = Iterables.concat(
+            method.isStatic() ? asList() : asList("self"),
+            explicitArgumentNames); 
+        
         val pythonBody = method.getBody()
             .stream()
             .map(PythonCodeGenerator::generateStatement)
             .collect(Collectors.toList());
         
-        return pythonFunctionDefinition(method.getName(), argumentNames, new PythonBlock(pythonBody));
+        return pythonFunctionDefinition(
+            method.getName(),
+            ImmutableList.copyOf(argumentNames),
+            new PythonBlock(pythonBody));
     }
     
     private static PythonStatementNode generateStatement(StatementNode statement) {
@@ -219,9 +233,21 @@ public class PythonCodeGenerator {
             
             val arguments = staticMethodCall.getArguments().stream()
                 .map(PythonCodeGenerator::generateExpression)
-                .collect(Collectors.toList());;
+                .collect(Collectors.toList());
                 
             return pythonCall(methodReference, arguments);
+        }
+
+        @Override
+        public PythonExpressionNode visit(ConstructorCallNode call) {
+            val className = call.getType();
+            val classReference = pythonVariableReference(className.getSimpleName());
+
+            val arguments = call.getArguments().stream()
+                .map(PythonCodeGenerator::generateExpression)
+                .collect(Collectors.toList());
+                
+            return pythonCall(classReference, arguments);
         }
 
         private List<PythonExpressionNode> generateArguments(MethodCallNode methodCall) {

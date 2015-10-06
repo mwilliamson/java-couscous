@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast.visitors;
 
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
@@ -35,6 +36,10 @@ public interface NodeVisitorWithEmptyDefaults extends NodeVisitor {
     
     @Override
     default void visit(StaticMethodCallNode staticMethodCall) {
+    }
+    
+    @Override
+    default void visit(ConstructorCallNode call) {
     }
 
     @Override

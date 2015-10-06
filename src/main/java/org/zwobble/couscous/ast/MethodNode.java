@@ -15,6 +15,10 @@ public class MethodNode implements Node {
         return builder().isStatic(true).name(name);
     }
     
+    public static MethodNodeBuilder method(String name) {
+        return builder().isStatic(false).name(name);
+    }
+    
     boolean isStatic;
     String name;
     @Singular
