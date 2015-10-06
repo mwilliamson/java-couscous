@@ -34,7 +34,7 @@ public class ObjectInterpreterValue implements InterpreterValue {
         if (fields.containsKey(fieldName)) {
             return fields.get(fieldName);            
         } else {
-            throw new UnsupportedOperationException();
+            throw new NoSuchField(fieldName);
         }
     }
 

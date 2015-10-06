@@ -116,6 +116,24 @@ public class EvaluatorTests extends BackendEvalTests {
     }
     
     @Test
+    public void cannotGetValueOfUndeclaredField() {
+        val classNode = ClassNode.builder("com.example.Example")
+            .build();
+        
+        val exception = assertThrows(NoSuchField.class,
+            () -> evalExpression(
+                asList(classNode),
+                fieldAccess(
+                    constructorCall(
+                        classNode.getName(),
+                        asList()),
+                    "value",
+                    IntegerValue.REF)));
+        
+        assertEquals(new NoSuchField("value"), exception);
+    }
+    
+    @Test
     public void cannotSetValueOfUndeclaredField() {
         val classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
