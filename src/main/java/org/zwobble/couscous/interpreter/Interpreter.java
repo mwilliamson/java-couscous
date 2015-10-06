@@ -1,6 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.zwobble.couscous.Project;
@@ -28,7 +29,7 @@ public class Interpreter {
             .stream()
             .<ExpressionNode>map(argument -> literal(argument.toPrimitiveValue().get()))
             .collect(Collectors.toList());
-        return eval(new Environment(project, ImmutableMap.of()),
+        return eval(new Environment(project, Optional.empty(), ImmutableMap.of()),
             staticMethodCall(className, methodName, argumentExpressions));
     }
 }

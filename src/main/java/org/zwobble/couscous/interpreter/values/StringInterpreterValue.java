@@ -2,6 +2,7 @@ package org.zwobble.couscous.interpreter.values;
 
 import java.util.Optional;
 
+import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
@@ -38,5 +39,10 @@ public class StringInterpreterValue implements InterpreterValue {
     @Override
     public Optional<PrimitiveValue> toPrimitiveValue() {
         return Optional.of(PrimitiveValues.value(value));
+    }
+
+    @Override
+    public InterpreterValue getField(String fieldName) {
+        throw new NoSuchField(fieldName);
     }
 }

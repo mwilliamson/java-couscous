@@ -10,7 +10,7 @@ import lombok.Value;
 
 @Builder
 @Value
-public class MethodNode implements Node {
+public class MethodNode implements CallableNode {
     public static MethodNodeBuilder staticMethod(String name) {
         return builder().isStatic(true).name(name);
     }

@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value(staticConstructor="pythonAssignment")
 public class PythonAssignmentNode implements PythonStatementNode {
-    PythonVariableReferenceNode target;
+    PythonExpressionNode target;
     PythonExpressionNode value;
     
     @Override

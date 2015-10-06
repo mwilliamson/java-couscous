@@ -8,11 +8,23 @@ import lombok.Value;
 
 @Value
 public class AssignmentNode implements ExpressionNode {
+    public static StatementNode assignStatement(AssignableExpressionNode target, ExpressionNode value) {
+        return new ExpressionStatementNode(assign(target, value));
+    }
+    
+    public static AssignmentNode assign(AssignableExpressionNode target, ExpressionNode value) {
+        return new AssignmentNode(target, value);
+    }
+    
+    public static StatementNode assignStatement(VariableNode target, ExpressionNode value) {
+        return new ExpressionStatementNode(assign(target, value));
+    }
+    
     public static AssignmentNode assign(VariableNode target, ExpressionNode value) {
         return new AssignmentNode(reference(target), value);
     }
     
-    VariableReferenceNode target;
+    AssignableExpressionNode target;
     ExpressionNode value;
     
     @Override

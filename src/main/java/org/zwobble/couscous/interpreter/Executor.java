@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.zwobble.couscous.ast.CallableNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.VariableNode;
@@ -19,8 +19,13 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import lombok.val;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
-    public static InterpreterValue callMethod(Environment environment, MethodNode method, PositionalArguments arguments) {
-        val innerEnvironment = buildEnvironment(environment, method, arguments);
+    public static InterpreterValue callMethod(
+            Environment environment,
+            CallableNode method,
+            Optional<InterpreterValue> thisValue,
+            PositionalArguments arguments) {
+        
+        val innerEnvironment = buildEnvironment(environment, method, thisValue, arguments);
       
         for (val statement : method.getBody()) {
             val result = exec(innerEnvironment, statement);
@@ -32,9 +37,10 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     }
 
     private static Environment buildEnvironment(
-        final Environment environment,
-        final MethodNode method,
-        PositionalArguments arguments) {
+            final Environment environment,
+            final CallableNode method,
+            Optional<InterpreterValue> thisValue,
+            PositionalArguments arguments) {
         
         val stackFrame = new StackFrameBuilder();
         for (int index = 0; index < method.getArguments().size(); index++) {
@@ -44,7 +50,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         findDeclarations(method.getBody()).forEach(declaration ->
             stackFrame.declare(declaration));
         
-        return environment.withStackFrame(stackFrame.build());
+        return environment.withStackFrame(thisValue, stackFrame.build());
     }
     
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {

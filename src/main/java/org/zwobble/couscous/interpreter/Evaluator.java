@@ -6,15 +6,20 @@ import java.util.stream.Collectors;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
+import org.zwobble.couscous.interpreter.values.ObjectInterpreterValue;
+import org.zwobble.couscous.util.Casts;
 
 import lombok.val;
 
@@ -44,9 +49,28 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     }
 
     @Override
+    public InterpreterValue visit(ThisReferenceNode reference) {
+        return environment.getThis().get();
+    }
+
+    @Override
     public InterpreterValue visit(AssignmentNode assignment) {
         val value = eval(assignment.getValue());
-        environment.put(assignment.getTarget().getReferentId(), value);
+        assignment.getTarget().accept(new AssignableExpressionNodeVisitor() {
+            @Override
+            public void visit(FieldAccessNode fieldAccess) {
+                val maybeLeft = Casts.tryCast(
+                    ObjectInterpreterValue.class,
+                    eval(fieldAccess.getLeft()));
+                val left = maybeLeft.orElseThrow(() -> new UnsupportedOperationException());
+                left.setField(fieldAccess.getFieldName(), value);
+            }
+            
+            @Override
+            public void visit(VariableReferenceNode reference) {
+                environment.put(reference.getReferentId(), value);
+            }
+        });
         return value;
     }
 
@@ -82,6 +106,14 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         val clazz = environment.findClass(call.getType());
         val arguments = evalArguments(call.getArguments());
         return clazz.callConstructor(environment, arguments);
+    }
+
+    @Override
+    public InterpreterValue visit(FieldAccessNode fieldAccess) {
+        // TODO: handle unbound fields
+        // TODO: handle non-existent fields
+        val left = eval(fieldAccess.getLeft());
+        return left.getField(fieldAccess.getFieldName());
     }
 
     private List<InterpreterValue> evalArguments(List<ExpressionNode> arguments) {

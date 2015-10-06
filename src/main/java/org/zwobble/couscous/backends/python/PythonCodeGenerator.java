@@ -8,8 +8,10 @@ import java.util.stream.Stream;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
+import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -18,6 +20,7 @@ import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
@@ -65,19 +68,27 @@ import lombok.val;
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
         val imports = generateImports(classNode).iterator();
+
+        val constructor = generateConstructor(classNode.getConstructor());
         
-        val pythonBody = classNode.getMethods()
-            .stream()
-            .map(PythonCodeGenerator::generateFunction)
-            .collect(Collectors.toList());
+        val pythonMethods = Iterables.transform(
+            classNode.getMethods(),
+            PythonCodeGenerator::generateFunction);
         
-        val pythonClass = pythonClass(classNode.getSimpleName(), pythonBody);
+        
+        val pythonBody = Iterables.concat(
+            asList(constructor),
+            pythonMethods);
+        
+        val pythonClass = pythonClass(
+            classNode.getSimpleName(),
+            ImmutableList.copyOf(pythonBody));
         
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             imports,
             singletonIterator(pythonClass))));
     }
-    
+
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
         val classes = findReferencedClasses(classNode);
         return classes.stream()
@@ -126,6 +137,27 @@ public class PythonCodeGenerator {
         });
     }
     
+    private static PythonFunctionDefinitionNode generateConstructor(
+                ConstructorNode constructor) {
+        val explicitArgumentNames = Iterables.transform(
+            constructor.getArguments(),
+            argument -> argument.getName());
+        
+        val argumentNames = Iterables.concat(
+            asList("self"),
+            explicitArgumentNames);
+        
+        val pythonBody = constructor.getBody()
+            .stream()
+            .map(PythonCodeGenerator::generateStatement)
+            .collect(Collectors.toList());
+        
+        return pythonFunctionDefinition(
+            "__init__",
+            ImmutableList.copyOf(argumentNames),
+            new PythonBlock(pythonBody));
+    }
+    
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
         val explicitArgumentNames = Iterables.transform(
             method.getArguments(),
@@ -161,7 +193,7 @@ public class PythonCodeGenerator {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
                 val assignment = (AssignmentNode) expressionStatement.getExpression();
                 return pythonAssignment(
-                    EXPRESSION_GENERATOR.visit(assignment.getTarget()),
+                    assignment.getTarget().accept(EXPRESSION_GENERATOR),
                     generateExpression(assignment.getValue()));
             } else {
                 throw new UnsupportedOperationException();   
@@ -196,6 +228,11 @@ public class PythonCodeGenerator {
         @Override
         public PythonVariableReferenceNode visit(VariableReferenceNode variableReference) {
             return pythonVariableReference(variableReference.getReferent().getName());
+        }
+
+        @Override
+        public PythonExpressionNode visit(ThisReferenceNode reference) {
+            return pythonVariableReference("self");
         }
 
         @Override
@@ -248,6 +285,13 @@ public class PythonCodeGenerator {
             val arguments = generateExpressions(call.getArguments());
                 
             return pythonCall(classReference, arguments);
+        }
+
+        @Override
+        public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
+            return pythonAttributeAccess(
+                generateExpression(fieldAccess.getLeft()),
+                fieldAccess.getFieldName());
         }
     }
     

@@ -19,15 +19,24 @@ import lombok.val;
 
 public class Environment {
     private final Project project;
+    private final Optional<InterpreterValue> thisValue;
     private final Map<Integer, VariableEntry> stackFrame;
 
-    public Environment(Project project, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
+    public Environment(
+            Project project,
+            Optional<InterpreterValue> thisValue,
+            Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
         this.project = project;
+        this.thisValue = thisValue;
         this.stackFrame = stackFrame.entrySet()
             .stream()
             .collect(toMap(
                 entry -> entry.getKey().getId(),
                 entry -> VariableEntry.of(entry.getKey().getType(), entry.getValue())));
+    }
+    
+    public Optional<InterpreterValue> getThis() {
+        return thisValue;
     }
 
     public InterpreterValue get(int variableId) {
@@ -51,8 +60,8 @@ public class Environment {
         return project.findClass(className);
     }
 
-    public Environment withStackFrame(Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
-        return new Environment(project, stackFrame);
+    public Environment withStackFrame(Optional<InterpreterValue> thisValue, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
+        return new Environment(project, thisValue, stackFrame);
     }
 
     private void checkVariableIsInScope(int variableId) {

@@ -16,7 +16,9 @@ import com.google.common.collect.ImmutableList;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -115,6 +117,32 @@ public abstract class BackendEvalTests {
                 constructorCall(classNode.getName(), asList()),
                 "main",
                 asList(literal(42)),
+                IntegerValue.REF));
+        
+        assertEquals(value(42), result);
+    }
+    
+    @Test
+    public void constructorIsExecutedOnConstruction() {
+        val argument = formalArg(var(42, "x", IntegerValue.REF));
+        val classNode = ClassNode.builder("com.example.Example")
+            .field("value", IntegerValue.REF)
+            .constructor(constructor -> constructor
+                .argument(argument)
+                .statement(assignStatement(
+                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    reference(argument))))
+            .method("main", method -> method
+                .statement(new ReturnNode(
+                    fieldAccess(method.thisReference(), "value", IntegerValue.REF))))
+            .build();
+        
+        val result = evalExpression(
+            asList(classNode),
+            methodCall(
+                constructorCall(classNode.getName(), asList(literal(42))),
+                "main",
+                asList(),
                 IntegerValue.REF));
         
         assertEquals(value(42), result);

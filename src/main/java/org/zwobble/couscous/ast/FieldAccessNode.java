@@ -5,26 +5,15 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
 import lombok.Value;
 
-@Value
-public class VariableReferenceNode implements AssignableExpressionNode {
-    public static VariableReferenceNode reference(VariableNode variable) {
-        return new VariableReferenceNode(variable.getDeclaration());
-    }
+@Value(staticConstructor="fieldAccess")
+public class FieldAccessNode implements AssignableExpressionNode {
+    ExpressionNode left;
+    String fieldName;
+    TypeName type;
     
-    VariableDeclaration referent;
-
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
-    }
-    
-    public int getReferentId() {
-        return referent.getId();
-    }
-
-    @Override
-    public TypeName getType() {
-        return referent.getType();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Test;
 import org.zwobble.couscous.JavaProject;
@@ -42,6 +43,7 @@ public class EvaluatorTests extends BackendEvalTests {
         val arg = formalArg(var(42, "x", StringValue.REF));
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
+            Optional.empty(),
             new StackFrameBuilder().declare(arg, value("[initial value]")).build());
         val result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringInterpreterValue("[updated value]"), result);
@@ -94,6 +96,7 @@ public class EvaluatorTests extends BackendEvalTests {
     private static Environment emptyEnvironment() {
         return new Environment(
             JavaProject.builder().build(),
+            Optional.empty(),
             ImmutableMap.of());
     }
 
@@ -104,6 +107,7 @@ public class EvaluatorTests extends BackendEvalTests {
         
         val environment = new Environment(
             JavaProject.of(classes),
+            Optional.empty(),
             ImmutableMap.of());
         return eval(environment, expression).toPrimitiveValue().get();
     }

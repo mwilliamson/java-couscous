@@ -7,4 +7,5 @@ import org.zwobble.couscous.values.PrimitiveValue;
 public interface InterpreterValue {
     ConcreteType getType();
     Optional<PrimitiveValue> toPrimitiveValue();
+    InterpreterValue getField(String fieldName);
 }

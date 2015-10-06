@@ -23,6 +23,12 @@ public interface ExpressionNode extends Node {
             }
 
             @Override
+            public Void visit(ThisReferenceNode reference) {
+                visitor.visit(reference);
+                return null;
+            }
+
+            @Override
             public Void visit(AssignmentNode assignment) {
                 visitor.visit(assignment);
                 return null;
@@ -49,6 +55,12 @@ public interface ExpressionNode extends Node {
             @Override
             public Void visit(ConstructorCallNode call) {
                 visitor.visit(call);
+                return null;
+            }
+
+            @Override
+            public Void visit(FieldAccessNode fieldAccess) {
+                visitor.visit(fieldAccess);
                 return null;
             }
         });

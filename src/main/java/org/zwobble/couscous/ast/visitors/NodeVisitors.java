@@ -3,7 +3,9 @@ package org.zwobble.couscous.ast.visitors;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
+import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -12,6 +14,7 @@ import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 
 import lombok.val;
@@ -28,12 +31,17 @@ public class NodeVisitors {
             public void visit(VariableReferenceNode variableReference) {
                 visitor.visit(variableReference);
             }
+
+            @Override
+            public void visit(ThisReferenceNode reference) {
+                visitor.visit(reference);
+            }
             
             @Override
             public void visit(AssignmentNode assignment) {
                 visitor.visit(assignment);
                 assignment.getValue().accept(this);
-                visit(assignment.getTarget());
+                assignment.getTarget().accept(this);
             }
             
             @Override
@@ -68,6 +76,11 @@ public class NodeVisitors {
                     argument.accept(this);
                 }
             }
+
+            @Override
+            public void visit(FieldAccessNode fieldAccess) {
+                visitor.visit(fieldAccess);
+            }
             
             @Override
             public void visit(ReturnNode returnNode) {
@@ -90,6 +103,7 @@ public class NodeVisitors {
             @Override
             public void visit(ClassNode classNode) {
                 visitor.visit(classNode);
+                classNode.getConstructor().accept(this);
                 for (val method : classNode.getMethods()) {
                     method.accept(this);
                 }
@@ -98,6 +112,13 @@ public class NodeVisitors {
             @Override
             public void visit(MethodNode methodNode) {
                 for (val statement : methodNode.getBody()) {
+                    statement.accept(this);
+                }
+            }
+
+            @Override
+            public void visit(ConstructorNode constructorNode) {
+                for (val statement : constructorNode.getBody()) {
                     statement.accept(this);
                 }
             }
