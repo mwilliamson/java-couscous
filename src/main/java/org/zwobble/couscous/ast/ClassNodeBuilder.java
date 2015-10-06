@@ -34,19 +34,28 @@ public class ClassNodeBuilder {
                 builder.arguments.build(),
                 builder.statements.build()));
     }
-    
+
     public ClassNodeBuilder method(MethodNode method) {
         this.methods.add(method);
         return this;
     }
     
+    public ClassNodeBuilder staticMethod(String name, Function<MethodBuilder<MethodNode>, MethodBuilder<MethodNode>> build) {
+        return method(name, true, build);
+    }
+    
     public ClassNodeBuilder method(String name, Function<MethodBuilder<MethodNode>, MethodBuilder<MethodNode>> build) {
-        this.methods.add(build.apply(methodBuilder(name)).build());
+        return method(name, false, build);
+    }
+    
+    public ClassNodeBuilder method(String name, boolean isStatic, Function<MethodBuilder<MethodNode>, MethodBuilder<MethodNode>> build) {
+        this.methods.add(build.apply(methodBuilder(name, isStatic)).build());
         return this;
     }
 
-    private MethodBuilder<MethodNode> methodBuilder(String name) {
+    private MethodBuilder<MethodNode> methodBuilder(String name, boolean isStatic) {
         return new MethodBuilder<MethodNode>(builder -> MethodNode.builder()
+            .isStatic(isStatic)
             .name(name)
             .arguments(builder.arguments.build())
             .body(builder.statements.build())

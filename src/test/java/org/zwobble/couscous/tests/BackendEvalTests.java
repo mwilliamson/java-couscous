@@ -5,7 +5,6 @@ import java.util.List;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.values.IntegerValue;
@@ -80,9 +79,8 @@ public abstract class BackendEvalTests {
     @Test
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
         val classNode = ClassNode.builder("com.example.Example")
-            .method(MethodNode.staticMethod("main")
-                .statement(new ReturnNode(staticMethodCall("java.lang.Integer", "parseInt", literal("42"))))
-                .build())
+            .staticMethod("main", method -> method
+                .statement(new ReturnNode(staticMethodCall("java.lang.Integer", "parseInt", literal("42")))))
             .build();
         val result = evalExpression(asList(classNode),
             staticMethodCall("com.example.Example", "main"));
