@@ -15,18 +15,18 @@ public class MapBackedProject implements Project {
     }
     
     public static class Builder {
-        private final ImmutableMap.Builder<TypeName, ConcreteType<?>> classes;
+        private final ImmutableMap.Builder<TypeName, ConcreteType> classes;
         
         private Builder() {
             classes = ImmutableMap.builder();
         }
         
-        public Builder addClass(ConcreteType<?> clazz) {
+        public Builder addClass(ConcreteType clazz) {
             classes.put(clazz.getName(), clazz);
             return this;
         }
         
-        public Builder addClasses(Iterable<ConcreteType<?>> classes) {
+        public Builder addClasses(Iterable<ConcreteType> classes) {
             for (val clazz : classes) {
                 addClass(clazz);
             }
@@ -38,14 +38,14 @@ public class MapBackedProject implements Project {
         }
     }
     
-    private Map<TypeName, ConcreteType<?>> classes;
+    private Map<TypeName, ConcreteType> classes;
 
-    public MapBackedProject(Map<TypeName, ConcreteType<?>> classes) {
+    public MapBackedProject(Map<TypeName, ConcreteType> classes) {
         this.classes = classes;
     }
     
     @Override
-    public ConcreteType<?> findClass(TypeName name) {
+    public ConcreteType findClass(TypeName name) {
         return classes.get(name);
     }
 }

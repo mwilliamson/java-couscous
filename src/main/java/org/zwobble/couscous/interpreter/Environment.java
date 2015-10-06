@@ -46,7 +46,7 @@ public class Environment {
         put(variable.getDeclaration().getId(), value);
     }
 
-    public ConcreteType<?> findClass(TypeName className) {
+    public ConcreteType findClass(TypeName className) {
         // TODO: handle missing classes
         return project.findClass(className);
     }

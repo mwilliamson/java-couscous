@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @ToString
 public class UnitInterpreterValue implements InterpreterValue {
-    private static final ConcreteType<?> TYPE = ConcreteType.<UnitInterpreterValue>builder("Unit")
+    private static final ConcreteType TYPE = ConcreteType.builder(UnitInterpreterValue.class, "Unit")
         .build();
     
     public static final UnitInterpreterValue UNIT = new UnitInterpreterValue(); 
@@ -18,7 +18,7 @@ public class UnitInterpreterValue implements InterpreterValue {
     }
 
     @Override
-    public ConcreteType<?> getType() {
+    public ConcreteType getType() {
         return TYPE;
     }
 

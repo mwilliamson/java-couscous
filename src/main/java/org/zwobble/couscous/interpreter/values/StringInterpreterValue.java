@@ -14,7 +14,7 @@ import lombok.val;
 
 @Value
 public class StringInterpreterValue implements InterpreterValue {
-    public static final ConcreteType<?> TYPE = ConcreteType.<StringInterpreterValue>builder(StringValue.REF)
+    public static final ConcreteType TYPE = ConcreteType.builder(StringInterpreterValue.class, StringValue.REF)
         .method("length", asList(),
             (receiver, arguments) -> new IntegerInterpreterValue(receiver.value.length()))
         
@@ -30,7 +30,7 @@ public class StringInterpreterValue implements InterpreterValue {
     String value;
 
     @Override
-    public ConcreteType<?> getType() {
+    public ConcreteType getType() {
         return TYPE;
     }
 

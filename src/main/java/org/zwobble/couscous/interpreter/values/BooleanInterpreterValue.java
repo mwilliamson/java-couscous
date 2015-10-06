@@ -11,7 +11,7 @@ import lombok.Value;
 
 @Value
 public class BooleanInterpreterValue implements InterpreterValue {
-    private static final ConcreteType<BooleanInterpreterValue> TYPE = ConcreteType.<BooleanInterpreterValue>builder("Boolean")
+    private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "Boolean")
         .build();
     
     @Getter(value = AccessLevel.NONE)
@@ -22,7 +22,7 @@ public class BooleanInterpreterValue implements InterpreterValue {
     }
 
     @Override
-    public ConcreteType<?> getType() {
+    public ConcreteType getType() {
         return TYPE;
     }
 

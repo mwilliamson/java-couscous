@@ -11,12 +11,12 @@ import lombok.Getter;
 import lombok.Value;
 
 @Value
-public class MethodValue<T> implements Callable {
+public class MethodValue implements Callable {
     List<TypeName> argumentTypes;
     @Getter(value=AccessLevel.NONE)
-    BiFunction<T, Arguments, InterpreterValue> apply;
+    BiFunction<InterpreterValue, Arguments, InterpreterValue> apply;
     
-    public InterpreterValue apply(T receiver, Arguments arguments) {
+    public InterpreterValue apply(InterpreterValue receiver, Arguments arguments) {
         return apply.apply(receiver, arguments);
     }
 }

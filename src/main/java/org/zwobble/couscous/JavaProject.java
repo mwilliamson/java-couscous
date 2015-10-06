@@ -17,7 +17,7 @@ public class JavaProject {
     }
 
     public static Project of(List<ClassNode> classNodes) {
-        val concreteTypes = (Iterable)Iterables.transform(classNodes, ConcreteType::fromNode);
+        val concreteTypes = Iterables.transform(classNodes, ConcreteType::fromNode);
         return builder()
                 .addClasses(concreteTypes)
                 .build();

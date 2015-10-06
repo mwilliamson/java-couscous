@@ -5,6 +5,6 @@ import java.util.Optional;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 public interface InterpreterValue {
-    ConcreteType<?> getType();
+    ConcreteType getType();
     Optional<PrimitiveValue> toPrimitiveValue();
 }

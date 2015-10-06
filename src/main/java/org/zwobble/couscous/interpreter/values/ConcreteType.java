@@ -13,6 +13,7 @@ import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.util.Casts;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -20,15 +21,17 @@ import static java.util.stream.Collectors.toMap;
 
 import lombok.val;
 
-public class ConcreteType<T> {
+public class ConcreteType {
     public static class Builder<T> {
-        private final ImmutableMap.Builder<String, MethodValue<T>> methods =
+        private final ImmutableMap.Builder<String, MethodValue> methods =
             ImmutableMap.builder();
         private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods =
             ImmutableMap.builder();
+        private Class<T> interpreterValueType;
         private final TypeName name;
         
-        public Builder(TypeName name) {
+        public Builder(Class<T> interpreterValueType, TypeName name) {
+            this.interpreterValueType = interpreterValueType;
             this.name = name;
         }
         
@@ -36,7 +39,13 @@ public class ConcreteType<T> {
                 String name,
                 List<TypeName> argumentsTypes,
                 BiFunction<T, Arguments, InterpreterValue> method) {
-            methods.put(name, new MethodValue<T>(argumentsTypes, method));
+            methods.put(name, new MethodValue(argumentsTypes, (receiver, arguments) -> {
+                return Casts.tryCast(interpreterValueType, receiver)
+                    .map(typedReceiver -> method.apply(typedReceiver, arguments))
+                    .orElseThrow(() -> {
+                        throw new RuntimeException("receiver is of wrong type");                        
+                    });
+            }));
             return this;
         }
         
@@ -48,12 +57,12 @@ public class ConcreteType<T> {
             return this;
         }
         
-        public ConcreteType<T> build() {
-            return new ConcreteType<T>(name, methods.build(), staticMethods.build());
+        public ConcreteType build() {
+            return new ConcreteType(name, methods.build(), staticMethods.build());
         }
     }
     
-    public static ConcreteType<?> fromNode(ClassNode classNode) {
+    public static ConcreteType fromNode(ClassNode classNode) {
         val staticMethods = classNode.getMethods()
             .stream()
             .filter(method -> method.isStatic())
@@ -68,19 +77,19 @@ public class ConcreteType<T> {
                         return Executor.callMethod(environment, method, arguments);
                     });
                 }));
-        return new ConcreteType<Void>(
+        return new ConcreteType(
             classNode.getName(),
             ImmutableMap.of(),
             staticMethods);
     }
 
     private TypeName name;
-    private Map<String, MethodValue<T>> methods;
+    private Map<String, MethodValue> methods;
     private Map<String, StaticMethodValue> staticMethods;
 
     public ConcreteType(
             TypeName name,
-            Map<String, MethodValue<T>> methods,
+            Map<String, MethodValue> methods,
             Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
         this.methods = methods;
@@ -91,18 +100,17 @@ public class ConcreteType<T> {
         return name;
     }
 
-    public static <T> ConcreteType.Builder<T> builder(TypeName reference) {
-        return new Builder<>(reference);
+    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {
+        return new Builder<>(interpreterValueType, reference);
     }
 
-    public static <T> ConcreteType.Builder<T> builder(String name) {
-        return builder(TypeName.of(name));
+    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, String name) {
+        return builder(interpreterValueType, TypeName.of(name));
     }
 
-    @SuppressWarnings("unchecked")
     public InterpreterValue callMethod(InterpreterValue receiver, String methodName, List<InterpreterValue> arguments) {
         val method = findMethod(methods, methodName, arguments);
-        return method.apply((T)receiver, new Arguments(arguments));
+        return method.apply(receiver, new Arguments(arguments));
     }
 
     public InterpreterValue callStaticMethod(Environment environment, String methodName, List<InterpreterValue> arguments) {
