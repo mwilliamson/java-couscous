@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.zwobble.couscous.interpreter.InterpreterTypes;
 import org.zwobble.couscous.interpreter.NoSuchField;
+import org.zwobble.couscous.interpreter.UnboundField;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import lombok.val;
@@ -31,10 +32,11 @@ public class ObjectInterpreterValue implements InterpreterValue {
 
     @Override
     public InterpreterValue getField(String fieldName) {
+        type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
         if (fields.containsKey(fieldName)) {
             return fields.get(fieldName);            
         } else {
-            throw new NoSuchField(fieldName);
+            throw new UnboundField(fieldName);
         }
     }
 

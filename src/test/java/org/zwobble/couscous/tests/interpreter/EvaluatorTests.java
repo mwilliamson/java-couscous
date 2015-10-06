@@ -14,6 +14,7 @@ import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;
+import org.zwobble.couscous.interpreter.UnboundField;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
@@ -131,6 +132,25 @@ public class EvaluatorTests extends BackendEvalTests {
                     IntegerValue.REF)));
         
         assertEquals(new NoSuchField("value"), exception);
+    }
+    
+    @Test
+    public void cannotGetValueOfUnbounddField() {
+        val classNode = ClassNode.builder("com.example.Example")
+            .field("value", IntegerValue.REF)
+            .build();
+        
+        val exception = assertThrows(UnboundField.class,
+            () -> evalExpression(
+                asList(classNode),
+                fieldAccess(
+                    constructorCall(
+                        classNode.getName(),
+                        asList()),
+                    "value",
+                    IntegerValue.REF)));
+        
+        assertEquals(new UnboundField("value"), exception);
     }
     
     @Test
