@@ -42,9 +42,7 @@ public class ConcreteType {
             methods.put(name, new MethodValue(argumentsTypes, (receiver, arguments) -> {
                 return Casts.tryCast(interpreterValueType, receiver)
                     .map(typedReceiver -> method.apply(typedReceiver, arguments))
-                    .orElseThrow(() -> {
-                        throw new RuntimeException("receiver is of wrong type");                        
-                    });
+                    .orElseThrow(() -> new RuntimeException("receiver is of wrong type"));
             }));
             return this;
         }
