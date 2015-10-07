@@ -20,8 +20,6 @@ public class JavaToPythonTests {
     @Test
     public void canEvaluateLiterals() {
         assertEquals(value("hello"), evalExpression("\"hello\""));
-        assertEquals(value(true), evalExpression("true"));
-        assertEquals(value(false), evalExpression("false"));
         assertEquals(value(42), evalExpression("42"));
     }
 

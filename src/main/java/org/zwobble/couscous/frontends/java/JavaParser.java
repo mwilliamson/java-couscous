@@ -1,5 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,7 +11,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import com.google.common.base.Charsets;
 
-import lombok.SneakyThrows;
 import lombok.val;
 
 public class JavaParser {
@@ -21,11 +21,18 @@ public class JavaParser {
         parser.setResolveBindings(true);
     }
     
-    @SneakyThrows
-    public CompilationUnit parseCompilationUnit(Path path) {
+    public CompilationUnit parseCompilationUnit(Path path) throws IOException {
         val javaFileBytes = Files.readAllBytes(path);
         val javaFileChars = Charsets.UTF_8.decode(ByteBuffer.wrap(javaFileBytes));
-        parser.setSource(javaFileChars.array());
+        return parseCompilationUnit(javaFileChars.array());
+    }
+    
+    public CompilationUnit parseCompilationUnit(String source) {
+        return parseCompilationUnit(source.toCharArray());
+    }
+    
+    private CompilationUnit parseCompilationUnit(char[] source) {
+        parser.setSource(source);
         return (CompilationUnit)parser.createAST(null);
     }
 }
