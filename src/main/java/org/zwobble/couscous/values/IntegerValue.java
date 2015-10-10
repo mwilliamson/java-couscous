@@ -6,7 +6,7 @@ import lombok.Value;
 
 @Value
 public class IntegerValue implements PrimitiveValue {
-    public static final TypeName REF = TypeName.of("java.lang.Integer");
+    public static final TypeName REF = TypeName.of("int");
     
     int value;
 

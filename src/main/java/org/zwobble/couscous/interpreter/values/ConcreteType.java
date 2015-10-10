@@ -25,6 +25,18 @@ import static java.util.stream.Collectors.toMap;
 import lombok.val;
 
 public class ConcreteType {
+    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {
+        return new Builder<>(interpreterValueType, reference);
+    }
+
+    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, String name) {
+        return builder(interpreterValueType, TypeName.of(name));
+    }
+
+    public static ConcreteType.Builder<ObjectInterpreterValue> classBuilder(String name) {
+        return builder(ObjectInterpreterValue.class, name);
+    }
+    
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, MethodValue> methods =
             ImmutableMap.builder();
@@ -157,14 +169,6 @@ public class ConcreteType {
     
     public Optional<FieldValue> getField(String fieldName) {
         return Optional.ofNullable(fields.get(fieldName));
-    }
-
-    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {
-        return new Builder<>(interpreterValueType, reference);
-    }
-
-    public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, String name) {
-        return builder(interpreterValueType, TypeName.of(name));
     }
 
     public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, String methodName, List<InterpreterValue> arguments) {

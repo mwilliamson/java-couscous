@@ -46,6 +46,11 @@ public class MapBackedProject implements Project {
     
     @Override
     public ConcreteType findClass(TypeName name) {
-        return classes.get(name);
+        if (classes.containsKey(name)) {
+            return classes.get(name);            
+        } else {
+            throw new IllegalArgumentException("Cannot find class: " + name);
+        }
+        
     }
 }

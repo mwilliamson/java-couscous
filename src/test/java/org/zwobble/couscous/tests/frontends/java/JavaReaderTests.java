@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
+import org.zwobble.couscous.values.BooleanValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -28,7 +28,7 @@ public class JavaReaderTests {
     @Test
     public void canReadInstanceMethodCalls() {
         assertEquals(
-            methodCall(literal("hello"), "startsWith", asList(literal("h")), TypeName.of("boolean")),
+            methodCall(literal("hello"), "startsWith", asList(literal("h")), BooleanValue.REF),
             readExpression("\"hello\".startsWith(\"h\")"));
     }
 

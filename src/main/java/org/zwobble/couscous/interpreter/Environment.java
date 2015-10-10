@@ -56,7 +56,6 @@ public class Environment {
     }
 
     public ConcreteType findClass(TypeName className) {
-        // TODO: handle missing classes
         return project.findClass(className);
     }
 

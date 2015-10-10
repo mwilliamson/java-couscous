@@ -8,7 +8,7 @@ import lombok.Value;
 
 @Value
 public class BooleanValue implements PrimitiveValue {
-    public static final TypeName REF = TypeName.of("java.lang.Boolean");
+    public static final TypeName REF = TypeName.of("boolean");
     
     @Getter(value = AccessLevel.NONE)
     boolean value;
