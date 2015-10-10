@@ -20,6 +20,7 @@ import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TypeName;
 
 import com.google.common.collect.Lists;
@@ -101,13 +102,20 @@ public class JavaReader {
 
     @SuppressWarnings("unchecked")
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
-        return MethodCallNode.methodCall(
-            readExpression(expression.getExpression()),
-            expression.getName().getIdentifier(),
-            Lists.transform(
-                (List<Expression>)expression.arguments(),
-                JavaReader::readExpression),
-            TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
+        val methodName = expression.getName().getIdentifier();
+        val arguments = Lists.transform(
+            (List<Expression>)expression.arguments(),
+            JavaReader::readExpression);
+        if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
+            val receiver = expression.getExpression().resolveTypeBinding();
+            return StaticMethodCallNode.staticMethodCall(receiver.getQualifiedName(), methodName, arguments);
+        } else {
+            return MethodCallNode.methodCall(
+                readExpression(expression.getExpression()),
+                methodName,
+                arguments,
+                TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
+        }
     }
 
     private static String generateClassName(CompilationUnit ast) {
