@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ReturnNode;
+import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
@@ -40,6 +41,13 @@ public class JavaReaderTests {
         assertEquals(
             staticMethodCall(TypeName.of("java.lang.Integer"), "parseInt", asList(literal("42"))),
             readExpression("Integer.parseInt(\"42\")"));
+    }
+    
+    @Test
+    public void canReadTernaryConditionals() {
+        assertEquals(
+            new TernaryConditionalNode(literal(true), literal(1), literal(2)),
+            readExpression("true ? 1 : 2"));
     }
 
     @SneakyThrows

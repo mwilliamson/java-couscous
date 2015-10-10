@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -21,6 +22,7 @@ import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
+import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.TypeName;
 
 import com.google.common.collect.Lists;
@@ -83,6 +85,8 @@ public class JavaReader {
                 return readStringLiteral((StringLiteral)expression);
             case ASTNode.METHOD_INVOCATION:
                 return readMethodInvocation((MethodInvocation)expression);
+            case ASTNode.CONDITIONAL_EXPRESSION:
+                return readConditionalExpression((ConditionalExpression)expression);
             default:
                 throw new RuntimeException("Unsupported expression: " + expression.getClass());
         }
@@ -116,6 +120,13 @@ public class JavaReader {
                 arguments,
                 TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
         }
+    }
+
+    private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {
+        return new TernaryConditionalNode(
+            readExpression(expression.getExpression()),
+            readExpression(expression.getThenExpression()),
+            readExpression(expression.getElseExpression()));
     }
 
     private static String generateClassName(CompilationUnit ast) {
