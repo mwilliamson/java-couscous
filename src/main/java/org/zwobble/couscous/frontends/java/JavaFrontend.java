@@ -16,7 +16,7 @@ public class JavaFrontend {
         val reader = new JavaReader();
         
         return findJavaFiles(directoryPath)
-            .map(javaFile -> reader.readClassFromFile(javaFile))
+            .map(javaFile -> reader.readClassFromFile(directoryPath, javaFile))
             .collect(Collectors.toList());
     }
     
