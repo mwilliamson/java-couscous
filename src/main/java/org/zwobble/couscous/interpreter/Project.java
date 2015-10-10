@@ -1,4 +1,4 @@
-package org.zwobble.couscous;
+package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.values.ConcreteType;

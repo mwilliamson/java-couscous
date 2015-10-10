@@ -1,4 +1,4 @@
-package org.zwobble.couscous;
+package org.zwobble.couscous.interpreter;
 
 import java.util.Map;
 

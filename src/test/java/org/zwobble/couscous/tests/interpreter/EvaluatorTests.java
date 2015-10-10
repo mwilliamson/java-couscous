@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.Test;
-import org.zwobble.couscous.JavaProject;
-import org.zwobble.couscous.MapBackedProject;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.interpreter.JavaProject;
+import org.zwobble.couscous.interpreter.MapBackedProject;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.interpreter.NoSuchMethod;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.zwobble.couscous.JavaProject;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -12,6 +11,7 @@ import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Interpreter;
+import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;

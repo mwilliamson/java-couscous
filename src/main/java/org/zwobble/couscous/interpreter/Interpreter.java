@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.zwobble.couscous.Project;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;

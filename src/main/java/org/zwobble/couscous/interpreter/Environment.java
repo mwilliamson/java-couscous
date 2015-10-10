@@ -3,7 +3,6 @@ package org.zwobble.couscous.interpreter;
 import java.util.Map;
 import java.util.Optional;
 
-import org.zwobble.couscous.Project;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
