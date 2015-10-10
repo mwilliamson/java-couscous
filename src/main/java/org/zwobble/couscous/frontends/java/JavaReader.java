@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
@@ -16,6 +17,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
+import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -85,6 +87,8 @@ public class JavaReader {
                 return readStringLiteral((StringLiteral)expression);
             case ASTNode.METHOD_INVOCATION:
                 return readMethodInvocation((MethodInvocation)expression);
+            case ASTNode.CLASS_INSTANCE_CREATION:
+                return readClassInstanceCreation((ClassInstanceCreation)expression);
             case ASTNode.CONDITIONAL_EXPRESSION:
                 return readConditionalExpression((ConditionalExpression)expression);
             default:
@@ -104,12 +108,9 @@ public class JavaReader {
         return LiteralNode.literal(expression.getLiteralValue());
     }
 
-    @SuppressWarnings("unchecked")
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
         val methodName = expression.getName().getIdentifier();
-        val arguments = Lists.transform(
-            (List<Expression>)expression.arguments(),
-            JavaReader::readExpression);
+        val arguments = readArguments(expression.arguments());
         if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
             val receiver = expression.getExpression().resolveTypeBinding();
             return StaticMethodCallNode.staticMethodCall(receiver.getQualifiedName(), methodName, arguments);
@@ -120,6 +121,19 @@ public class JavaReader {
                 arguments,
                 TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
         }
+    }
+
+    private static ExpressionNode readClassInstanceCreation(ClassInstanceCreation expression) {
+        return ConstructorCallNode.constructorCall(
+            TypeName.of(expression.resolveTypeBinding().getQualifiedName()),
+            readArguments(expression.arguments()));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static List<ExpressionNode> readArguments(final List javaArguments) {
+        return Lists.transform(
+            (List<Expression>)javaArguments,
+            JavaReader::readExpression);
     }
 
     private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {

@@ -12,6 +12,7 @@ import org.zwobble.couscous.values.BooleanValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
@@ -41,6 +42,13 @@ public class JavaReaderTests {
         assertEquals(
             staticMethodCall(TypeName.of("java.lang.Integer"), "parseInt", asList(literal("42"))),
             readExpression("Integer.parseInt(\"42\")"));
+    }
+    
+    @Test
+    public void canReadConstructorCalls() {
+        assertEquals(
+            constructorCall(TypeName.of("java.lang.String"), asList(literal("_"), literal(42))),
+            readExpression("new String(\"_\", 42)"));
     }
     
     @Test
