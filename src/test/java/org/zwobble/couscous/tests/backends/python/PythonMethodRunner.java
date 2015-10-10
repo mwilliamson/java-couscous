@@ -35,7 +35,7 @@ public class PythonMethodRunner implements MethodRunner {
             String methodName,
             List<PrimitiveValue> arguments) {
         val directoryPath = Files.createTempDirectory(null);
-        val compiler = new PythonCompiler(directoryPath);
+        val compiler = new PythonCompiler(directoryPath, "couscous");
         try {
             compiler.compile(classNodes);
             
@@ -44,7 +44,7 @@ public class PythonMethodRunner implements MethodRunner {
                 .map(PythonSerializer::serialize)
                 .iterator());
             
-            val program = "from " + className.getQualifiedName() + " import " + className.getSimpleName() +
+            val program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() +
                 ";print(repr(" + className.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
             
             val process = new ProcessBuilder("python3.4", "-c", program)

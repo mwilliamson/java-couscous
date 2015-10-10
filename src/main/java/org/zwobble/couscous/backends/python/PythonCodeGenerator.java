@@ -41,6 +41,7 @@ import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.StringValue;
 import org.zwobble.couscous.values.UnitValue;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -93,8 +94,19 @@ public class PythonCodeGenerator {
         val classes = findReferencedClasses(classNode);
         return classes.stream()
             .map(name -> pythonImport(
-                name.getQualifiedName(),
+                Strings.repeat(".", packageDepth(classNode) + 1) + name.getQualifiedName(),
                 asList(pythonImportAlias(name.getSimpleName()))));
+    }
+    
+    private static int packageDepth(ClassNode classNode) {
+        int depth = 0;
+        val qualifiedName = classNode.getName().getQualifiedName();
+        for (int index = 0; index < qualifiedName.length(); index++) {
+            if (qualifiedName.charAt(index) == '.') {
+                depth += 1;                
+            }
+        }
+        return depth;
     }
     
     private static Set<TypeName> findReferencedClasses(ClassNode classNode) {

@@ -1,6 +1,7 @@
 package org.zwobble.couscous.backends.python;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -17,9 +18,11 @@ import lombok.val;
 
 public class PythonCompiler {
     private final Path root;
+    private final String packageName;
 
-    public PythonCompiler(Path root) {
+    public PythonCompiler(Path root, String packageName) {
         this.root = root;
+        this.packageName = packageName;
     }
     
     public void compile(List<ClassNode> classes) {
@@ -34,7 +37,9 @@ public class PythonCompiler {
     }
 
     private Path pathForClass(TypeName className) {
-        return root.resolve(className.getQualifiedName().replace(".", File.separator) + ".py");
+        return root
+            .resolve(packageName)
+            .resolve(className.getQualifiedName().replace(".", File.separator) + ".py");
     }
 
     private void compileClass(ClassNode classNode) {
@@ -45,6 +50,17 @@ public class PythonCompiler {
     private void writeClass(TypeName name, String contents) {
         val path = pathForClass(name);
         Files.createDirectories(path.getParent());
+        createPythonPackages(path.getParent());
         Files.write(path, asList(contents));
+    }
+
+    private void createPythonPackages(Path packagePath) throws IOException {
+        while (packagePath.startsWith(root)) {
+            val packageFile = packagePath.resolve("__init__.py");
+            if (!packageFile.toFile().exists()) {
+                Files.createFile(packageFile);
+            }
+            packagePath = packagePath.getParent();
+        }
     }
 }
