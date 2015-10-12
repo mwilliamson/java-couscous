@@ -10,9 +10,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -89,6 +93,8 @@ public class JavaReader {
                 return readNumberLiteral((NumberLiteral)expression);
             case ASTNode.STRING_LITERAL:
                 return readStringLiteral((StringLiteral)expression);
+            case ASTNode.SIMPLE_NAME:
+                return readSimpleName((SimpleName)expression);
             case ASTNode.THIS_EXPRESSION:
                 return readThisExpression((ThisExpression)expression);
             case ASTNode.FIELD_ACCESS:
@@ -114,6 +120,26 @@ public class JavaReader {
 
     private static ExpressionNode readStringLiteral(StringLiteral expression) {
         return LiteralNode.literal(expression.getLiteralValue());
+    }
+
+    private static ExpressionNode readSimpleName(SimpleName expression) {
+        val binding = expression.resolveBinding();
+        if (binding.getKind() == IBinding.VARIABLE) {
+            return readVariableBinding((IVariableBinding)binding);
+        } else {
+            throw new RuntimeException("Unsupported binding: " + binding.getClass());
+        }
+    }
+
+    private static ExpressionNode readVariableBinding(IVariableBinding binding) {
+        if (binding.getDeclaringClass() == null) {
+            throw new RuntimeException("Cannot read variables");
+        } else {
+            return FieldAccessNode.fieldAccess(
+                ThisReferenceNode.thisReference(typeOf(binding.getDeclaringClass())),
+                binding.getName(),
+                typeOf(binding.getType()));
+        }
     }
 
     private static ExpressionNode readThisExpression(ThisExpression expression) {
@@ -168,6 +194,10 @@ public class JavaReader {
     }
 
     private static TypeName typeOf(Expression expression) {
-        return TypeName.of(expression.resolveTypeBinding().getQualifiedName());
+        return typeOf(expression.resolveTypeBinding());
+    }
+
+    private static TypeName typeOf(ITypeBinding typeBinding) {
+        return TypeName.of(typeBinding.getQualifiedName());
     }
 }

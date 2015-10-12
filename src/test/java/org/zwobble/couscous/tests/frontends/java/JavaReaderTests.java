@@ -43,10 +43,19 @@ public class JavaReaderTests {
     
     @Test
     public void canReadExplicitFieldReference() {
+        canReadFieldReference("this.name");
+    }
+    
+    @Test
+    public void canReadImplicitFieldReference() {
+        canReadFieldReference("name");
+    }
+    
+    private void canReadFieldReference(String expression) {
         val classNode = readClass(
             "private String name;" +
             "public String getName() {" +
-            "    return this.name;" +
+            "    return " + expression + ";" +
             "}");
         
         val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
