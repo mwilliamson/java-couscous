@@ -156,7 +156,14 @@ public class JavaReader {
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
         val methodName = expression.getName().getIdentifier();
         val arguments = readArguments(expression.arguments());
-        if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
+        if (expression.getExpression() == null) {
+            val methodBinding = expression.resolveMethodBinding();
+            return MethodCallNode.methodCall(
+                ThisReferenceNode.thisReference(typeOf(methodBinding.getDeclaringClass())),
+                methodName,
+                arguments,
+                typeOf(expression));
+        } else if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
             val receiver = expression.getExpression();
             return StaticMethodCallNode.staticMethodCall(typeOf(receiver), methodName, arguments);
         } else {

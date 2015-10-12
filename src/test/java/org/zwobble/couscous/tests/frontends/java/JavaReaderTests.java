@@ -7,6 +7,7 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
@@ -72,6 +73,23 @@ public class JavaReaderTests {
         assertEquals(
             methodCall(literal("hello"), "startsWith", asList(literal("h")), BooleanValue.REF),
             readExpression("\"hello\".startsWith(\"h\")"));
+    }
+    
+    @Test
+    public void canReadImplicitInstanceMethodCalls() {
+        val classNode = readClass(
+            "public String loop() {" +
+            "    return loop();" +
+            "}");
+        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        
+        assertEquals(
+            methodCall(
+                ThisReferenceNode.thisReference(TypeName.of("com.example.Example")),
+                "loop",
+                asList(),
+                StringValue.REF),
+            returnNode.getValue());
     }
     
     @Test
