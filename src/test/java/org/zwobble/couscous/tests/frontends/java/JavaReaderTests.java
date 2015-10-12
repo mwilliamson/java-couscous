@@ -15,6 +15,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
@@ -111,6 +112,25 @@ public class JavaReaderTests {
         assertEquals(
             new TernaryConditionalNode(literal(true), literal(1), literal(2)),
             readExpression("true ? 1 : 2"));
+    }
+    
+    @Test
+    public void canReadAssignments() {
+        val classNode = readClass(
+            "private String name;" +
+            "public String getName() {" +
+            "    return name = \"blah\";" +
+            "}");
+        
+        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                fieldAccess(
+                    thisReference(TypeName.of("com.example.Example")),
+                    "name",
+                    StringValue.REF),
+                literal("blah")),
+            returnNode.getValue());
     }
 
     @SneakyThrows

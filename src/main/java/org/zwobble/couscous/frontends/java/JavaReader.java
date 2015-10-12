@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -21,6 +22,8 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.zwobble.couscous.ast.AssignableExpressionNode;
+import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
@@ -105,6 +108,8 @@ public class JavaReader {
                 return readClassInstanceCreation((ClassInstanceCreation)expression);
             case ASTNode.CONDITIONAL_EXPRESSION:
                 return readConditionalExpression((ConditionalExpression)expression);
+            case ASTNode.ASSIGNMENT:
+                return readAssignment((Assignment)expression);
             default:
                 throw new RuntimeException("Unsupported expression: " + expression.getClass());
         }
@@ -193,6 +198,12 @@ public class JavaReader {
             readExpression(expression.getExpression()),
             readExpression(expression.getThenExpression()),
             readExpression(expression.getElseExpression()));
+    }
+
+    private static ExpressionNode readAssignment(Assignment expression) {
+        return AssignmentNode.assign(
+            (AssignableExpressionNode)readExpression(expression.getLeftHandSide()),
+            readExpression(expression.getRightHandSide()));
     }
 
     private static String generateClassName(CompilationUnit ast) {
