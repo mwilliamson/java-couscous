@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.frontends.java;
 import java.nio.file.Files;
 
 import org.junit.Test;
+import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
@@ -16,6 +17,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 
 import lombok.SneakyThrows;
@@ -28,6 +30,13 @@ public class JavaReaderTests {
         assertEquals(literal(true), readExpression("true"));
         assertEquals(literal(false), readExpression("false"));
         assertEquals(literal(42), readExpression("42"));
+    }
+    
+    @Test
+    public void canReadThisReference() {
+        assertEquals(
+            thisReference(TypeName.of("com.example.Example")),
+            readExpressionInInstanceMethod("this"));
     }
     
     @Test
@@ -59,13 +68,36 @@ public class JavaReaderTests {
     }
 
     @SneakyThrows
+    private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
+        val javaClass =
+            "public Object main() {" +
+            "    return " + expressionSource + ";" +
+            "}";
+        
+        val classNode = readClass(javaClass);
+        val returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        return returnStatement.getValue();
+    }
+
+    @SneakyThrows
     private ExpressionNode readExpression(String expressionSource) {
+        val javaClass =
+            "public static Object main() {" +
+            "    return " + expressionSource + ";" +
+            "}";
+        
+        val classNode = readClass(javaClass);
+        val returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        return returnStatement.getValue();
+    }
+
+    @SneakyThrows
+    private ClassNode readClass(String classBody) {
+
         val javaClass =
             "package com.example;" +
             "public class Example {" +
-            "    public static Object main() {" +
-            "        return " + expressionSource + ";" +
-            "    }" +
+            classBody +
             "}";
         
         val directoryPath = Files.createTempDirectory(null);
@@ -75,9 +107,7 @@ public class JavaReaderTests {
             Files.write(sourcePath, asList(javaClass));
             
             val reader = new JavaReader();
-            val classNode = reader.readClassFromFile(directoryPath, sourcePath);
-            val returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
-            return returnStatement.getValue();
+            return reader.readClassFromFile(directoryPath, sourcePath);
         } finally {
             deleteRecursively(directoryPath.toFile());
         }

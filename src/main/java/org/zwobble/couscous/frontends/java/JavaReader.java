@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
@@ -25,6 +26,7 @@ import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
+import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 
 import com.google.common.collect.Lists;
@@ -85,6 +87,8 @@ public class JavaReader {
                 return readNumberLiteral((NumberLiteral)expression);
             case ASTNode.STRING_LITERAL:
                 return readStringLiteral((StringLiteral)expression);
+            case ASTNode.THIS_EXPRESSION:
+                return readThisExpression((ThisExpression)expression);
             case ASTNode.METHOD_INVOCATION:
                 return readMethodInvocation((MethodInvocation)expression);
             case ASTNode.CLASS_INSTANCE_CREATION:
@@ -95,7 +99,7 @@ public class JavaReader {
                 throw new RuntimeException("Unsupported expression: " + expression.getClass());
         }
     }
-
+    
     private static ExpressionNode readBooleanLiteral(BooleanLiteral expression) {
         return LiteralNode.literal(expression.booleanValue());
     }
@@ -106,6 +110,11 @@ public class JavaReader {
 
     private static ExpressionNode readStringLiteral(StringLiteral expression) {
         return LiteralNode.literal(expression.getLiteralValue());
+    }
+
+    private static ExpressionNode readThisExpression(ThisExpression expression) {
+        return ThisReferenceNode.thisReference(
+            TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
     }
 
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
