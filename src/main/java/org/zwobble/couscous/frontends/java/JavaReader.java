@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -20,6 +21,7 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.ReturnNode;
@@ -89,6 +91,8 @@ public class JavaReader {
                 return readStringLiteral((StringLiteral)expression);
             case ASTNode.THIS_EXPRESSION:
                 return readThisExpression((ThisExpression)expression);
+            case ASTNode.FIELD_ACCESS:
+                return readFieldAccess((FieldAccess)expression);
             case ASTNode.METHOD_INVOCATION:
                 return readMethodInvocation((MethodInvocation)expression);
             case ASTNode.CLASS_INSTANCE_CREATION:
@@ -99,7 +103,7 @@ public class JavaReader {
                 throw new RuntimeException("Unsupported expression: " + expression.getClass());
         }
     }
-    
+
     private static ExpressionNode readBooleanLiteral(BooleanLiteral expression) {
         return LiteralNode.literal(expression.booleanValue());
     }
@@ -113,28 +117,34 @@ public class JavaReader {
     }
 
     private static ExpressionNode readThisExpression(ThisExpression expression) {
-        return ThisReferenceNode.thisReference(
-            TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
+        return ThisReferenceNode.thisReference(typeOf(expression));
+    }
+    
+    private static ExpressionNode readFieldAccess(FieldAccess expression) {
+        return FieldAccessNode.fieldAccess(
+            readExpression(expression.getExpression()),
+            expression.getName().getIdentifier(),
+            typeOf(expression));
     }
 
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
         val methodName = expression.getName().getIdentifier();
         val arguments = readArguments(expression.arguments());
         if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
-            val receiver = expression.getExpression().resolveTypeBinding();
-            return StaticMethodCallNode.staticMethodCall(receiver.getQualifiedName(), methodName, arguments);
+            val receiver = expression.getExpression();
+            return StaticMethodCallNode.staticMethodCall(typeOf(receiver), methodName, arguments);
         } else {
             return MethodCallNode.methodCall(
                 readExpression(expression.getExpression()),
                 methodName,
                 arguments,
-                TypeName.of(expression.resolveTypeBinding().getQualifiedName()));
+                typeOf(expression));
         }
     }
 
     private static ExpressionNode readClassInstanceCreation(ClassInstanceCreation expression) {
         return ConstructorCallNode.constructorCall(
-            TypeName.of(expression.resolveTypeBinding().getQualifiedName()),
+            typeOf(expression),
             readArguments(expression.arguments()));
     }
 
@@ -155,5 +165,9 @@ public class JavaReader {
     private static String generateClassName(CompilationUnit ast) {
         val type = (TypeDeclaration)ast.types().get(0);
         return ast.getPackage().getName().getFullyQualifiedName() + "." + type.getName().getFullyQualifiedName();
+    }
+
+    private static TypeName typeOf(Expression expression) {
+        return TypeName.of(expression.resolveTypeBinding().getQualifiedName());
     }
 }

@@ -10,10 +10,12 @@ import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
@@ -37,6 +39,23 @@ public class JavaReaderTests {
         assertEquals(
             thisReference(TypeName.of("com.example.Example")),
             readExpressionInInstanceMethod("this"));
+    }
+    
+    @Test
+    public void canReadExplicitFieldReference() {
+        val classNode = readClass(
+            "private String name;" +
+            "public String getName() {" +
+            "    return this.name;" +
+            "}");
+        
+        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            fieldAccess(
+                thisReference(TypeName.of("com.example.Example")),
+                "name",
+                StringValue.REF),
+            returnNode.getValue());
     }
     
     @Test
@@ -93,7 +112,6 @@ public class JavaReaderTests {
 
     @SneakyThrows
     private ClassNode readClass(String classBody) {
-
         val javaClass =
             "package com.example;" +
             "public class Example {" +
