@@ -18,6 +18,14 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     
     VariableDeclaration declaration;
     ExpressionNode initialValue;
+
+    public String getName() {
+        return declaration.getName();
+    }
+    
+    public TypeName getType() {
+        return declaration.getType();
+    }
     
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {

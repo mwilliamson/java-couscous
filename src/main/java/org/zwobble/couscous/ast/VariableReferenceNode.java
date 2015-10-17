@@ -5,7 +5,7 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
 import lombok.Value;
 
-@Value
+@Value(staticConstructor="reference")
 public class VariableReferenceNode implements AssignableExpressionNode {
     public static VariableReferenceNode reference(VariableNode variable) {
         return new VariableReferenceNode(variable.getDeclaration());

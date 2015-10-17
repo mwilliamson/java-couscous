@@ -1,11 +1,13 @@
 package org.zwobble.couscous.tests.frontends.java;
 
 import java.nio.file.Files;
+import java.util.List;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
@@ -13,6 +15,7 @@ import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
@@ -25,6 +28,7 @@ import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 
 import lombok.SneakyThrows;
@@ -163,6 +167,20 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void canDeclareAndReferenceLocalVariables() {
+        val statements = readStatements("int x = 4; return x;");
+        
+        val declaration = (LocalVariableDeclarationNode) statements.get(0);
+        assertEquals("x", declaration.getName());
+        assertEquals(IntegerValue.REF, declaration.getType());
+        assertEquals(literal(4), declaration.getInitialValue());
+        val returnNode = (ReturnNode) statements.get(1);
+        assertEquals(
+            reference(declaration),
+            returnNode.getValue());
+    }
+    
+    @Test
     public void canReadExpressionStatements() {
         assertEquals(
             new ExpressionStatementNode(
@@ -190,13 +208,17 @@ public class JavaReaderTests {
     }
 
     private StatementNode readStatement(String statementSource) {
+        return readStatements(statementSource).get(0);
+    }
+
+    private List<StatementNode> readStatements(String statementsSource) {
         val javaClass =
             "public static Object main() {" +
-            statementSource +
+            statementsSource +
             "}";
         
         val classNode = readClass(javaClass);
-        return classNode.getMethods().get(0).getBody().get(0);
+        return classNode.getMethods().get(0).getBody();
     }
 
     @SneakyThrows

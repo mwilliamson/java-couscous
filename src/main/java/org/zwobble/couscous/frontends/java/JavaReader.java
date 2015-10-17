@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.zwobble.couscous.ast.AssignableExpressionNode;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
@@ -45,6 +46,11 @@ import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 
 import com.google.common.collect.Lists;
+
+import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -97,18 +103,23 @@ public class JavaReader {
             true,
             builder -> {
                 for (Object statement : method.getBody().statements()) {
-                    builder.statement(readStatement((Statement)statement));
+                    for (StatementNode intermediateStatement : readStatement((Statement)statement)) {
+                        builder.statement(intermediateStatement);                        
+                    }
+                    
                 }
                 return builder;
             });
     }
 
-    private static StatementNode readStatement(Statement statement) {
+    private static List<StatementNode> readStatement(Statement statement) {
         switch (statement.getNodeType()) {
             case ASTNode.RETURN_STATEMENT:
-                return readReturnStatement((ReturnStatement)statement);
+                return asList(readReturnStatement((ReturnStatement)statement));
             case ASTNode.EXPRESSION_STATEMENT:
-                return readExpressionStatement((ExpressionStatement)statement);
+                return asList(readExpressionStatement((ExpressionStatement)statement));
+            case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+                return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
             default:
                 throw new RuntimeException("Unsupported statement: " + statement.getClass());
         }
@@ -120,6 +131,18 @@ public class JavaReader {
 
     private static StatementNode readExpressionStatement(ExpressionStatement statement) {
         return new ExpressionStatementNode(readExpression(statement.getExpression()));
+    }
+
+    private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
+        @SuppressWarnings("unchecked")
+        val fragments = (List<VariableDeclarationFragment>)statement.fragments();
+        val type = typeOf(statement.getType().resolveBinding());
+        return Lists.transform(fragments, fragment ->
+            localVariableDeclaration(
+                fragment.resolveBinding().getKey(),
+                fragment.getName().getIdentifier(),
+                type,
+                readExpression(fragment.getInitializer())));
     }
 
     private static ExpressionNode readExpression(Expression expression) {
@@ -171,13 +194,17 @@ public class JavaReader {
     }
 
     private static ExpressionNode readVariableBinding(IVariableBinding binding) {
+        val type = typeOf(binding.getType());
         if (binding.getDeclaringClass() == null) {
-            throw new RuntimeException("Cannot read variables");
+            return reference(var(
+                binding.getKey(),
+                binding.getName(),
+                type));
         } else {
             return FieldAccessNode.fieldAccess(
                 ThisReferenceNode.thisReference(typeOf(binding.getDeclaringClass())),
                 binding.getName(),
-                typeOf(binding.getType()));
+                type);
         }
     }
 
