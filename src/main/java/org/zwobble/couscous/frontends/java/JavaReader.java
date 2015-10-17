@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -32,6 +33,7 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -105,6 +107,8 @@ public class JavaReader {
         switch (statement.getNodeType()) {
             case ASTNode.RETURN_STATEMENT:
                 return readReturnStatement((ReturnStatement)statement);
+            case ASTNode.EXPRESSION_STATEMENT:
+                return readExpressionStatement((ExpressionStatement)statement);
             default:
                 throw new RuntimeException("Unsupported statement: " + statement.getClass());
         }
@@ -112,6 +116,10 @@ public class JavaReader {
 
     private static StatementNode readReturnStatement(ReturnStatement statement) {
         return new ReturnNode(readExpression(statement.getExpression()));
+    }
+
+    private static StatementNode readExpressionStatement(ExpressionStatement statement) {
+        return new ExpressionStatementNode(readExpression(statement.getExpression()));
     }
 
     private static ExpressionNode readExpression(Expression expression) {

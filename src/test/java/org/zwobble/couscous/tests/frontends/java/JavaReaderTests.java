@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.ReturnNode;
+import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
@@ -159,6 +161,17 @@ public class JavaReaderTests {
                 literal("blah")),
             returnNode.getValue());
     }
+    
+    @Test
+    public void canReadExpressionStatements() {
+        assertEquals(
+            new ExpressionStatementNode(
+                staticMethodCall(
+                    TypeName.of("java.lang.Integer"),
+                    "parseInt",
+                    asList(literal("42")))),
+            readStatement("Integer.parseInt(\"42\");"));
+    }
 
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
         val javaClass =
@@ -172,14 +185,18 @@ public class JavaReaderTests {
     }
 
     private ExpressionNode readExpression(String expressionSource) {
+        val returnStatement = (ReturnNode) readStatement("return " + expressionSource + ";");
+        return returnStatement.getValue();
+    }
+
+    private StatementNode readStatement(String statementSource) {
         val javaClass =
             "public static Object main() {" +
-            "    return " + expressionSource + ";" +
+            statementSource +
             "}";
         
         val classNode = readClass(javaClass);
-        val returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
-        return returnStatement.getValue();
+        return classNode.getMethods().get(0).getBody().get(0);
     }
 
     @SneakyThrows
