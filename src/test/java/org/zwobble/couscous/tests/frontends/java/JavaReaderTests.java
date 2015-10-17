@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
@@ -41,6 +42,16 @@ public class JavaReaderTests {
         assertEquals(
             thisReference(TypeName.of("com.example.Example")),
             readExpressionInInstanceMethod("this"));
+    }
+    
+    @Test
+    public void canReadFieldDeclarations() {
+        val classNode = readClass(
+            "private String name;");
+        
+        assertEquals(
+            asList(field("name", TypeName.of("java.lang.String"))),
+            classNode.getFields());
     }
     
     @Test

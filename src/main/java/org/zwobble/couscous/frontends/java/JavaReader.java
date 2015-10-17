@@ -11,9 +11,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.zwobble.couscous.ast.AssignableExpressionNode;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
@@ -60,20 +63,42 @@ public class JavaReader {
 
         val type = (TypeDeclaration)ast.types().get(0);
         
-        for (val method : type.getMethods()) {
-            classBuilder.method(
-                method.getName().getIdentifier(),
-                true,
-                builder -> {
-                    for (Object statement : method.getBody().statements()) {
-                        builder.statement(readStatement((Statement)statement));
-                    }
-                    return builder;
-                });
-        }
+        readFields(type, classBuilder);
+        readMethods(type, classBuilder);
         
         return classBuilder
             .build();
+    }
+
+    private static void readFields(TypeDeclaration type, ClassNodeBuilder classBuilder) {
+        for (val field : type.getFields()) {
+            readField(field, classBuilder);
+        }
+    }
+
+    private static void readField(FieldDeclaration field, ClassNodeBuilder classBuilder) {
+        for (val fragment : field.fragments()) {
+            val name = ((VariableDeclarationFragment)fragment).getName().getIdentifier();
+            classBuilder.field(name, typeOf(field.getType().resolveBinding()));   
+        }
+    }
+
+    private static void readMethods(TypeDeclaration type, ClassNodeBuilder classBuilder) {
+        for (val method : type.getMethods()) {
+            readMethod(classBuilder, method);
+        }
+    }
+
+    private static void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
+        classBuilder.method(
+            method.getName().getIdentifier(),
+            true,
+            builder -> {
+                for (Object statement : method.getBody().statements()) {
+                    builder.statement(readStatement((Statement)statement));
+                }
+                return builder;
+            });
     }
 
     private static StatementNode readStatement(Statement statement) {
