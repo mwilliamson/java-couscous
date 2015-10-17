@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -163,11 +164,17 @@ public class JavaReader {
         val arguments = readArguments(expression.arguments());
         if (expression.getExpression() == null) {
             val methodBinding = expression.resolveMethodBinding();
-            return MethodCallNode.methodCall(
-                ThisReferenceNode.thisReference(typeOf(methodBinding.getDeclaringClass())),
-                methodName,
-                arguments,
-                typeOf(expression));
+            val receiverType = typeOf(methodBinding.getDeclaringClass());
+            if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
+                return StaticMethodCallNode.staticMethodCall(
+                    receiverType, methodName, arguments);
+            } else {
+                return MethodCallNode.methodCall(
+                    ThisReferenceNode.thisReference(receiverType),
+                    methodName,
+                    arguments,
+                    typeOf(expression));   
+            }
         } else if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
             val receiver = expression.getExpression();
             return StaticMethodCallNode.staticMethodCall(typeOf(receiver), methodName, arguments);

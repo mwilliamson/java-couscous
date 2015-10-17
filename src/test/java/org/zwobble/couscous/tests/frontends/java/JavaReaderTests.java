@@ -101,6 +101,22 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void canReadImplicitStaticMethodCalls() {
+        val classNode = readClass(
+            "public static String loop() {" +
+            "    return loop();" +
+            "}");
+        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        
+        assertEquals(
+            staticMethodCall(
+                TypeName.of("com.example.Example"),
+                "loop",
+                asList()),
+            returnNode.getValue());
+    }
+    
+    @Test
     public void canReadConstructorCalls() {
         assertEquals(
             constructorCall(TypeName.of("java.lang.String"), asList(literal("_"), literal(42))),
