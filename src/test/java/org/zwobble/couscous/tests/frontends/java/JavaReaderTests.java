@@ -160,7 +160,6 @@ public class JavaReaderTests {
             returnNode.getValue());
     }
 
-    @SneakyThrows
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
         val javaClass =
             "public Object main() {" +
@@ -172,7 +171,6 @@ public class JavaReaderTests {
         return returnStatement.getValue();
     }
 
-    @SneakyThrows
     private ExpressionNode readExpression(String expressionSource) {
         val javaClass =
             "public static Object main() {" +
