@@ -9,7 +9,7 @@ import lombok.Value;
 @Value(staticConstructor="localVariableDeclaration")
 public class LocalVariableDeclarationNode implements VariableNode, StatementNode {
     public static LocalVariableDeclarationNode localVariableDeclaration(
-            int id,
+            String id,
             String name,
             TypeName type,
             ExpressionNode initialValue) {

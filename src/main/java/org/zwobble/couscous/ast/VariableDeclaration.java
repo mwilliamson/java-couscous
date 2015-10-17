@@ -4,7 +4,7 @@ import lombok.Value;
 
 @Value(staticConstructor="var")
 public class VariableDeclaration {
-    int id;
+    String id;
     String name;
     TypeName type;
 }

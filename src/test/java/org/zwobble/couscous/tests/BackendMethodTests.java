@@ -19,6 +19,7 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
@@ -42,7 +43,7 @@ public abstract class BackendMethodTests {
     }
     @Test
     public void canPassValueToMethod() {
-        val arg = formalArg(var(42, "x", StringValue.REF));
+        val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ReturnNode(reference(arg)));
@@ -53,7 +54,7 @@ public abstract class BackendMethodTests {
     
     @Test
     public void canReassignValueToArgument() {
-        val arg = formalArg(var(42, "x", StringValue.REF));
+        val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
             .statement(new ExpressionStatementNode(new AssignmentNode(reference(arg), LiteralNode.literal("[updated value]"))))
@@ -66,7 +67,7 @@ public abstract class BackendMethodTests {
     @Test
     public void canDeclareVariable() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
+            ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
             .statement(new ReturnNode(reference(localVariableDeclaration)));
@@ -78,7 +79,7 @@ public abstract class BackendMethodTests {
     @Test
     public void canDeclareVariableAndThenAssignValues() {
         val localVariableDeclaration = localVariableDeclaration(
-            42, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
+            ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
             .statement(new ExpressionStatementNode(new AssignmentNode(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))

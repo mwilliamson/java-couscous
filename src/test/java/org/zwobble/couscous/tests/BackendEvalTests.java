@@ -24,6 +24,7 @@ import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 import lombok.val;
@@ -100,7 +101,7 @@ public abstract class BackendEvalTests {
     
     @Test
     public void canCallInstanceMethodWithArgumentsOnUserDefinedClass() {
-        val argument = formalArg(var(42, "x", IntegerValue.REF));
+        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
         val classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .argument(argument)
@@ -120,7 +121,7 @@ public abstract class BackendEvalTests {
     
     @Test
     public void constructorIsExecutedOnConstruction() {
-        val argument = formalArg(var(42, "x", IntegerValue.REF));
+        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
         val classNode = ClassNode.builder("com.example.Example")
             .field("value", IntegerValue.REF)
             .constructor(constructor -> constructor

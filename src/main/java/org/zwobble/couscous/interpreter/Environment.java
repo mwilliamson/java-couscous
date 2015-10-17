@@ -19,7 +19,7 @@ import lombok.val;
 public class Environment {
     private final Project project;
     private final Optional<InterpreterValue> thisValue;
-    private final Map<Integer, VariableEntry> stackFrame;
+    private final Map<String, VariableEntry> stackFrame;
 
     public Environment(
             Project project,
@@ -38,13 +38,13 @@ public class Environment {
         return thisValue;
     }
 
-    public InterpreterValue get(int variableId) {
+    public InterpreterValue get(String variableId) {
         checkVariableIsInScope(variableId);
         val entry = stackFrame.get(variableId);
         return entry.getValue().orElseThrow(() -> new UnboundVariable(variableId));
     }
 
-    public void put(int variableId, InterpreterValue value) {
+    public void put(String variableId, InterpreterValue value) {
         checkVariableIsInScope(variableId);
         checkVariableType(variableId, value);
         stackFrame.get(variableId).setValue(Optional.of(value));
@@ -62,13 +62,13 @@ public class Environment {
         return new Environment(project, thisValue, stackFrame);
     }
 
-    private void checkVariableIsInScope(int variableId) {
+    private void checkVariableIsInScope(String variableId) {
         if (!stackFrame.containsKey(variableId)) {
             throw new VariableNotInScope(variableId);
         }
     }
 
-    private void checkVariableType(int variableId, InterpreterValue value) {
+    private void checkVariableType(String variableId, InterpreterValue value) {
         val variableType = stackFrame.get(variableId).getType();
         InterpreterTypes.checkIsInstance(variableType, value);
     }

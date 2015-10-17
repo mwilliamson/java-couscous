@@ -18,7 +18,7 @@ public class VariableReferenceNode implements AssignableExpressionNode {
         return visitor.visit(this);
     }
     
-    public int getReferentId() {
+    public String getReferentId() {
         return referent.getId();
     }
 

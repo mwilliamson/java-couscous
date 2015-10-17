@@ -38,6 +38,7 @@ import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
+import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
 import lombok.val;
@@ -45,7 +46,7 @@ import lombok.val;
 public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = formalArg(var(42, "x", StringValue.REF));
+        val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
             Optional.empty(),
@@ -100,7 +101,7 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void errorIfConstructorArgumentIsWrongType() {
-        val argument = formalArg(var(42, "x", IntegerValue.REF));
+        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
         val classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
                 .argument(argument))

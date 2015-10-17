@@ -8,5 +8,5 @@ import lombok.Value;
 public class VariableNotInScope extends InterpreterException {
     private static final long serialVersionUID = 1L;
     
-    int variableId;
+    String variableId;
 }
