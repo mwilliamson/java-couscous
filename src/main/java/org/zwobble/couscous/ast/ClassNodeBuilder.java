@@ -5,6 +5,9 @@ import java.util.function.Function;
 
 import com.google.common.collect.ImmutableList;
 
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
+
 public class ClassNodeBuilder {
     private final TypeName name;
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
@@ -83,6 +86,11 @@ public class ClassNodeBuilder {
         
         public ThisReferenceNode thisReference() {
             return ThisReferenceNode.thisReference(name);
+        }
+        
+        public MethodBuilder<T> argument(String id, String name, TypeName type) {
+            arguments.add(formalArg(var(id, name, type)));
+            return this;
         }
         
         public MethodBuilder<T> argument(FormalArgumentNode argument) {

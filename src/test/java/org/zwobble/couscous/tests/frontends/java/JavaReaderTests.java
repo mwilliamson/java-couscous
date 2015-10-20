@@ -181,6 +181,23 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void canDeclareAndReferenceArguments() {
+        val classNode = readClass(
+            "public String identity(int value) {" +
+            "    return value;" +
+            "}");
+        
+        val method = classNode.getMethods().get(0);
+        val argument = method.getArguments().get(0);
+        assertEquals("value", argument.getName());
+        assertEquals(TypeName.of("int"), argument.getType());
+        assertEquals(1, method.getArguments().size());
+        
+        val returnNode = (ReturnNode)method.getBody().get(0);
+        assertEquals(reference(argument), returnNode.getValue());
+    }
+    
+    @Test
     public void canReadExpressionStatements() {
         assertEquals(
             new ExpressionStatementNode(

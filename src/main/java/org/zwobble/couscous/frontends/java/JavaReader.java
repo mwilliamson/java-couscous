@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -102,6 +103,14 @@ public class JavaReader {
             method.getName().getIdentifier(),
             true,
             builder -> {
+                for (Object parameterObject : method.parameters()) {
+                    val parameter = (SingleVariableDeclaration)parameterObject;
+                    builder.argument(
+                        parameter.resolveBinding().getKey(),
+                        parameter.getName().getIdentifier(),
+                        typeOf(parameter.resolveBinding()));
+                }
+                
                 for (Object statement : method.getBody().statements()) {
                     for (StatementNode intermediateStatement : readStatement((Statement)statement)) {
                         builder.statement(intermediateStatement);                        
@@ -280,6 +289,10 @@ public class JavaReader {
 
     private static TypeName typeOf(Expression expression) {
         return typeOf(expression.resolveTypeBinding());
+    }
+
+    private static TypeName typeOf(IVariableBinding variableBinding) {
+        return typeOf(variableBinding.getType());
     }
 
     private static TypeName typeOf(ITypeBinding typeBinding) {
