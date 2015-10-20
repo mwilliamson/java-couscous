@@ -21,6 +21,7 @@ import org.zwobble.couscous.values.StringValue;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
@@ -206,6 +207,28 @@ public class JavaReaderTests {
                     "parseInt",
                     asList(literal("42")))),
             readStatement("Integer.parseInt(\"42\");"));
+    }
+    
+    @Test
+    public void canDeclareConstructor() {
+        val classNode = readClass(
+            "private final String name;" +
+            "public Example() {" +
+            "    this.name = \"Flaws\";" +
+            "}");
+        
+        val constructor = classNode.getConstructor();
+        
+        assertEquals(asList(), constructor.getArguments());
+        
+        assertEquals(
+            asList(assignStatement(
+                fieldAccess(
+                    thisReference(TypeName.of("com.example.Example")),
+                    "name",
+                    StringValue.REF),
+                literal("Flaws"))),
+            constructor.getBody());
     }
 
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {

@@ -34,6 +34,7 @@ import org.zwobble.couscous.ast.AssignableExpressionNode;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
+import org.zwobble.couscous.ast.ClassNodeBuilder.MethodBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
@@ -100,26 +101,33 @@ public class JavaReader {
     }
 
     private static void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
-        classBuilder.method(
-            method.getName().getIdentifier(),
-            true,
-            builder -> {
-                for (Object parameterObject : method.parameters()) {
-                    val parameter = (SingleVariableDeclaration)parameterObject;
-                    builder.argument(
-                        parameter.resolveBinding().getKey(),
-                        parameter.getName().getIdentifier(),
-                        typeOf(parameter.resolveBinding()));
-                }
-                
-                for (Object statement : method.getBody().statements()) {
-                    for (StatementNode intermediateStatement : readStatement((Statement)statement)) {
-                        builder.statement(intermediateStatement);                        
-                    }
-                    
-                }
-                return builder;
-            });
+        if (method.isConstructor()) {
+            classBuilder.constructor(builder -> buildMethod(method, builder));
+        } else {
+            classBuilder.method(
+                method.getName().getIdentifier(),
+                true,
+                builder -> buildMethod(method, builder));   
+        }
+    }
+
+    private static <T> MethodBuilder<T> buildMethod(
+            MethodDeclaration method,
+            MethodBuilder<T> builder) {
+        for (Object parameterObject : method.parameters()) {
+            val parameter = (SingleVariableDeclaration)parameterObject;
+            builder.argument(
+                parameter.resolveBinding().getKey(),
+                parameter.getName().getIdentifier(),
+                typeOf(parameter.resolveBinding()));
+        }
+        for (Object statement : method.getBody().statements()) {
+            for (StatementNode intermediateStatement : readStatement((Statement)statement)) {
+                builder.statement(intermediateStatement);                        
+            }
+            
+        }
+        return builder;
     }
 
     private static List<StatementNode> readStatement(Statement statement) {
