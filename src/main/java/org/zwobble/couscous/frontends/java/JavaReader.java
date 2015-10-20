@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -88,7 +89,7 @@ public class JavaReader {
     private static void readField(FieldDeclaration field, ClassNodeBuilder classBuilder) {
         for (val fragment : field.fragments()) {
             val name = ((VariableDeclarationFragment)fragment).getName().getIdentifier();
-            classBuilder.field(name, typeOf(field.getType().resolveBinding()));   
+            classBuilder.field(name, typeOf(field.getType()));   
         }
     }
 
@@ -145,7 +146,7 @@ public class JavaReader {
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
         val fragments = (List<VariableDeclarationFragment>)statement.fragments();
-        val type = typeOf(statement.getType().resolveBinding());
+        val type = typeOf(statement.getType());
         return Lists.transform(fragments, fragment ->
             localVariableDeclaration(
                 fragment.resolveBinding().getKey(),
@@ -203,7 +204,7 @@ public class JavaReader {
     }
 
     private static ExpressionNode readVariableBinding(IVariableBinding binding) {
-        val type = typeOf(binding.getType());
+        val type = typeOf(binding);
         if (binding.getDeclaringClass() == null) {
             return reference(var(
                 binding.getKey(),
@@ -293,6 +294,10 @@ public class JavaReader {
 
     private static TypeName typeOf(IVariableBinding variableBinding) {
         return typeOf(variableBinding.getType());
+    }
+
+    private static TypeName typeOf(Type type) {
+        return typeOf(type.resolveBinding());
     }
 
     private static TypeName typeOf(ITypeBinding typeBinding) {
