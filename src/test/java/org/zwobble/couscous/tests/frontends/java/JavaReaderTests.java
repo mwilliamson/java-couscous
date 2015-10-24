@@ -20,6 +20,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
@@ -229,6 +230,17 @@ public class JavaReaderTests {
                     StringValue.REF),
                 literal("Flaws"))),
             constructor.getBody());
+    }
+    
+    @Test
+    public void canDeclareStaticMethodWithAnnotation() {
+        val classNode = readClass(
+            "@Deprecated public void doNothing() {}");
+        
+        val method = classNode.getMethods().get(0);
+        assertEquals(
+            asList(annotation(TypeName.of("java.lang.Deprecated"))),
+            method.getAnnotations());
     }
 
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {

@@ -60,6 +60,7 @@ public class ClassNodeBuilder {
         return new MethodBuilder<MethodNode>(builder -> MethodNode.builder()
             .isStatic(isStatic)
             .name(name)
+            .annotations(builder.annotations.build())
             .arguments(builder.arguments.build())
             .body(builder.statements.build())
             .build());
@@ -75,13 +76,20 @@ public class ClassNodeBuilder {
     
     public class MethodBuilder<T> {
         private final Function<MethodBuilder<?>, T> build;
+        private final ImmutableList.Builder<AnnotationNode> annotations;
         private final ImmutableList.Builder<FormalArgumentNode> arguments;
         private final ImmutableList.Builder<StatementNode> statements;
 
         public MethodBuilder(Function<MethodBuilder<?>, T> build) {
             this.build = build;
+            this.annotations = ImmutableList.builder();
             this.arguments = ImmutableList.builder();
             this.statements = ImmutableList.builder();
+        }
+        
+        public MethodBuilder<T> annotation(TypeName type) {
+            annotations.add(AnnotationNode.annotation(type));
+            return this;
         }
         
         public ThisReferenceNode thisReference() {

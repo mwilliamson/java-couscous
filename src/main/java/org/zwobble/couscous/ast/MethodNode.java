@@ -15,6 +15,7 @@ public class MethodNode implements CallableNode {
         return builder().isStatic(true).name(name);
     }
     
+    List<AnnotationNode> annotations;
     boolean isStatic;
     String name;
     @Singular

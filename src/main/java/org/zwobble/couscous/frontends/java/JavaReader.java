@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -114,6 +115,9 @@ public class JavaReader {
     private static <T> MethodBuilder<T> buildMethod(
             MethodDeclaration method,
             MethodBuilder<T> builder) {
+        for (IAnnotationBinding annotation : method.resolveBinding().getAnnotations()) {
+            builder.annotation(typeOf(annotation.getAnnotationType()));
+        }
         for (Object parameterObject : method.parameters()) {
             val parameter = (SingleVariableDeclaration)parameterObject;
             builder.argument(
