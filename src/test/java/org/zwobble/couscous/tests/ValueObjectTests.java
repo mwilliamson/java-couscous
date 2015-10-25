@@ -26,6 +26,7 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.util.ExtraArrays;
@@ -62,6 +63,7 @@ public class ValueObjectTests {
             {LiteralNode.class},
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
+            {ReturnNode.class},
             {VariableDeclaration.class}
         });
     }

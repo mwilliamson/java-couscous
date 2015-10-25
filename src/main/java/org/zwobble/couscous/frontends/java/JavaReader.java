@@ -148,7 +148,7 @@ public class JavaReader {
     }
 
     private static StatementNode readReturnStatement(ReturnStatement statement) {
-        return new ReturnNode(readExpression(statement.getExpression()));
+        return ReturnNode.returns(readExpression(statement.getExpression()));
     }
 
     private static StatementNode readExpressionStatement(ExpressionStatement statement) {

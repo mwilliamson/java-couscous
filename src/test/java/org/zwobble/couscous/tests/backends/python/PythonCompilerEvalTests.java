@@ -24,7 +24,7 @@ public class PythonCompilerEvalTests extends BackendEvalTests {
         
         val programNode = ClassNode.builder("Program")
             .method(MethodNode.staticMethod("run")
-                .statement(new ReturnNode(expression))
+                .statement(ReturnNode.returns(expression))
                 .build())
             .build();
         

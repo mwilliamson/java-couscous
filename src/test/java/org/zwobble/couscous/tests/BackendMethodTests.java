@@ -4,7 +4,6 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 import org.zwobble.couscous.values.StringValue;
@@ -17,6 +16,7 @@ import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
@@ -36,7 +36,7 @@ public abstract class BackendMethodTests {
     @Test
     public void canReturnLiteralValue() {
         val method = staticMethod("hello")
-            .statement(new ReturnNode(literal("hello, world!")));
+            .statement(returns(literal("hello, world!")));
         val result = runMethod(method);
         
         assertEquals(value("hello, world!"), result);
@@ -46,7 +46,7 @@ public abstract class BackendMethodTests {
         val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
-            .statement(new ReturnNode(reference(arg)));
+            .statement(returns(reference(arg)));
         val result = runMethod(method, value("hello, world!"));
         
         assertEquals(value("hello, world!"), result);
@@ -58,7 +58,7 @@ public abstract class BackendMethodTests {
         val method = staticMethod("hello")
             .argument(arg)
             .statement(expressionStatement(assign(reference(arg), LiteralNode.literal("[updated value]"))))
-            .statement(new ReturnNode(reference(arg)));
+            .statement(returns(reference(arg)));
         val result = runMethod(method, value("[initial value]"));
         
         assertEquals(value("[updated value]"), result);
@@ -70,7 +70,7 @@ public abstract class BackendMethodTests {
             ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
-            .statement(new ReturnNode(reference(localVariableDeclaration)));
+            .statement(returns(reference(localVariableDeclaration)));
         val result = runMethod(method);
         
         assertEquals(value("[initial value]"), result);
@@ -83,7 +83,7 @@ public abstract class BackendMethodTests {
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
             .statement(expressionStatement(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
-            .statement(new ReturnNode(reference(localVariableDeclaration)));
+            .statement(returns(reference(localVariableDeclaration)));
         val result = runMethod(method);
         
         assertEquals(value("[updated value]"), result);

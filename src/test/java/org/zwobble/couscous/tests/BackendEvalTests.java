@@ -5,7 +5,6 @@ import java.util.List;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -21,6 +20,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -81,7 +81,7 @@ public abstract class BackendEvalTests {
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
         val classNode = ClassNode.builder("com.example.Example")
             .staticMethod("main", method -> method
-                .statement(new ReturnNode(staticMethodCall("java.lang.Integer", "parseInt", literal("42")))))
+                .statement(returns(staticMethodCall("java.lang.Integer", "parseInt", literal("42")))))
             .build();
         val result = evalExpression(asList(classNode),
             staticMethodCall("com.example.Example", "main"));
@@ -92,7 +92,7 @@ public abstract class BackendEvalTests {
     public void canCallInstanceMethodWithNoArgumentsOnUserDefinedClass() {
         val classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
-                .statement(new ReturnNode(literal(42))))
+                .statement(returns(literal(42))))
             .build();
         val result = evalExpression(asList(classNode),
             methodCall(constructorCall(classNode.getName(), asList()), "main", asList(), IntegerValue.REF));
@@ -105,7 +105,7 @@ public abstract class BackendEvalTests {
         val classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .argument(argument)
-                .statement(new ReturnNode(reference(argument))))
+                .statement(returns(reference(argument))))
             .build();
         
         val result = evalExpression(
@@ -130,7 +130,7 @@ public abstract class BackendEvalTests {
                     fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
                     reference(argument))))
             .method("main", method -> method
-                .statement(new ReturnNode(
+                .statement(returns(
                     fieldAccess(method.thisReference(), "value", IntegerValue.REF))))
             .build();
         

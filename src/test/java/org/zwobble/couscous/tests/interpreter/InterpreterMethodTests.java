@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.JavaProject;
@@ -28,6 +27,7 @@ import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
@@ -78,7 +78,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         val localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
-            .statement(new ReturnNode(reference(localVariableDeclaration)));
+            .statement(returns(reference(localVariableDeclaration)));
 
         val exception = assertThrows(VariableNotInScope.class,
             () -> runMethod(method));
@@ -91,7 +91,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         val localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
-            .statement(new ReturnNode(reference(localVariableDeclaration)))
+            .statement(returns(reference(localVariableDeclaration)))
             .statement(localVariableDeclaration);
 
         val exception = assertThrows(UnboundVariable.class,
