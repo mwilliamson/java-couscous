@@ -72,7 +72,8 @@ public class ValueObjectTests {
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
             {TypeName.class},
-            {VariableDeclaration.class}
+            {VariableDeclaration.class},
+            {VariableReferenceNode.class}
         });
     }
     
