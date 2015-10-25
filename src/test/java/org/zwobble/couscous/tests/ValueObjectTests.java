@@ -57,6 +57,7 @@ public class ValueObjectTests {
             {FieldAccessNode.class},
             {FieldDeclarationNode.class},
             {FormalArgumentNode.class},
+            {LiteralNode.class},
             {VariableDeclaration.class}
         });
     }
