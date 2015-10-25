@@ -2,7 +2,6 @@ package org.zwobble.couscous.backends.python;
 
 import java.util.List;
 import java.util.function.Consumer;
-
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
@@ -19,19 +18,17 @@ import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonNode;
 import org.zwobble.couscous.backends.python.ast.PythonPassNode;
 import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
+import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import org.zwobble.couscous.util.Action;
-
 import static com.google.common.collect.Iterables.skip;
-
-import lombok.val;
 
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
-        val writer = new PythonWriter();
-        val serializer = new PythonSerializer(writer);
+        PythonWriter writer = new PythonWriter();
+        PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);
         return writer.asString();
     }
@@ -50,22 +47,22 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonIntegerLiteralNode integerLiteral) {
         writer.writeInteger(integerLiteral.getValue());
     }
-
+    
     @Override
     public void visit(PythonStringLiteralNode stringLiteral) {
         writer.writeStringLiteral(stringLiteral.getValue());
     }
-
+    
     @Override
     public void visit(PythonBooleanLiteralNode booleanLiteral) {
         writer.writeKeyword(booleanLiteral.getValue() ? "True" : "False");
     }
-
+    
     @Override
     public void visit(PythonVariableReferenceNode reference) {
         writer.writeIdentifier(reference.getName());
     }
-
+    
     @Override
     public void visit(PythonConditionalExpressionNode conditional) {
         writeParenthesised(conditional.getTrueValue());
@@ -78,14 +75,14 @@ public class PythonSerializer implements PythonNodeVisitor {
         writer.writeSpace();
         writeParenthesised(conditional.getFalseValue());
     }
-
+    
     @Override
     public void visit(PythonAttributeAccessNode attributeAccess) {
         writeParenthesised(attributeAccess.getLeft());
         writer.writeSymbol(".");
         writer.writeIdentifier(attributeAccess.getAttributeName());
     }
-
+    
     @Override
     public void visit(PythonCallNode call) {
         writeParenthesised(call.getCallee());
@@ -96,7 +93,7 @@ public class PythonSerializer implements PythonNodeVisitor {
         });
         writer.writeSymbol(")");
     }
-
+    
     @Override
     public void visit(PythonGetSliceNode getSlice) {
         writeParenthesised(getSlice.getReceiver());
@@ -106,7 +103,7 @@ public class PythonSerializer implements PythonNodeVisitor {
         });
         writer.writeSymbol("]");
     }
-
+    
     @Override
     public void visit(PythonReturnNode pythonReturn) {
         writer.writeStatement(() -> {
@@ -115,14 +112,14 @@ public class PythonSerializer implements PythonNodeVisitor {
             write(pythonReturn.getValue());
         });
     }
-
+    
     @Override
     public void visit(PythonPassNode pass) {
         writer.writeStatement(() -> {
-            writer.writeKeyword("pass");            
+            writer.writeKeyword("pass");
         });
     }
-
+    
     @Override
     public void visit(PythonClassNode pythonClass) {
         writer.writeStatement(() -> {
@@ -135,7 +132,7 @@ public class PythonSerializer implements PythonNodeVisitor {
             writeBlock(pythonClass.getBody());
         });
     }
-
+    
     @Override
     public void visit(PythonFunctionDefinitionNode functionDefinition) {
         writer.writeStatement(() -> {
@@ -148,7 +145,7 @@ public class PythonSerializer implements PythonNodeVisitor {
             writeBlock(functionDefinition.getBody());
         });
     }
-
+    
     @Override
     public void visit(PythonAssignmentNode assignment) {
         writer.writeStatement(() -> {
@@ -157,10 +154,9 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSymbol("=");
             writer.writeSpace();
             write(assignment.getValue());
-            
         });
     }
-
+    
     @Override
     public void visit(PythonImportNode importNode) {
         writer.writeStatement(() -> {
@@ -170,38 +166,32 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSpace();
             writer.writeKeyword("import");
             writer.writeSpace();
-            writeWithSeparator(
-                importNode.getAliases(),
-                alias -> {
-                    writer.writeIdentifier(alias.getName());
-                },
-                () -> {
-                    writer.writeSymbol(",");
-                    writer.writeSpace();
-                });
+            writeWithSeparator(importNode.getAliases(), alias -> {
+                writer.writeIdentifier(alias.getName());
+            }, () -> {
+                writer.writeSymbol(",");
+                writer.writeSpace();
+            });
         });
     }
-
+    
     private void writeParenthesised(PythonExpressionNode expression) {
         writer.writeSymbol("(");
         write(expression);
         writer.writeSymbol(")");
     }
-
+    
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {
-        writeWithSeparator(
-            functionDefinition.getArgumentNames(),
-            writer::writeIdentifier,
-            () -> {
-                writer.writeSymbol(",");
-                writer.writeSpace();
-            });
+        writeWithSeparator(functionDefinition.getArgumentNames(), writer::writeIdentifier, () -> {
+            writer.writeSymbol(",");
+            writer.writeSpace();
+        });
     }
-
+    
     private <T> void writeWithSeparator(List<T> values, Consumer<T> writeValue, Action separator) {
         if (!values.isEmpty()) {
             writeValue.accept(values.get(0));
-            for (val value : skip(values, 1)) {
+            for (T value : skip(values, 1)) {
                 separator.run();
                 writeValue.accept(value);
             }
@@ -210,14 +200,14 @@ public class PythonSerializer implements PythonNodeVisitor {
     
     @Override
     public void visit(PythonModuleNode module) {
-        for (val statement : module.getStatements()) {
+        for (PythonStatementNode statement : module.getStatements()) {
             write(statement);
         }
     }
-
+    
     private void writeBlock(PythonBlock body) {
         writer.startBlock();
-        for (val statement : body) {
+        for (PythonStatementNode statement : body) {
             write(statement);
         }
         writer.endBlock();

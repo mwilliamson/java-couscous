@@ -1,15 +1,12 @@
 package org.zwobble.couscous.interpreter;
 
 import java.util.Map;
-
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
-
 import com.google.common.collect.ImmutableMap;
 
-import lombok.val;
-
 public class MapBackedProject implements Project {
+    
     public static Builder builder() {
         return new Builder();
     }
@@ -27,7 +24,7 @@ public class MapBackedProject implements Project {
         }
         
         public Builder addClasses(Iterable<ConcreteType> classes) {
-            for (val clazz : classes) {
+            for (ConcreteType clazz : classes) {
                 addClass(clazz);
             }
             return this;
@@ -37,9 +34,8 @@ public class MapBackedProject implements Project {
             return new MapBackedProject(classes.build());
         }
     }
-    
     private Map<TypeName, ConcreteType> classes;
-
+    
     public MapBackedProject(Map<TypeName, ConcreteType> classes) {
         this.classes = classes;
     }
@@ -47,10 +43,9 @@ public class MapBackedProject implements Project {
     @Override
     public ConcreteType findClass(TypeName name) {
         if (classes.containsKey(name)) {
-            return classes.get(name);            
+            return classes.get(name);
         } else {
             throw new IllegalArgumentException("Cannot find class: " + name);
         }
-        
     }
 }

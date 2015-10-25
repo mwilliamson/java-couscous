@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.backends.python;
 import org.junit.Test;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
+import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -22,19 +23,17 @@ import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonRe
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 
-import lombok.val;
-
 public class PythonSerializerTests {
     @Test
     public void integersAreNotBoxed() {
-        val output = serialize(pythonIntegerLiteral(42));
+        String output = serialize(pythonIntegerLiteral(42));
         assertEquals("42", output);
     }
     
     @Test
     public void stringsAreNotBoxed() {
         // TODO: escaping
-        val output = serialize(pythonStringLiteral("blah"));
+        String output = serialize(pythonStringLiteral("blah"));
         assertEquals("\"blah\"", output);
     }
     
@@ -51,104 +50,82 @@ public class PythonSerializerTests {
     
     @Test
     public void conditionalExpressionIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(1) if (True) else (2)", serialize(
-            pythonConditionalExpression(
-                pythonBooleanLiteral(true),
-                pythonIntegerLiteral(1),
-                pythonIntegerLiteral(2))));
+        assertEquals("(1) if (True) else (2)", serialize(pythonConditionalExpression(pythonBooleanLiteral(true), pythonIntegerLiteral(1), pythonIntegerLiteral(2))));
     }
     
     @Test
     public void attributeAccessIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(x).y", serialize(
-            pythonAttributeAccess(
-                pythonVariableReference("x"),
-                "y")));
+        assertEquals("(x).y", serialize(pythonAttributeAccess(pythonVariableReference("x"), "y")));
     }
     
     @Test
     public void callIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(f)(x, y)", serialize(
-            pythonCall(
-                pythonVariableReference("f"),
-                asList(
-                    pythonVariableReference("x"),
-                    pythonVariableReference("y")))));
+        assertEquals("(f)(x, y)", serialize(pythonCall(pythonVariableReference("f"), asList(pythonVariableReference("x"), pythonVariableReference("y")))));
     }
     
     @Test
     public void getSliceIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(x)[y:z]", serialize(
-            pythonGetSlice(
-                pythonVariableReference("x"),
-                asList(
-                    pythonVariableReference("y"),
-                    pythonVariableReference("z")))));
+        assertEquals("(x)[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), asList(pythonVariableReference("y"), pythonVariableReference("z")))));
     }
     
     @Test
     public void returnKeywordIsUsedForReturns() {
-        val output = serialize(pythonReturn(pythonIntegerLiteral(42)));
+        String output = serialize(pythonReturn(pythonIntegerLiteral(42)));
         assertEquals("return 42\n", output);
     }
     
     @Test
     public void passStatementIsSerializedAsPassKeyword() {
-        val output = serialize(PASS);
+        final java.lang.Object output = serialize(PASS);
         assertEquals("pass\n", output);
     }
     
     @Test
     public void emptyFunctionHasPassStatement() {
-        val function = PythonFunctionDefinitionNode.builder("empty").build();
-        val output = serialize(function);
+        PythonFunctionDefinitionNode function = PythonFunctionDefinitionNode.builder("empty").build();
+        String output = serialize(function);
         assertEquals("def empty():\n    pass\n", output);
     }
     
     @Test
     public void functionArgumentsAreSerializedWithName() {
-        val function = PythonFunctionDefinitionNode.builder("empty")
+        PythonFunctionDefinitionNode function = PythonFunctionDefinitionNode.builder("empty")
             .argument("one")
             .argument("two")
             .build();
-        val output = serialize(function);
+        String output = serialize(function);
         assertEquals("def empty(one, two):\n    pass\n", output);
     }
     
     @Test
     public void emptyClassHasPassStatement() {
-        val classNode = PythonClassNode.builder("Empty")
-            .build();
-        val output = serialize(classNode);
+        PythonClassNode classNode = PythonClassNode.builder("Empty").build();
+        String output = serialize(classNode);
         assertEquals("class Empty(object):\n    pass\n", output);
     }
     
     @Test
     public void bodiesOfBlocksAreIndented() {
-        val classNode = PythonClassNode.builder("Foo")
+        PythonClassNode classNode = PythonClassNode.builder("Foo")
             .statement(PythonFunctionDefinitionNode.builder("one").build())
             .statement(PythonFunctionDefinitionNode.builder("two").build())
             .build();
-        val output = serialize(classNode);
-        val expectedOutput =
-            "class Foo(object):\n" +
-            "    def one():\n" +
-            "        pass\n" +
-            "    def two():\n" +
-            "        pass\n";
+        String output = serialize(classNode);
+        String expectedOutput = "class Foo(object):\n    def one():\n        pass\n    def two():\n        pass\n";
         assertEquals(expectedOutput, output);
     }
     
     @Test
     public void assignmentIsSerializedWithEqualsSymbolSeparatingTargetAndValue() {
-        val output = serialize(pythonAssignment(
-            pythonVariableReference("x"), pythonIntegerLiteral(42)));
+        String output = serialize(pythonAssignment(
+            pythonVariableReference("x"),
+            pythonIntegerLiteral(42)));
         assertEquals("x = 42\n", output);
     }
     
     @Test
     public void importIsSerializedUsingImportKeyword() {
-        val output = serialize(pythonImport(
+        String output = serialize(pythonImport(
             "com.example",
             asList(pythonImportAlias("Program"))));
         assertEquals("from com.example import Program\n", output);
@@ -156,16 +133,16 @@ public class PythonSerializerTests {
     
     @Test
     public void importAliasesAreSeparatedByCommas() {
-        val output = serialize(pythonImport(
+        String output = serialize(pythonImport(
             "com.example",
-            asList(pythonImportAlias("Program"), pythonImportAlias("Runner"))));
+            asList(pythonImportAlias("Program"),pythonImportAlias("Runner"))));
         assertEquals("from com.example import Program, Runner\n", output);
     }
     
     @Test
     public void moduleIsSerializedStatements() {
-        val classNode = pythonModule(asList(PASS));
-        val output = serialize(classNode);
+        PythonModuleNode classNode = pythonModule(asList(PASS));
+        String output = serialize(classNode);
         assertEquals("pass\n", output);
     }
 }

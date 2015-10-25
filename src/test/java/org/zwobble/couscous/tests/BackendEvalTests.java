@@ -5,6 +5,7 @@ import java.util.List;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -27,8 +28,6 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
-import lombok.val;
-
 public abstract class BackendEvalTests {
     @Test
     public void canEvaluateLiterals() {
@@ -40,19 +39,19 @@ public abstract class BackendEvalTests {
     
     @Test
     public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
-        val result = evalExpression(ternaryConditional(literal(true), literal("T"), literal("F")));
+        PrimitiveValue result = evalExpression(ternaryConditional(literal(true), literal("T"), literal("F")));
         assertEquals(value("T"), result);
     }
     
     @Test
     public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
-        val result = evalExpression(ternaryConditional(literal(false), literal("T"), literal("F")));
+        PrimitiveValue result = evalExpression(ternaryConditional(literal(false), literal("T"), literal("F")));
         assertEquals(value("F"), result);
     }
     
     @Test
     public void canCallMethodWithNoArgumentsOnBuiltin() {
-        val result = evalExpression(methodCall(
+        PrimitiveValue result = evalExpression(methodCall(
             literal("hello"),
             "length",
             asList(),
@@ -62,7 +61,7 @@ public abstract class BackendEvalTests {
     
     @Test
     public void canCallMethodWithArgumentsOnBuiltin() {
-        val result = evalExpression(methodCall(
+        PrimitiveValue result = evalExpression(methodCall(
             literal("hello"),
             "substring",
             asList(literal(1), literal(4)),
@@ -72,43 +71,43 @@ public abstract class BackendEvalTests {
     
     @Test
     public void canCallBuiltinStaticMethod() {
-        val result = evalExpression(
+        PrimitiveValue result = evalExpression(
             staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
         assertEquals(value(42), result);
     }
     
     @Test
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .staticMethod("main", method -> method
                 .statement(returns(staticMethodCall("java.lang.Integer", "parseInt", literal("42")))))
             .build();
-        val result = evalExpression(asList(classNode),
+        PrimitiveValue result = evalExpression(asList(classNode),
             staticMethodCall("com.example.Example", "main"));
         assertEquals(value(42), result);
     }
     
     @Test
     public void canCallInstanceMethodWithNoArgumentsOnUserDefinedClass() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .statement(returns(literal(42))))
             .build();
-        val result = evalExpression(asList(classNode),
+        PrimitiveValue result = evalExpression(asList(classNode),
             methodCall(constructorCall(classNode.getName(), asList()), "main", asList(), IntegerValue.REF));
         assertEquals(value(42), result);
     }
     
     @Test
     public void canCallInstanceMethodWithArgumentsOnUserDefinedClass() {
-        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
-        val classNode = ClassNode.builder("com.example.Example")
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .argument(argument)
                 .statement(returns(reference(argument))))
             .build();
         
-        val result = evalExpression(
+        PrimitiveValue result = evalExpression(
             asList(classNode),
             methodCall(
                 constructorCall(classNode.getName(), asList()),
@@ -121,8 +120,8 @@ public abstract class BackendEvalTests {
     
     @Test
     public void constructorIsExecutedOnConstruction() {
-        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
-        val classNode = ClassNode.builder("com.example.Example")
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .field("value", IntegerValue.REF)
             .constructor(constructor -> constructor
                 .argument(argument)
@@ -134,7 +133,7 @@ public abstract class BackendEvalTests {
                     fieldAccess(method.thisReference(), "value", IntegerValue.REF))))
             .build();
         
-        val result = evalExpression(
+        PrimitiveValue result = evalExpression(
             asList(classNode),
             methodCall(
                 constructorCall(classNode.getName(), asList(literal(42))),

@@ -1,12 +1,16 @@
 package org.zwobble.couscous.tests.frontends.java;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
@@ -33,9 +37,6 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 
-import lombok.SneakyThrows;
-import lombok.val;
-
 public class JavaReaderTests {
     @Test
     public void canReadLiterals() {
@@ -54,7 +55,7 @@ public class JavaReaderTests {
     
     @Test
     public void canReadFieldDeclarations() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "private String name;");
         
         assertEquals(
@@ -73,13 +74,13 @@ public class JavaReaderTests {
     }
     
     private void canReadFieldReference(String expression) {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "private String name;" +
             "public String getName() {" +
             "    return " + expression + ";" +
             "}");
         
-        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         assertEquals(
             fieldAccess(
                 thisReference(TypeName.of("com.example.Example")),
@@ -97,11 +98,11 @@ public class JavaReaderTests {
     
     @Test
     public void canReadImplicitInstanceMethodCalls() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "public String loop() {" +
             "    return loop();" +
             "}");
-        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         
         assertEquals(
             methodCall(
@@ -121,11 +122,11 @@ public class JavaReaderTests {
     
     @Test
     public void canReadImplicitStaticMethodCalls() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "public static String loop() {" +
             "    return loop();" +
             "}");
-        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         
         assertEquals(
             staticMethodCall(
@@ -151,13 +152,13 @@ public class JavaReaderTests {
     
     @Test
     public void canReadAssignments() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "private String name;" +
             "public String getName() {" +
             "    return name = \"blah\";" +
             "}");
         
-        val returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         assertEquals(
             assign(
                 fieldAccess(
@@ -170,13 +171,13 @@ public class JavaReaderTests {
     
     @Test
     public void canDeclareAndReferenceLocalVariables() {
-        val statements = readStatements("int x = 4; return x;");
+        List<StatementNode> statements = readStatements("int x = 4; return x;");
         
-        val declaration = (LocalVariableDeclarationNode) statements.get(0);
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         assertEquals("x", declaration.getName());
         assertEquals(IntegerValue.REF, declaration.getType());
         assertEquals(literal(4), declaration.getInitialValue());
-        val returnNode = (ReturnNode) statements.get(1);
+        ReturnNode returnNode = (ReturnNode) statements.get(1);
         assertEquals(
             reference(declaration),
             returnNode.getValue());
@@ -184,18 +185,18 @@ public class JavaReaderTests {
     
     @Test
     public void canDeclareAndReferenceArguments() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "public String identity(int value) {" +
             "    return value;" +
             "}");
         
-        val method = classNode.getMethods().get(0);
-        val argument = method.getArguments().get(0);
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
         assertEquals("value", argument.getName());
         assertEquals(TypeName.of("int"), argument.getType());
         assertEquals(1, method.getArguments().size());
         
-        val returnNode = (ReturnNode)method.getBody().get(0);
+        ReturnNode returnNode = (ReturnNode)method.getBody().get(0);
         assertEquals(reference(argument), returnNode.getValue());
     }
     
@@ -212,13 +213,13 @@ public class JavaReaderTests {
     
     @Test
     public void canDeclareConstructor() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "private final String name;" +
             "public Example() {" +
             "    this.name = \"Flaws\";" +
             "}");
         
-        val constructor = classNode.getConstructor();
+        ConstructorNode constructor = classNode.getConstructor();
         
         assertEquals(asList(), constructor.getArguments());
         
@@ -234,28 +235,28 @@ public class JavaReaderTests {
     
     @Test
     public void canDeclareStaticMethodWithAnnotation() {
-        val classNode = readClass(
+        ClassNode classNode = readClass(
             "@Deprecated public void doNothing() {}");
         
-        val method = classNode.getMethods().get(0);
+        MethodNode method = classNode.getMethods().get(0);
         assertEquals(
             asList(annotation(TypeName.of("java.lang.Deprecated"))),
             method.getAnnotations());
     }
 
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
-        val javaClass =
+        String javaClass =
             "public Object main() {" +
             "    return " + expressionSource + ";" +
             "}";
         
-        val classNode = readClass(javaClass);
-        val returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ClassNode classNode = readClass(javaClass);
+        ReturnNode returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         return returnStatement.getValue();
     }
 
     private ExpressionNode readExpression(String expressionSource) {
-        val returnStatement = (ReturnNode) readStatement("return " + expressionSource + ";");
+        ReturnNode returnStatement = (ReturnNode) readStatement("return " + expressionSource + ";");
         return returnStatement.getValue();
     }
 
@@ -264,33 +265,36 @@ public class JavaReaderTests {
     }
 
     private List<StatementNode> readStatements(String statementsSource) {
-        val javaClass =
+        String javaClass =
             "public static Object main() {" +
             statementsSource +
             "}";
         
-        val classNode = readClass(javaClass);
+        ClassNode classNode = readClass(javaClass);
         return classNode.getMethods().get(0).getBody();
     }
 
-    @SneakyThrows
     private ClassNode readClass(String classBody) {
-        val javaClass =
+        String javaClass =
             "package com.example;" +
             "public class Example {" +
             classBody +
             "}";
-        
-        val directoryPath = Files.createTempDirectory(null);
-        val sourcePath = directoryPath.resolve("com/example/Example.java");
         try {
-            Files.createDirectories(directoryPath.resolve("com/example"));
-            Files.write(sourcePath, asList(javaClass));
-            
-            val reader = new JavaReader();
-            return reader.readClassFromFile(directoryPath, sourcePath);
-        } finally {
-            deleteRecursively(directoryPath.toFile());
+
+            Path directoryPath = Files.createTempDirectory(null);
+            Path sourcePath = directoryPath.resolve("com/example/Example.java");
+            try {
+                Files.createDirectories(directoryPath.resolve("com/example"));
+                Files.write(sourcePath, asList(javaClass));
+                
+                JavaReader reader = new JavaReader();
+                return reader.readClassFromFile(directoryPath, sourcePath);
+            } finally {
+                deleteRecursively(directoryPath.toFile());
+            }
+        } catch (Exception exception) {
+            throw new RuntimeException(exception);
         }
     }
 }

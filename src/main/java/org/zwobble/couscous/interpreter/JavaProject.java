@@ -8,8 +8,6 @@ import org.zwobble.couscous.interpreter.values.ConcreteType;
 
 import com.google.common.collect.Iterables;
 
-import lombok.val;
-
 public class JavaProject {
     public static MapBackedProject.Builder builder() {
         return MapBackedProject.builder()
@@ -17,7 +15,7 @@ public class JavaProject {
     }
 
     public static Project of(List<ClassNode> classNodes) {
-        val concreteTypes = Iterables.transform(classNodes, ConcreteType::fromNode);
+        Iterable<ConcreteType> concreteTypes = Iterables.transform(classNodes, ConcreteType::fromNode);
         return builder()
                 .addClasses(concreteTypes)
                 .build();

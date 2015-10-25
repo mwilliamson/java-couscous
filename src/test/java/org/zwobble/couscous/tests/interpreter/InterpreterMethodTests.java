@@ -5,14 +5,19 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
+import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.JavaProject;
+import org.zwobble.couscous.interpreter.Project;
 import org.zwobble.couscous.interpreter.UnboundVariable;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.VariableNotInScope;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendMethodTests;
 import org.zwobble.couscous.tests.MethodRunner;
@@ -34,14 +39,12 @@ import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
-import lombok.val;
-
 public class InterpreterMethodTests extends BackendMethodTests {
     @Test
     public void errorIfWrongNumberOfArgumentsArePassed() {
-        val method = staticMethod("hello");
+        MethodNode.Builder method = staticMethod("hello");
         
-        val exception = assertThrows(WrongNumberOfArguments.class,
+        WrongNumberOfArguments exception = assertThrows(WrongNumberOfArguments.class,
             () -> runMethod(method, value("hello, world!")));
         
         assertEquals(new WrongNumberOfArguments(0, 1), exception);
@@ -49,12 +52,12 @@ public class InterpreterMethodTests extends BackendMethodTests {
     
     @Test
     public void errorIfTryingToAssignValueOfWrongTypeToVariable() {
-        val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
-        val method = staticMethod("hello")
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
             .statement(expressionStatement(assign(reference(arg), literal(0))));
 
-        val exception = assertThrows(UnexpectedValueType.class,
+        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> runMethod(method, value("")));
         
         assertEquals(new UnexpectedValueType(StringValue.REF, IntegerValue.REF), exception);
@@ -62,12 +65,12 @@ public class InterpreterMethodTests extends BackendMethodTests {
     
     @Test
     public void errorIfTryingToAssignToVariableNotInScope() {
-        val localVariableDeclaration = localVariableDeclaration(
+        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
-        val method = staticMethod("hello")
+        MethodNode.Builder method = staticMethod("hello")
             .statement(expressionStatement(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
 
-        val exception = assertThrows(VariableNotInScope.class,
+        VariableNotInScope exception = assertThrows(VariableNotInScope.class,
             () -> runMethod(method));
         
         assertEquals(new VariableNotInScope(ANY_ID), exception);
@@ -75,12 +78,12 @@ public class InterpreterMethodTests extends BackendMethodTests {
     
     @Test
     public void errorIfTryingToGetValueOfVariableNotInScope() {
-        val localVariableDeclaration = localVariableDeclaration(
+        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
-        val method = staticMethod("hello")
+        MethodNode.Builder method = staticMethod("hello")
             .statement(returns(reference(localVariableDeclaration)));
 
-        val exception = assertThrows(VariableNotInScope.class,
+        VariableNotInScope exception = assertThrows(VariableNotInScope.class,
             () -> runMethod(method));
         
         assertEquals(new VariableNotInScope(ANY_ID), exception);
@@ -88,13 +91,13 @@ public class InterpreterMethodTests extends BackendMethodTests {
     
     @Test
     public void errorIfTryingToGetValueOfUnboundVariable() {
-        val localVariableDeclaration = localVariableDeclaration(
+        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
-        val method = staticMethod("hello")
+        MethodNode.Builder method = staticMethod("hello")
             .statement(returns(reference(localVariableDeclaration)))
             .statement(localVariableDeclaration);
 
-        val exception = assertThrows(UnboundVariable.class,
+        UnboundVariable exception = assertThrows(UnboundVariable.class,
             () -> runMethod(method));
         
         assertEquals(new UnboundVariable(ANY_ID), exception);
@@ -110,9 +113,9 @@ public class InterpreterMethodTests extends BackendMethodTests {
                     String methodName,
                     List<PrimitiveValue> arguments) {
                 
-                val project = JavaProject.of(classNodes);
-                val interpreter = new Interpreter(project);
-                val argumentValues = arguments.stream()
+                Project project = JavaProject.of(classNodes);
+                Interpreter interpreter = new Interpreter(project);
+                List<InterpreterValue> argumentValues = arguments.stream()
                     .map(InterpreterValues::value)
                     .collect(Collectors.toList());
                 

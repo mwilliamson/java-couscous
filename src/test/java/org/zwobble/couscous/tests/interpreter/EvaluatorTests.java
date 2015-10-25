@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
@@ -17,6 +18,7 @@ import org.zwobble.couscous.interpreter.UnboundField;
 import org.zwobble.couscous.interpreter.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
 import org.zwobble.couscous.values.IntegerValue;
@@ -41,23 +43,21 @@ import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 
-import lombok.val;
-
 public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
-        val environment = new Environment(
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        Environment environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
             Optional.empty(),
             new StackFrameBuilder().declare(arg, value("[initial value]")).build());
-        val result = eval(environment, assign(arg, literal("[updated value]")));
+        InterpreterValue result = eval(environment, assign(arg, literal("[updated value]")));
         assertEquals(new StringInterpreterValue("[updated value]"), result);
     }
     
     @Test
     public void errorIfConditionIsNotBoolean() {
-        val exception = assertThrows(ConditionMustBeBoolean.class,
+        ConditionMustBeBoolean exception = assertThrows(ConditionMustBeBoolean.class,
             () -> eval(emptyEnvironment(),
                 ternaryConditional(literal(1), literal("T"), literal("F"))));
         assertEquals(new ConditionMustBeBoolean(new IntegerInterpreterValue(1)), exception);
@@ -65,7 +65,7 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void errorIfMethodDoesNotExist() {
-        val exception = assertThrows(NoSuchMethod.class,
+        NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> eval(emptyEnvironment(),
                 methodCall(
                     literal("hello"),
@@ -77,7 +77,7 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void errorIfWrongNumberOfArgumentsArePassed() {
-        val exception = assertThrows(WrongNumberOfArguments.class,
+        WrongNumberOfArguments exception = assertThrows(WrongNumberOfArguments.class,
             () -> eval(emptyEnvironment(),
                 methodCall(
                     literal("hello"),
@@ -89,7 +89,7 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void errorIfArgumentIsWrongType() {
-        val exception = assertThrows(UnexpectedValueType.class,
+        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> eval(emptyEnvironment(),
                 methodCall(
                     literal("hello"),
@@ -101,13 +101,13 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void errorIfConstructorArgumentIsWrongType() {
-        val argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
-        val classNode = ClassNode.builder("com.example.Example")
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
                 .argument(argument))
             .build();
         
-        val exception = assertThrows(UnexpectedValueType.class,
+        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> evalExpression(
                 asList(classNode),
                 constructorCall(
@@ -119,10 +119,10 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void cannotGetValueOfUndeclaredField() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .build();
         
-        val exception = assertThrows(NoSuchField.class,
+        NoSuchField exception = assertThrows(NoSuchField.class,
             () -> evalExpression(
                 asList(classNode),
                 fieldAccess(
@@ -137,11 +137,11 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void cannotGetValueOfUnbounddField() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .field("value", IntegerValue.REF)
             .build();
         
-        val exception = assertThrows(UnboundField.class,
+        UnboundField exception = assertThrows(UnboundField.class,
             () -> evalExpression(
                 asList(classNode),
                 fieldAccess(
@@ -156,14 +156,14 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void cannotSetValueOfUndeclaredField() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
                 .statement(assignStatement(
                     fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
                     literal(42))))
             .build();
         
-        val exception = assertThrows(NoSuchField.class,
+        NoSuchField exception = assertThrows(NoSuchField.class,
             () -> evalExpression(
                 asList(classNode),
                 constructorCall(
@@ -175,7 +175,7 @@ public class EvaluatorTests extends BackendEvalTests {
     
     @Test
     public void cannotSetValueOfFieldWithWrongType() {
-        val classNode = ClassNode.builder("com.example.Example")
+        ClassNode classNode = ClassNode.builder("com.example.Example")
             .field("value", IntegerValue.REF)
             .constructor(constructor -> constructor
                 .statement(assignStatement(
@@ -183,7 +183,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     literal(""))))
             .build();
         
-        val exception = assertThrows(UnexpectedValueType.class,
+        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> evalExpression(
                 asList(classNode),
                 constructorCall(
@@ -205,7 +205,7 @@ public class EvaluatorTests extends BackendEvalTests {
             List<ClassNode> classes,
             ExpressionNode expression) {
         
-        val environment = new Environment(
+        Environment environment = new Environment(
             JavaProject.of(classes),
             Optional.empty(),
             ImmutableMap.of());
