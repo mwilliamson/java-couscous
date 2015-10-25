@@ -22,6 +22,7 @@ import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.FieldDeclarationNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableReferenceNode;
@@ -55,6 +56,7 @@ public class ValueObjectTests {
             {ExpressionStatementNode.class},
             {FieldAccessNode.class},
             {FieldDeclarationNode.class},
+            {FormalArgumentNode.class},
             {VariableDeclaration.class}
         });
     }
