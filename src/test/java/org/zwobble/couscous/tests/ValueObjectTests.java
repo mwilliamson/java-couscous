@@ -4,12 +4,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.AnnotationNode;
+import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.util.ExtraArrays;
 
 import com.google.common.base.Joiner;
@@ -30,7 +32,8 @@ public class ValueObjectTests {
     @Parameters(name="{0} is value object")
     public static Iterable<Object[]> valueObjectTypes() {
         return asList(new Object[][] {
-            {AnnotationNode.class}
+            {AnnotationNode.class},
+            {VariableDeclaration.class}
         });
     }
     
@@ -49,19 +52,48 @@ public class ValueObjectTests {
     }
 
     @Test
-    public void equalityIncludesAllFields() {
-        assertEquals(generateInstance(clazz), generateInstance(clazz));
-        assertNotEquals(
+    public void equalityAndHashCodeIncludeAllFields() throws Exception {
+        assertEqualsWithHashCode(generateInstance(clazz), generateInstance(clazz));
+        
+        generateInstancesWithSlightDifference(clazz)
+            .forEach(instance -> {
+                assertNotEqualsWithHashCode(
+                    generateFirstInstance(clazz),
+                    instance);
+            });
+        
+        assertNotEqualsWithHashCode(
             generateFirstInstance(clazz),
             generateSecondInstance(clazz));
     }
-
-    @Test
-    public void hashCodeIncludesAllFields() {
-        assertEquals(generateInstance(clazz).hashCode(), generateInstance(clazz).hashCode());
-        assertNotEquals(
-            generateFirstInstance(clazz).hashCode(),
-            generateSecondInstance(clazz).hashCode());
+    
+    private static void assertEqualsWithHashCode(Object first, Object second) {
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+    
+    private static void assertNotEqualsWithHashCode(Object first, Object second) {
+        assertNotEquals(first, second);
+        assertNotEquals(first.hashCode(), second.hashCode());
+    }
+    
+    private static Stream<Object> generateInstancesWithSlightDifference(Class<?> clazz) {
+        Class<?>[] fieldTypes = fieldTypes(clazz);
+        Method constructor = findStaticConstructor(clazz);
+        
+        return IntStream.range(0, fieldTypes.length)
+            .mapToObj(index -> {
+                Object[] arguments = ExtraArrays.mapWithIndex(
+                    fieldTypes,
+                    (argumentIndex, fieldType) ->
+                        argumentIndex == index ? generateSecondInstance(fieldType) : generateFirstInstance(fieldType))
+                    .toArray(Object[]::new);
+                try {
+                    return constructor.invoke(null, arguments);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
     
     private static Object generateFirstInstance(Class<?> type) {
@@ -74,7 +106,7 @@ public class ValueObjectTests {
     
     private static Object generateSecondInstance(Class<?> type) {
         if (type.equals(String.class)) {
-            return "[string ]";
+            return "[string 2]";
         } else {
             return generateValue(type, ValueObjectTests::generateSecondInstance).instance;           
         }
@@ -90,10 +122,8 @@ public class ValueObjectTests {
     
     private static GeneratedValue generateValue(Class<?> type, Function<Class<?>, Object> generate) {
         try {
-            Field[] fields = type.getDeclaredFields();
-            Class<?>[] fieldTypes = ExtraArrays.map(fields, field -> field.getType())
-                .toArray(Class<?>[]::new);
-            Method constructor = findStaticConstructor(type, fieldTypes);
+            Class<?>[] fieldTypes = fieldTypes(type);
+            Method constructor = findStaticConstructor(type);
             Object[] arguments = ExtraArrays.map(fieldTypes, fieldType -> generate.apply(fieldType))
                 .toArray(Object[]::new);
             Object instance = constructor.invoke(null, arguments);
@@ -102,8 +132,15 @@ public class ValueObjectTests {
             throw new RuntimeException(e);
         }
     }
+
+    private static Class<?>[] fieldTypes(Class<?> type) {
+        Field[] fields = type.getDeclaredFields();
+        return ExtraArrays.map(fields, field -> field.getType())
+            .toArray(Class<?>[]::new);
+    }
     
-    private static Method findStaticConstructor(Class<?> type, Class<?>[] fieldTypes) {
+    private static Method findStaticConstructor(Class<?> type) {
+        Class<?>[] fieldTypes = fieldTypes(type);
         return stream(type.getDeclaredMethods())
             .filter(method -> isStaticConstructor(type, fieldTypes, method))
             .findAny()
