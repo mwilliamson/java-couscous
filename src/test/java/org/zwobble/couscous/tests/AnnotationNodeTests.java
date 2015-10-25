@@ -25,6 +25,7 @@ public class AnnotationNodeTests {
     private <T> void assertIsValueObject(Class<T> clazz) throws Exception {
         assertToStringIncludesAllFields(clazz);
         assertEqualityIncludesAllFields(clazz);
+        assertHashCodeIncludesAllFields(clazz);
     }
 
     private <T> void assertToStringIncludesAllFields(Class<T> clazz) {
@@ -44,6 +45,12 @@ public class AnnotationNodeTests {
         assertNotEquals(
             generateFirstInstance(clazz),
             generateSecondInstance(clazz));
+    }
+
+    private void assertHashCodeIncludesAllFields(Class<?> clazz) {
+        assertNotEquals(
+            generateFirstInstance(clazz).hashCode(),
+            generateSecondInstance(clazz).hashCode());
     }
     
     private Object generateFirstInstance(Class<?> type) {
