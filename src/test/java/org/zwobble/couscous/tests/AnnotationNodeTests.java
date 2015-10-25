@@ -42,12 +42,14 @@ public class AnnotationNodeTests {
     }
 
     private void assertEqualityIncludesAllFields(Class<?> clazz) {
+        assertEquals(generateInstance(clazz), generateInstance(clazz));
         assertNotEquals(
             generateFirstInstance(clazz),
             generateSecondInstance(clazz));
     }
 
     private void assertHashCodeIncludesAllFields(Class<?> clazz) {
+        assertEquals(generateInstance(clazz).hashCode(), generateInstance(clazz).hashCode());
         assertNotEquals(
             generateFirstInstance(clazz).hashCode(),
             generateSecondInstance(clazz).hashCode());
