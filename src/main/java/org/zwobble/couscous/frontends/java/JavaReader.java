@@ -38,7 +38,6 @@ import org.zwobble.couscous.ast.ClassNodeBuilder;
 import org.zwobble.couscous.ast.ClassNodeBuilder.MethodBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -52,6 +51,7 @@ import org.zwobble.couscous.ast.TypeName;
 import com.google.common.collect.Lists;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -152,7 +152,7 @@ public class JavaReader {
     }
 
     private static StatementNode readExpressionStatement(ExpressionStatement statement) {
-        return new ExpressionStatementNode(readExpression(statement.getExpression()));
+        return expressionStatement(readExpression(statement.getExpression()));
     }
 
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {

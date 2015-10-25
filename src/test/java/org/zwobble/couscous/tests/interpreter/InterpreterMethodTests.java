@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.TypeName;
@@ -24,6 +23,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
@@ -52,7 +52,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
-            .statement(new ExpressionStatementNode(assign(reference(arg), literal(0))));
+            .statement(expressionStatement(assign(reference(arg), literal(0))));
 
         val exception = assertThrows(UnexpectedValueType.class,
             () -> runMethod(method, value("")));
@@ -65,7 +65,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         val localVariableDeclaration = localVariableDeclaration(
             ANY_ID, "x", StringValue.REF, literal(""));
         val method = staticMethod("hello")
-            .statement(new ExpressionStatementNode(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
+            .statement(expressionStatement(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
 
         val exception = assertThrows(VariableNotInScope.class,
             () -> runMethod(method));

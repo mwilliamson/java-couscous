@@ -2,11 +2,12 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 
 public class AssignmentNode implements ExpressionNode {
     public static StatementNode assignStatement(AssignableExpressionNode target, ExpressionNode value) {
-        return new ExpressionStatementNode(assign(target, value));
+        return expressionStatement(assign(target, value));
     }
     
     public static AssignmentNode assign(AssignableExpressionNode target, ExpressionNode value) {
@@ -14,7 +15,7 @@ public class AssignmentNode implements ExpressionNode {
     }
     
     public static StatementNode assignStatement(VariableNode target, ExpressionNode value) {
-        return new ExpressionStatementNode(assign(target, value));
+        return expressionStatement(assign(target, value));
     }
     
     public static AssignmentNode assign(VariableNode target, ExpressionNode value) {
