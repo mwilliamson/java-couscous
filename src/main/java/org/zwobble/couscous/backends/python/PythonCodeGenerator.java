@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -142,7 +143,9 @@ public class PythonCodeGenerator {
     
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
         Iterable<String> explicitArgumentNames = Iterables.transform(method.getArguments(), argument -> argument.getName());
-        Iterable<String> argumentNames = Iterables.concat(method.isStatic() ? asList() : asList("self"), explicitArgumentNames);
+        Iterable<String> argumentNames = Iterables.concat(
+            method.isStatic() ? Collections.<String>emptyList() : asList("self"),
+            explicitArgumentNames);
         List<PythonStatementNode> pythonBody = method.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
         return pythonFunctionDefinition(method.getName(), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
@@ -152,8 +155,8 @@ public class PythonCodeGenerator {
     }
     
     private static class StatementGenerator implements StatementNodeMapper<PythonStatementNode> {
-        
-        
+
+
         @Override
         public PythonStatementNode visit(ReturnNode returnNode) {
             return pythonReturn(generateExpression(returnNode.getValue()));
