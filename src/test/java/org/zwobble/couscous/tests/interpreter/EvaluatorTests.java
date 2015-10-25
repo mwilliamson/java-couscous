@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
@@ -35,6 +34,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
@@ -59,7 +59,7 @@ public class EvaluatorTests extends BackendEvalTests {
     public void errorIfConditionIsNotBoolean() {
         val exception = assertThrows(ConditionMustBeBoolean.class,
             () -> eval(emptyEnvironment(),
-                new TernaryConditionalNode(literal(1), literal("T"), literal("F"))));
+                ternaryConditional(literal(1), literal("T"), literal("F"))));
         assertEquals(new ConditionMustBeBoolean(new IntegerInterpreterValue(1)), exception);
     }
     

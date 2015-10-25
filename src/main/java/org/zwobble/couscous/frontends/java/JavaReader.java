@@ -283,7 +283,7 @@ public class JavaReader {
     }
 
     private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {
-        return new TernaryConditionalNode(
+        return TernaryConditionalNode.ternaryConditional(
             readExpression(expression.getExpression()),
             readExpression(expression.getThenExpression()),
             readExpression(expression.getElseExpression()));

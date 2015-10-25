@@ -9,7 +9,6 @@ import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -29,6 +28,7 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
@@ -145,7 +145,7 @@ public class JavaReaderTests {
     @Test
     public void canReadTernaryConditionals() {
         assertEquals(
-            new TernaryConditionalNode(literal(true), literal(1), literal(2)),
+            ternaryConditional(literal(true), literal(1), literal(2)),
             readExpression("true ? 1 : 2"));
     }
     

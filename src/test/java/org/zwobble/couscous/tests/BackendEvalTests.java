@@ -5,7 +5,6 @@ import java.util.List;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -22,6 +21,7 @@ import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
@@ -40,13 +40,13 @@ public abstract class BackendEvalTests {
     
     @Test
     public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
-        val result = evalExpression(new TernaryConditionalNode(literal(true), literal("T"), literal("F")));
+        val result = evalExpression(ternaryConditional(literal(true), literal("T"), literal("F")));
         assertEquals(value("T"), result);
     }
     
     @Test
     public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
-        val result = evalExpression(new TernaryConditionalNode(literal(false), literal("T"), literal("F")));
+        val result = evalExpression(ternaryConditional(literal(false), literal("T"), literal("F")));
         assertEquals(value("F"), result);
     }
     
