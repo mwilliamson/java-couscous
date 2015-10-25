@@ -67,7 +67,7 @@ public class ClassNodeBuilder {
     }
     
     public ClassNode build() {
-        return new ClassNode(
+        return ClassNode.declareClass(
             name,
             fields.build(),
             constructor.orElse(constructorBuilder().build()),

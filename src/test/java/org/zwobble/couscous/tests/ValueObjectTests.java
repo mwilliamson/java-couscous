@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -14,6 +15,7 @@ import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.AnnotationNode;
 import org.zwobble.couscous.ast.AssignableExpressionNode;
 import org.zwobble.couscous.ast.AssignmentNode;
+import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -42,6 +44,7 @@ public class ValueObjectTests {
         return asList(new Object[][] {
             {AnnotationNode.class},
             {AssignmentNode.class},
+            {ClassNode.class},
             {VariableDeclaration.class}
         });
     }
@@ -108,6 +111,8 @@ public class ValueObjectTests {
     private static Object generateFirstInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 1]";
+        } else if (type.equals(List.class)) {
+            return asList("[list 1]");
         } else if (type.equals(PrimitiveValue.class)) {
             return generateFirstInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -122,6 +127,8 @@ public class ValueObjectTests {
     private static Object generateSecondInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 2]";
+        } else if (type.equals(List.class)) {
+            return asList("[list 2]");
         } else if (type.equals(PrimitiveValue.class)) {
             return generateSecondInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -136,6 +143,8 @@ public class ValueObjectTests {
     private static Object generateInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string]";
+        } else if (type.equals(List.class)) {
+            return asList("[list]");
         } else if (type.equals(PrimitiveValue.class)) {
             return generateInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
