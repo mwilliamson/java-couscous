@@ -4,9 +4,6 @@ import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
-import lombok.Value;
-
-@Value(staticConstructor="localVariableDeclaration")
 public class LocalVariableDeclarationNode implements VariableNode, StatementNode {
     public static LocalVariableDeclarationNode localVariableDeclaration(
             String id,
@@ -16,9 +13,30 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
         return localVariableDeclaration(var(id, name, type), initialValue);
     }
     
-    VariableDeclaration declaration;
-    ExpressionNode initialValue;
+    public static LocalVariableDeclarationNode localVariableDeclaration(
+            VariableDeclaration declaration,
+            ExpressionNode initialValue) {
+        return new LocalVariableDeclarationNode(declaration, initialValue);
+    }
+    
+    private final VariableDeclaration declaration;
+    private final ExpressionNode initialValue;
 
+    private LocalVariableDeclarationNode(
+            VariableDeclaration declaration,
+            ExpressionNode initialValue) {
+        this.declaration = declaration;
+        this.initialValue = initialValue;
+    }
+    
+    public VariableDeclaration getDeclaration() {
+        return declaration;
+    }
+    
+    public ExpressionNode getInitialValue() {
+        return initialValue;
+    }
+    
     public String getName() {
         return declaration.getName();
     }
@@ -30,5 +48,44 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "LocalVariableDeclarationNode(declaration=" + declaration
+               + ", initialValue=" + initialValue + ")";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result
+                 + ((declaration == null) ? 0 : declaration.hashCode());
+        result = prime * result
+                 + ((initialValue == null) ? 0 : initialValue.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LocalVariableDeclarationNode other = (LocalVariableDeclarationNode) obj;
+        if (declaration == null) {
+            if (other.declaration != null)
+                return false;
+        } else if (!declaration.equals(other.declaration))
+            return false;
+        if (initialValue == null) {
+            if (other.initialValue != null)
+                return false;
+        } else if (!initialValue.equals(other.initialValue))
+            return false;
+        return true;
     }
 }
