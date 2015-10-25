@@ -6,6 +6,9 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.AnnotationNode;
 import org.zwobble.couscous.util.ExtraArrays;
 
@@ -16,20 +19,24 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.zwobble.couscous.util.ExtraArrays.stream;
 
-public class AnnotationNodeTests {
+@RunWith(Parameterized.class)
+public class ValueObjectTests {
+    private final Class<?> clazz;
+
+    public ValueObjectTests(Class<?> clazz) {
+        this.clazz = clazz;
+    }
+    
+    @Parameters(name="{0} is value object")
+    public static Iterable<Object[]> valueObjectTypes() {
+        return asList(new Object[][] {
+            {AnnotationNode.class}
+        });
+    }
+    
     @Test
-    public void annotationNodeIsValueObject() throws Exception {
-        assertIsValueObject(AnnotationNode.class);
-    }
-
-    private <T> void assertIsValueObject(Class<T> clazz) throws Exception {
-        assertToStringIncludesAllFields(clazz);
-        assertEqualityIncludesAllFields(clazz);
-        assertHashCodeIncludesAllFields(clazz);
-    }
-
-    private <T> void assertToStringIncludesAllFields(Class<T> clazz) {
-        GeneratedValue value = generateValue(clazz, this::generateInstance);
+    public <T> void toStringIncludesAllFields() {
+        GeneratedValue value = generateValue(clazz, ValueObjectTests::generateInstance);
         Field[] fields = clazz.getDeclaredFields();
         Object[] fieldStrings = IntStream.range(0, fields.length)
             .mapToObj(index -> String.format("%s=%s", fields[index].getName(), value.arguments[index]))
@@ -41,45 +48,47 @@ public class AnnotationNodeTests {
             value.instance.toString());
     }
 
-    private void assertEqualityIncludesAllFields(Class<?> clazz) {
+    @Test
+    public void equalityIncludesAllFields() {
         assertEquals(generateInstance(clazz), generateInstance(clazz));
         assertNotEquals(
             generateFirstInstance(clazz),
             generateSecondInstance(clazz));
     }
 
-    private void assertHashCodeIncludesAllFields(Class<?> clazz) {
+    @Test
+    public void hashCodeIncludesAllFields() {
         assertEquals(generateInstance(clazz).hashCode(), generateInstance(clazz).hashCode());
         assertNotEquals(
             generateFirstInstance(clazz).hashCode(),
             generateSecondInstance(clazz).hashCode());
     }
     
-    private Object generateFirstInstance(Class<?> type) {
+    private static Object generateFirstInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 1]";
         } else {
-            return generateValue(type, this::generateFirstInstance).instance;         
+            return generateValue(type, ValueObjectTests::generateFirstInstance).instance;         
         }
     }
     
-    private Object generateSecondInstance(Class<?> type) {
+    private static Object generateSecondInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string ]";
         } else {
-            return generateValue(type, this::generateSecondInstance).instance;           
+            return generateValue(type, ValueObjectTests::generateSecondInstance).instance;           
         }
     }
     
-    private Object generateInstance(Class<?> type) {
+    private static Object generateInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string]";
         } else {
-            return generateValue(type, this::generateInstance).instance;
+            return generateValue(type, ValueObjectTests::generateInstance).instance;
         }
     }
     
-    private GeneratedValue generateValue(Class<?> type, Function<Class<?>, Object> generate) {
+    private static GeneratedValue generateValue(Class<?> type, Function<Class<?>, Object> generate) {
         try {
             Field[] fields = type.getDeclaredFields();
             Class<?>[] fieldTypes = ExtraArrays.map(fields, field -> field.getType())
@@ -94,19 +103,19 @@ public class AnnotationNodeTests {
         }
     }
     
-    private Method findStaticConstructor(Class<?> type, Class<?>[] fieldTypes) {
+    private static Method findStaticConstructor(Class<?> type, Class<?>[] fieldTypes) {
         return stream(type.getDeclaredMethods())
             .filter(method -> isStaticConstructor(type, fieldTypes, method))
             .findAny()
             .orElseThrow(() -> new RuntimeException("Could not find static constructor for " + type));
     }
     
-    private boolean isStaticConstructor(Class<?> type, Class<?>[] fieldTypes, Method method) {
+    private static boolean isStaticConstructor(Class<?> type, Class<?>[] fieldTypes, Method method) {
         return method.getReturnType().equals(type) &&
             asList(fieldTypes).equals(asList(method.getParameterTypes()));
     }
 
-    private class GeneratedValue {
+    private static class GeneratedValue {
         private final Object instance;
         private final Object[] arguments;
         
