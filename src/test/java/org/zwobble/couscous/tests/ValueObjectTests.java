@@ -26,6 +26,7 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
@@ -67,6 +68,7 @@ public class ValueObjectTests {
             {LiteralNode.class},
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
+            {MethodNode.class},
             {ReturnNode.class},
             {StaticMethodCallNode.class},
             {TernaryConditionalNode.class},
@@ -139,6 +141,8 @@ public class ValueObjectTests {
     private static Object generateFirstInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 1]";
+        } else if (type.equals(boolean.class)) {
+            return true;
         } else if (type.equals(List.class)) {
             return asList("[list 1]");
         } else if (type.equals(PrimitiveValue.class)) {
@@ -155,6 +159,8 @@ public class ValueObjectTests {
     private static Object generateSecondInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 2]";
+        } else if (type.equals(boolean.class)) {
+            return false;
         } else if (type.equals(List.class)) {
             return asList("[list 2]");
         } else if (type.equals(PrimitiveValue.class)) {
@@ -171,6 +177,8 @@ public class ValueObjectTests {
     private static Object generateInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string]";
+        } else if (type.equals(boolean.class)) {
+            return true;
         } else if (type.equals(List.class)) {
             return asList("[list]");
         } else if (type.equals(PrimitiveValue.class)) {

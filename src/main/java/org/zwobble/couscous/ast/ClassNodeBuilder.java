@@ -57,9 +57,8 @@ public class ClassNodeBuilder {
     }
 
     private MethodBuilder<MethodNode> methodBuilder(String name, boolean isStatic) {
-        return new MethodBuilder<MethodNode>(builder -> MethodNode.builder()
+        return new MethodBuilder<MethodNode>(builder -> MethodNode.builder(name)
             .isStatic(isStatic)
-            .name(name)
             .annotations(builder.annotations.build())
             .arguments(builder.arguments.build())
             .body(builder.statements.build())

@@ -89,7 +89,7 @@ public abstract class BackendMethodTests {
         assertEquals(value("[updated value]"), result);
     }
 
-    protected PrimitiveValue runMethod(MethodNode.MethodNodeBuilder methodBuilder, PrimitiveValue... arguments) {
+    protected PrimitiveValue runMethod(MethodNode.Builder methodBuilder, PrimitiveValue... arguments) {
         val method = methodBuilder.build();
         val className = "com.example.Program";
         val classNode = ClassNode.builder(className)
