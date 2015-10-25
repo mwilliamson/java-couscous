@@ -17,6 +17,7 @@ import org.zwobble.couscous.ast.AssignableExpressionNode;
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
+import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -47,6 +48,7 @@ public class ValueObjectTests {
             {AssignmentNode.class},
             {ClassNode.class},
             {ConstructorCallNode.class},
+            {ConstructorNode.class},
             {VariableDeclaration.class}
         });
     }
