@@ -1,7 +1,6 @@
 package org.zwobble.couscous.tests;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
@@ -13,6 +12,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
@@ -57,7 +57,7 @@ public abstract class BackendMethodTests {
         val arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         val method = staticMethod("hello")
             .argument(arg)
-            .statement(new ExpressionStatementNode(new AssignmentNode(reference(arg), LiteralNode.literal("[updated value]"))))
+            .statement(new ExpressionStatementNode(assign(reference(arg), LiteralNode.literal("[updated value]"))))
             .statement(new ReturnNode(reference(arg)));
         val result = runMethod(method, value("[initial value]"));
         
@@ -82,7 +82,7 @@ public abstract class BackendMethodTests {
             ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         val method = staticMethod("hello")
             .statement(localVariableDeclaration)
-            .statement(new ExpressionStatementNode(new AssignmentNode(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
+            .statement(new ExpressionStatementNode(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))))
             .statement(new ReturnNode(reference(localVariableDeclaration)));
         val result = runMethod(method);
         

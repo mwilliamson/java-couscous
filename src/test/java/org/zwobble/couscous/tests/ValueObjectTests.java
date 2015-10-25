@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -11,8 +12,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.AnnotationNode;
+import org.zwobble.couscous.ast.AssignableExpressionNode;
+import org.zwobble.couscous.ast.AssignmentNode;
+import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.VariableDeclaration;
+import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.util.ExtraArrays;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.base.Joiner;
 
@@ -33,6 +41,7 @@ public class ValueObjectTests {
     public static Iterable<Object[]> valueObjectTypes() {
         return asList(new Object[][] {
             {AnnotationNode.class},
+            {AssignmentNode.class},
             {VariableDeclaration.class}
         });
     }
@@ -99,6 +108,12 @@ public class ValueObjectTests {
     private static Object generateFirstInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 1]";
+        } else if (type.equals(PrimitiveValue.class)) {
+            return generateFirstInstance(StringValue.class);
+        } else if (type.equals(ExpressionNode.class)) {
+            return generateFirstInstance(LiteralNode.class);
+        } else if (type.equals(AssignableExpressionNode.class)) {
+            return generateFirstInstance(VariableReferenceNode.class);
         } else {
             return generateValue(type, ValueObjectTests::generateFirstInstance).instance;         
         }
@@ -107,6 +122,12 @@ public class ValueObjectTests {
     private static Object generateSecondInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string 2]";
+        } else if (type.equals(PrimitiveValue.class)) {
+            return generateSecondInstance(StringValue.class);
+        } else if (type.equals(ExpressionNode.class)) {
+            return generateSecondInstance(LiteralNode.class);
+        } else if (type.equals(AssignableExpressionNode.class)) {
+            return generateSecondInstance(VariableReferenceNode.class);
         } else {
             return generateValue(type, ValueObjectTests::generateSecondInstance).instance;           
         }
@@ -115,6 +136,12 @@ public class ValueObjectTests {
     private static Object generateInstance(Class<?> type) {
         if (type.equals(String.class)) {
             return "[string]";
+        } else if (type.equals(PrimitiveValue.class)) {
+            return generateInstance(StringValue.class);
+        } else if (type.equals(ExpressionNode.class)) {
+            return generateInstance(LiteralNode.class);
+        } else if (type.equals(AssignableExpressionNode.class)) {
+            return generateInstance(VariableReferenceNode.class);
         } else {
             return generateValue(type, ValueObjectTests::generateInstance).instance;
         }
@@ -134,8 +161,10 @@ public class ValueObjectTests {
     }
 
     private static Class<?>[] fieldTypes(Class<?> type) {
-        Field[] fields = type.getDeclaredFields();
-        return ExtraArrays.map(fields, field -> field.getType())
+        return asList(type.getDeclaredFields())
+            .stream()
+            .filter(field -> !Modifier.isStatic(field.getModifiers()))
+            .map(field -> field.getType())
             .toArray(Class<?>[]::new);
     }
     

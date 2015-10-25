@@ -6,6 +6,10 @@ import lombok.Value;
 
 @Value
 public class StringValue implements PrimitiveValue {
+    public static StringValue of(String value) {
+        return new StringValue(value);
+    }
+    
     public static final TypeName REF = TypeName.of("java.lang.String");
 
     String value;
