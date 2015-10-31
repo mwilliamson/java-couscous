@@ -241,6 +241,7 @@ public class JavaReader {
     
     private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
         String methodName = expression.getName().getIdentifier();
+        @SuppressWarnings("unchecked")
         List<ExpressionNode> arguments = readArguments(expression.arguments());
         if (expression.getExpression() == null) {
             IMethodBinding methodBinding = expression.resolveMethodBinding();
@@ -259,12 +260,15 @@ public class JavaReader {
     }
     
     private static ExpressionNode readClassInstanceCreation(ClassInstanceCreation expression) {
-        return ConstructorCallNode.constructorCall(typeOf(expression), readArguments(expression.arguments()));
+        @SuppressWarnings("unchecked")
+        List<Expression> arguments = expression.arguments();
+        return ConstructorCallNode.constructorCall(
+            typeOf(expression),
+            readArguments(arguments));
     }
     
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static List<ExpressionNode> readArguments(final List javaArguments) {
-        return eagerMap((List<Expression>)javaArguments, JavaReader::readExpression);
+    private static List<ExpressionNode> readArguments(List<Expression> javaArguments) {
+        return eagerMap(javaArguments, JavaReader::readExpression);
     }
     
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
