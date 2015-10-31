@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -48,6 +50,9 @@ import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
+
 import com.google.common.collect.Lists;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
@@ -174,6 +179,9 @@ public class JavaReader {
         case ASTNode.CLASS_INSTANCE_CREATION: 
             return readClassInstanceCreation((ClassInstanceCreation)expression);
         
+        case ASTNode.INFIX_EXPRESSION:
+            return readInfixExpression((InfixExpression)expression);
+            
         case ASTNode.CONDITIONAL_EXPRESSION: 
             return readConditionalExpression((ConditionalExpression)expression);
         
@@ -185,7 +193,7 @@ public class JavaReader {
         
         }
     }
-    
+
     private static ExpressionNode readBooleanLiteral(BooleanLiteral expression) {
         return LiteralNode.literal(expression.booleanValue());
     }
@@ -252,6 +260,53 @@ public class JavaReader {
         return Lists.transform((List<Expression>)javaArguments, JavaReader::readExpression);
     }
     
+    private static ExpressionNode readInfixExpression(InfixExpression expression) {
+        JavaOperator operator = readOperator(expression.getOperator());
+        return MethodCallNode.methodCall(
+            readExpression(expression.getLeftOperand()),
+            operator.methodName,
+            asList(readExpression(expression.getRightOperand())),
+            operator.returnValue);
+    }
+    
+    private static JavaOperator readOperator(Operator operator) {
+        if (operator == Operator.PLUS) {
+            return JavaOperator.of("add", IntegerValue.REF);
+        } else if (operator == Operator.MINUS) {
+            return JavaOperator.of("subtract", IntegerValue.REF);
+        } else if (operator == Operator.TIMES) {
+            return JavaOperator.of("multiply", IntegerValue.REF);
+        } else if (operator == Operator.DIVIDE) {
+            return JavaOperator.of("divide", IntegerValue.REF);
+        } else if (operator == Operator.REMAINDER) {
+            return JavaOperator.of("mod", IntegerValue.REF);
+        } else if (operator == Operator.GREATER) {
+            return JavaOperator.of("greaterThan", BooleanValue.REF);
+        } else if (operator == Operator.GREATER_EQUALS) {
+            return JavaOperator.of("greaterThanOrEqual", BooleanValue.REF);
+        } else if (operator == Operator.LESS) {
+            return JavaOperator.of("lessThan", BooleanValue.REF);
+        } else if (operator == Operator.LESS_EQUALS) {
+            return JavaOperator.of("lessThanOrEqual", BooleanValue.REF);
+        } else {
+            throw new RuntimeException("Unrecognised operator: " + operator);
+        }
+    }
+    
+    private static class JavaOperator {
+        private static JavaOperator of(String methodName, TypeName returnValue) {
+            return new JavaOperator(methodName, returnValue);
+        }
+        
+        private final String methodName;
+        private final TypeName returnValue;
+
+        private JavaOperator(String methodName, TypeName returnValue) {
+            this.methodName = methodName;
+            this.returnValue = returnValue;
+        }
+    }
+
     private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {
         return TernaryConditionalNode.ternaryConditional(readExpression(expression.getExpression()), readExpression(expression.getThenExpression()), readExpression(expression.getElseExpression()));
     }

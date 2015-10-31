@@ -144,6 +144,38 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void canUseOperatorsOnIntegers() {
+        assertEquals(
+            methodCall(literal(1), "add", asList(literal(2)), IntegerValue.REF),
+            readExpression("1 + 2"));
+        assertEquals(
+            methodCall(literal(1), "subtract", asList(literal(2)), IntegerValue.REF),
+            readExpression("1 - 2"));
+        assertEquals(
+            methodCall(literal(1), "multiply", asList(literal(2)), IntegerValue.REF),
+            readExpression("1 * 2"));
+        assertEquals(
+            methodCall(literal(1), "divide", asList(literal(2)), IntegerValue.REF),
+            readExpression("1 / 2"));
+        assertEquals(
+            methodCall(literal(1), "mod", asList(literal(2)), IntegerValue.REF),
+            readExpression("1 % 2"));
+        
+        assertEquals(
+            methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF),
+            readExpression("1 > 2"));
+        assertEquals(
+            methodCall(literal(1), "greaterThanOrEqual", asList(literal(2)), BooleanValue.REF),
+            readExpression("1 >= 2"));
+        assertEquals(
+            methodCall(literal(1), "lessThan", asList(literal(2)), BooleanValue.REF),
+            readExpression("1 < 2"));
+        assertEquals(
+            methodCall(literal(1), "lessThanOrEqual", asList(literal(2)), BooleanValue.REF),
+            readExpression("1 <= 2"));
+    }
+    
+    @Test
     public void canReadTernaryConditionals() {
         assertEquals(
             ternaryConditional(literal(true), literal(1), literal(2)),

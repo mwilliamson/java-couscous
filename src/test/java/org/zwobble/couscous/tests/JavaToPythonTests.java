@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests;
 import java.nio.file.Files;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
@@ -19,6 +20,13 @@ public class JavaToPythonTests {
     public void canEvaluateLiterals() {
         assertEquals(value("hello"), evalExpression("\"hello\""));
         assertEquals(value(42), evalExpression("42"));
+    }
+    
+    @Test
+    @Ignore("WIP")
+    public void canUseOperatorsOnPrimitives() {
+        assertEquals(value(3), evalExpression("1 + 2"));
+        assertEquals(value(false), evalExpression("1 > 2"));
     }
     
     private PrimitiveValue evalExpression(String expressionSource) {
