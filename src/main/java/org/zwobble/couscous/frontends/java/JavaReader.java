@@ -150,7 +150,7 @@ public class JavaReader {
     
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
-        List<VariableDeclarationFragment> fragments = (List<VariableDeclarationFragment>)statement.fragments();
+        List<VariableDeclarationFragment> fragments = statement.fragments();
         TypeName type = typeOf(statement.getType());
         return eagerMap(fragments, fragment ->
             localVariableDeclaration(
