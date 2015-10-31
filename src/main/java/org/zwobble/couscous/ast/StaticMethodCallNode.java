@@ -5,12 +5,21 @@ import java.util.List;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.InternalCouscousValue;
+import org.zwobble.couscous.values.ObjectValues;
 
 import static java.util.Arrays.asList;
 
 public class StaticMethodCallNode implements ExpressionNode {
     public static ExpressionNode same(ExpressionNode left, ExpressionNode right) {
         return staticMethodCall(InternalCouscousValue.REF, "same", asList(left, right), BooleanValue.REF);
+    }
+    
+    public static ExpressionNode boxInt(ExpressionNode value) {
+        return staticMethodCall(
+            InternalCouscousValue.REF,
+            "boxInt",
+            asList(value),
+            ObjectValues.BOXED_INT);
     }
     
     public static StaticMethodCallNode staticMethodCall(

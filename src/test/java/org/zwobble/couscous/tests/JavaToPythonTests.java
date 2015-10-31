@@ -37,6 +37,11 @@ public class JavaToPythonTests {
         assertEquals(value(true), exec("Object x = new Object(); return x == x;"));
     }
     
+    @Test
+    public void integersCanBeAssignedToObjectVariable() {
+        assertEquals(value(false), exec("Object x = 1; return x.equals(new Object());"));
+    }
+    
     private PrimitiveValue exec(String source) {
         try {
             String javaClass =

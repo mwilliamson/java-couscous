@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Hashtable;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -18,8 +20,17 @@ public class JavaParser {
         parser = ASTParser.newParser(AST.JLS8);
         parser.setBindingsRecovery(true);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        parser.setCompilerOptions(JavaCore.getOptions());
-        parser.setEnvironment(new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"}, new String[0], new String[0], false);
+        @SuppressWarnings("unchecked")
+        Hashtable<String, String> options = JavaCore.getOptions();
+        options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+        options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+        options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+        parser.setCompilerOptions(options);
+        parser.setEnvironment(
+            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"},
+            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"},
+            new String[]{"UTF-8"},
+            false);
         parser.setResolveBindings(true);
     }
     

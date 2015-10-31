@@ -14,11 +14,13 @@ import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
@@ -33,6 +35,7 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.boxInt;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
@@ -154,8 +157,17 @@ public class JavaReaderTests {
     @Test
     public void canReadConstructorCalls() {
         assertEquals(
-            constructorCall(TypeName.of("java.lang.String"), asList(literal("_"), literal(42))),
-            readExpression("new String(\"_\", 42)"));
+            constructorCall(TypeName.of("java.lang.String"), asList(literal("_"))),
+            readExpression("new String(\"_\")"));
+    }
+    
+    @Test
+    public void argumentIsBoxedIfNecessary() {
+        StaticMethodCallNode expression = (StaticMethodCallNode)readExpression(
+            "java.util.Objects.toString(42)");
+        assertEquals(
+            boxInt(literal(42)),
+            expression.getArguments().get(0));
     }
     
     @Test
@@ -238,6 +250,25 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void integersAreBoxedIfAssignedToObjectVariable() {
+        ClassNode classNode = readClass(
+            "private Object value;" +
+            "public Object getValue() {" +
+            "    return value = 4;" +
+            "}");
+        
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                fieldAccess(
+                    thisReference(TypeName.of("com.example.Example")),
+                    "value",
+                    ObjectValues.OBJECT),
+                boxInt(literal(4))),
+            returnNode.getValue());
+    }
+    
+    @Test
     public void canDeclareAndReferenceLocalVariables() {
         List<StatementNode> statements = readStatements("int x = 4; return x;");
         
@@ -249,6 +280,14 @@ public class JavaReaderTests {
         assertEquals(
             reference(declaration),
             returnNode.getValue());
+    }
+    
+    @Test
+    public void integersAreBoxedIfDeclaredAsObjectVariable() {
+        List<StatementNode> statements = readStatements("Object x = 4;");
+        
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        assertEquals(StaticMethodCallNode.boxInt(literal(4)), declaration.getInitialValue());
     }
     
     @Test
