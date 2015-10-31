@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.junit.Test;
@@ -33,12 +34,17 @@ public class JavaToPythonTests {
     @Test
     public void equalityOnReferenceTypesChecksForIdentity() {
         assertEquals(value(false), evalExpression("new Object() == new Object()"));
+        assertEquals(value(true), exec("Object x = new Object(); return x == x;"));
     }
     
-    private PrimitiveValue evalExpression(String expressionSource) {
+    private PrimitiveValue exec(String source) {
         try {
-            final java.lang.String javaClass = "package com.example;" + "public class Example {" + "    public static Object main() {" + "        return " + expressionSource + ";" + "    }" + "}";
-            final java.nio.file.Path directoryPath = Files.createTempDirectory(null);
+            String javaClass =
+                "package com.example;" +
+                "public class Example {" +
+                "    public static Object main() {" + source + "}" +
+                "}";
+            Path directoryPath = Files.createTempDirectory(null);
             try {
                 Files.createDirectories(directoryPath.resolve("com/example"));
                 Files.write(directoryPath.resolve("com/example/Example.java"), asList(javaClass));
@@ -50,5 +56,9 @@ public class JavaToPythonTests {
         } catch (final java.lang.Throwable $ex) {
             throw new RuntimeException($ex);
         }
+    }
+    
+    private PrimitiveValue evalExpression(String expressionSource) {
+        return exec("return " + expressionSource + ";");
     }
 }
