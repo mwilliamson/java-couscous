@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ExtraLists {
     @SuppressWarnings("unchecked")
@@ -24,6 +25,14 @@ public class ExtraLists {
         } catch (StashedException exception) {
             throw (E)exception.exception;
         }
+    }
+    
+    public static <T, R> List<R> eagerMap(
+            Iterable<T> iterable,
+            Function<T, R> function) {
+        return StreamSupport.stream(iterable.spliterator(), false)
+            .map(function)
+            .collect(Collectors.toList());
     }
     
     @FunctionalInterface

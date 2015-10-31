@@ -3,6 +3,7 @@ package org.zwobble.couscous.frontends.java;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -53,13 +54,13 @@ import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 
-import com.google.common.collect.Lists;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaReader {
     
@@ -151,7 +152,7 @@ public class JavaReader {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = (List<VariableDeclarationFragment>)statement.fragments();
         TypeName type = typeOf(statement.getType());
-        return Lists.transform(fragments, fragment -> localVariableDeclaration(fragment.resolveBinding().getKey(), fragment.getName().getIdentifier(), type, readExpression(fragment.getInitializer())));
+        return eagerMap(fragments, fragment -> localVariableDeclaration(fragment.resolveBinding().getKey(), fragment.getName().getIdentifier(), type, readExpression(fragment.getInitializer())));
     }
     
     private static ExpressionNode readExpression(Expression expression) {
@@ -258,7 +259,7 @@ public class JavaReader {
     
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static List<ExpressionNode> readArguments(final List javaArguments) {
-        return Lists.transform((List<Expression>)javaArguments, JavaReader::readExpression);
+        return eagerMap((List<Expression>)javaArguments, JavaReader::readExpression);
     }
     
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
