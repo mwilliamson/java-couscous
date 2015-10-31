@@ -73,10 +73,16 @@ public class PythonCodeGenerator {
             importPathToRoot(classNode),
             asList(pythonImportAlias("_couscous")));
         
-        PythonFunctionDefinitionNode constructor = generateConstructor(classNode.getConstructor());
-        Iterable<PythonFunctionDefinitionNode> pythonMethods = Iterables.transform(classNode.getMethods(), PythonCodeGenerator::generateFunction);
-        Iterable<PythonStatementNode> pythonBody = Iterables.concat(asList(constructor), pythonMethods);
-        PythonClassNode pythonClass = pythonClass(classNode.getSimpleName(), ImmutableList.copyOf(pythonBody));
+        PythonFunctionDefinitionNode constructor =
+            generateConstructor(classNode.getConstructor());
+        
+        Iterable<PythonFunctionDefinitionNode> pythonMethods = Iterables.transform(
+            classNode.getMethods(),
+            PythonCodeGenerator::generateFunction);
+        
+        PythonClassNode pythonClass = pythonClass(
+            classNode.getSimpleName(),
+            ImmutableList.copyOf(Iterables.concat(asList(constructor), pythonMethods)));
         
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             imports,
