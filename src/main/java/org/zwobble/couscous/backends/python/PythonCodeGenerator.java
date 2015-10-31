@@ -67,17 +67,30 @@ import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNo
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
-        Iterator<org.zwobble.couscous.backends.python.ast.PythonImportNode> imports = generateImports(classNode).iterator();
+        Iterator<PythonImportNode> imports = generateImports(classNode).iterator();
+        
+        PythonImportNode internalsImport = pythonImport(
+            importPathToRoot(classNode),
+            asList(pythonImportAlias("_couscous")));
+        
         PythonFunctionDefinitionNode constructor = generateConstructor(classNode.getConstructor());
         Iterable<PythonFunctionDefinitionNode> pythonMethods = Iterables.transform(classNode.getMethods(), PythonCodeGenerator::generateFunction);
         Iterable<PythonStatementNode> pythonBody = Iterables.concat(asList(constructor), pythonMethods);
         PythonClassNode pythonClass = pythonClass(classNode.getSimpleName(), ImmutableList.copyOf(pythonBody));
-        return pythonModule(ImmutableList.copyOf(Iterators.concat(imports, singletonIterator(pythonClass))));
+        
+        return pythonModule(ImmutableList.copyOf(Iterators.concat(
+            imports,
+            singletonIterator(internalsImport),
+            singletonIterator(pythonClass))));
     }
     
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
-        final java.util.Set<org.zwobble.couscous.ast.TypeName> classes = findReferencedClasses(classNode);
-        return classes.stream().map(name -> pythonImport(Strings.repeat(".", packageDepth(classNode) + 1) + name.getQualifiedName(), asList(pythonImportAlias(name.getSimpleName()))));
+        Set<TypeName> classes = findReferencedClasses(classNode);
+        return classes.stream().map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), asList(pythonImportAlias(name.getSimpleName()))));
+    }
+
+    private static String importPathToRoot(ClassNode classNode) {
+        return Strings.repeat(".", packageDepth(classNode) + 1);
     }
     
     private static int packageDepth(ClassNode classNode) {

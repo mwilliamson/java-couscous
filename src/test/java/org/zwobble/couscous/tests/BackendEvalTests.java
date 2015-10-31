@@ -53,13 +53,15 @@ public abstract class BackendEvalTests {
         
         assertEquals(value(0), evalExpression(divideIntegers(1, 2)));
         assertEquals(value(1), evalExpression(divideIntegers(10, 6)));
-        // TODO:
-//        assertEquals(value(-1), evalExpression(divideIntegers(-10, 6)));
-//        assertEquals(value(-1), evalExpression(divideIntegers(10, -6)));
-//        assertEquals(value(1), evalExpression(divideIntegers(-10, -6)));
+        assertEquals(value(-1), evalExpression(divideIntegers(-10, 6)));
+        assertEquals(value(-1), evalExpression(divideIntegers(10, -6)));
+        assertEquals(value(1), evalExpression(divideIntegers(-10, -6)));
         
         assertEquals(value(1), evalExpression(modIntegers(1, 2)));
         assertEquals(value(4), evalExpression(modIntegers(10, 6)));
+        assertEquals(value(-4), evalExpression(modIntegers(-10, 6)));
+        assertEquals(value(4), evalExpression(modIntegers(10, -6)));
+        assertEquals(value(-4), evalExpression(modIntegers(-10, -6)));
         
         assertEquals(
             value(false),

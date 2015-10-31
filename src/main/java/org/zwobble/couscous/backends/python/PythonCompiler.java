@@ -25,6 +25,9 @@ public class PythonCompiler {
             compileClass(classNode);
         }
         writeClass(TypeName.of("java.lang.Integer"), "class Integer(object):\n    def parseInt(value):\n        return int(value)");
+        writeClass(TypeName.of("_couscous"),
+            "def _div_round_to_zero(a, b): return -(-a // b) if (a < 0) ^ (b < 0) else a // b\n" +
+            "def _mod_round_to_zero(a, b): return -(-a % b) if (a < 0) ^ (b < 0) else a % b");
     }
     
     private Path pathForClass(TypeName className) {

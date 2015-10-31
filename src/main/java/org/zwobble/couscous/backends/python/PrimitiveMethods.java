@@ -40,8 +40,15 @@ public class PrimitiveMethods {
         addMethod(methods, "add", "__add__");
         addMethod(methods, "subtract", "__sub__");
         addMethod(methods, "multiply", "__mul__");
-        addMethod(methods, "divide", "__floordiv__");
-        addMethod(methods, "mod", "__mod__");
+
+        methods.put("divide", (receiver, arguments) ->
+            pythonCall(
+                internalReference("_div_round_to_zero"),
+                asList(receiver, arguments.get(0))));
+        methods.put("mod", (receiver, arguments) ->
+            pythonCall(
+                internalReference("_mod_round_to_zero"),
+                asList(receiver, arguments.get(0))));
 
         addMethod(methods, "greaterThan", "__gt__");
         addMethod(methods, "greaterThanOrEqual", "__ge__");
@@ -49,6 +56,10 @@ public class PrimitiveMethods {
         addMethod(methods, "lessThanOrEqual", "__le__");
         
         INT_METHODS = methods.build();
+    }
+    
+    private static PythonExpressionNode internalReference(String name) {
+        return pythonAttributeAccess(pythonVariableReference("_couscous"), name);
     }
     
     private static void addMethod(
