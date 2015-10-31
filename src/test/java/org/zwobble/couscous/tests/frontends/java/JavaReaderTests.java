@@ -97,6 +97,13 @@ public class JavaReaderTests {
         assertEquals(
             methodCall(literal("hello"), "startsWith", asList(literal("h")), BooleanValue.REF),
             readExpression("\"hello\".startsWith(\"h\")"));
+        
+        List<StatementNode> statements = readStatements("Object x = 1; return x.hashCode();");
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        ReturnNode returnNode = (ReturnNode) statements.get(1);
+        assertEquals(
+            methodCall(reference(declaration), "hashCode", asList(), IntegerValue.REF),
+            returnNode.getValue());
     }
     
     @Test

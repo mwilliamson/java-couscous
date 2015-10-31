@@ -244,32 +244,21 @@ public class JavaReader {
         @SuppressWarnings("unchecked")
         List<ExpressionNode> arguments = readArguments(expression.arguments());
         final TypeName type = typeOf(expression);
-        if (expression.getExpression() == null) {
-            IMethodBinding methodBinding = expression.resolveMethodBinding();
-            TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
-            if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
-                return StaticMethodCallNode.staticMethodCall(
-                    receiverType,
-                    methodName,
-                    arguments,
-                    type);
-            } else {
-                return MethodCallNode.methodCall(
-                    ThisReferenceNode.thisReference(receiverType),
-                    methodName,
-                    arguments,
-                    type);
-            }
-        } else if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
-            Expression receiver = expression.getExpression();
+        
+        IMethodBinding methodBinding = expression.resolveMethodBinding();
+        TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
+        if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
             return StaticMethodCallNode.staticMethodCall(
-                typeOf(receiver),
+                receiverType,
                 methodName,
                 arguments,
                 type);
         } else {
+            ExpressionNode receiver = expression.getExpression() == null
+                ? ThisReferenceNode.thisReference(receiverType)
+                : readExpression(expression.getExpression());
             return MethodCallNode.methodCall(
-                readExpression(expression.getExpression()),
+                receiver,
                 methodName,
                 arguments,
                 type);
