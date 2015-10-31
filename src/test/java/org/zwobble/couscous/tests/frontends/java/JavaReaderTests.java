@@ -291,6 +291,14 @@ public class JavaReaderTests {
     }
     
     @Test
+    public void booleansAreBoxedIfDeclaredAsObjectVariable() {
+        List<StatementNode> statements = readStatements("Object x = true;");
+        
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        assertEquals(StaticMethodCallNode.boxBoolean(literal(true)), declaration.getInitialValue());
+    }
+    
+    @Test
     public void canDeclareAndReferenceArguments() {
         ClassNode classNode = readClass(
             "public String identity(int value) {" +

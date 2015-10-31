@@ -166,11 +166,23 @@ public class JavaReader {
     
     private static ExpressionNode readExpression(TypeName targetType, Expression expression) {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
-        if (couscousExpression.getType().equals(IntegerValue.REF) && !targetType.equals(IntegerValue.REF)) {
+        if (isIntegerBox(targetType, couscousExpression)) {
             return StaticMethodCallNode.boxInt(couscousExpression);
+        } else if (isBooleanBox(targetType, couscousExpression)) {
+            return StaticMethodCallNode.boxBoolean(couscousExpression);
         } else {
             return couscousExpression;
         }
+    }
+
+    private static boolean isIntegerBox(TypeName targetType, ExpressionNode expression) {
+        return expression.getType().equals(IntegerValue.REF) &&
+            !targetType.equals(IntegerValue.REF);
+    }
+
+    private static boolean isBooleanBox(TypeName targetType, ExpressionNode expression) {
+        return expression.getType().equals(BooleanValue.REF) &&
+            !targetType.equals(BooleanValue.REF);
     }
 
     private static ExpressionNode readExpressionWithoutBoxing(Expression expression) {

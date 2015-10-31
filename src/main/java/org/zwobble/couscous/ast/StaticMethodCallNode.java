@@ -22,6 +22,14 @@ public class StaticMethodCallNode implements ExpressionNode {
             ObjectValues.BOXED_INT);
     }
     
+    public static ExpressionNode boxBoolean(ExpressionNode value) {
+        return staticMethodCall(
+            InternalCouscousValue.REF,
+            "boxBoolean",
+            asList(value),
+            ObjectValues.BOXED_BOOLEAN);
+    }
+    
     public static StaticMethodCallNode staticMethodCall(
             String className,
             String methodName,
