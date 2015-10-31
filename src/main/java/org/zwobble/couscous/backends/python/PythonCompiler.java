@@ -2,16 +2,23 @@ package org.zwobble.couscous.backends.python;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.zwobble.couscous.ast.TypeName;
+
 import org.zwobble.couscous.ast.ClassNode;
+
+import com.google.common.io.Resources;
+
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 
 public class PythonCompiler {
+    private static final List<String> RUNTIME_FILES = asList(
+        "java.lang.Integer", "_couscous");
+    
     private final Path root;
     private final String packageName;
     
@@ -24,24 +31,35 @@ public class PythonCompiler {
         for (ClassNode classNode : classes) {
             compileClass(classNode);
         }
-        writeClass(TypeName.of("java.lang.Integer"), "class Integer(object):\n    def parseInt(value):\n        return int(value)");
-        writeClass(TypeName.of("_couscous"),
-            "def _div_round_to_zero(a, b): return -(-a // b) if (a < 0) ^ (b < 0) else a // b\n" +
-            "def _mod_round_to_zero(a, b): return -(-a % b) if (a < 0) ^ (b < 0) else a % b");
+        for (String runtimeFile : RUNTIME_FILES) {
+            try {
+                String path = relativePathForModule(runtimeFile);
+                writeModule(
+                    runtimeFile,
+                    Resources.toString(Resources.getResource("python/runtime/" + path), StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
     
-    private Path pathForClass(TypeName className) {
-        return root.resolve(packageName)
-            .resolve(className.getQualifiedName().replace(".", File.separator) + ".py");
+    private Path destinationPathForModule(String moduleName) {
+        return root.resolve(packageName).resolve(relativePathForModule(moduleName));
+    }
+    
+    private String relativePathForModule(String moduleName) {
+        return moduleName.replace(".", File.separator) + ".py";
     }
     
     private void compileClass(ClassNode classNode) {
-        writeClass(classNode.getName(), serialize(generateCode(classNode)));
+        writeModule(
+            classNode.getName().getQualifiedName(),
+            serialize(generateCode(classNode)));
     }
     
-    private void writeClass(TypeName name, String contents) {
+    private void writeModule(String name, String contents) {
+        Path path = destinationPathForModule(name);
         try {
-            final java.nio.file.Path path = pathForClass(name);
             Files.createDirectories(path.getParent());
             createPythonPackages(path.getParent());
             Files.write(path, asList(contents));
