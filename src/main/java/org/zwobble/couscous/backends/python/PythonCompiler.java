@@ -27,19 +27,15 @@ public class PythonCompiler {
         this.packageName = packageName;
     }
     
-    public void compile(List<ClassNode> classes) {
+    public void compile(List<ClassNode> classes) throws IOException {
         for (ClassNode classNode : classes) {
             compileClass(classNode);
         }
         for (String runtimeFile : RUNTIME_FILES) {
-            try {
-                String path = relativePathForModule(runtimeFile);
-                writeModule(
-                    runtimeFile,
-                    Resources.toString(Resources.getResource("python/runtime/" + path), StandardCharsets.UTF_8));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            String path = relativePathForModule(runtimeFile);
+            writeModule(
+                runtimeFile,
+                Resources.toString(Resources.getResource("python/runtime/" + path), StandardCharsets.UTF_8));
         }
     }
     
@@ -51,21 +47,17 @@ public class PythonCompiler {
         return moduleName.replace(".", File.separator) + ".py";
     }
     
-    private void compileClass(ClassNode classNode) {
+    private void compileClass(ClassNode classNode) throws IOException {
         writeModule(
             classNode.getName().getQualifiedName(),
             serialize(generateCode(classNode)));
     }
     
-    private void writeModule(String name, String contents) {
+    private void writeModule(String name, String contents) throws IOException {
         Path path = destinationPathForModule(name);
-        try {
-            Files.createDirectories(path.getParent());
-            createPythonPackages(path.getParent());
-            Files.write(path, asList(contents));
-        } catch (final java.lang.Throwable $ex) {
-            throw new RuntimeException($ex);
-        }
+        Files.createDirectories(path.getParent());
+        createPythonPackages(path.getParent());
+        Files.write(path, asList(contents));
     }
     
     private void createPythonPackages(Path packagePath) throws IOException {
