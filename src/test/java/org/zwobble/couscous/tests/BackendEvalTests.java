@@ -22,6 +22,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.MethodCallNode.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
@@ -37,6 +38,16 @@ public abstract class BackendEvalTests {
         assertEquals(value(true), evalExpression(literal(true)));
         assertEquals(value(false), evalExpression(literal(false)));
         assertEquals(value(42), evalExpression(literal(42)));
+    }
+    
+    @Test
+    public void canEvaluateOperationsOnBooleans() {
+        assertEquals(
+            value(true),
+            evalExpression(not(literal(false))));
+        assertEquals(
+            value(false),
+            evalExpression(not(literal(true))));
     }
     
     @Test

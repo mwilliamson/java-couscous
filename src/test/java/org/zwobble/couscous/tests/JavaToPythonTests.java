@@ -26,6 +26,8 @@ public class JavaToPythonTests {
     public void canUseOperatorsOnPrimitives() {
         assertEquals(value(3), evalExpression("1 + 2"));
         assertEquals(value(false), evalExpression("1 > 2"));
+        assertEquals(value(true), evalExpression("1 == 1"));
+        assertEquals(value(false), evalExpression("1 != 1"));
     }
     
     private PrimitiveValue evalExpression(String expressionSource) {

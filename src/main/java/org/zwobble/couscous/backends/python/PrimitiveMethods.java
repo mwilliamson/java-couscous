@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
+import org.zwobble.couscous.backends.python.ast.PythonNotNode;
+import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -29,6 +31,14 @@ public class PrimitiveMethods {
             
             .put("substring", (receiver, arguments) ->
                 pythonGetSlice(receiver, arguments))
+            
+            .build();
+    
+    private static final Map<String, PrimitiveMethodGenerator> BOOLEAN_METHODS =
+        ImmutableMap.<String, PrimitiveMethodGenerator>builder()
+        
+            .put("negate", (receiver, arguments) ->
+                PythonNotNode.pythonNot(receiver))
             
             .build();
     
@@ -76,6 +86,7 @@ public class PrimitiveMethods {
     private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS = 
         ImmutableMap.<TypeName, Map<String, PrimitiveMethodGenerator>>builder()
             .put(StringValue.REF, STRING_METHODS)
+            .put(BooleanValue.REF, BOOLEAN_METHODS)
             .put(IntegerValue.REF, INT_METHODS)
             .build();
     

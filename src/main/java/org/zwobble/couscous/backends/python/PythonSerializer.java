@@ -16,6 +16,7 @@ import org.zwobble.couscous.backends.python.ast.PythonImportNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 import org.zwobble.couscous.backends.python.ast.PythonNode;
+import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.backends.python.ast.PythonPassNode;
 import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
@@ -102,6 +103,13 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSymbol(":");
         });
         writer.writeSymbol("]");
+    }
+
+    @Override
+    public void visit(PythonNotNode notOperation) {
+        writer.writeKeyword("not");
+        writer.writeSpace();
+        writeParenthesised(notOperation.getOperand());
     }
     
     @Override

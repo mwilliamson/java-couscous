@@ -57,6 +57,7 @@ import com.google.common.collect.Lists;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 
@@ -261,12 +262,18 @@ public class JavaReader {
     }
     
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
-        JavaOperator operator = readOperator(expression.getOperator());
-        return MethodCallNode.methodCall(
-            readExpression(expression.getLeftOperand()),
-            operator.methodName,
-            asList(readExpression(expression.getRightOperand())),
-            operator.returnValue);
+        final ExpressionNode left = readExpression(expression.getLeftOperand());
+        final ExpressionNode right = readExpression(expression.getRightOperand());
+        if (expression.getOperator() == Operator.NOT_EQUALS) {
+            return MethodCallNode.not(methodCall(left, "equals", asList(right), BooleanValue.REF));
+        } else {
+            JavaOperator operator = readOperator(expression.getOperator());
+            return MethodCallNode.methodCall(
+                left,
+                operator.methodName,
+                asList(right),
+                operator.returnValue);   
+        }
     }
     
     private static JavaOperator readOperator(Operator operator) {

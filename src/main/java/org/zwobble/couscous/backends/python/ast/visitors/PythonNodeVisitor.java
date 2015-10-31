@@ -11,6 +11,7 @@ import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
 import org.zwobble.couscous.backends.python.ast.PythonImportNode;
 import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
+import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.backends.python.ast.PythonPassNode;
 import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
@@ -25,6 +26,7 @@ public interface PythonNodeVisitor {
     void visit(PythonAttributeAccessNode attributeAccess);
     void visit(PythonCallNode call);
     void visit(PythonGetSliceNode getSlice);
+    void visit(PythonNotNode notOperation);
     
     void visit(PythonReturnNode pythonReturn);
     void visit(PythonPassNode pass);

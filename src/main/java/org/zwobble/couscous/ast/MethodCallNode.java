@@ -1,10 +1,20 @@
 package org.zwobble.couscous.ast;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.values.BooleanValue;
 
 public class MethodCallNode implements ExpressionNode {
+    public static ExpressionNode not(ExpressionNode value) {
+        if (value.getType().equals(BooleanValue.REF)) {
+            return methodCall(value, "negate", Collections.emptyList(), BooleanValue.REF);
+        } else {
+            throw new IllegalArgumentException("Can only negate booleans");
+        }
+    }
+    
     public static MethodCallNode methodCall(
             ExpressionNode receiver,
             String methodName,

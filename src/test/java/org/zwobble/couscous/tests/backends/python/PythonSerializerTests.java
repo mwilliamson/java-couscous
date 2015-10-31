@@ -18,6 +18,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pyt
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
+import static org.zwobble.couscous.backends.python.ast.PythonNotNode.pythonNot;
 import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
@@ -66,6 +67,11 @@ public class PythonSerializerTests {
     @Test
     public void getSliceIsSerializedUsingParenthesisedSubExpression() {
         assertEquals("(x)[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), asList(pythonVariableReference("y"), pythonVariableReference("z")))));
+    }
+    
+    @Test
+    public void notOperationIsSerializedUsingParenthesisedSubExpression() {
+        assertEquals("not (x)", serialize(pythonNot(pythonVariableReference("x"))));
     }
     
     @Test

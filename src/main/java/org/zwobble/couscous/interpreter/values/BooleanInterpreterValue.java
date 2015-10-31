@@ -1,12 +1,18 @@
 package org.zwobble.couscous.interpreter.values;
 
+import java.util.Collections;
 import java.util.Optional;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
 public final class BooleanInterpreterValue implements InterpreterValue {
-    private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "Boolean").build();
+    private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
+        
+        .method("negate", Collections.emptyList(), (environment, arguments) -> 
+            new BooleanInterpreterValue(!arguments.getReceiver().getValue()))
+        
+        .build();
     private final boolean value;
     
     public boolean getValue() {

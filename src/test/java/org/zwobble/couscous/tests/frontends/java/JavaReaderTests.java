@@ -31,6 +31,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.MethodCallNode.not;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -164,6 +165,9 @@ public class JavaReaderTests {
         assertEquals(
             methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF),
             readExpression("1 == 2"));
+        assertEquals(
+            not(methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF)),
+            readExpression("1 != 2"));
         assertEquals(
             methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF),
             readExpression("1 > 2"));
