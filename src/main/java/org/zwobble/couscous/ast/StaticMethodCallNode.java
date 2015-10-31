@@ -3,36 +3,46 @@ package org.zwobble.couscous.ast;
 import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.InternalCouscousValue;
 
 import static java.util.Arrays.asList;
 
 public class StaticMethodCallNode implements ExpressionNode {
-    public static StaticMethodCallNode staticMethodCall(String className, String methodName, ExpressionNode... arguments) {
-        return staticMethodCall(className, methodName, asList(arguments));
+    public static ExpressionNode same(ExpressionNode left, ExpressionNode right) {
+        return staticMethodCall(InternalCouscousValue.REF, "same", asList(left, right), BooleanValue.REF);
     }
     
-    public static StaticMethodCallNode staticMethodCall(String className, String methodName, List<ExpressionNode> arguments) {
-        return staticMethodCall(TypeName.of(className), methodName, arguments);
+    public static StaticMethodCallNode staticMethodCall(
+            String className,
+            String methodName,
+            List<ExpressionNode> arguments,
+            TypeName type) {
+        return staticMethodCall(TypeName.of(className), methodName, arguments, type);
     }
     
     public static StaticMethodCallNode staticMethodCall(
             TypeName className,
             String methodName,
-            List<ExpressionNode> arguments) {
-        return new StaticMethodCallNode(className, methodName, arguments);
+            List<ExpressionNode> arguments,
+            TypeName type) {
+        return new StaticMethodCallNode(className, methodName, arguments, type);
     }
     
     private final TypeName className;
     private final String methodName;
     private final List<ExpressionNode> arguments;
+    private final TypeName type;
     
     public StaticMethodCallNode(
             TypeName className,
             String methodName,
-            List<ExpressionNode> arguments) {
+            List<ExpressionNode> arguments,
+            TypeName type) {
         this.className = className;
         this.methodName = methodName;
         this.arguments = arguments;
+        this.type = type;
     }
     
     public TypeName getClassName() {
@@ -47,20 +57,20 @@ public class StaticMethodCallNode implements ExpressionNode {
         return arguments;
     }
     
+    public TypeName getType() {
+        return type;
+    }
+    
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
 
     @Override
-    public TypeName getType() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public String toString() {
         return "StaticMethodCallNode(className=" + className + ", methodName="
-               + methodName + ", arguments=" + arguments + ")";
+               + methodName + ", arguments=" + arguments + ", type=" + type
+               + ")";
     }
 
     @Override
@@ -73,6 +83,7 @@ public class StaticMethodCallNode implements ExpressionNode {
                  + ((className == null) ? 0 : className.hashCode());
         result = prime * result
                  + ((methodName == null) ? 0 : methodName.hashCode());
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
         return result;
     }
 
@@ -99,6 +110,11 @@ public class StaticMethodCallNode implements ExpressionNode {
             if (other.methodName != null)
                 return false;
         } else if (!methodName.equals(other.methodName))
+            return false;
+        if (type == null) {
+            if (other.type != null)
+                return false;
+        } else if (!type.equals(other.type))
             return false;
         return true;
     }

@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -7,6 +8,7 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -24,6 +26,7 @@ import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
@@ -38,6 +41,15 @@ public abstract class BackendEvalTests {
         assertEquals(value(true), evalExpression(literal(true)));
         assertEquals(value(false), evalExpression(literal(false)));
         assertEquals(value(42), evalExpression(literal(42)));
+    }
+    
+    @Test
+    public void equalityOnReferenceTypesChecksForIdentity() {
+        assertEquals(
+            value(false),
+            evalExpression(same(
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()))));
     }
     
     @Test
@@ -136,8 +148,11 @@ public abstract class BackendEvalTests {
     
     @Test
     public void canCallBuiltinStaticMethod() {
-        PrimitiveValue result = evalExpression(
-            staticMethodCall("java.lang.Integer", "parseInt", literal("42")));
+        PrimitiveValue result = evalExpression(staticMethodCall(
+            "java.lang.Integer",
+            "parseInt",
+            asList(literal("42")),
+            IntegerValue.REF));
         assertEquals(value(42), result);
     }
     
@@ -145,10 +160,14 @@ public abstract class BackendEvalTests {
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .staticMethod("main", method -> method
-                .statement(returns(staticMethodCall("java.lang.Integer", "parseInt", literal("42")))))
+                .statement(returns(staticMethodCall(
+                    "java.lang.Integer",
+                    "parseInt",
+                    asList(literal("42")),
+                    IntegerValue.REF))))
             .build();
         PrimitiveValue result = evalExpression(asList(classNode),
-            staticMethodCall("com.example.Example", "main"));
+            staticMethodCall("com.example.Example", "main", asList(), IntegerValue.REF));
         assertEquals(value(42), result);
     }
     

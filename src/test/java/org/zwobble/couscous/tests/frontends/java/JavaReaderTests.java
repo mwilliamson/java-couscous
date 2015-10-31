@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -32,6 +33,7 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -117,7 +119,11 @@ public class JavaReaderTests {
     @Test
     public void canReadStaticMethodCalls() {
         assertEquals(
-            staticMethodCall(TypeName.of("java.lang.Integer"), "parseInt", asList(literal("42"))),
+            staticMethodCall(
+                TypeName.of("java.lang.Integer"),
+                "parseInt",
+                asList(literal("42")),
+                IntegerValue.REF),
             readExpression("Integer.parseInt(\"42\")"));
     }
     
@@ -133,7 +139,8 @@ public class JavaReaderTests {
             staticMethodCall(
                 TypeName.of("com.example.Example"),
                 "loop",
-                asList()),
+                asList(),
+                StringValue.REF),
             returnNode.getValue());
     }
     
@@ -142,6 +149,21 @@ public class JavaReaderTests {
         assertEquals(
             constructorCall(TypeName.of("java.lang.String"), asList(literal("_"), literal(42))),
             readExpression("new String(\"_\", 42)"));
+    }
+    
+    @Test
+    public void canUseOperatorsOnReferences() {
+        assertEquals(
+            same(
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList())),
+            readExpression("new Object() == new Object()"));
+        
+        assertEquals(
+            not(same(
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
+                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()))),
+            readExpression("new Object() != new Object()"));
     }
     
     @Test
@@ -246,7 +268,8 @@ public class JavaReaderTests {
                 staticMethodCall(
                     TypeName.of("java.lang.Integer"),
                     "parseInt",
-                    asList(literal("42")))),
+                    asList(literal("42")),
+                    IntegerValue.REF)),
             readStatement("Integer.parseInt(\"42\");"));
     }
     

@@ -9,6 +9,7 @@ import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
@@ -16,6 +17,7 @@ import com.google.common.collect.ImmutableMap.Builder;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
+import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonIs;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
@@ -90,6 +92,18 @@ public class PrimitiveMethods {
             .put(IntegerValue.REF, INT_METHODS)
             .build();
     
+    private static final Map<String, PrimitiveStaticMethodGenerator> INTERNAL_METHODS =
+        ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
+        
+            .put("same", arguments -> pythonIs(arguments.get(0), arguments.get(1)))
+            
+            .build();
+    
+    private static final Map<TypeName, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS = 
+        ImmutableMap.<TypeName, Map<String, PrimitiveStaticMethodGenerator>>builder()
+            .put(InternalCouscousValue.REF, INTERNAL_METHODS)
+            .build();
+    
     public static boolean isPrimitive(TypeName type) {
         return METHODS.containsKey(type);
     }
@@ -102,5 +116,15 @@ public class PrimitiveMethods {
     @FunctionalInterface
     public interface PrimitiveMethodGenerator {
         PythonExpressionNode generate(PythonExpressionNode receiver, List<PythonExpressionNode> arguments);
+    }
+
+    public static Optional<PrimitiveStaticMethodGenerator> getPrimitiveStaticMethod(TypeName type, String methodName) {
+        return Optional.ofNullable(STATIC_METHODS.get(type))
+            .flatMap(methodsForType -> Optional.ofNullable(methodsForType.get(methodName)));
+    }
+    
+    @FunctionalInterface
+    public interface PrimitiveStaticMethodGenerator {
+        PythonExpressionNode generate(List<PythonExpressionNode> arguments);
     }
 }

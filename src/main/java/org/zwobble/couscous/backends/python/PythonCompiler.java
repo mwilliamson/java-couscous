@@ -17,7 +17,9 @@ import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 
 public class PythonCompiler {
     private static final List<String> RUNTIME_FILES = asList(
-        "java.lang.Integer", "_couscous");
+        "java.lang.Object",
+        "java.lang.Integer",
+        "_couscous");
     
     private final Path root;
     private final String packageName;

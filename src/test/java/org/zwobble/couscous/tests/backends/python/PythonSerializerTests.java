@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
+import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonIs;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
@@ -72,6 +73,13 @@ public class PythonSerializerTests {
     @Test
     public void notOperationIsSerializedUsingParenthesisedSubExpression() {
         assertEquals("not (x)", serialize(pythonNot(pythonVariableReference("x"))));
+    }
+    
+    @Test
+    public void binaryOperationIsSerializedUsingParenthesisedSubExpressions() {
+        assertEquals(
+            "(x) is (y)",
+            serialize(pythonIs(pythonVariableReference("x"), pythonVariableReference("y"))));
     }
     
     @Test

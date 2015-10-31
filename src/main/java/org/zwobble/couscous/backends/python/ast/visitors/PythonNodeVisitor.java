@@ -2,6 +2,7 @@ package org.zwobble.couscous.backends.python.ast.visitors;
 
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
+import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonCallNode;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
@@ -27,6 +28,7 @@ public interface PythonNodeVisitor {
     void visit(PythonCallNode call);
     void visit(PythonGetSliceNode getSlice);
     void visit(PythonNotNode notOperation);
+    void visit(PythonBinaryOperation operation);
     
     void visit(PythonReturnNode pythonReturn);
     void visit(PythonPassNode pass);

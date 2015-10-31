@@ -29,6 +29,7 @@ import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
 import org.zwobble.couscous.ast.visitors.NodeVisitors;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator;
+import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
@@ -39,6 +40,7 @@ import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
 import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.StringValue;
@@ -92,7 +94,9 @@ public class PythonCodeGenerator {
     
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
         Set<TypeName> classes = findReferencedClasses(classNode);
-        return classes.stream().map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), asList(pythonImportAlias(name.getSimpleName()))));
+        return classes.stream()
+            .filter(name -> !name.equals(InternalCouscousValue.REF))
+            .map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), asList(pythonImportAlias(name.getSimpleName()))));
     }
 
     private static String importPathToRoot(ClassNode classNode) {
@@ -243,11 +247,14 @@ public class PythonCodeGenerator {
         
         @Override
         public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
-            final org.zwobble.couscous.ast.TypeName className = staticMethodCall.getClassName();
-            final org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode classReference = pythonVariableReference(className.getSimpleName());
-            final org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode methodReference = pythonAttributeAccess(classReference, staticMethodCall.getMethodName());
-            final java.util.List<org.zwobble.couscous.backends.python.ast.PythonExpressionNode> arguments = generateExpressions(staticMethodCall.getArguments());
-            return pythonCall(methodReference, arguments);
+            TypeName className = staticMethodCall.getClassName();
+            PythonVariableReferenceNode classReference = pythonVariableReference(className.getSimpleName());
+            PythonAttributeAccessNode methodReference = pythonAttributeAccess(classReference, staticMethodCall.getMethodName());
+            List<PythonExpressionNode> arguments = generateExpressions(staticMethodCall.getArguments());
+            
+            return PrimitiveMethods.getPrimitiveStaticMethod(className, staticMethodCall.getMethodName())
+                .map(generator -> generator.generate(arguments))
+                .orElseGet(() -> pythonCall(methodReference, arguments));                
         }
         
         @Override

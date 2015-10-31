@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
 import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
+import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
 import org.zwobble.couscous.backends.python.ast.PythonCallNode;
@@ -34,7 +35,7 @@ public class PythonSerializer implements PythonNodeVisitor {
         return writer.asString();
     }
     
-    private PythonWriter writer;
+    private final PythonWriter writer;
     
     private PythonSerializer(PythonWriter writer) {
         this.writer = writer;
@@ -110,6 +111,15 @@ public class PythonSerializer implements PythonNodeVisitor {
         writer.writeKeyword("not");
         writer.writeSpace();
         writeParenthesised(notOperation.getOperand());
+    }
+
+    @Override
+    public void visit(PythonBinaryOperation operation) {
+        writeParenthesised(operation.getLeft());
+        writer.writeSpace();
+        writer.writeKeyword(operation.getOperator());
+        writer.writeSpace();
+        writeParenthesised(operation.getRight());
     }
     
     @Override

@@ -30,6 +30,11 @@ public class JavaToPythonTests {
         assertEquals(value(false), evalExpression("1 != 1"));
     }
     
+    @Test
+    public void equalityOnReferenceTypesChecksForIdentity() {
+        assertEquals(value(false), evalExpression("new Object() == new Object()"));
+    }
+    
     private PrimitiveValue evalExpression(String expressionSource) {
         try {
             final java.lang.String javaClass = "package com.example;" + "public class Example {" + "    public static Object main() {" + "        return " + expressionSource + ";" + "    }" + "}";

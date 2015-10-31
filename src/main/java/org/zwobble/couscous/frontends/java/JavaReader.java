@@ -243,19 +243,36 @@ public class JavaReader {
         String methodName = expression.getName().getIdentifier();
         @SuppressWarnings("unchecked")
         List<ExpressionNode> arguments = readArguments(expression.arguments());
+        final TypeName type = typeOf(expression);
         if (expression.getExpression() == null) {
             IMethodBinding methodBinding = expression.resolveMethodBinding();
             TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
             if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
-                return StaticMethodCallNode.staticMethodCall(receiverType, methodName, arguments);
+                return StaticMethodCallNode.staticMethodCall(
+                    receiverType,
+                    methodName,
+                    arguments,
+                    type);
             } else {
-                return MethodCallNode.methodCall(ThisReferenceNode.thisReference(receiverType), methodName, arguments, typeOf(expression));
+                return MethodCallNode.methodCall(
+                    ThisReferenceNode.thisReference(receiverType),
+                    methodName,
+                    arguments,
+                    type);
             }
         } else if (expression.getExpression().getNodeType() == ASTNode.SIMPLE_NAME) {
             Expression receiver = expression.getExpression();
-            return StaticMethodCallNode.staticMethodCall(typeOf(receiver), methodName, arguments);
+            return StaticMethodCallNode.staticMethodCall(
+                typeOf(receiver),
+                methodName,
+                arguments,
+                type);
         } else {
-            return MethodCallNode.methodCall(readExpression(expression.getExpression()), methodName, arguments, typeOf(expression));
+            return MethodCallNode.methodCall(
+                readExpression(expression.getExpression()),
+                methodName,
+                arguments,
+                type);
         }
     }
     
@@ -274,15 +291,26 @@ public class JavaReader {
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
         final ExpressionNode left = readExpression(expression.getLeftOperand());
         final ExpressionNode right = readExpression(expression.getRightOperand());
-        if (expression.getOperator() == Operator.NOT_EQUALS) {
-            return MethodCallNode.not(methodCall(left, "equals", asList(right), BooleanValue.REF));
+        
+        if (left.getType().equals(IntegerValue.REF)) {
+            if (expression.getOperator() == Operator.NOT_EQUALS) {
+                return MethodCallNode.not(methodCall(left, "equals", asList(right), BooleanValue.REF));
+            } else {
+                JavaOperator operator = readOperator(expression.getOperator());
+                return MethodCallNode.methodCall(
+                    left,
+                    operator.methodName,
+                    asList(right),
+                    operator.returnValue);
+            }
         } else {
-            JavaOperator operator = readOperator(expression.getOperator());
-            return MethodCallNode.methodCall(
-                left,
-                operator.methodName,
-                asList(right),
-                operator.returnValue);   
+            if (expression.getOperator() == Operator.EQUALS) {
+                return StaticMethodCallNode.same(left, right);
+            } else if (expression.getOperator() == Operator.NOT_EQUALS) {
+                return MethodCallNode.not(StaticMethodCallNode.same(left, right));
+            } else {
+                throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
+            }
         }
     }
     
