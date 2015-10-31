@@ -8,15 +8,11 @@ import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
-import org.zwobble.couscous.values.StringValue;
+
 import static java.util.Arrays.asList;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
     public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
-        .staticMethod("parseInt", asList(StringValue.REF), (environment, arguments) -> {
-            StringInterpreterValue value = (StringInterpreterValue)arguments.get(0);
-            return new IntegerInterpreterValue(Integer.parseInt(value.getValue()));
-        })
         .method("add", asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left + right))
         .method("subtract", asList(IntegerValue.REF),
