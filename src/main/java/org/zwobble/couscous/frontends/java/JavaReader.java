@@ -280,6 +280,8 @@ public class JavaReader {
             return JavaOperator.of("divide", IntegerValue.REF);
         } else if (operator == Operator.REMAINDER) {
             return JavaOperator.of("mod", IntegerValue.REF);
+        } else if (operator == Operator.EQUALS) {
+            return JavaOperator.of("equals", BooleanValue.REF);
         } else if (operator == Operator.GREATER) {
             return JavaOperator.of("greaterThan", BooleanValue.REF);
         } else if (operator == Operator.GREATER_EQUALS) {

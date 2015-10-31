@@ -162,6 +162,9 @@ public class JavaReaderTests {
             readExpression("1 % 2"));
         
         assertEquals(
+            methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF),
+            readExpression("1 == 2"));
+        assertEquals(
             methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF),
             readExpression("1 > 2"));
         assertEquals(

@@ -50,6 +50,7 @@ public class PrimitiveMethods {
                 internalReference("_mod_round_to_zero"),
                 asList(receiver, arguments.get(0))));
 
+        addMethod(methods, "equals", "__eq__");
         addMethod(methods, "greaterThan", "__gt__");
         addMethod(methods, "greaterThanOrEqual", "__ge__");
         addMethod(methods, "lessThan", "__lt__");

@@ -62,7 +62,13 @@ public abstract class BackendEvalTests {
         assertEquals(value(-4), evalExpression(modIntegers(-10, 6)));
         assertEquals(value(4), evalExpression(modIntegers(10, -6)));
         assertEquals(value(-4), evalExpression(modIntegers(-10, -6)));
-        
+
+        assertEquals(
+            value(false),
+            evalExpression(methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF)));
+        assertEquals(
+            value(true),
+            evalExpression(methodCall(literal(1), "equals", asList(literal(1)), BooleanValue.REF)));
         assertEquals(
             value(false),
             evalExpression(methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF)));
