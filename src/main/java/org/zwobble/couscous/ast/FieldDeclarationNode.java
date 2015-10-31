@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 public class FieldDeclarationNode {
     public static FieldDeclarationNode field(String name, TypeName type) {
         return new FieldDeclarationNode(name, type);
@@ -36,7 +38,7 @@ public class FieldDeclarationNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 public class TypeName {
     public static TypeName of(String qualifiedName) {
         return new TypeName(qualifiedName);
@@ -34,7 +36,7 @@ public class TypeName {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

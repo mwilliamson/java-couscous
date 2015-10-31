@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 public class FormalArgumentNode implements VariableNode {
     public static FormalArgumentNode formalArg(VariableDeclaration declaration) {
         return new FormalArgumentNode(declaration);
@@ -38,7 +40,7 @@ public class FormalArgumentNode implements VariableNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

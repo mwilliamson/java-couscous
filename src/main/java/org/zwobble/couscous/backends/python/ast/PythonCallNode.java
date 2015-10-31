@@ -1,6 +1,9 @@
 package org.zwobble.couscous.backends.python.ast;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
 public final class PythonCallNode implements PythonExpressionNode {
@@ -30,7 +33,7 @@ public final class PythonCallNode implements PythonExpressionNode {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof PythonCallNode)) return false;
         final PythonCallNode other = (PythonCallNode)o;

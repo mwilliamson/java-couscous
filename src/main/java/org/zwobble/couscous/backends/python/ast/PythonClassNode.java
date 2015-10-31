@@ -1,6 +1,9 @@
 package org.zwobble.couscous.backends.python.ast;
 
 import java.util.List;
+
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import com.google.common.collect.ImmutableList;
 
@@ -58,7 +61,7 @@ public final class PythonClassNode implements PythonStatementNode {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof PythonClassNode)) return false;
         final PythonClassNode other = (PythonClassNode)o;

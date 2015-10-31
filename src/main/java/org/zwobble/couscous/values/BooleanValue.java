@@ -1,5 +1,7 @@
 package org.zwobble.couscous.values;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.TypeName;
 
 public final class BooleanValue implements PrimitiveValue {
@@ -25,7 +27,7 @@ public final class BooleanValue implements PrimitiveValue {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof BooleanValue)) return false;
         final BooleanValue other = (BooleanValue)o;

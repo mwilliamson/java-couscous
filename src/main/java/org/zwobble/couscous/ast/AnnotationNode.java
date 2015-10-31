@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 public class AnnotationNode {
     public static AnnotationNode annotation(TypeName type) {
         return new AnnotationNode(type);
@@ -29,7 +31,7 @@ public class AnnotationNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

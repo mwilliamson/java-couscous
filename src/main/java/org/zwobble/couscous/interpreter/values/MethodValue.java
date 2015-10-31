@@ -2,6 +2,9 @@ package org.zwobble.couscous.interpreter.values;
 
 import java.util.List;
 import java.util.function.BiFunction;
+
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.Environment;
 
@@ -23,7 +26,7 @@ public final class MethodValue implements Callable {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof MethodValue)) return false;
         final MethodValue other = (MethodValue)o;

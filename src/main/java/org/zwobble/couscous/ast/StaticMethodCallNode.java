@@ -2,6 +2,8 @@ package org.zwobble.couscous.ast;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
 import static java.util.Arrays.asList;
@@ -77,7 +79,7 @@ public class StaticMethodCallNode implements ExpressionNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

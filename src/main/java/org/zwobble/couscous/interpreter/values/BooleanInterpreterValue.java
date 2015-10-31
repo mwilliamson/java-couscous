@@ -2,6 +2,9 @@ package org.zwobble.couscous.interpreter.values;
 
 import java.util.Collections;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
@@ -44,7 +47,7 @@ public final class BooleanInterpreterValue implements InterpreterValue {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof BooleanInterpreterValue)) return false;
         final BooleanInterpreterValue other = (BooleanInterpreterValue)o;

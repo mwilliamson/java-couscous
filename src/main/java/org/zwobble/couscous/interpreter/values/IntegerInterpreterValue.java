@@ -3,6 +3,8 @@ package org.zwobble.couscous.interpreter.values;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
@@ -92,7 +94,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof IntegerInterpreterValue)) return false;
         final IntegerInterpreterValue other = (IntegerInterpreterValue)o;

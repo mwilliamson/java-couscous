@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
+import javax.annotation.Nullable;
+
 public final class NoSuchField extends InterpreterException {
     private static final long serialVersionUID = 1L;
     private final String fieldName;
@@ -17,7 +19,7 @@ public final class NoSuchField extends InterpreterException {
     }
 
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof NoSuchField)) return false;
         final NoSuchField other = (NoSuchField)o;

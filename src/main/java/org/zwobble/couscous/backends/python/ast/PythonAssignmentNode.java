@@ -1,5 +1,7 @@
 package org.zwobble.couscous.backends.python.ast;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
 public final class PythonAssignmentNode implements PythonStatementNode {
@@ -29,7 +31,7 @@ public final class PythonAssignmentNode implements PythonStatementNode {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof PythonAssignmentNode)) return false;
         final PythonAssignmentNode other = (PythonAssignmentNode)o;

@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 public final class ConditionMustBeBoolean extends InterpreterException {
@@ -20,7 +22,7 @@ public final class ConditionMustBeBoolean extends InterpreterException {
     }
 
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof ConditionMustBeBoolean)) return false;
         final ConditionMustBeBoolean other = (ConditionMustBeBoolean)o;

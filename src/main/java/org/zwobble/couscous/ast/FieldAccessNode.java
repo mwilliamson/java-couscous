@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
@@ -64,7 +66,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

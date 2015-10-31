@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.TypeName;
 
 public final class UnexpectedValueType extends InterpreterException {
@@ -26,7 +28,7 @@ public final class UnexpectedValueType extends InterpreterException {
     }
 
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof UnexpectedValueType)) return false;
         final UnexpectedValueType other = (UnexpectedValueType)o;

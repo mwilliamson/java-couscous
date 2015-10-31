@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import javax.annotation.Nullable;
+
 public class VariableDeclaration {
     public static VariableDeclaration var(String id, String name, TypeName type) {
         return new VariableDeclaration(id, name, type);
@@ -44,7 +46,7 @@ public class VariableDeclaration {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj)
             return true;
         if (obj == null)

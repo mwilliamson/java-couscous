@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
+import javax.annotation.Nullable;
+
 import org.zwobble.couscous.ast.TypeName;
 
 public final class FieldValue {
@@ -20,7 +22,7 @@ public final class FieldValue {
     }
 
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof FieldValue)) return false;
         final FieldValue other = (FieldValue)o;

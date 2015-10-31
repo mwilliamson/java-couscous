@@ -1,5 +1,7 @@
 package org.zwobble.couscous.backends.python.ast;
 
+import javax.annotation.Nullable;
+
 public final class PythonImportAliasNode {
     private final String name;
 
@@ -16,7 +18,7 @@ public final class PythonImportAliasNode {
     }
 
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
+    public boolean equals(@Nullable final java.lang.Object o) {
         if (o == this) return true;
         if (!(o instanceof PythonImportAliasNode)) return false;
         final PythonImportAliasNode other = (PythonImportAliasNode)o;
