@@ -3,13 +3,13 @@ package org.zwobble.couscous.tests;
 import java.nio.file.Files;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
+
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
@@ -23,7 +23,6 @@ public class JavaToPythonTests {
     }
     
     @Test
-    @Ignore("WIP")
     public void canUseOperatorsOnPrimitives() {
         assertEquals(value(3), evalExpression("1 + 2"));
         assertEquals(value(false), evalExpression("1 > 2"));

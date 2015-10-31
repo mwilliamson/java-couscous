@@ -28,6 +28,7 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
 import org.zwobble.couscous.ast.visitors.NodeVisitors;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator;
 import org.zwobble.couscous.backends.python.ast.PythonBlock;
 import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
@@ -65,8 +66,6 @@ import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.p
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 
 public class PythonCodeGenerator {
-    
-    
     public static PythonModuleNode generateCode(ClassNode classNode) {
         Iterator<org.zwobble.couscous.backends.python.ast.PythonImportNode> imports = generateImports(classNode).iterator();
         PythonFunctionDefinitionNode constructor = generateConstructor(classNode.getConstructor());
@@ -155,8 +154,6 @@ public class PythonCodeGenerator {
     }
     
     private static class StatementGenerator implements StatementNodeMapper<PythonStatementNode> {
-
-
         @Override
         public PythonStatementNode visit(ReturnNode returnNode) {
             return pythonReturn(generateExpression(returnNode.getValue()));
@@ -188,8 +185,6 @@ public class PythonCodeGenerator {
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
     
     private static class ExpressionGenerator implements ExpressionNodeMapper<PythonExpressionNode> {
-        
-        
         @Override
         public PythonExpressionNode visit(LiteralNode literal) {
             return generateCode(literal.getValue());
@@ -217,10 +212,10 @@ public class PythonCodeGenerator {
         
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
-            final org.zwobble.couscous.backends.python.ast.PythonExpressionNode receiver = generateExpression(methodCall.getReceiver());
-            final java.util.List<org.zwobble.couscous.backends.python.ast.PythonExpressionNode> arguments = generateExpressions(methodCall.getArguments());
+            PythonExpressionNode receiver = generateExpression(methodCall.getReceiver());
+            List<PythonExpressionNode> arguments = generateExpressions(methodCall.getArguments());
             if (isPrimitive(methodCall.getReceiver())) {
-                final org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(methodCall.getReceiver().getType(), methodCall.getMethodName()).get();
+                PrimitiveMethodGenerator primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(methodCall.getReceiver().getType(), methodCall.getMethodName()).get();
                 return primitiveMethodGenerator.generate(receiver, arguments);
             } else {
                 return pythonCall(pythonAttributeAccess(receiver, methodCall.getMethodName()), arguments);

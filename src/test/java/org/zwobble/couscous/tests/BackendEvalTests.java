@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -35,6 +37,50 @@ public abstract class BackendEvalTests {
         assertEquals(value(true), evalExpression(literal(true)));
         assertEquals(value(false), evalExpression(literal(false)));
         assertEquals(value(42), evalExpression(literal(42)));
+    }
+    
+    @Test
+    public void canEvaluateOperationsOnIntegers() {
+        assertEquals(
+            value(3),
+            evalExpression(methodCall(literal(1), "add", asList(literal(2)), IntegerValue.REF)));
+        assertEquals(
+            value(-1),
+            evalExpression(methodCall(literal(1), "subtract", asList(literal(2)), IntegerValue.REF)));
+        assertEquals(
+            value(2),
+            evalExpression(methodCall(literal(1), "multiply", asList(literal(2)), IntegerValue.REF)));
+        
+        assertEquals(value(0), evalExpression(divideIntegers(1, 2)));
+        assertEquals(value(1), evalExpression(divideIntegers(10, 6)));
+        // TODO:
+//        assertEquals(value(-1), evalExpression(divideIntegers(-10, 6)));
+//        assertEquals(value(-1), evalExpression(divideIntegers(10, -6)));
+//        assertEquals(value(1), evalExpression(divideIntegers(-10, -6)));
+        
+        assertEquals(value(1), evalExpression(modIntegers(1, 2)));
+        assertEquals(value(4), evalExpression(modIntegers(10, 6)));
+        
+        assertEquals(
+            value(false),
+            evalExpression(methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF)));
+        assertEquals(
+            value(false),
+            evalExpression(methodCall(literal(1), "greaterThanOrEqual", asList(literal(2)), BooleanValue.REF)));
+        assertEquals(
+            value(true),
+            evalExpression(methodCall(literal(1), "lessThan", asList(literal(2)), BooleanValue.REF)));
+        assertEquals(
+            value(true),
+            evalExpression(methodCall(literal(1), "lessThanOrEqual", asList(literal(2)), BooleanValue.REF)));
+    }
+
+    private MethodCallNode divideIntegers(int left, int right) {
+        return methodCall(literal(left), "divide", asList(literal(right)), IntegerValue.REF);
+    }
+
+    private MethodCallNode modIntegers(int left, int right) {
+        return methodCall(literal(left), "mod", asList(literal(right)), IntegerValue.REF);
     }
     
     @Test

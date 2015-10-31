@@ -1,6 +1,9 @@
 package org.zwobble.couscous.interpreter.values;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
+
+import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -9,10 +12,57 @@ import org.zwobble.couscous.values.StringValue;
 import static java.util.Arrays.asList;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
-    public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF).staticMethod("parseInt", asList(StringValue.REF), (environment, arguments) -> {
-        StringInterpreterValue value = (StringInterpreterValue)arguments.get(0);
-        return new IntegerInterpreterValue(Integer.parseInt(value.getValue()));
-    }).build();
+    public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
+        .staticMethod("parseInt", asList(StringValue.REF), (environment, arguments) -> {
+            StringInterpreterValue value = (StringInterpreterValue)arguments.get(0);
+            return new IntegerInterpreterValue(Integer.parseInt(value.getValue()));
+        })
+        .method("add", asList(IntegerValue.REF),
+            infixReturningInteger((left, right) -> left + right))
+        .method("subtract", asList(IntegerValue.REF),
+            infixReturningInteger((left, right) -> left - right))
+        .method("multiply", asList(IntegerValue.REF),
+            infixReturningInteger((left, right) -> left * right))
+        .method("divide", asList(IntegerValue.REF),
+            infixReturningInteger((left, right) -> left / right))
+        .method("mod", asList(IntegerValue.REF),
+            infixReturningInteger((left, right) -> left % right))
+        .method("greaterThan", asList(IntegerValue.REF),
+            infixReturningBoolean((left, right) -> left > right))
+        .method("greaterThanOrEqual", asList(IntegerValue.REF),
+            infixReturningBoolean((left, right) -> left >= right))
+        .method("lessThan", asList(IntegerValue.REF),
+            infixReturningBoolean((left, right) -> left < right))
+        .method("lessThanOrEqual", asList(IntegerValue.REF),
+            infixReturningBoolean((left, right) -> left <= right))
+        .build();
+    
+    private static
+            BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
+            infixReturningInteger(BiFunction<Integer, Integer, Integer> func) {
+        return infix((left, right) -> {
+            return new IntegerInterpreterValue(func.apply(left, right));
+        });
+    }
+    
+    private static
+            BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
+            infixReturningBoolean(BiFunction<Integer, Integer, Boolean> func) {
+        return infix((left, right) -> {
+            return new BooleanInterpreterValue(func.apply(left, right));
+        });
+    }
+    
+    private static
+            BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
+            infix(BiFunction<Integer, Integer, InterpreterValue> func) {
+        return (environment, arguments) -> {
+            IntegerInterpreterValue left = arguments.getReceiver();
+            IntegerInterpreterValue right = (IntegerInterpreterValue) arguments.get(0);
+            return func.apply(left.getValue(), right.getValue());
+        };
+    }
+    
     private final int value;
     
     @Override
