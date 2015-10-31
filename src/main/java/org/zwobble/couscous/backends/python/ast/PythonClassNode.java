@@ -58,31 +58,6 @@ public final class PythonClassNode implements PythonStatementNode {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof PythonClassNode)) return false;
-        final PythonClassNode other = (PythonClassNode)o;
-        final java.lang.Object this$name = this.getName();
-        final java.lang.Object other$name = other.getName();
-        if (this$name == null ? other$name != null : !this$name.equals(other$name)) return false;
-        final java.lang.Object this$body = this.getBody();
-        final java.lang.Object other$body = other.getBody();
-        if (this$body == null ? other$body != null : !this$body.equals(other$body)) return false;
-        return true;
-    }
-    
-    @java.lang.Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        final java.lang.Object $name = this.getName();
-        result = result * PRIME + ($name == null ? 43 : $name.hashCode());
-        final java.lang.Object $body = this.getBody();
-        result = result * PRIME + ($body == null ? 43 : $body.hashCode());
-        return result;
-    }
-    
-    @java.lang.Override
     public java.lang.String toString() {
         return "PythonClassNode(name=" + this.getName() + ", body=" + this.getBody() + ")";
     }

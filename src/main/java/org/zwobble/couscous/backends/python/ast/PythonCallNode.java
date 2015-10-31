@@ -30,31 +30,6 @@ public final class PythonCallNode implements PythonExpressionNode {
     }
     
     @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof PythonCallNode)) return false;
-        final PythonCallNode other = (PythonCallNode)o;
-        final java.lang.Object this$callee = this.getCallee();
-        final java.lang.Object other$callee = other.getCallee();
-        if (this$callee == null ? other$callee != null : !this$callee.equals(other$callee)) return false;
-        final java.lang.Object this$arguments = this.getArguments();
-        final java.lang.Object other$arguments = other.getArguments();
-        if (this$arguments == null ? other$arguments != null : !this$arguments.equals(other$arguments)) return false;
-        return true;
-    }
-    
-    @java.lang.Override
-    public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        final java.lang.Object $callee = this.getCallee();
-        result = result * PRIME + ($callee == null ? 43 : $callee.hashCode());
-        final java.lang.Object $arguments = this.getArguments();
-        result = result * PRIME + ($arguments == null ? 43 : $arguments.hashCode());
-        return result;
-    }
-    
-    @java.lang.Override
     public java.lang.String toString() {
         return "PythonCallNode(callee=" + this.getCallee() + ", arguments=" + this.getArguments() + ")";
     }
