@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.ObjectValues;
 
@@ -21,6 +22,14 @@ public class StaticMethodCallNode implements ExpressionNode {
             asList(value),
             ObjectValues.BOXED_INT);
     }
+
+    public static ExpressionNode unboxInt(ExpressionNode value) {
+        return staticMethodCall(
+            InternalCouscousValue.REF,
+            "unboxInt",
+            asList(value),
+            IntegerValue.REF);
+    }
     
     public static ExpressionNode boxBoolean(ExpressionNode value) {
         return staticMethodCall(
@@ -28,6 +37,14 @@ public class StaticMethodCallNode implements ExpressionNode {
             "boxBoolean",
             asList(value),
             ObjectValues.BOXED_BOOLEAN);
+    }
+
+    public static ExpressionNode unboxBoolean(ExpressionNode value) {
+        return staticMethodCall(
+            InternalCouscousValue.REF,
+            "unboxBoolean",
+            asList(value),
+            BooleanValue.REF);
     }
     
     public static StaticMethodCallNode staticMethodCall(

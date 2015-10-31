@@ -168,8 +168,12 @@ public class JavaReader {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
         if (isIntegerBox(targetType, couscousExpression)) {
             return StaticMethodCallNode.boxInt(couscousExpression);
+        } else if (isIntegerUnbox(targetType, couscousExpression)) {
+            return StaticMethodCallNode.unboxInt(couscousExpression);
         } else if (isBooleanBox(targetType, couscousExpression)) {
             return StaticMethodCallNode.boxBoolean(couscousExpression);
+        } else if (isBooleanUnbox(targetType, couscousExpression)) {
+            return StaticMethodCallNode.unboxBoolean(couscousExpression);
         } else {
             return couscousExpression;
         }
@@ -180,9 +184,19 @@ public class JavaReader {
             !targetType.equals(IntegerValue.REF);
     }
 
+    private static boolean isIntegerUnbox(TypeName targetType, ExpressionNode expression) {
+        return !expression.getType().equals(IntegerValue.REF) &&
+            targetType.equals(IntegerValue.REF);
+    }
+
     private static boolean isBooleanBox(TypeName targetType, ExpressionNode expression) {
         return expression.getType().equals(BooleanValue.REF) &&
             !targetType.equals(BooleanValue.REF);
+    }
+
+    private static boolean isBooleanUnbox(TypeName targetType, ExpressionNode expression) {
+        return !expression.getType().equals(BooleanValue.REF) &&
+            targetType.equals(BooleanValue.REF);
     }
 
     private static ExpressionNode readExpressionWithoutBoxing(Expression expression) {

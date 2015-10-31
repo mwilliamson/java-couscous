@@ -35,9 +35,11 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.boxBoolean;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxInt;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.unboxInt;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -250,7 +252,7 @@ public class JavaReaderTests {
     }
     
     @Test
-    public void integersAreBoxedIfAssignedToObjectVariable() {
+    public void valuesOfAssignmentsAreBoxedIfNecessary() {
         ClassNode classNode = readClass(
             "private Object value;" +
             "public Object getValue() {" +
@@ -283,19 +285,45 @@ public class JavaReaderTests {
     }
     
     @Test
-    public void integersAreBoxedIfDeclaredAsObjectVariable() {
+    public void initialValueOfLocalVariableDeclarationsAreBoxedIfNecessary() {
         List<StatementNode> statements = readStatements("Object x = 4;");
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
-        assertEquals(StaticMethodCallNode.boxInt(literal(4)), declaration.getInitialValue());
+        assertEquals(boxInt(literal(4)), declaration.getInitialValue());
     }
     
     @Test
-    public void booleansAreBoxedIfDeclaredAsObjectVariable() {
+    public void integersAreBoxedWhenTargetTypeIsObject() {
+        List<StatementNode> statements = readStatements("Object x = 4;");
+        
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        assertEquals(boxInt(literal(4)), declaration.getInitialValue());
+    }
+    
+    @Test
+    public void booleansAreBoxedWhenTargetTypeIsObject() {
         List<StatementNode> statements = readStatements("Object x = true;");
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
-        assertEquals(StaticMethodCallNode.boxBoolean(literal(true)), declaration.getInitialValue());
+        assertEquals(boxBoolean(literal(true)), declaration.getInitialValue());
+    }
+    
+    @Test
+    public void integersAreUnboxedIfTargetTypeIsPrimitive() {
+        List<StatementNode> statements = readStatements("Integer x = 4; int y = x;");
+        
+        LocalVariableDeclarationNode boxedDeclaration = (LocalVariableDeclarationNode) statements.get(0);
+        LocalVariableDeclarationNode unboxedDeclaration = (LocalVariableDeclarationNode) statements.get(1);
+        assertEquals(unboxInt(reference(boxedDeclaration)), unboxedDeclaration.getInitialValue());
+    }
+    
+    @Test
+    public void booleansAreUnboxedIfTargetTypeIsPrimitive() {
+        List<StatementNode> statements = readStatements("Boolean x = false; boolean y = x;");
+        
+        LocalVariableDeclarationNode boxedDeclaration = (LocalVariableDeclarationNode) statements.get(0);
+        LocalVariableDeclarationNode unboxedDeclaration = (LocalVariableDeclarationNode) statements.get(1);
+        assertEquals(StaticMethodCallNode.unboxBoolean(reference(boxedDeclaration)), unboxedDeclaration.getInitialValue());
     }
     
     @Test
