@@ -152,7 +152,12 @@ public class JavaReader {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = (List<VariableDeclarationFragment>)statement.fragments();
         TypeName type = typeOf(statement.getType());
-        return eagerMap(fragments, fragment -> localVariableDeclaration(fragment.resolveBinding().getKey(), fragment.getName().getIdentifier(), type, readExpression(fragment.getInitializer())));
+        return eagerMap(fragments, fragment ->
+            localVariableDeclaration(
+                fragment.resolveBinding().getKey(),
+                fragment.getName().getIdentifier(),
+                type,
+                readExpression(fragment.getInitializer())));
     }
     
     private static ExpressionNode readExpression(Expression expression) {
