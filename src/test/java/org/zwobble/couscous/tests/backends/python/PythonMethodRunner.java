@@ -29,17 +29,7 @@ public class PythonMethodRunner implements MethodRunner {
             PythonCompiler compiler = new PythonCompiler(directoryPath, "couscous");
             try {
                 compiler.compile(classNodes);
-                String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
-                String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";print(repr(" + className.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
-                Process process = new ProcessBuilder("python3.4", "-c", program).directory(directoryPath.toFile()).start();
-                int exitCode = process.waitFor();
-                String output = readString(process.getInputStream()).trim();
-                String stderrOutput = readString(process.getErrorStream());
-                if (exitCode != 0) {
-                    throw new RuntimeException("stderr was: " + stderrOutput);
-                } else {
-                    return readPrimitive(output);
-                }
+                return runFunction(directoryPath, className, methodName, arguments);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
@@ -47,8 +37,28 @@ public class PythonMethodRunner implements MethodRunner {
             throw new RuntimeException($ex);
         }
     }
+
+    public static PrimitiveValue runFunction(
+            Path directoryPath,
+            TypeName className,
+            String methodName,
+            List<PrimitiveValue> arguments)
+            throws IOException, InterruptedException {
+        
+        String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
+        String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";print(repr(" + className.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
+        Process process = new ProcessBuilder("python3.4", "-c", program).directory(directoryPath.toFile()).start();
+        int exitCode = process.waitFor();
+        String output = readString(process.getInputStream()).trim();
+        String stderrOutput = readString(process.getErrorStream());
+        if (exitCode != 0) {
+            throw new RuntimeException("stderr was: " + stderrOutput);
+        } else {
+            return readPrimitive(output);
+        }
+    }
     
-    private PrimitiveValue readPrimitive(String output) {
+    private static PrimitiveValue readPrimitive(String output) {
         if (output.equals("None")) {
             return PrimitiveValues.UNIT;
         } else if (output.startsWith("\'")) {
@@ -62,7 +72,7 @@ public class PythonMethodRunner implements MethodRunner {
         }
     }
     
-    private String readString(final InputStream stream) throws IOException {
+    private static String readString(final InputStream stream) throws IOException {
         return CharStreams.toString(new InputStreamReader(stream, Charsets.UTF_8));
     }
 }

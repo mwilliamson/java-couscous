@@ -1,12 +1,19 @@
 package org.zwobble.couscous.tests;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
+import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.backends.python.PythonCompiler;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -42,6 +49,45 @@ public class JavaToPythonTests {
         assertEquals(value(false), exec("Object x = 1; return x.equals(new Object());"));
     }
     
+    @Test
+    @Ignore
+    public void recursiveFactorial() throws Exception {
+        assertEquals(
+            value(120),
+            execProgram(
+                "recursive-factorial",
+                TypeName.of("com.example.RecursiveFactorial"),
+                "factorial",
+                asList(value(6))));
+    }
+    
+    private PrimitiveValue execProgram(
+            String directory,
+            TypeName type,
+            String methodName,
+            List<PrimitiveValue> arguments) throws IOException, InterruptedException {
+        
+        Path path = pathForResource(
+            "/java/" + directory + "/" + type.getQualifiedName().replace(".", "/") + ".java");
+        
+        Path directoryPath = Files.createTempDirectory(null);
+        try {
+            CouscousCompiler compiler = new CouscousCompiler(
+                new PythonCompiler(directoryPath, "couscous"));
+            compiler.compileDirectory(directoryName(path, type.getQualifiedName().split(".").length));
+            return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
+        } finally {
+            deleteRecursively(directoryPath.toFile());
+        }
+    }
+    
+    private Path directoryName(Path path, int length) {
+        for (int i = 0; i < length; i++) {
+            path = path.getParent();
+        }
+        return path;
+    }
+
     private PrimitiveValue exec(String source) {
         try {
             String javaClass =
@@ -65,5 +111,14 @@ public class JavaToPythonTests {
     
     private PrimitiveValue evalExpression(String expressionSource) {
         return exec("return " + expressionSource + ";");
+    }
+    
+    private static Path pathForResource(String name) {
+        try {
+            URI uri = JavaToPythonTests.class.getResource(name).toURI();
+            return new File(uri).toPath();
+        } catch (URISyntaxException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 }
