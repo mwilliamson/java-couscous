@@ -32,9 +32,11 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
+import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxBoolean;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxInt;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
@@ -353,6 +355,16 @@ public class JavaReaderTests {
                     asList(literal("42")),
                     IntegerValue.REF)),
             readStatement("Integer.parseInt(\"42\");"));
+    }
+    
+    @Test
+    public void canReadIfStatements() {
+        assertEquals(
+            ifStatement(
+                literal(true),
+                asList(returns(literal(1))),
+                asList(returns(literal(2)))),
+            readStatement("if (true) { return 1; } else { return 2; }"));
     }
     
     @Test

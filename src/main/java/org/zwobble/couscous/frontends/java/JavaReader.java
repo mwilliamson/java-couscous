@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -21,6 +22,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -45,6 +47,7 @@ import org.zwobble.couscous.ast.ClassNodeBuilder.MethodBuilder;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.ReturnNode;
@@ -128,21 +131,35 @@ public class JavaReader {
     
     private static List<StatementNode> readStatement(Statement statement) {
         switch (statement.getNodeType()) {
+        case ASTNode.BLOCK:
+            return readBlock((Block)statement);
+        
         case ASTNode.RETURN_STATEMENT: 
             return asList(readReturnStatement((ReturnStatement)statement));
         
         case ASTNode.EXPRESSION_STATEMENT: 
             return asList(readExpressionStatement((ExpressionStatement)statement));
+            
+        case ASTNode.IF_STATEMENT:
+            return asList(readIfStatement((IfStatement)statement));
         
         case ASTNode.VARIABLE_DECLARATION_STATEMENT: 
             return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
-        
+            
         default: 
             throw new RuntimeException("Unsupported statement: " + statement.getClass());
         
         }
     }
-    
+
+    private static List<StatementNode> readBlock(Block block) {
+        @SuppressWarnings("unchecked")
+        List<Statement> statements = block.statements();
+        return statements.stream()
+            .flatMap(statement -> readStatement(statement).stream())
+            .collect(Collectors.toList());
+    }
+
     private static StatementNode readReturnStatement(ReturnStatement statement) {
         // TODO: set target type
         return ReturnNode.returns(readExpressionWithoutBoxing(statement.getExpression()));
@@ -152,6 +169,13 @@ public class JavaReader {
         return expressionStatement(readExpressionWithoutBoxing(statement.getExpression()));
     }
     
+    private static StatementNode readIfStatement(IfStatement statement) {
+        return IfStatementNode.ifStatement(
+            readExpression(BooleanValue.REF, statement.getExpression()),
+            readStatement(statement.getThenStatement()),
+            readStatement(statement.getElseStatement()));
+    }
+
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = statement.fragments();
