@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.ClassNode;
@@ -50,10 +49,9 @@ public class JavaToPythonTests {
     }
     
     @Test
-    @Ignore
     public void recursiveFactorial() throws Exception {
         assertEquals(
-            value(120),
+            value(720),
             execProgram(
                 "recursive-factorial",
                 TypeName.of("com.example.RecursiveFactorial"),

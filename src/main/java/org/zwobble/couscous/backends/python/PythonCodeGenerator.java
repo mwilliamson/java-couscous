@@ -92,9 +92,9 @@ public class PythonCodeGenerator {
             ImmutableList.copyOf(Iterables.concat(asList(constructor), pythonMethods)));
         
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
+            singletonIterator(pythonClass),
             imports,
-            singletonIterator(internalsImport),
-            singletonIterator(pythonClass))));
+            singletonIterator(internalsImport))));
     }
     
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
