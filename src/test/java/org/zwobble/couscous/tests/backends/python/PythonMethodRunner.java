@@ -9,7 +9,7 @@ import java.util.List;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
-import org.zwobble.couscous.backends.python.PythonCompiler;
+import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -26,7 +26,7 @@ public class PythonMethodRunner implements MethodRunner {
     public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
-            PythonCompiler compiler = new PythonCompiler(directoryPath, "couscous");
+            PythonBackend compiler = new PythonBackend(directoryPath, "couscous");
             try {
                 compiler.compile(classNodes);
                 return runFunction(directoryPath, className, methodName, arguments);

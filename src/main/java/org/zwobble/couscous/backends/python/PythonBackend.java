@@ -15,7 +15,7 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 
-public class PythonCompiler {
+public class PythonBackend {
     private static final List<String> RUNTIME_FILES = asList(
         "java.lang.Object",
         "java.lang.Integer",
@@ -24,7 +24,7 @@ public class PythonCompiler {
     private final Path root;
     private final String packageName;
     
-    public PythonCompiler(Path root, String packageName) {
+    public PythonBackend(Path root, String packageName) {
         this.root = root;
         this.packageName = packageName;
     }

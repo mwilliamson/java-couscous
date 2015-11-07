@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.backends.python.PythonCompiler;
+import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -71,7 +71,7 @@ public class JavaToPythonTests {
         Path directoryPath = Files.createTempDirectory(null);
         try {
             CouscousCompiler compiler = new CouscousCompiler(
-                new PythonCompiler(directoryPath, "couscous"));
+                new PythonBackend(directoryPath, "couscous"));
             compiler.compileDirectory(directoryName(path, type.getQualifiedName().split(".").length));
             return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
         } finally {
