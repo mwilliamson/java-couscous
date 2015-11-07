@@ -27,6 +27,12 @@ public interface StatementNode extends Node {
                 visitor.visit(localVariableDeclaration);
                 return null;
             }
+
+            @Override
+            public Void visit(IfStatementNode ifStatement) {
+                visitor.visit(ifStatement);
+                return null;
+            }
         });
     }
 }

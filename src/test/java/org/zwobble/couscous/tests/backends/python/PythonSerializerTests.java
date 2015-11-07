@@ -15,6 +15,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
+import static org.zwobble.couscous.backends.python.ast.PythonIfStatementNode.pythonIfStatement;
 import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pythonImportAlias;
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
@@ -151,6 +152,15 @@ public class PythonSerializerTests {
             "com.example",
             asList(pythonImportAlias("Program"),pythonImportAlias("Runner"))));
         assertEquals("from com.example import Program, Runner\n", output);
+    }
+    
+    @Test
+    public void ifStatementIsSerializedWithIfKeyword() {
+        String output = serialize(pythonIfStatement(
+            pythonBooleanLiteral(true),
+            asList(pythonReturn(pythonIntegerLiteral(1))),
+            asList(pythonReturn(pythonIntegerLiteral(2)))));
+        assertEquals("if True:\n    return 1\nelse:\n    return 2\n", output);
     }
     
     @Test

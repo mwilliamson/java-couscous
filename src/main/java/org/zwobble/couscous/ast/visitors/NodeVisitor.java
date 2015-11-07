@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -30,6 +31,7 @@ public interface NodeVisitor {
     void visit(ReturnNode returnNode);
     void visit(ExpressionStatementNode expressionStatement);
     void visit(LocalVariableDeclarationNode localVariableDeclaration);
+    void visit(IfStatementNode ifStatement);
     
     void visit(ClassNode classNode);
     void visit(MethodNode methodNode);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
@@ -13,6 +14,7 @@ import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -45,11 +47,13 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.StringValue;
 import org.zwobble.couscous.values.UnitValue;
+
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+
 import static com.google.common.collect.Iterators.singletonIterator;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
@@ -59,6 +63,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall
 import static org.zwobble.couscous.backends.python.ast.PythonClassNode.pythonClass;
 import static org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode.pythonConditionalExpression;
 import static org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode.pythonFunctionDefinition;
+import static org.zwobble.couscous.backends.python.ast.PythonIfStatementNode.pythonIfStatement;
 import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pythonImportAlias;
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
@@ -117,7 +122,6 @@ public class PythonCodeGenerator {
     private static Set<TypeName> findReferencedClasses(ClassNode classNode) {
         ImmutableSet.Builder<TypeName> imports = ImmutableSet.builder();
         NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults(){
-            
             @Override
             public void visit(StaticMethodCallNode staticMethodCall) {
                 imports.add(staticMethodCall.getClassName());
@@ -168,8 +172,14 @@ public class PythonCodeGenerator {
         Iterable<String> argumentNames = Iterables.concat(
             method.isStatic() ? Collections.<String>emptyList() : asList("self"),
             explicitArgumentNames);
-        List<PythonStatementNode> pythonBody = method.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
+        List<PythonStatementNode> pythonBody = generateStatements(method.getBody());
         return pythonFunctionDefinition(method.getName(), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
+    }
+    
+    private static List<PythonStatementNode> generateStatements(List<StatementNode> statements) {
+        return statements.stream()
+            .map(PythonCodeGenerator::generateStatement)
+            .collect(Collectors.toList());
     }
     
     private static PythonStatementNode generateStatement(StatementNode statement) {
@@ -195,6 +205,14 @@ public class PythonCodeGenerator {
         @Override
         public PythonStatementNode visit(LocalVariableDeclarationNode declaration) {
             return pythonAssignment(pythonVariableReference(declaration.getDeclaration().getName()), generateExpression(declaration.getInitialValue()));
+        }
+
+        @Override
+        public PythonStatementNode visit(IfStatementNode ifStatement) {
+            return pythonIfStatement(
+                generateExpression(ifStatement.getCondition()),
+                generateStatements(ifStatement.getTrueBranch()),
+                generateStatements(ifStatement.getFalseBranch()));
         }
     }
     

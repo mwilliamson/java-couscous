@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ConstructorNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
@@ -63,6 +64,10 @@ public interface NodeVisitorWithEmptyDefaults extends NodeVisitor {
     
     @Override
     default void visit(LocalVariableDeclarationNode localVariableDeclaration) {
+    }
+    
+    @Override
+    default void visit(IfStatementNode ifStatement) {
     }
     
     @Override

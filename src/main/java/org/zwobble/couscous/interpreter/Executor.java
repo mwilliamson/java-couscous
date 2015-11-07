@@ -3,19 +3,22 @@ package org.zwobble.couscous.interpreter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import org.zwobble.couscous.ast.CallableNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.ReturnNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
+
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
-    
     public static InterpreterValue callMethod(Environment environment, CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
         final org.zwobble.couscous.interpreter.Environment innerEnvironment = buildEnvironment(environment, method, thisValue, arguments);
         for (final org.zwobble.couscous.ast.StatementNode statement : method.getBody()) {
@@ -38,7 +41,6 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
         return body.stream().flatMap(statement -> statement.accept(new StatementNodeMapper<Stream<VariableNode>>(){
-            
             @Override
             public Stream<VariableNode> visit(ReturnNode returnNode) {
                 return Stream.empty();
@@ -52,6 +54,12 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
             @Override
             public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
                 return Stream.of(localVariableDeclaration);
+            }
+
+            @Override
+            public Stream<VariableNode> visit(IfStatementNode ifStatement) {
+                // TODO: Handle declarations in branches
+                return Stream.empty();
             }
         }));
     }
@@ -80,6 +88,25 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     public Optional<InterpreterValue> visit(LocalVariableDeclarationNode localVariableDeclaration) {
         final org.zwobble.couscous.interpreter.values.InterpreterValue value = eval(environment, localVariableDeclaration.getInitialValue());
         environment.put(localVariableDeclaration, value);
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<InterpreterValue> visit(IfStatementNode ifStatement) {
+        BooleanInterpreterValue condition = (BooleanInterpreterValue) eval(environment, ifStatement.getCondition());
+        if (condition.getValue()) {
+            return exec(ifStatement.getTrueBranch());
+        }
+        return Optional.empty();
+    }
+
+    private Optional<InterpreterValue> exec(List<StatementNode> statements) {
+        for (StatementNode statement : statements) {
+            Optional<InterpreterValue> result = exec(environment, statement);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
         return Optional.empty();
     }
 }

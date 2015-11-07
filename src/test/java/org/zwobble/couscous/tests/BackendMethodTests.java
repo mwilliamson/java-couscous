@@ -9,11 +9,13 @@ import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 import org.zwobble.couscous.values.StringValue;
+
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
@@ -83,6 +85,16 @@ public abstract class BackendMethodTests {
             .statement(returns(reference(localVariableDeclaration)));
         final java.lang.Object result = runMethod(method);
         assertEquals(value("[updated value]"), result);
+    }
+    
+    @Test
+    public void whenConditionIsTrueIfStatementExecutesTrueBranch() {
+        MethodNode.Builder method = staticMethod("hello")
+            .statement(ifStatement(
+                literal(true),
+                asList(returns(literal("[true]"))),
+                asList(returns(literal("[false]")))));
+        assertEquals(value("[true]"), runMethod(method));
     }
     
     protected PrimitiveValue runMethod(MethodNode.Builder methodBuilder, PrimitiveValue... arguments) {

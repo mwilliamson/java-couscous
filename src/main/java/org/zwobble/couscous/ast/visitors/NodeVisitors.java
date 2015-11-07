@@ -1,19 +1,20 @@
 package org.zwobble.couscous.ast.visitors;
 
+import java.util.List;
+
 import org.zwobble.couscous.ast.AssignmentNode;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ConstructorCallNode;
 import org.zwobble.couscous.ast.ConstructorNode;
-import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.ExpressionStatementNode;
 import org.zwobble.couscous.ast.FieldAccessNode;
+import org.zwobble.couscous.ast.IfStatementNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.StaticMethodCallNode;
 import org.zwobble.couscous.ast.TernaryConditionalNode;
 import org.zwobble.couscous.ast.ThisReferenceNode;
@@ -56,25 +57,19 @@ public class NodeVisitors {
             public void visit(MethodCallNode methodCall) {
                 visitor.visit(methodCall);
                 methodCall.getReceiver().accept(this);
-                for (ExpressionNode argument : methodCall.getArguments()) {
-                    argument.accept(this);
-                }
+                visitAll(methodCall.getArguments());
             }
             
             @Override
             public void visit(StaticMethodCallNode staticMethodCall) {
                 visitor.visit(staticMethodCall);
-                for (ExpressionNode argument : staticMethodCall.getArguments()) {
-                    argument.accept(this);
-                }
+                visitAll(staticMethodCall.getArguments());
             }
             
             @Override
             public void visit(ConstructorCallNode call) {
                 visitor.visit(call);
-                for (ExpressionNode argument : call.getArguments()) {
-                    argument.accept(this);
-                }
+                visitAll(call.getArguments());
             }
             
             @Override
@@ -99,27 +94,34 @@ public class NodeVisitors {
                 visitor.visit(localVariableDeclaration);
                 localVariableDeclaration.getInitialValue().accept(this);
             }
-            
+
+            @Override
+            public void visit(IfStatementNode ifStatement) {
+                ifStatement.getCondition().accept(visitor);
+                visitAll(ifStatement.getTrueBranch());
+                visitAll(ifStatement.getFalseBranch());
+            }
+
             @Override
             public void visit(ClassNode classNode) {
                 visitor.visit(classNode);
                 classNode.getConstructor().accept(this);
-                for (MethodNode method : classNode.getMethods()) {
-                    method.accept(this);
-                }
+                visitAll(classNode.getMethods());
             }
             
             @Override
             public void visit(MethodNode methodNode) {
-                for (StatementNode statement : methodNode.getBody()) {
-                    statement.accept(this);
-                }
+                visitAll(methodNode.getBody());
             }
             
             @Override
             public void visit(ConstructorNode constructorNode) {
-                for (StatementNode statement : constructorNode.getBody()) {
-                    statement.accept(this);
+                visitAll(constructorNode.getBody());
+            }
+            
+            private <T extends Node> void visitAll(List<T> nodes) {
+                for (Node node : nodes) {
+                    node.accept(this);
                 }
             }
         });
