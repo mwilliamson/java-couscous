@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
 
 import com.google.common.io.Resources;
@@ -15,7 +16,7 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 
-public class PythonBackend {
+public class PythonBackend implements Backend {
     private static final List<String> RUNTIME_FILES = asList(
         "java.lang.Object",
         "java.lang.Integer",
@@ -29,6 +30,7 @@ public class PythonBackend {
         this.packageName = packageName;
     }
     
+    @Override
     public void compile(List<ClassNode> classes) throws IOException {
         for (ClassNode classNode : classes) {
             compileClass(classNode);

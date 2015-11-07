@@ -5,13 +5,12 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 
 public class CouscousCompiler {
-    private final PythonBackend backend;
+    private final Backend backend;
 
-    public CouscousCompiler(PythonBackend backend) {
+    public CouscousCompiler(Backend backend) {
         this.backend = backend;
     }
 
