@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
-import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
@@ -52,27 +51,41 @@ public class JavaToPythonTests {
     public void recursiveFactorial() throws Exception {
         assertEquals(
             value(720),
-            execProgram(
+            execTestProgram(
                 "recursive-factorial",
                 TypeName.of("com.example.RecursiveFactorial"),
                 "factorial",
                 asList(value(6))));
     }
     
-    private PrimitiveValue execProgram(
-            String directory,
+    private PrimitiveValue execTestProgram(
+            String directoryName,
             TypeName type,
             String methodName,
             List<PrimitiveValue> arguments) throws IOException, InterruptedException {
         
         Path path = pathForResource(
-            "/java/" + directory + "/" + type.getQualifiedName().replace(".", "/") + ".java");
+            "/java/" + directoryName + "/" + type.getQualifiedName().replace(".", "/") + ".java");
+        
+        return execProgram(
+            directoryName(path, type.getQualifiedName().split(".").length),
+            type,
+            methodName,
+            arguments);
+    }
+    
+    private PrimitiveValue execProgram(
+            Path directory,
+            TypeName type,
+            String methodName,
+            List<PrimitiveValue> arguments) throws IOException, InterruptedException {
         
         Path directoryPath = Files.createTempDirectory(null);
         try {
             CouscousCompiler compiler = new CouscousCompiler(
+                new JavaFrontend(),
                 new PythonBackend(directoryPath, "couscous"));
-            compiler.compileDirectory(directoryName(path, type.getQualifiedName().split(".").length));
+            compiler.compileDirectory(directory);
             return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
         } finally {
             deleteRecursively(directoryPath.toFile());
@@ -97,8 +110,11 @@ public class JavaToPythonTests {
             try {
                 Files.createDirectories(directoryPath.resolve("com/example"));
                 Files.write(directoryPath.resolve("com/example/Example.java"), asList(javaClass));
-                List<ClassNode> classNodes = JavaFrontend.readSourceDirectory(directoryPath);
-                return new PythonMethodRunner().runMethod(classNodes, TypeName.of("com.example.Example"), "main", asList());
+                return execProgram(
+                    directoryPath,
+                    TypeName.of("com.example.Example"),
+                    "main",
+                    asList());
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
