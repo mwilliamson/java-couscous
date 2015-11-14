@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.ClassNodeBuilder.MethodBuilder;
 import org.zwobble.couscous.values.BooleanValue;
@@ -314,26 +313,27 @@ public class JavaReader {
     }
     
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
-        if (typeOf(expression.getLeftOperand()).equals(IntegerValue.REF)) {
+        TypeName operandType = typeOf(expression.getLeftOperand());
+        if (operandType.equals(IntegerValue.REF)) {
             ExpressionNode left = readExpression(IntegerValue.REF, expression.getLeftOperand());
             ExpressionNode right = readExpression(IntegerValue.REF, expression.getRightOperand());
             
-            if (expression.getOperator() == Operator.NOT_EQUALS) {
-                return MethodCallNode.not(methodCall(left, "equals", asList(right), BooleanValue.REF));
+            if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
+                return MethodCallNode.notEqual(left, right);
             } else {
-                JavaOperator operator = readOperator(expression.getOperator());
+                Operator operator = readOperator(expression.getOperator());
                 return MethodCallNode.methodCall(
                     left,
-                    operator.methodName,
+                    operator.getMethodName(),
                     asList(right),
-                    operator.returnValue);
+                    operator.isBoolean() ? BooleanValue.REF : operandType);
             }
         } else {
             ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
             ExpressionNode right = readExpression(ObjectValues.OBJECT, expression.getRightOperand());
-            if (expression.getOperator() == Operator.EQUALS) {
+            if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
                 return StaticMethodCallNode.same(left, right);
-            } else if (expression.getOperator() == Operator.NOT_EQUALS) {
+            } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
                 return MethodCallNode.not(StaticMethodCallNode.same(left, right));
             } else {
                 throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
@@ -342,63 +342,49 @@ public class JavaReader {
     }
 
     private static ExpressionNode readPrefixExpression(PrefixExpression expression) {
-        JavaOperator operator = readOperator(expression.getOperator());
+        Operator operator = readOperator(expression.getOperator());
         return AssignmentNode.assign(
             (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
             MethodCallNode.methodCall(
                 readExpression(IntegerValue.REF, expression.getOperand()),
-                operator.methodName,
+                operator.getMethodName(),
                 asList(literal(1)),
-                operator.returnValue));
+                IntegerValue.REF));
     }
 
-    private static JavaOperator readOperator(PrefixExpression.Operator operator) {
+    private static Operator readOperator(PrefixExpression.Operator operator) {
         if (operator == PrefixExpression.Operator.INCREMENT) {
-            return JavaOperator.of("add", IntegerValue.REF);
+            return Operator.ADD;
         } else if (operator == PrefixExpression.Operator.DECREMENT) {
-            return JavaOperator.of("subtract", IntegerValue.REF);
+            return Operator.SUBTRACT;
         } else {
             throw new RuntimeException("Unrecognised operator: " + operator);
         }
     }
 
-    private static JavaOperator readOperator(InfixExpression.Operator operator) {
+    private static Operator readOperator(InfixExpression.Operator operator) {
         if (operator == InfixExpression.Operator.PLUS) {
-            return JavaOperator.of("add", IntegerValue.REF);
+            return Operator.ADD;
         } else if (operator == InfixExpression.Operator.MINUS) {
-            return JavaOperator.of("subtract", IntegerValue.REF);
+            return Operator.SUBTRACT;
         } else if (operator == InfixExpression.Operator.TIMES) {
-            return JavaOperator.of("multiply", IntegerValue.REF);
+            return Operator.MULTIPLY;
         } else if (operator == InfixExpression.Operator.DIVIDE) {
-            return JavaOperator.of("divide", IntegerValue.REF);
+            return Operator.DIVIDE;
         } else if (operator == InfixExpression.Operator.REMAINDER) {
-            return JavaOperator.of("mod", IntegerValue.REF);
+            return Operator.MOD;
         } else if (operator == InfixExpression.Operator.EQUALS) {
-            return JavaOperator.of("equals", BooleanValue.REF);
+            return Operator.EQUALS;
         } else if (operator == InfixExpression.Operator.GREATER) {
-            return JavaOperator.of("greaterThan", BooleanValue.REF);
+            return Operator.GREATER_THAN;
         } else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
-            return JavaOperator.of("greaterThanOrEqual", BooleanValue.REF);
+            return Operator.GREATER_THAN_OR_EQUAL;
         } else if (operator == InfixExpression.Operator.LESS) {
-            return JavaOperator.of("lessThan", BooleanValue.REF);
+            return Operator.LESS_THAN;
         } else if (operator == InfixExpression.Operator.LESS_EQUALS) {
-            return JavaOperator.of("lessThanOrEqual", BooleanValue.REF);
+            return Operator.LESS_THAN_OR_EQUAL;
         } else {
             throw new RuntimeException("Unrecognised operator: " + operator);
-        }
-    }
-    
-    private static class JavaOperator {
-        private static JavaOperator of(String methodName, TypeName returnValue) {
-            return new JavaOperator(methodName, returnValue);
-        }
-        
-        private final String methodName;
-        private final TypeName returnValue;
-
-        private JavaOperator(String methodName, TypeName returnValue) {
-            this.methodName = methodName;
-            this.returnValue = returnValue;
         }
     }
 
