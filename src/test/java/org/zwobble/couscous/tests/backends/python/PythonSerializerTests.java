@@ -25,6 +25,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonPassNode.PASS;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
+import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
 
 public class PythonSerializerTests {
     @Test
@@ -161,6 +162,14 @@ public class PythonSerializerTests {
             asList(pythonReturn(pythonIntegerLiteral(1))),
             asList(pythonReturn(pythonIntegerLiteral(2)))));
         assertEquals("if True:\n    return 1\nelse:\n    return 2\n", output);
+    }
+
+    @Test
+    public void whileIsSerializedWithWhileKeyword() {
+        String output = serialize(pythonWhile(
+            pythonBooleanLiteral(true),
+            asList(pythonReturn(pythonIntegerLiteral(1)))));
+        assertEquals("while True:\n    return 1\n", output);
     }
     
     @Test

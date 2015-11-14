@@ -53,6 +53,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonMo
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
+import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
@@ -199,7 +200,9 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonStatementNode visit(WhileNode whileLoop) {
-            throw new UnsupportedOperationException();
+            return pythonWhile(
+                generateExpression(whileLoop.getCondition()),
+                generateStatements(whileLoop.getBody()));
         }
     }
     

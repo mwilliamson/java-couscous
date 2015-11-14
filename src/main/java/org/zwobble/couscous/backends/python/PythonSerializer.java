@@ -2,28 +2,8 @@ package org.zwobble.couscous.backends.python;
 
 import java.util.List;
 import java.util.function.Consumer;
-import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
-import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
-import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
-import org.zwobble.couscous.backends.python.ast.PythonBlock;
-import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonCallNode;
-import org.zwobble.couscous.backends.python.ast.PythonClassNode;
-import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
-import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
-import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
-import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
-import org.zwobble.couscous.backends.python.ast.PythonIfStatementNode;
-import org.zwobble.couscous.backends.python.ast.PythonImportNode;
-import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
-import org.zwobble.couscous.backends.python.ast.PythonNode;
-import org.zwobble.couscous.backends.python.ast.PythonNotNode;
-import org.zwobble.couscous.backends.python.ast.PythonPassNode;
-import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
-import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
-import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
+
+import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import org.zwobble.couscous.util.Action;
 import static com.google.common.collect.Iterables.skip;
@@ -207,7 +187,17 @@ public class PythonSerializer implements PythonNodeVisitor {
             writeBlock(ifStatement.getFalseBranch()); 
         });
     }
-    
+
+    @Override
+    public void visit(PythonWhileNode whileLoop) {
+        writer.writeStatement(() -> {
+            writer.writeKeyword("while");
+            writer.writeSpace();
+            write(whileLoop.getCondition());
+            writeBlock(whileLoop.getBody());
+        });
+    }
+
     private void writeParenthesised(PythonExpressionNode expression) {
         writer.writeSymbol("(");
         write(expression);

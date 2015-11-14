@@ -23,7 +23,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         }
         return UnitInterpreterValue.UNIT;
     }
-    
+
     private static Environment buildEnvironment(final Environment environment, final CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
         final org.zwobble.couscous.interpreter.StackFrameBuilder stackFrame = new StackFrameBuilder();
         for (int index = 0; index < method.getArguments().size(); index++) {
@@ -32,19 +32,19 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         findDeclarations(method.getBody()).forEach(declaration -> stackFrame.declare(declaration));
         return environment.withStackFrame(thisValue, stackFrame.build());
     }
-    
+
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
         return body.stream().flatMap(statement -> statement.accept(new StatementNodeMapper<Stream<VariableNode>>(){
             @Override
             public Stream<VariableNode> visit(ReturnNode returnNode) {
                 return Stream.empty();
             }
-            
+
             @Override
             public Stream<VariableNode> visit(ExpressionStatementNode expressionStatement) {
                 return Stream.empty();
             }
-            
+
             @Override
             public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
                 return Stream.of(localVariableDeclaration);
@@ -63,27 +63,27 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
             }
         }));
     }
-    
+
     public static Optional<InterpreterValue> exec(Environment environment, StatementNode statement) {
         return statement.accept(new Executor(environment));
     }
     private final Environment environment;
-    
+
     private Executor(Environment environment) {
         this.environment = environment;
     }
-    
+
     @Override
     public Optional<InterpreterValue> visit(ReturnNode returnNode) {
         return Optional.of(eval(environment, returnNode.getValue()));
     }
-    
+
     @Override
     public Optional<InterpreterValue> visit(ExpressionStatementNode expressionStatement) {
         eval(environment, expressionStatement.getExpression());
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<InterpreterValue> visit(LocalVariableDeclarationNode localVariableDeclaration) {
         final org.zwobble.couscous.interpreter.values.InterpreterValue value = eval(environment, localVariableDeclaration.getInitialValue());
@@ -93,8 +93,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
 
     @Override
     public Optional<InterpreterValue> visit(IfStatementNode ifStatement) {
-        BooleanInterpreterValue condition = (BooleanInterpreterValue) eval(environment, ifStatement.getCondition());
-        List<StatementNode> body = condition.getValue()
+        List<StatementNode> body = evalCondition(ifStatement.getCondition())
             ? ifStatement.getTrueBranch()
             : ifStatement.getFalseBranch();
         return exec(body);
@@ -102,7 +101,18 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
 
     @Override
     public Optional<InterpreterValue> visit(WhileNode whileLoop) {
-        throw new UnsupportedOperationException();
+        while (evalCondition(whileLoop.getCondition())) {
+            Optional<InterpreterValue> result = exec(whileLoop.getBody());
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private boolean evalCondition(ExpressionNode conditionExpression) {
+        BooleanInterpreterValue condition = (BooleanInterpreterValue) eval(environment, conditionExpression);
+        return condition.getValue();
     }
 
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {

@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 import org.zwobble.couscous.values.StringValue;
@@ -13,15 +14,19 @@ import org.zwobble.couscous.values.StringValue;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
+import static org.zwobble.couscous.ast.MethodCallNode.integerAdd;
+import static org.zwobble.couscous.ast.MethodCallNode.notEqual;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
@@ -105,6 +110,36 @@ public abstract class BackendMethodTests {
                 asList(returns(literal("[true]"))),
                 asList(returns(literal("[false]")))));
         assertEquals(value("[false]"), runMethod(method));
+    }
+
+    @Test
+    public void whileLoopIsExecutedWhileConditionIsTrue() {
+        LocalVariableDeclarationNode x = localVariableDeclaration("x", "x", IntegerValue.REF, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration("y", "y", IntegerValue.REF, literal(2));
+        MethodNode.Builder method = staticMethod("hello")
+            .statement(x)
+            .statement(y)
+            .statement(whileLoop(
+                notEqual(reference(x), reference(y)),
+                asList(assignStatement(x, integerAdd(reference(x), literal(1))))))
+            .statement(returns(reference(x)));
+        assertEquals(value(2), runMethod(method));
+    }
+
+    @Test
+    public void returnWillExitWhileLoopEarly() {
+        LocalVariableDeclarationNode x = localVariableDeclaration("x", "x", IntegerValue.REF, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration("y", "y", IntegerValue.REF, literal(2));
+        MethodNode.Builder method = staticMethod("hello")
+            .statement(x)
+            .statement(y)
+            .statement(whileLoop(
+                notEqual(reference(x), reference(y)),
+                asList(
+                    assignStatement(x, integerAdd(reference(x), literal(1))),
+                    returns(reference(x)))))
+            .statement(returns(reference(x)));
+        assertEquals(value(1), runMethod(method));
     }
     
     protected PrimitiveValue runMethod(MethodNode.Builder methodBuilder, PrimitiveValue... arguments) {

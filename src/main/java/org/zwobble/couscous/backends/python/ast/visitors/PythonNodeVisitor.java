@@ -1,23 +1,6 @@
 package org.zwobble.couscous.backends.python.ast.visitors;
 
-import org.zwobble.couscous.backends.python.ast.PythonAssignmentNode;
-import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
-import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
-import org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonCallNode;
-import org.zwobble.couscous.backends.python.ast.PythonClassNode;
-import org.zwobble.couscous.backends.python.ast.PythonConditionalExpressionNode;
-import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
-import org.zwobble.couscous.backends.python.ast.PythonGetSliceNode;
-import org.zwobble.couscous.backends.python.ast.PythonIfStatementNode;
-import org.zwobble.couscous.backends.python.ast.PythonImportNode;
-import org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
-import org.zwobble.couscous.backends.python.ast.PythonNotNode;
-import org.zwobble.couscous.backends.python.ast.PythonPassNode;
-import org.zwobble.couscous.backends.python.ast.PythonReturnNode;
-import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
-import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
+import org.zwobble.couscous.backends.python.ast.*;
 
 public interface PythonNodeVisitor {
     void visit(PythonIntegerLiteralNode integerLiteral);
@@ -38,6 +21,7 @@ public interface PythonNodeVisitor {
     void visit(PythonAssignmentNode assignment);
     void visit(PythonImportNode importNode);
     void visit(PythonIfStatementNode ifStatement);
+    void visit(PythonWhileNode whileLoop);
 
     void visit(PythonModuleNode module);
 
