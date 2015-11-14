@@ -20,23 +20,23 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static ExpressionNode integerAdd(ExpressionNode left, ExpressionNode right) {
-        return integerOperation("add", left, right);
+        return integerOperation(Operator.ADD.getMethodName(), left, right);
     }
 
     public static ExpressionNode integerSubtract(ExpressionNode left, ExpressionNode right) {
-        return integerOperation("subtract", left, right);
+        return integerOperation(Operator.SUBTRACT.getMethodName(), left, right);
     }
 
     public static ExpressionNode integerMultiply(ExpressionNode left, ExpressionNode right) {
-        return integerOperation("multiply", left, right);
+        return integerOperation(Operator.MULTIPLY.getMethodName(), left, right);
     }
 
     public static ExpressionNode integerDivide(ExpressionNode left, ExpressionNode right) {
-        return integerOperation("divide", left, right);
+        return integerOperation(Operator.DIVIDE.getMethodName(), left, right);
     }
 
     public static ExpressionNode integerMod(ExpressionNode left, ExpressionNode right) {
-        return integerOperation("mod", left, right);
+        return integerOperation(Operator.MOD.getMethodName(), left, right);
     }
 
     private static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
@@ -44,27 +44,27 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static ExpressionNode equal(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation("equals", left, right);
+        return booleanOperation(Operator.EQUALS.getMethodName(), left, right);
     }
 
     public static ExpressionNode notEqual(ExpressionNode left, ExpressionNode right) {
-        return not(booleanOperation("equals", left, right));
+        return not(booleanOperation(Operator.EQUALS.getMethodName(), left, right));
     }
 
     public static ExpressionNode greaterThan(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation("greaterThan", left, right);
+        return booleanOperation(Operator.GREATER_THAN.getMethodName(), left, right);
     }
 
     public static ExpressionNode greaterThanOrEqual(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation("greaterThanOrEqual", left, right);
+        return booleanOperation(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), left, right);
     }
 
     public static ExpressionNode lessThan(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation("lessThan", left, right);
+        return booleanOperation(Operator.LESS_THAN.getMethodName(), left, right);
     }
 
     public static ExpressionNode lessThanOrEqual(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation("lessThanOrEqual", left, right);
+        return booleanOperation(Operator.LESS_THAN_OR_EQUAL.getMethodName(), left, right);
     }
 
     private static ExpressionNode booleanOperation(String methodName, ExpressionNode left, ExpressionNode right) {

@@ -3,6 +3,7 @@ package org.zwobble.couscous.interpreter.values;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
@@ -13,25 +14,25 @@ import static java.util.Arrays.asList;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
     public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
-        .method("add", asList(IntegerValue.REF),
+        .method(Operator.ADD.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left + right))
-        .method("subtract", asList(IntegerValue.REF),
+        .method(Operator.SUBTRACT.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left - right))
-        .method("multiply", asList(IntegerValue.REF),
+        .method(Operator.MULTIPLY.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left * right))
-        .method("divide", asList(IntegerValue.REF),
+        .method(Operator.DIVIDE.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left / right))
-        .method("mod", asList(IntegerValue.REF),
+        .method(Operator.MOD.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left % right))
-        .method("equals", asList(IntegerValue.REF),
+        .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left == right))
-        .method("greaterThan", asList(IntegerValue.REF),
+        .method(Operator.GREATER_THAN.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left > right))
-        .method("greaterThanOrEqual", asList(IntegerValue.REF),
+        .method(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left >= right))
-        .method("lessThan", asList(IntegerValue.REF),
+        .method(Operator.LESS_THAN.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left < right))
-        .method("lessThanOrEqual", asList(IntegerValue.REF),
+        .method(Operator.LESS_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left <= right))
         .build();
     

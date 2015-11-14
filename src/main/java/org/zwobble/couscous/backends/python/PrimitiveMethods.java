@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
@@ -49,24 +50,24 @@ public class PrimitiveMethods {
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
         
-        addMethod(methods, "add", "__add__");
-        addMethod(methods, "subtract", "__sub__");
-        addMethod(methods, "multiply", "__mul__");
+        addMethod(methods, Operator.ADD.getMethodName(), "__add__");
+        addMethod(methods, Operator.SUBTRACT.getMethodName(), "__sub__");
+        addMethod(methods, Operator.MULTIPLY.getMethodName(), "__mul__");
 
-        methods.put("divide", (receiver, arguments) ->
+        methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_div_round_to_zero"),
                 asList(receiver, arguments.get(0))));
-        methods.put("mod", (receiver, arguments) ->
+        methods.put(Operator.MOD.getMethodName(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_mod_round_to_zero"),
                 asList(receiver, arguments.get(0))));
 
-        addMethod(methods, "equals", "__eq__");
-        addMethod(methods, "greaterThan", "__gt__");
-        addMethod(methods, "greaterThanOrEqual", "__ge__");
-        addMethod(methods, "lessThan", "__lt__");
-        addMethod(methods, "lessThanOrEqual", "__le__");
+        addMethod(methods, Operator.EQUALS.getMethodName(), "__eq__");
+        addMethod(methods, Operator.GREATER_THAN.getMethodName(), "__gt__");
+        addMethod(methods, Operator.GREATER_THAN_OR_EQUAL.getMethodName(), "__ge__");
+        addMethod(methods, Operator.LESS_THAN.getMethodName(), "__lt__");
+        addMethod(methods, Operator.LESS_THAN_OR_EQUAL.getMethodName(), "__le__");
         
         INT_METHODS = methods.build();
     }
