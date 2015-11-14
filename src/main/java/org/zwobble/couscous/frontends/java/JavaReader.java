@@ -17,7 +17,6 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
-import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -397,12 +396,39 @@ public class JavaReader {
     }
     
     private static ExpressionNode readAssignment(Assignment expression) {
-        ExpressionNode left = readExpressionWithoutBoxing(expression.getLeftHandSide());
-        return AssignmentNode.assign(
-            (AssignableExpressionNode)left,
-            readExpression(left.getType(), expression.getRightHandSide()));
+        // TODO: fix boxing
+        AssignableExpressionNode left = (AssignableExpressionNode)readExpressionWithoutBoxing(expression.getLeftHandSide());
+        ExpressionNode right = readExpression(left.getType(), expression.getRightHandSide());
+        if (expression.getOperator() == Assignment.Operator.ASSIGN) {
+            return AssignmentNode.assign(left, right);
+        } else {
+            Operator operator = readOperator(expression.getOperator());
+            return AssignmentNode.assign(
+                left,
+                MethodCallNode.methodCall(
+                    left,
+                    operator.getMethodName(),
+                    asList(right),
+                    left.getType()));
+        }
     }
-    
+
+    private static Operator readOperator(Assignment.Operator operator) {
+        if (operator == Assignment.Operator.PLUS_ASSIGN) {
+            return Operator.ADD;
+        } else if (operator == Assignment.Operator.MINUS_ASSIGN) {
+            return Operator.SUBTRACT;
+        } else if (operator == Assignment.Operator.TIMES_ASSIGN) {
+            return Operator.MULTIPLY;
+        } else if (operator == Assignment.Operator.DIVIDE_ASSIGN) {
+            return Operator.DIVIDE;
+        } else if (operator == Assignment.Operator.REMAINDER_ASSIGN) {
+            return Operator.MOD;
+        } else {
+            throw new RuntimeException("Unrecognised operator: " + operator);
+        }
+    }
+
     private static String generateClassName(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         return ast.getPackage().getName().getFullyQualifiedName() + "." + type.getName().getFullyQualifiedName();

@@ -39,7 +39,7 @@ public class MethodCallNode implements ExpressionNode {
         return integerOperation(Operator.MOD.getMethodName(), left, right);
     }
 
-    private static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
+    public static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
         return methodCall(left, methodName, asList(right), IntegerValue.REF);
     }
 

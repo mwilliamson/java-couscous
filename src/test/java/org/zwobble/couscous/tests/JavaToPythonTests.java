@@ -60,7 +60,6 @@ public class JavaToPythonTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void whileFactorial() throws Exception {
         assertEquals(
             value(720),

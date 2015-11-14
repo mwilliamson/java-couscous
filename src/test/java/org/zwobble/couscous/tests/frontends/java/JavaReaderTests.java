@@ -354,6 +354,32 @@ public class JavaReaderTests {
     }
 
     @Test
+    public void canReadCompoundAssignmentOperations() {
+        canReadCompoundAssignmentOperation("+=", Operator.ADD);
+        canReadCompoundAssignmentOperation("-=", Operator.SUBTRACT);
+        canReadCompoundAssignmentOperation("*=", Operator.MULTIPLY);
+        canReadCompoundAssignmentOperation("/=", Operator.DIVIDE);
+        canReadCompoundAssignmentOperation("%=", Operator.MOD);
+    }
+
+    private void canReadCompoundAssignmentOperation(String symbol, Operator operator) {
+        ClassNode classNode = readClass(
+            "public void go(int value) {" +
+            "    value " + symbol + " 2;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                reference(argument),
+                integerOperation(operator.getMethodName(), reference(argument), literal(2))),
+            statement.getExpression());
+    }
+
+    @Test
     public void canReadPrefixDecrement() {
         ClassNode classNode = readClass(
             "public void go(int value) {" +
