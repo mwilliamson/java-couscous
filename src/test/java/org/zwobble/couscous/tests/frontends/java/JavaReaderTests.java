@@ -380,6 +380,44 @@ public class JavaReaderTests {
     }
 
     @Test
+    public void rightOperandOfCompoundAssignmentsIsUnboxedIfNecessary() {
+        ClassNode classNode = readClass(
+            "public void go(int left, Integer right) {" +
+            "    left += right;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode left = method.getArguments().get(0);
+        FormalArgumentNode right = method.getArguments().get(1);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                reference(left),
+                integerAdd(reference(left), unboxInt(reference(right)))),
+            statement.getExpression());
+    }
+
+    @Test
+    public void leftOperandOfCompoundAssignmentsIsUnboxedIfNecessary() {
+        ClassNode classNode = readClass(
+            "public void go(Integer left, int right) {" +
+                "    left += right;" +
+                "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode left = method.getArguments().get(0);
+        FormalArgumentNode right = method.getArguments().get(1);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                reference(left),
+                boxInt(integerAdd(unboxInt(reference(left)), reference(right)))),
+            statement.getExpression());
+    }
+
+    @Test
     public void canReadPrefixDecrement() {
         ClassNode classNode = readClass(
             "public void go(int value) {" +

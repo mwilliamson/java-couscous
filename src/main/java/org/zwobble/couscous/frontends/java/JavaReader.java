@@ -152,6 +152,10 @@ public class JavaReader {
     
     private static ExpressionNode readExpression(TypeName targetType, Expression expression) {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
+        return handleBoxing(targetType, couscousExpression);
+    }
+
+    private static ExpressionNode handleBoxing(TypeName targetType, ExpressionNode couscousExpression) {
         if (isIntegerBox(targetType, couscousExpression)) {
             return StaticMethodCallNode.boxInt(couscousExpression);
         } else if (isIntegerUnbox(targetType, couscousExpression)) {
@@ -162,6 +166,16 @@ public class JavaReader {
             return StaticMethodCallNode.unboxBoolean(couscousExpression);
         } else {
             return couscousExpression;
+        }
+    }
+
+    private static TypeName unboxedType(TypeName type) {
+        if (type.equals(ObjectValues.BOXED_INT)) {
+            return IntegerValue.REF;
+        } else if (type.equals(ObjectValues.BOXED_BOOLEAN)) {
+            return BooleanValue.REF;
+        } else {
+            return type;
         }
     }
 
@@ -396,21 +410,29 @@ public class JavaReader {
     }
     
     private static ExpressionNode readAssignment(Assignment expression) {
-        // TODO: fix boxing
         AssignableExpressionNode left = (AssignableExpressionNode)readExpressionWithoutBoxing(expression.getLeftHandSide());
-        ExpressionNode right = readExpression(left.getType(), expression.getRightHandSide());
         if (expression.getOperator() == Assignment.Operator.ASSIGN) {
+            ExpressionNode right = readExpression(left.getType(), expression.getRightHandSide());
             return AssignmentNode.assign(left, right);
         } else {
+            ExpressionNode right = readUnboxedExpression(expression.getRightHandSide());
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
                 left,
-                MethodCallNode.methodCall(
-                    left,
-                    operator.getMethodName(),
-                    asList(right),
-                    left.getType()));
+                handleBoxing(
+                    left.getType(),
+                    MethodCallNode.methodCall(
+                        readUnboxedExpression(expression.getLeftHandSide()),
+                        operator.getMethodName(),
+                        asList(right),
+                        unboxedType(left.getType()))));
         }
+    }
+
+    private static ExpressionNode readUnboxedExpression(Expression expression) {
+        return readExpression(
+            unboxedType(typeOf(expression)),
+            expression);
     }
 
     private static Operator readOperator(Assignment.Operator operator) {
