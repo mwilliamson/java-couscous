@@ -6,56 +6,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BooleanLiteral;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.zwobble.couscous.ast.AssignableExpressionNode;
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ClassNodeBuilder;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.ClassNodeBuilder.MethodBuilder;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.IfStatementNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
@@ -66,6 +20,7 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaReader {
@@ -131,24 +86,26 @@ public class JavaReader {
     
     private static List<StatementNode> readStatement(Statement statement) {
         switch (statement.getNodeType()) {
-        case ASTNode.BLOCK:
-            return readBlock((Block)statement);
-        
-        case ASTNode.RETURN_STATEMENT: 
-            return asList(readReturnStatement((ReturnStatement)statement));
-        
-        case ASTNode.EXPRESSION_STATEMENT: 
-            return asList(readExpressionStatement((ExpressionStatement)statement));
-            
-        case ASTNode.IF_STATEMENT:
-            return asList(readIfStatement((IfStatement)statement));
-        
-        case ASTNode.VARIABLE_DECLARATION_STATEMENT: 
-            return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
-            
-        default: 
-            throw new RuntimeException("Unsupported statement: " + statement.getClass());
-        
+            case ASTNode.BLOCK:
+                return readBlock((Block)statement);
+
+            case ASTNode.RETURN_STATEMENT:
+                return asList(readReturnStatement((ReturnStatement)statement));
+
+            case ASTNode.EXPRESSION_STATEMENT:
+                return asList(readExpressionStatement((ExpressionStatement)statement));
+
+            case ASTNode.IF_STATEMENT:
+                return asList(readIfStatement((IfStatement)statement));
+
+            case ASTNode.WHILE_STATEMENT:
+                return asList(readWhileStatement((WhileStatement)statement));
+
+            case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+                return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
+
+            default:
+                throw new RuntimeException("Unsupported statement: " + statement.getClass());
         }
     }
 
@@ -174,6 +131,12 @@ public class JavaReader {
             readExpression(BooleanValue.REF, statement.getExpression()),
             readStatement(statement.getThenStatement()),
             readStatement(statement.getElseStatement()));
+    }
+
+    private static WhileNode readWhileStatement(WhileStatement statement) {
+        return whileLoop(
+            readExpression(BooleanValue.REF, statement.getExpression()),
+            readStatement(statement.getBody()));
     }
 
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {

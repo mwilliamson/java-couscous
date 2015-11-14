@@ -33,6 +33,12 @@ public interface StatementNode extends Node {
                 visitor.visit(ifStatement);
                 return null;
             }
+
+            @Override
+            public Void visit(WhileNode whileLoop) {
+                visitor.visit(whileLoop);
+                return null;
+            }
         });
     }
 }

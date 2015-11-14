@@ -7,25 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.ConstructorNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.IfStatementNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
 import org.zwobble.couscous.ast.visitors.NodeVisitors;
@@ -213,6 +195,11 @@ public class PythonCodeGenerator {
                 generateExpression(ifStatement.getCondition()),
                 generateStatements(ifStatement.getTrueBranch()),
                 generateStatements(ifStatement.getFalseBranch()));
+        }
+
+        @Override
+        public PythonStatementNode visit(WhileNode whileLoop) {
+            throw new UnsupportedOperationException();
         }
     }
     

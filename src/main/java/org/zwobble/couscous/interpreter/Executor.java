@@ -4,13 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.zwobble.couscous.ast.CallableNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
-import org.zwobble.couscous.ast.IfStatementNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.VariableNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
@@ -61,6 +55,12 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
                 // TODO: Handle declarations in branches
                 return Stream.empty();
             }
+
+            @Override
+            public Stream<VariableNode> visit(WhileNode whileLoop) {
+                // TODO: Handle declarations in branches
+                return Stream.empty();
+            }
         }));
     }
     
@@ -98,6 +98,11 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
             return exec(ifStatement.getTrueBranch());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<InterpreterValue> visit(WhileNode whileLoop) {
+        throw new UnsupportedOperationException();
     }
 
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {

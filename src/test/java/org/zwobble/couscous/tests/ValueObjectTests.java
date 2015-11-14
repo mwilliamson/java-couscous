@@ -12,29 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.zwobble.couscous.ast.AnnotationNode;
-import org.zwobble.couscous.ast.AssignableExpressionNode;
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.ConstructorNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.FieldDeclarationNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.IfStatementNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.ast.VariableDeclaration;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -77,7 +55,8 @@ public class ValueObjectTests {
             {ThisReferenceNode.class},
             {TypeName.class},
             {VariableDeclaration.class},
-            {VariableReferenceNode.class}
+            {VariableReferenceNode.class},
+            {WhileNode.class}
         });
     }
     

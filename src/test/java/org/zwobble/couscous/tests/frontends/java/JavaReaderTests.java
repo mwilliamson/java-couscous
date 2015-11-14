@@ -45,6 +45,7 @@ import static org.zwobble.couscous.ast.StaticMethodCallNode.unboxInt;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 
 public class JavaReaderTests {
@@ -365,6 +366,15 @@ public class JavaReaderTests {
                 asList(returns(literal(1))),
                 asList(returns(literal(2)))),
             readStatement("if (true) { return 1; } else { return 2; }"));
+    }
+
+    @Test
+    public void canReadWhileLoops() {
+        assertEquals(
+            whileLoop(
+                literal(true),
+                asList(returns(literal(1)))),
+            readStatement("while (true) { return 1; }"));
     }
     
     @Test

@@ -2,23 +2,7 @@ package org.zwobble.couscous.ast.visitors;
 
 import java.util.List;
 
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.ConstructorNode;
-import org.zwobble.couscous.ast.ExpressionStatementNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.IfStatementNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.Node;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 
 public class NodeVisitors {
     public static void visitAll(Node node, NodeVisitor visitor) {
@@ -100,6 +84,12 @@ public class NodeVisitors {
                 ifStatement.getCondition().accept(visitor);
                 visitAll(ifStatement.getTrueBranch());
                 visitAll(ifStatement.getFalseBranch());
+            }
+
+            @Override
+            public void visit(WhileNode whileLoop) {
+                whileLoop.getCondition().accept(visitor);
+                visitAll(whileLoop.getBody());
             }
 
             @Override

@@ -35,7 +35,7 @@ public class PythonBackend implements Backend {
         for (ClassNode classNode : classes) {
             compileClass(classNode);
         }
-        for (String runtimeFile : RUNTIME_FILES) {
+        for (String runtimeFile :  RUNTIME_FILES) {
             String path = relativePathForModule(runtimeFile);
             writeModule(
                 runtimeFile,
