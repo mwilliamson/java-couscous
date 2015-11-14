@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.TypeName;
@@ -54,6 +55,18 @@ public class JavaToPythonTests {
             execTestProgram(
                 "recursive-factorial",
                 TypeName.of("com.example.RecursiveFactorial"),
+                "factorial",
+                asList(value(6))));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void whileFactorial() throws Exception {
+        assertEquals(
+            value(720),
+            execTestProgram(
+                "while-factorial",
+                TypeName.of("com.example.WhileFactorial"),
                 "factorial",
                 asList(value(6))));
     }

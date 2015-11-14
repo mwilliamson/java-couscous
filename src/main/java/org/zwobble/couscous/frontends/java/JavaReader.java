@@ -16,6 +16,7 @@ import org.zwobble.couscous.values.ObjectValues;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
+import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
@@ -214,6 +215,9 @@ public class JavaReader {
         
         case ASTNode.INFIX_EXPRESSION:
             return readInfixExpression((InfixExpression)expression);
+
+        case ASTNode.PREFIX_EXPRESSION:
+            return readPrefixExpression((PrefixExpression)expression);
             
         case ASTNode.CONDITIONAL_EXPRESSION: 
             return readConditionalExpression((ConditionalExpression)expression);
@@ -228,15 +232,15 @@ public class JavaReader {
     }
 
     private static ExpressionNode readBooleanLiteral(BooleanLiteral expression) {
-        return LiteralNode.literal(expression.booleanValue());
+        return literal(expression.booleanValue());
     }
     
     private static LiteralNode readNumberLiteral(NumberLiteral expression) {
-        return LiteralNode.literal(Integer.parseInt(expression.getToken()));
+        return literal(Integer.parseInt(expression.getToken()));
     }
     
     private static ExpressionNode readStringLiteral(StringLiteral expression) {
-        return LiteralNode.literal(expression.getLiteralValue());
+        return literal(expression.getLiteralValue());
     }
     
     private static ExpressionNode readSimpleName(SimpleName expression) {
@@ -336,27 +340,48 @@ public class JavaReader {
             }
         }
     }
-    
-    private static JavaOperator readOperator(Operator operator) {
-        if (operator == Operator.PLUS) {
+
+    private static ExpressionNode readPrefixExpression(PrefixExpression expression) {
+        JavaOperator operator = readOperator(expression.getOperator());
+        return AssignmentNode.assign(
+            (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
+            MethodCallNode.methodCall(
+                readExpression(IntegerValue.REF, expression.getOperand()),
+                operator.methodName,
+                asList(literal(1)),
+                operator.returnValue));
+    }
+
+    private static JavaOperator readOperator(PrefixExpression.Operator operator) {
+        if (operator == PrefixExpression.Operator.INCREMENT) {
             return JavaOperator.of("add", IntegerValue.REF);
-        } else if (operator == Operator.MINUS) {
+        } else if (operator == PrefixExpression.Operator.DECREMENT) {
             return JavaOperator.of("subtract", IntegerValue.REF);
-        } else if (operator == Operator.TIMES) {
+        } else {
+            throw new RuntimeException("Unrecognised operator: " + operator);
+        }
+    }
+
+    private static JavaOperator readOperator(InfixExpression.Operator operator) {
+        if (operator == InfixExpression.Operator.PLUS) {
+            return JavaOperator.of("add", IntegerValue.REF);
+        } else if (operator == InfixExpression.Operator.MINUS) {
+            return JavaOperator.of("subtract", IntegerValue.REF);
+        } else if (operator == InfixExpression.Operator.TIMES) {
             return JavaOperator.of("multiply", IntegerValue.REF);
-        } else if (operator == Operator.DIVIDE) {
+        } else if (operator == InfixExpression.Operator.DIVIDE) {
             return JavaOperator.of("divide", IntegerValue.REF);
-        } else if (operator == Operator.REMAINDER) {
+        } else if (operator == InfixExpression.Operator.REMAINDER) {
             return JavaOperator.of("mod", IntegerValue.REF);
-        } else if (operator == Operator.EQUALS) {
+        } else if (operator == InfixExpression.Operator.EQUALS) {
             return JavaOperator.of("equals", BooleanValue.REF);
-        } else if (operator == Operator.GREATER) {
+        } else if (operator == InfixExpression.Operator.GREATER) {
             return JavaOperator.of("greaterThan", BooleanValue.REF);
-        } else if (operator == Operator.GREATER_EQUALS) {
+        } else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
             return JavaOperator.of("greaterThanOrEqual", BooleanValue.REF);
-        } else if (operator == Operator.LESS) {
+        } else if (operator == InfixExpression.Operator.LESS) {
             return JavaOperator.of("lessThan", BooleanValue.REF);
-        } else if (operator == Operator.LESS_EQUALS) {
+        } else if (operator == InfixExpression.Operator.LESS_EQUALS) {
             return JavaOperator.of("lessThanOrEqual", BooleanValue.REF);
         } else {
             throw new RuntimeException("Unrecognised operator: " + operator);

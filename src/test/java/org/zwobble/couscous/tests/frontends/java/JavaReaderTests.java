@@ -6,17 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ConstructorNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
@@ -344,6 +334,42 @@ public class JavaReaderTests {
         
         ReturnNode returnNode = (ReturnNode)method.getBody().get(0);
         assertEquals(reference(argument), returnNode.getValue());
+    }
+
+    @Test
+    public void canReadPrefixIncrement() {
+        ClassNode classNode = readClass(
+            "public void go(int value) {" +
+            "    ++value;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                reference(argument),
+                methodCall(reference(argument), "add", asList(literal(1)), IntegerValue.REF)),
+            statement.getExpression());
+    }
+
+    @Test
+    public void canReadPrefixDecrement() {
+        ClassNode classNode = readClass(
+            "public void go(int value) {" +
+            "    --value;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            assign(
+                reference(argument),
+                methodCall(reference(argument), "subtract", asList(literal(1)), IntegerValue.REF)),
+            statement.getExpression());
     }
     
     @Test
