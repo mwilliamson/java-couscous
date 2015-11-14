@@ -96,6 +96,16 @@ public abstract class BackendMethodTests {
                 asList(returns(literal("[false]")))));
         assertEquals(value("[true]"), runMethod(method));
     }
+
+    @Test
+    public void whenConditionIsFalseIfStatementExecutesTrueBranch() {
+        MethodNode.Builder method = staticMethod("hello")
+            .statement(ifStatement(
+                literal(false),
+                asList(returns(literal("[true]"))),
+                asList(returns(literal("[false]")))));
+        assertEquals(value("[false]"), runMethod(method));
+    }
     
     protected PrimitiveValue runMethod(MethodNode.Builder methodBuilder, PrimitiveValue... arguments) {
         MethodNode method = methodBuilder.build();

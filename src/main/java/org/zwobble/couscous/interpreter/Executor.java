@@ -96,8 +96,9 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         BooleanInterpreterValue condition = (BooleanInterpreterValue) eval(environment, ifStatement.getCondition());
         if (condition.getValue()) {
             return exec(ifStatement.getTrueBranch());
+        } else {
+            return exec(ifStatement.getFalseBranch());
         }
-        return Optional.empty();
     }
 
     @Override
