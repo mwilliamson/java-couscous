@@ -24,8 +24,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
-import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
-import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.MethodCallNode.*;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxBoolean;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxInt;
@@ -183,38 +182,38 @@ public class JavaReaderTests {
     @Test
     public void canUseOperatorsOnIntegers() {
         assertEquals(
-            methodCall(literal(1), "add", asList(literal(2)), IntegerValue.REF),
+            integerAdd(literal(1), literal(2)),
             readExpression("1 + 2"));
         assertEquals(
-            methodCall(literal(1), "subtract", asList(literal(2)), IntegerValue.REF),
+            integerSubtract(literal(1), literal(2)),
             readExpression("1 - 2"));
         assertEquals(
-            methodCall(literal(1), "multiply", asList(literal(2)), IntegerValue.REF),
+            integerMultiply(literal(1), literal(2)),
             readExpression("1 * 2"));
         assertEquals(
-            methodCall(literal(1), "divide", asList(literal(2)), IntegerValue.REF),
+            integerDivide(literal(1), literal(2)),
             readExpression("1 / 2"));
         assertEquals(
-            methodCall(literal(1), "mod", asList(literal(2)), IntegerValue.REF),
+            integerMod(literal(1), literal(2)),
             readExpression("1 % 2"));
         
         assertEquals(
-            methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF),
+            equal(literal(1), literal(2)),
             readExpression("1 == 2"));
         assertEquals(
-            not(methodCall(literal(1), "equals", asList(literal(2)), BooleanValue.REF)),
+            notEqual(literal(1), literal(2)),
             readExpression("1 != 2"));
         assertEquals(
-            methodCall(literal(1), "greaterThan", asList(literal(2)), BooleanValue.REF),
+            greaterThan(literal(1), literal(2)),
             readExpression("1 > 2"));
         assertEquals(
-            methodCall(literal(1), "greaterThanOrEqual", asList(literal(2)), BooleanValue.REF),
+            greaterThanOrEqual(literal(1), literal(2)),
             readExpression("1 >= 2"));
         assertEquals(
-            methodCall(literal(1), "lessThan", asList(literal(2)), BooleanValue.REF),
+            lessThan(literal(1), literal(2)),
             readExpression("1 < 2"));
         assertEquals(
-            methodCall(literal(1), "lessThanOrEqual", asList(literal(2)), BooleanValue.REF),
+            lessThanOrEqual(literal(1), literal(2)),
             readExpression("1 <= 2"));
     }
     
@@ -350,7 +349,7 @@ public class JavaReaderTests {
         assertEquals(
             assign(
                 reference(argument),
-                methodCall(reference(argument), "add", asList(literal(1)), IntegerValue.REF)),
+                integerAdd(reference(argument), literal(1))),
             statement.getExpression());
     }
 
@@ -368,7 +367,7 @@ public class JavaReaderTests {
         assertEquals(
             assign(
                 reference(argument),
-                methodCall(reference(argument), "subtract", asList(literal(1)), IntegerValue.REF)),
+                integerSubtract(reference(argument), literal(1))),
             statement.getExpression());
     }
     

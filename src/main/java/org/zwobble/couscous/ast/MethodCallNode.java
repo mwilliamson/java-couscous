@@ -1,10 +1,14 @@
 package org.zwobble.couscous.ast;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
+
 import java.util.Collections;
 import java.util.List;
 
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.BooleanValue;
+import static java.util.Arrays.asList;
 
 public class MethodCallNode implements ExpressionNode {
     public static ExpressionNode not(ExpressionNode value) {
@@ -14,7 +18,59 @@ public class MethodCallNode implements ExpressionNode {
             throw new IllegalArgumentException("Can only negate booleans");
         }
     }
-    
+
+    public static ExpressionNode integerAdd(ExpressionNode left, ExpressionNode right) {
+        return integerOperation("add", left, right);
+    }
+
+    public static ExpressionNode integerSubtract(ExpressionNode left, ExpressionNode right) {
+        return integerOperation("subtract", left, right);
+    }
+
+    public static ExpressionNode integerMultiply(ExpressionNode left, ExpressionNode right) {
+        return integerOperation("multiply", left, right);
+    }
+
+    public static ExpressionNode integerDivide(ExpressionNode left, ExpressionNode right) {
+        return integerOperation("divide", left, right);
+    }
+
+    public static ExpressionNode integerMod(ExpressionNode left, ExpressionNode right) {
+        return integerOperation("mod", left, right);
+    }
+
+    private static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
+        return methodCall(left, methodName, asList(right), IntegerValue.REF);
+    }
+
+    public static ExpressionNode equal(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation("equals", left, right);
+    }
+
+    public static ExpressionNode notEqual(ExpressionNode left, ExpressionNode right) {
+        return not(booleanOperation("equals", left, right));
+    }
+
+    public static ExpressionNode greaterThan(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation("greaterThan", left, right);
+    }
+
+    public static ExpressionNode greaterThanOrEqual(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation("greaterThanOrEqual", left, right);
+    }
+
+    public static ExpressionNode lessThan(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation("lessThan", left, right);
+    }
+
+    public static ExpressionNode lessThanOrEqual(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation("lessThanOrEqual", left, right);
+    }
+
+    private static ExpressionNode booleanOperation(String methodName, ExpressionNode left, ExpressionNode right) {
+        return methodCall(left, methodName, asList(right), BooleanValue.REF);
+    }
+
     public static MethodCallNode methodCall(
             ExpressionNode receiver,
             String methodName,
