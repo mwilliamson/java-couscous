@@ -20,6 +20,7 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
+import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaReader {
@@ -365,42 +366,6 @@ public class JavaReader {
                 IntegerValue.REF));
     }
 
-    private static Operator readOperator(PrefixExpression.Operator operator) {
-        if (operator == PrefixExpression.Operator.INCREMENT) {
-            return Operator.ADD;
-        } else if (operator == PrefixExpression.Operator.DECREMENT) {
-            return Operator.SUBTRACT;
-        } else {
-            throw new RuntimeException("Unrecognised operator: " + operator);
-        }
-    }
-
-    private static Operator readOperator(InfixExpression.Operator operator) {
-        if (operator == InfixExpression.Operator.PLUS) {
-            return Operator.ADD;
-        } else if (operator == InfixExpression.Operator.MINUS) {
-            return Operator.SUBTRACT;
-        } else if (operator == InfixExpression.Operator.TIMES) {
-            return Operator.MULTIPLY;
-        } else if (operator == InfixExpression.Operator.DIVIDE) {
-            return Operator.DIVIDE;
-        } else if (operator == InfixExpression.Operator.REMAINDER) {
-            return Operator.MOD;
-        } else if (operator == InfixExpression.Operator.EQUALS) {
-            return Operator.EQUALS;
-        } else if (operator == InfixExpression.Operator.GREATER) {
-            return Operator.GREATER_THAN;
-        } else if (operator == InfixExpression.Operator.GREATER_EQUALS) {
-            return Operator.GREATER_THAN_OR_EQUAL;
-        } else if (operator == InfixExpression.Operator.LESS) {
-            return Operator.LESS_THAN;
-        } else if (operator == InfixExpression.Operator.LESS_EQUALS) {
-            return Operator.LESS_THAN_OR_EQUAL;
-        } else {
-            throw new RuntimeException("Unrecognised operator: " + operator);
-        }
-    }
-
     private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {
         TypeName type = typeOf(expression);
         return TernaryConditionalNode.ternaryConditional(
@@ -433,22 +398,6 @@ public class JavaReader {
         return readExpression(
             unboxedType(typeOf(expression)),
             expression);
-    }
-
-    private static Operator readOperator(Assignment.Operator operator) {
-        if (operator == Assignment.Operator.PLUS_ASSIGN) {
-            return Operator.ADD;
-        } else if (operator == Assignment.Operator.MINUS_ASSIGN) {
-            return Operator.SUBTRACT;
-        } else if (operator == Assignment.Operator.TIMES_ASSIGN) {
-            return Operator.MULTIPLY;
-        } else if (operator == Assignment.Operator.DIVIDE_ASSIGN) {
-            return Operator.DIVIDE;
-        } else if (operator == Assignment.Operator.REMAINDER_ASSIGN) {
-            return Operator.MOD;
-        } else {
-            throw new RuntimeException("Unrecognised operator: " + operator);
-        }
     }
 
     private static String generateClassName(CompilationUnit ast) {
