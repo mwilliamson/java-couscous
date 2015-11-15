@@ -8,6 +8,7 @@ public enum Operator {
     MOD("mod", false),
 
     EQUALS("equals", true),
+    NOT_EQUALS("notEquals", true),
     GREATER_THAN("greaterThan", true),
     GREATER_THAN_OR_EQUAL("greaterThanOrEqual", true),
     LESS_THAN("lessThan", true),

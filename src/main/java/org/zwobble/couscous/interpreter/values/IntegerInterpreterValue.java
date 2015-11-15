@@ -26,6 +26,8 @@ public final class IntegerInterpreterValue implements InterpreterValue {
             infixReturningInteger((left, right) -> left % right))
         .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left == right))
+        .method(Operator.NOT_EQUALS.getMethodName(), asList(IntegerValue.REF),
+            infixReturningBoolean((left, right) -> left != right))
         .method(Operator.GREATER_THAN.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left > right))
         .method(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),

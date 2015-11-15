@@ -29,6 +29,8 @@ public class JavaOperators {
             return Operator.MOD;
         } else if (operator == InfixExpression.Operator.EQUALS) {
             return Operator.EQUALS;
+        } else if (operator == InfixExpression.Operator.NOT_EQUALS) {
+            return Operator.NOT_EQUALS;
         } else if (operator == InfixExpression.Operator.GREATER) {
             return Operator.GREATER_THAN;
         } else if (operator == InfixExpression.Operator.GREATER_EQUALS) {

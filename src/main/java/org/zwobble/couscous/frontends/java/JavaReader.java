@@ -329,18 +329,11 @@ public class JavaReader {
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
         TypeName operandType = typeOf(expression.getLeftOperand());
         if (operandType.equals(IntegerValue.REF)) {
-            if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
-                return MethodCallNode.not(readOperation(
-                    Operator.EQUALS,
-                    expression.getLeftOperand(),
-                    expression.getRightOperand()));
-            } else {
-                Operator operator = readOperator(expression.getOperator());
-                return readOperation(
-                    operator,
-                    expression.getLeftOperand(),
-                    expression.getRightOperand());
-            }
+            Operator operator = readOperator(expression.getOperator());
+            return readOperation(
+                operator,
+                expression.getLeftOperand(),
+                expression.getRightOperand());
         } else {
             ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
             ExpressionNode right = readExpression(ObjectValues.OBJECT, expression.getRightOperand());

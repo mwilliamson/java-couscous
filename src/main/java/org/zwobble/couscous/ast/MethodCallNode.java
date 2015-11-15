@@ -48,7 +48,7 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static ExpressionNode notEqual(ExpressionNode left, ExpressionNode right) {
-        return not(booleanOperation(Operator.EQUALS.getMethodName(), left, right));
+        return booleanOperation(Operator.NOT_EQUALS.getMethodName(), left, right);
     }
 
     public static ExpressionNode greaterThan(ExpressionNode left, ExpressionNode right) {

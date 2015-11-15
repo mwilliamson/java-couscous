@@ -64,6 +64,7 @@ public class PrimitiveMethods {
                 asList(receiver, arguments.get(0))));
 
         addMethod(methods, Operator.EQUALS.getMethodName(), "__eq__");
+        addMethod(methods, Operator.NOT_EQUALS.getMethodName(), "__ne__");
         addMethod(methods, Operator.GREATER_THAN.getMethodName(), "__gt__");
         addMethod(methods, Operator.GREATER_THAN_OR_EQUAL.getMethodName(), "__ge__");
         addMethod(methods, Operator.LESS_THAN.getMethodName(), "__lt__");
