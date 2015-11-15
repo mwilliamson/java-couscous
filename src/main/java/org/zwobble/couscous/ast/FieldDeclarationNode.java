@@ -1,6 +1,9 @@
 package org.zwobble.couscous.ast;
 
-public class FieldDeclarationNode {
+import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeVisitor;
+
+public class FieldDeclarationNode implements Node {
     public static FieldDeclarationNode field(String name, TypeName type) {
         return new FieldDeclarationNode(name, type);
     }
@@ -19,6 +22,11 @@ public class FieldDeclarationNode {
     
     public TypeName getType() {
         return type;
+    }
+
+    @Override
+    public <T> T accept(NodeMapper<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

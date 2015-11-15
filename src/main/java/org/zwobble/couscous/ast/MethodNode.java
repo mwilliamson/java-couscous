@@ -1,10 +1,9 @@
 package org.zwobble.couscous.ast;
 
-import java.util.List;
-
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
-
 import com.google.common.collect.ImmutableList;
+import org.zwobble.couscous.ast.visitors.NodeMapper;
+
+import java.util.List;
 
 public class MethodNode implements CallableNode {
     public static Builder staticMethod(String name) {
@@ -115,10 +114,10 @@ public class MethodNode implements CallableNode {
     public List<StatementNode> getBody() {
         return body;
     }
-    
+
     @Override
-    public void accept(NodeVisitor visitor) {
-        visitor.visit(this);
+    public <T> T accept(NodeMapper<T> visitor) {
+        return visitor.visit(this);
     }
     
     @Override

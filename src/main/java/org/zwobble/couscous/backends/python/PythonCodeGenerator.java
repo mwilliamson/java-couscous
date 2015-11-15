@@ -1,40 +1,24 @@
 package org.zwobble.couscous.backends.python;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.structure.NodeStructure;
+import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
+import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator;
+import org.zwobble.couscous.backends.python.ast.*;
+import org.zwobble.couscous.values.*;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeVisitorWithEmptyDefaults;
-import org.zwobble.couscous.ast.visitors.NodeVisitors;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
-import org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator;
-import org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode;
-import org.zwobble.couscous.backends.python.ast.PythonBlock;
-import org.zwobble.couscous.backends.python.ast.PythonClassNode;
-import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
-import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
-import org.zwobble.couscous.backends.python.ast.PythonImportNode;
-import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
-import org.zwobble.couscous.backends.python.ast.PythonStatementNode;
-import org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.InternalCouscousValue;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
-import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.UnitValue;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 
 import static com.google.common.collect.Iterators.singletonIterator;
 import static java.util.Arrays.asList;
@@ -103,19 +87,19 @@ public class PythonCodeGenerator {
     }
     
     private static Set<TypeName> findReferencedClasses(ClassNode classNode) {
-        ImmutableSet.Builder<TypeName> imports = ImmutableSet.builder();
-        NodeVisitors.visitAll(classNode, new NodeVisitorWithEmptyDefaults(){
-            @Override
-            public void visit(StaticMethodCallNode staticMethodCall) {
-                imports.add(staticMethodCall.getClassName());
-            }
-            
-            @Override
-            public void visit(ConstructorCallNode call) {
-                imports.add(call.getType());
-            }
-        });
-        return imports.build();
+        return NodeStructure.descendantNodes(classNode)
+            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<TypeName>>(Stream.empty()) {
+                @Override
+                public Stream<TypeName> visit(StaticMethodCallNode staticMethodCall) {
+                    return Stream.of(staticMethodCall.getClassName());
+                }
+
+                @Override
+                public Stream<TypeName> visit(ConstructorCallNode call) {
+                    return Stream.of(call.getType());
+                }
+            }))
+            .collect(Collectors.toSet());
     }
     
     public static PythonExpressionNode generateCode(PrimitiveValue value) {

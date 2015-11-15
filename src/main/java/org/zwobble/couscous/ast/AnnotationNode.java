@@ -1,6 +1,8 @@
 package org.zwobble.couscous.ast;
 
-public class AnnotationNode {
+import org.zwobble.couscous.ast.visitors.NodeMapper;
+
+public class AnnotationNode implements Node {
     public static AnnotationNode annotation(TypeName type) {
         return new AnnotationNode(type);
     }
@@ -13,6 +15,11 @@ public class AnnotationNode {
     
     public TypeName getType() {
         return type;
+    }
+
+    @Override
+    public <T> T accept(NodeMapper<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

@@ -1,67 +1,58 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
+import org.zwobble.couscous.ast.visitors.NodeMapper;
 
 public interface ExpressionNode extends Node {
     TypeName getType();
     <T> T accept(ExpressionNodeMapper<T> visitor);
     
     @Override
-    default void accept(NodeVisitor visitor) {
-        accept(new ExpressionNodeMapper<Void>() {
+    default <T> T accept(NodeMapper<T> visitor) {
+        return accept(new ExpressionNodeMapper<T>() {
             @Override
-            public Void visit(LiteralNode literal) {
-                visitor.visit(literal);
-                return null;
+            public T visit(LiteralNode literal) {
+                return visitor.visit(literal);
             }
 
             @Override
-            public Void visit(VariableReferenceNode variableReference) {
-                visitor.visit(variableReference);
-                return null;
+            public T visit(VariableReferenceNode variableReference) {
+                return visitor.visit(variableReference);
             }
 
             @Override
-            public Void visit(ThisReferenceNode reference) {
-                visitor.visit(reference);
-                return null;
+            public T visit(ThisReferenceNode reference) {
+                return visitor.visit(reference);
             }
 
             @Override
-            public Void visit(AssignmentNode assignment) {
-                visitor.visit(assignment);
-                return null;
+            public T visit(AssignmentNode assignment) {
+                return visitor.visit(assignment);
             }
 
             @Override
-            public Void visit(TernaryConditionalNode ternaryConditional) {
-                visitor.visit(ternaryConditional);
-                return null;
+            public T visit(TernaryConditionalNode ternaryConditional) {
+                return visitor.visit(ternaryConditional);
             }
 
             @Override
-            public Void visit(MethodCallNode methodCall) {
-                visitor.visit(methodCall);
-                return null;
+            public T visit(MethodCallNode methodCall) {
+                return visitor.visit(methodCall);
             }
 
             @Override
-            public Void visit(StaticMethodCallNode staticMethodCall) {
-                visitor.visit(staticMethodCall);
-                return null;
+            public T visit(StaticMethodCallNode staticMethodCall) {
+                return visitor.visit(staticMethodCall);
             }
 
             @Override
-            public Void visit(ConstructorCallNode call) {
-                visitor.visit(call);
-                return null;
+            public T visit(ConstructorCallNode call) {
+                return visitor.visit(call);
             }
 
             @Override
-            public Void visit(FieldAccessNode fieldAccess) {
-                visitor.visit(fieldAccess);
-                return null;
+            public T visit(FieldAccessNode fieldAccess) {
+                return visitor.visit(fieldAccess);
             }
         });
     }

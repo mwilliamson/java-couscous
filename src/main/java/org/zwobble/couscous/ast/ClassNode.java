@@ -1,8 +1,8 @@
 package org.zwobble.couscous.ast;
 
-import java.util.List;
+import org.zwobble.couscous.ast.visitors.NodeMapper;
 
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
+import java.util.List;
 
 public class ClassNode implements Node {
     public static ClassNodeBuilder builder(String name) {
@@ -54,8 +54,8 @@ public class ClassNode implements Node {
     }
 
     @Override
-    public void accept(NodeVisitor visitor) {
-        visitor.visit(this);
+    public <T> T accept(NodeMapper<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

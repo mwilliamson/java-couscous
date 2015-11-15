@@ -18,8 +18,11 @@ public interface NodeVisitor {
     void visit(LocalVariableDeclarationNode localVariableDeclaration);
     void visit(IfStatementNode ifStatement);
     void visit(WhileNode whileLoop);
-    
-    void visit(ClassNode classNode);
+
+    void visit(FormalArgumentNode formalArgumentNode);
+    void visit(AnnotationNode annotation);
     void visit(MethodNode methodNode);
     void visit(ConstructorNode constructorNode);
+    void visit(FieldDeclarationNode declaration);
+    void visit(ClassNode classNode);
 }

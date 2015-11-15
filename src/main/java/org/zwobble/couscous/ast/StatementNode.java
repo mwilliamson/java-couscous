@@ -1,43 +1,37 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
+import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 public interface StatementNode extends Node {
     <T> T accept(StatementNodeMapper<T> visitor);
     
     @Override
-    default void accept(NodeVisitor visitor) {
-        accept(new StatementNodeMapper<Void>() {
+    default <T> T accept(NodeMapper<T> visitor) {
+        return accept(new StatementNodeMapper<T>() {
             @Override
-            public Void visit(ReturnNode returnNode) {
-                visitor.visit(returnNode);
-                return null;
+            public T visit(ReturnNode returnNode) {
+                return visitor.visit(returnNode);
             }
 
             @Override
-            public Void visit(ExpressionStatementNode expressionStatement) {
-                visitor.visit(expressionStatement);
-                return null;
+            public T visit(ExpressionStatementNode expressionStatement) {
+                return visitor.visit(expressionStatement);
             }
 
             @Override
-            public Void visit(
-                LocalVariableDeclarationNode localVariableDeclaration) {
-                visitor.visit(localVariableDeclaration);
-                return null;
+            public T visit(LocalVariableDeclarationNode localVariableDeclaration) {
+                return visitor.visit(localVariableDeclaration);
             }
 
             @Override
-            public Void visit(IfStatementNode ifStatement) {
-                visitor.visit(ifStatement);
-                return null;
+            public T visit(IfStatementNode ifStatement) {
+                return visitor.visit(ifStatement);
             }
 
             @Override
-            public Void visit(WhileNode whileLoop) {
-                visitor.visit(whileLoop);
-                return null;
+            public T visit(WhileNode whileLoop) {
+                return visitor.visit(whileLoop);
             }
         });
     }
