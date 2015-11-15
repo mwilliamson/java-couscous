@@ -329,18 +329,17 @@ public class JavaReader {
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
         TypeName operandType = typeOf(expression.getLeftOperand());
         if (operandType.equals(IntegerValue.REF)) {
-            ExpressionNode left = readExpression(IntegerValue.REF, expression.getLeftOperand());
-            ExpressionNode right = readExpression(IntegerValue.REF, expression.getRightOperand());
-            
             if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
-                return MethodCallNode.notEqual(left, right);
+                return MethodCallNode.not(readOperation(
+                    Operator.EQUALS,
+                    expression.getLeftOperand(),
+                    expression.getRightOperand()));
             } else {
                 Operator operator = readOperator(expression.getOperator());
-                return MethodCallNode.methodCall(
-                    left,
-                    operator.getMethodName(),
-                    asList(right),
-                    operator.isBoolean() ? BooleanValue.REF : operandType);
+                return readOperation(
+                    operator,
+                    expression.getLeftOperand(),
+                    expression.getRightOperand());
             }
         } else {
             ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
@@ -386,12 +385,18 @@ public class JavaReader {
                 left,
                 handleBoxing(
                     left.getType(),
-                    MethodCallNode.methodCall(
-                        readUnboxedExpression(expression.getLeftHandSide()),
-                        operator.getMethodName(),
-                        asList(right),
-                        unboxedType(left.getType()))));
+                    readOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
         }
+    }
+
+    private static ExpressionNode readOperation(Operator operator, Expression leftJava, Expression rightJava) {
+        ExpressionNode left = readUnboxedExpression(leftJava);
+        ExpressionNode right = readUnboxedExpression(rightJava);
+        return MethodCallNode.methodCall(
+            left,
+            operator.getMethodName(),
+            asList(right),
+            operator.isBoolean() ? BooleanValue.REF : left.getType());
     }
 
     private static ExpressionNode readUnboxedExpression(Expression expression) {
