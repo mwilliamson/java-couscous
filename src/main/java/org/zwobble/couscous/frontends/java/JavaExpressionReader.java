@@ -251,7 +251,6 @@ public class JavaExpressionReader {
             ExpressionNode right = readExpression(left.getType(), expression.getRightHandSide());
             return AssignmentNode.assign(left, right);
         } else {
-            ExpressionNode right = readUnboxedExpression(expression.getRightHandSide());
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
                 left,

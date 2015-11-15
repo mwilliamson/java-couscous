@@ -88,7 +88,7 @@ public class ConcreteType {
     private final Map<String, MethodValue> methods;
     private final Map<String, StaticMethodValue> staticMethods;
     
-    public ConcreteType(TypeName name, Map<String, FieldValue> fields, MethodValue constructor, Map<String, MethodValue> methods, Map<String, StaticMethodValue> staticMethods) {
+    private ConcreteType(TypeName name, Map<String, FieldValue> fields, MethodValue constructor, Map<String, MethodValue> methods, Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
         this.fields = fields;
         this.constructor = constructor;

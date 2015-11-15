@@ -226,7 +226,7 @@ public abstract class BackendEvalTests {
         assertEquals(value(42), result);
     }
     
-    protected PrimitiveValue evalExpression(ExpressionNode expression) {
+    private PrimitiveValue evalExpression(ExpressionNode expression) {
         return evalExpression(ImmutableList.of(), expression);
     }
     

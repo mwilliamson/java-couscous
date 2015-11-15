@@ -25,9 +25,9 @@ public final class IntegerInterpreterValue implements InterpreterValue {
         .method(Operator.MOD.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left % right))
         .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
-            infixReturningBoolean((left, right) -> left == right))
+            infixReturningBoolean(Integer::equals))
         .method(Operator.NOT_EQUALS.getMethodName(), asList(IntegerValue.REF),
-            infixReturningBoolean((left, right) -> left != right))
+            infixReturningBoolean((left, right) -> !left.equals(right)))
         .method(Operator.GREATER_THAN.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left > right))
         .method(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
@@ -41,17 +41,13 @@ public final class IntegerInterpreterValue implements InterpreterValue {
     private static
             BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
             infixReturningInteger(BiFunction<Integer, Integer, Integer> func) {
-        return infix((left, right) -> {
-            return new IntegerInterpreterValue(func.apply(left, right));
-        });
+        return infix((left, right) -> new IntegerInterpreterValue(func.apply(left, right)));
     }
     
     private static
             BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
             infixReturningBoolean(BiFunction<Integer, Integer, Boolean> func) {
-        return infix((left, right) -> {
-            return new BooleanInterpreterValue(func.apply(left, right));
-        });
+        return infix((left, right) -> new BooleanInterpreterValue(func.apply(left, right)));
     }
     
     private static
