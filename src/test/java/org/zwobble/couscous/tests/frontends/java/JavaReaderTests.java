@@ -2,7 +2,6 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -14,6 +13,7 @@ import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
@@ -168,14 +168,14 @@ public class JavaReaderTests {
     public void canUseOperatorsOnReferences() {
         assertEquals(
             same(
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList())),
+                constructorCall(TypeName.of("java.lang.Object"), emptyList()),
+                constructorCall(TypeName.of("java.lang.Object"), emptyList())),
             readExpression("new Object() == new Object()"));
         
         assertEquals(
             not(same(
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()))),
+                constructorCall(TypeName.of("java.lang.Object"), emptyList()),
+                constructorCall(TypeName.of("java.lang.Object"), emptyList()))),
             readExpression("new Object() != new Object()"));
     }
     
@@ -216,7 +216,46 @@ public class JavaReaderTests {
             lessThanOrEqual(literal(1), literal(2)),
             readExpression("1 <= 2"));
     }
-    
+
+    @Test
+    public void equalityOperatorUnboxesIfExactlyOneOperandIsPrimitive() {
+        assertEquals(
+            equal(
+                literal(1),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
+            readExpression("1 == new Integer(1)"));
+
+        assertEquals(
+            notEqual(
+                literal(1),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
+            readExpression("1 != new Integer(1)"));
+    }
+
+    @Test
+    public void equalityOperatorDoesNotUnboxIfBothOperandsAreBoxed() {
+        assertEquals(
+            same(
+                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
+                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2)))),
+            readExpression("new Integer(1) == new Integer(2)"));
+
+        assertEquals(
+            not(same(
+                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
+                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
+            readExpression("new Integer(1) != new Integer(2)"));
+    }
+
+    @Test
+    public void integerOperatorUnboxesWhenBothOperandsAreBoxed() {
+        assertEquals(
+            integerAdd(
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1)))),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
+            readExpression("new Integer(1) + new Integer(2)"));
+    }
+
     @Test
     public void canReadTernaryConditionals() {
         assertEquals(

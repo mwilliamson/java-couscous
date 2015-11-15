@@ -327,10 +327,9 @@ public class JavaReader {
     }
     
     private static ExpressionNode readInfixExpression(InfixExpression expression) {
-        TypeName operandType = typeOf(expression.getLeftOperand());
-        if (operandType.equals(IntegerValue.REF)) {
+        if (isPrimitiveOperation(expression)) {
             Operator operator = readOperator(expression.getOperator());
-            return readOperation(
+            return readPrimitiveOperation(
                 operator,
                 expression.getLeftOperand(),
                 expression.getRightOperand());
@@ -345,6 +344,19 @@ public class JavaReader {
                 throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
             }
         }
+    }
+
+    private static boolean isPrimitiveOperation(InfixExpression expression) {
+        TypeName leftOperandType = typeOf(expression.getLeftOperand());
+        TypeName rightOperandType = typeOf(expression.getRightOperand());
+        return isPrimitive(leftOperandType)
+            || isPrimitive(rightOperandType)
+            || (expression.getOperator() != InfixExpression.Operator.NOT_EQUALS
+                && expression.getOperator() != InfixExpression.Operator.EQUALS);
+    }
+
+    private static boolean isPrimitive(TypeName type) {
+        return type.equals(BooleanValue.REF) || type.equals(IntegerValue.REF);
     }
 
     private static ExpressionNode readPrefixExpression(PrefixExpression expression) {
@@ -378,11 +390,11 @@ public class JavaReader {
                 left,
                 handleBoxing(
                     left.getType(),
-                    readOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
+                    readPrimitiveOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
         }
     }
 
-    private static ExpressionNode readOperation(Operator operator, Expression leftJava, Expression rightJava) {
+    private static ExpressionNode readPrimitiveOperation(Operator operator, Expression leftJava, Expression rightJava) {
         ExpressionNode left = readUnboxedExpression(leftJava);
         ExpressionNode right = readUnboxedExpression(rightJava);
         return MethodCallNode.methodCall(
