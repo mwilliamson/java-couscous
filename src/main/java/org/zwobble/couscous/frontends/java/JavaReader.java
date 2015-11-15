@@ -4,11 +4,12 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ClassNodeBuilder;
 import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.TypeName;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 
-import static org.zwobble.couscous.frontends.java.JavaStatementReader.readStatement;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 
 public class JavaReader {
@@ -63,8 +64,12 @@ public class JavaReader {
             SingleVariableDeclaration parameter = (SingleVariableDeclaration)parameterObject;
             builder.argument(parameter.resolveBinding().getKey(), parameter.getName().getIdentifier(), typeOf(parameter.resolveBinding()));
         }
+        Optional<TypeName> returnType = method.getReturnType2() == null
+            ? Optional.empty()
+            : Optional.of(typeOf(method.getReturnType2()));
+        JavaStatementReader statementReader = new JavaStatementReader(returnType);
         for (Object statement : method.getBody().statements()) {
-            for (StatementNode intermediateStatement : readStatement((Statement)statement)) {
+            for (StatementNode intermediateStatement : statementReader.readStatement((Statement)statement)) {
                 builder.statement(intermediateStatement);
             }
         }

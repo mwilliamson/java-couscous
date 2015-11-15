@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.values.BooleanValue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -16,8 +17,14 @@ import static org.zwobble.couscous.frontends.java.JavaExpressionReader.readExpre
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
-public class JavaStatementReader {
-    static List<StatementNode> readStatement(Statement statement) {
+class JavaStatementReader {
+    private final Optional<TypeName> returnType;
+
+    JavaStatementReader(Optional<TypeName> returnType) {
+        this.returnType = returnType;
+    }
+
+    List<StatementNode> readStatement(Statement statement) {
         switch (statement.getNodeType()) {
             case ASTNode.BLOCK:
                 return readBlock((Block)statement);
@@ -42,7 +49,7 @@ public class JavaStatementReader {
         }
     }
 
-    private static List<StatementNode> readBlock(Block block) {
+    private List<StatementNode> readBlock(Block block) {
         @SuppressWarnings("unchecked")
         List<Statement> statements = block.statements();
         return statements.stream()
@@ -50,23 +57,22 @@ public class JavaStatementReader {
             .collect(Collectors.toList());
     }
 
-    private static StatementNode readReturnStatement(ReturnStatement statement) {
-        // TODO: set target type
-        return ReturnNode.returns(readExpressionWithoutBoxing(statement.getExpression()));
+    private StatementNode readReturnStatement(ReturnStatement statement) {
+        return ReturnNode.returns(readExpression(returnType.get(), statement.getExpression()));
     }
 
     private static StatementNode readExpressionStatement(ExpressionStatement statement) {
         return expressionStatement(readExpressionWithoutBoxing(statement.getExpression()));
     }
 
-    private static StatementNode readIfStatement(IfStatement statement) {
+    private StatementNode readIfStatement(IfStatement statement) {
         return IfStatementNode.ifStatement(
             readExpression(BooleanValue.REF, statement.getExpression()),
             readStatement(statement.getThenStatement()),
             readStatement(statement.getElseStatement()));
     }
 
-    private static WhileNode readWhileStatement(WhileStatement statement) {
+    private WhileNode readWhileStatement(WhileStatement statement) {
         return whileLoop(
             readExpression(BooleanValue.REF, statement.getExpression()),
             readStatement(statement.getBody()));

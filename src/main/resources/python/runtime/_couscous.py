@@ -1,4 +1,5 @@
 from .java.lang.Integer import Integer
+from .java.lang.Boolean import Boolean
 
 
 def _div_round_to_zero(a, b):
@@ -9,3 +10,6 @@ def _mod_round_to_zero(a, b):
     
 def boxInt(value):
     return Integer(value)
+
+def boxBoolean(value):
+    return Boolean(value)

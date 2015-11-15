@@ -40,10 +40,10 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 public class JavaReaderTests {
     @Test
     public void canReadLiterals() {
-        assertEquals(literal("hello"), readExpression("\"hello\""));
-        assertEquals(literal(true), readExpression("true"));
-        assertEquals(literal(false), readExpression("false"));
-        assertEquals(literal(42), readExpression("42"));
+        assertEquals(literal("hello"), readObjectExpression("\"hello\""));
+        assertEquals(literal(true), readBooleanExpression("true"));
+        assertEquals(literal(false), readBooleanExpression("false"));
+        assertEquals(literal(42), readIntExpression("42"));
     }
     
     @Test
@@ -93,9 +93,9 @@ public class JavaReaderTests {
     public void canReadInstanceMethodCalls() {
         assertEquals(
             methodCall(literal("hello"), "startsWith", asList(literal("h")), BooleanValue.REF),
-            readExpression("\"hello\".startsWith(\"h\")"));
+            readBooleanExpression("\"hello\".startsWith(\"h\")"));
         
-        List<StatementNode> statements = readStatements("Object x = 1; return x.hashCode();");
+        List<StatementNode> statements = readStatements("int", "Object x = 1; return x.hashCode();");
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         ReturnNode returnNode = (ReturnNode) statements.get(1);
         assertEquals(
@@ -128,7 +128,7 @@ public class JavaReaderTests {
                 "parseInt",
                 asList(literal("42")),
                 IntegerValue.REF),
-            readExpression("Integer.parseInt(\"42\")"));
+            readIntExpression("Integer.parseInt(\"42\")"));
     }
     
     @Test
@@ -152,12 +152,12 @@ public class JavaReaderTests {
     public void canReadConstructorCalls() {
         assertEquals(
             constructorCall(TypeName.of("java.lang.String"), asList(literal("_"))),
-            readExpression("new String(\"_\")"));
+            readObjectExpression("new String(\"_\")"));
     }
     
     @Test
     public void argumentIsBoxedIfNecessary() {
-        StaticMethodCallNode expression = (StaticMethodCallNode)readExpression(
+        StaticMethodCallNode expression = (StaticMethodCallNode) readObjectExpression(
             "java.util.Objects.toString(42)");
         assertEquals(
             boxInt(literal(42)),
@@ -170,51 +170,51 @@ public class JavaReaderTests {
             same(
                 constructorCall(TypeName.of("java.lang.Object"), emptyList()),
                 constructorCall(TypeName.of("java.lang.Object"), emptyList())),
-            readExpression("new Object() == new Object()"));
+            readBooleanExpression("new Object() == new Object()"));
         
         assertEquals(
             not(same(
                 constructorCall(TypeName.of("java.lang.Object"), emptyList()),
                 constructorCall(TypeName.of("java.lang.Object"), emptyList()))),
-            readExpression("new Object() != new Object()"));
+            readBooleanExpression("new Object() != new Object()"));
     }
     
     @Test
     public void canUseOperatorsOnIntegers() {
         assertEquals(
             integerAdd(literal(1), literal(2)),
-            readExpression("1 + 2"));
+            readIntExpression("1 + 2"));
         assertEquals(
             integerSubtract(literal(1), literal(2)),
-            readExpression("1 - 2"));
+            readIntExpression("1 - 2"));
         assertEquals(
             integerMultiply(literal(1), literal(2)),
-            readExpression("1 * 2"));
+            readIntExpression("1 * 2"));
         assertEquals(
             integerDivide(literal(1), literal(2)),
-            readExpression("1 / 2"));
+            readIntExpression("1 / 2"));
         assertEquals(
             integerMod(literal(1), literal(2)),
-            readExpression("1 % 2"));
+            readIntExpression("1 % 2"));
         
         assertEquals(
             equal(literal(1), literal(2)),
-            readExpression("1 == 2"));
+            readBooleanExpression("1 == 2"));
         assertEquals(
             notEqual(literal(1), literal(2)),
-            readExpression("1 != 2"));
+            readBooleanExpression("1 != 2"));
         assertEquals(
             greaterThan(literal(1), literal(2)),
-            readExpression("1 > 2"));
+            readBooleanExpression("1 > 2"));
         assertEquals(
             greaterThanOrEqual(literal(1), literal(2)),
-            readExpression("1 >= 2"));
+            readBooleanExpression("1 >= 2"));
         assertEquals(
             lessThan(literal(1), literal(2)),
-            readExpression("1 < 2"));
+            readBooleanExpression("1 < 2"));
         assertEquals(
             lessThanOrEqual(literal(1), literal(2)),
-            readExpression("1 <= 2"));
+            readBooleanExpression("1 <= 2"));
     }
 
     @Test
@@ -223,13 +223,13 @@ public class JavaReaderTests {
             equal(
                 literal(1),
                 unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
-            readExpression("1 == new Integer(1)"));
+            readBooleanExpression("1 == new Integer(1)"));
 
         assertEquals(
             notEqual(
                 literal(1),
                 unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
-            readExpression("1 != new Integer(1)"));
+            readBooleanExpression("1 != new Integer(1)"));
     }
 
     @Test
@@ -238,13 +238,13 @@ public class JavaReaderTests {
             same(
                 constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
                 constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2)))),
-            readExpression("new Integer(1) == new Integer(2)"));
+            readBooleanExpression("new Integer(1) == new Integer(2)"));
 
         assertEquals(
             not(same(
                 constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
                 constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
-            readExpression("new Integer(1) != new Integer(2)"));
+            readBooleanExpression("new Integer(1) != new Integer(2)"));
     }
 
     @Test
@@ -253,14 +253,14 @@ public class JavaReaderTests {
             integerAdd(
                 unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1)))),
                 unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
-            readExpression("new Integer(1) + new Integer(2)"));
+            readIntExpression("new Integer(1) + new Integer(2)"));
     }
 
     @Test
     public void canReadTernaryConditionals() {
         assertEquals(
             ternaryConditional(literal(true), literal(1), literal(2)),
-            readExpression("true ? 1 : 2"));
+            readIntExpression("true ? 1 : 2"));
     }
     
     @Test
@@ -303,7 +303,7 @@ public class JavaReaderTests {
     
     @Test
     public void canDeclareAndReferenceLocalVariables() {
-        List<StatementNode> statements = readStatements("int x = 4; return x;");
+        List<StatementNode> statements = readStatements("int", "int x = 4; return x;");
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         assertEquals("x", declaration.getName());
@@ -360,7 +360,7 @@ public class JavaReaderTests {
     @Test
     public void canDeclareAndReferenceArguments() {
         ClassNode classNode = readClass(
-            "public String identity(int value) {" +
+            "public int identity(int value) {" +
             "    return value;" +
             "}");
         
@@ -493,7 +493,7 @@ public class JavaReaderTests {
                 literal(true),
                 asList(returns(literal(1))),
                 asList(returns(literal(2)))),
-            readStatement("if (true) { return 1; } else { return 2; }"));
+            readStatement("int", "if (true) { return 1; } else { return 2; }"));
     }
 
     @Test
@@ -502,7 +502,7 @@ public class JavaReaderTests {
             whileLoop(
                 literal(true),
                 asList(returns(literal(1)))),
-            readStatement("while (true) { return 1; }"));
+            readStatement("int", "while (true) { return 1; }"));
     }
     
     @Test
@@ -538,6 +538,17 @@ public class JavaReaderTests {
             method.getAnnotations());
     }
 
+    @Test
+    public void returnValueHandlesBoxing() {
+        ClassNode classNode = readClass(
+            "public Integer one() { return 1; }");
+
+        MethodNode method = classNode.getMethods().get(0);
+        assertEquals(
+            asList(returns(boxInt(literal(1)))),
+            method.getBody());
+    }
+
     private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
         String javaClass =
             "public Object main() {" +
@@ -549,8 +560,20 @@ public class JavaReaderTests {
         return returnStatement.getValue();
     }
 
-    private ExpressionNode readExpression(String expressionSource) {
-        ReturnNode returnStatement = (ReturnNode) readStatement("return " + expressionSource + ";");
+    private ExpressionNode readObjectExpression(String expressionSource) {
+        return readExpression("Object", expressionSource);
+    }
+
+    private ExpressionNode readBooleanExpression(String expressionSource) {
+        return readExpression("boolean", expressionSource);
+    }
+
+    private ExpressionNode readIntExpression(String expressionSource) {
+        return readExpression("int", expressionSource);
+    }
+
+    private ExpressionNode readExpression(String returnType, String expressionSource) {
+        ReturnNode returnStatement = (ReturnNode) readStatement(returnType, "return " + expressionSource + ";");
         return returnStatement.getValue();
     }
 
@@ -558,9 +581,17 @@ public class JavaReaderTests {
         return readStatements(statementSource).get(0);
     }
 
+    private StatementNode readStatement(String returnType, String statementSource) {
+        return readStatements(returnType, statementSource).get(0);
+    }
+
     private List<StatementNode> readStatements(String statementsSource) {
+        return readStatements("Object", statementsSource);
+    }
+
+    private List<StatementNode> readStatements(String returnType, String statementsSource) {
         String javaClass =
-            "public static Object main() {" +
+            "public static " + returnType + " main() {" +
             statementsSource +
             "}";
         

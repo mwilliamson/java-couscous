@@ -19,6 +19,7 @@ import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 public class PythonBackend implements Backend {
     private static final List<String> RUNTIME_FILES = asList(
         "java.lang.Object",
+        "java.lang.Boolean",
         "java.lang.Integer",
         "_couscous");
     
