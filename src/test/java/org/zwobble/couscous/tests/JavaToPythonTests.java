@@ -80,6 +80,18 @@ public class JavaToPythonTests {
                 "factorial",
                 asList(value(6))));
     }
+
+    @Test
+    @Ignore
+    public void anonymousClasses() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "anonymous-class",
+                TypeName.of("com.example.AnonymousClass"),
+                "factorial",
+                asList()));
+    }
     
     private PrimitiveValue execTestProgram(
             String directoryName,
