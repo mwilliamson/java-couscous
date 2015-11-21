@@ -1,7 +1,12 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.base.Strings;
+
 public class TypeName {
     public static TypeName of(String qualifiedName) {
+        if (Strings.isNullOrEmpty(qualifiedName)) {
+            throw new IllegalArgumentException("qualifiedName cannot be blank");
+        }
         return new TypeName(qualifiedName);
     }
     

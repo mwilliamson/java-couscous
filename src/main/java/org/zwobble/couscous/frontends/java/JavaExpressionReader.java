@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -19,9 +20,11 @@ import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 
 public class JavaExpressionReader {
+    private final JavaReader javaReader;
     private final ImmutableList.Builder<ClassNode> classes;
 
-    JavaExpressionReader(ImmutableList.Builder<ClassNode> classes) {
+    JavaExpressionReader(JavaReader javaReader, ImmutableList.Builder<ClassNode> classes) {
+        this.javaReader = javaReader;
         this.classes = classes;
     }
 
@@ -186,10 +189,18 @@ public class JavaExpressionReader {
 
     private ExpressionNode readClassInstanceCreation(ClassInstanceCreation expression) {
         @SuppressWarnings("unchecked")
-        List<Expression> arguments = expression.arguments();
-        return ConstructorCallNode.constructorCall(
-            typeOf(expression),
-            readArguments(expression.resolveConstructorBinding(), arguments));
+        List<Expression> javaArguments = expression.arguments();
+        IMethodBinding constructor = expression.resolveConstructorBinding();
+        List<ExpressionNode> arguments = readArguments(constructor, javaArguments);
+
+        if (constructor.getDeclaringClass().isAnonymous()) {
+            // TODO: generate anonymous class name
+            TypeName anonymousClassName = TypeName.of("ANONYMOUS");
+            classes.add(javaReader.readTypeDeclaration("ANONYMOUS", expression.getAnonymousClassDeclaration()));
+            return constructorCall(anonymousClassName, arguments);
+        } else {
+            return constructorCall(typeOf(expression), arguments);
+        }
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

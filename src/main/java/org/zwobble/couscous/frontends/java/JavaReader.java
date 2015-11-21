@@ -12,14 +12,16 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.cons;
+import static org.zwobble.couscous.util.ExtraLists.ofType;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(root, sourcePath);
         JavaReader reader = new JavaReader();
-        return reader.readCompilationUnit(ast);
+        return cons(reader.readCompilationUnit(ast), reader.classes.build());
     }
 
     private final ImmutableList.Builder<ClassNode> classes;
@@ -28,17 +30,28 @@ public class JavaReader {
         classes = ImmutableList.builder();
     }
 
-    private List<ClassNode> readCompilationUnit(CompilationUnit ast) {
+    private ClassNode readCompilationUnit(CompilationUnit ast) {
         String name = generateClassName(ast);
-        ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        readFields(type, classBuilder);
-        readMethods(type, classBuilder);
-        return cons(classBuilder.build(), classes.build());
+        return readTypeDeclaration(name, type);
     }
-    
-    private void readFields(TypeDeclaration type, ClassNodeBuilder classBuilder) {
-        for (FieldDeclaration field : type.getFields()) {
+
+    ClassNode readTypeDeclaration(String name, AnonymousClassDeclaration type) {
+        ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
+        readFields(ofType(type.bodyDeclarations(), FieldDeclaration.class), classBuilder);
+        readMethods(ofType(type.bodyDeclarations(), MethodDeclaration.class), classBuilder);
+        return classBuilder.build();
+    }
+
+    ClassNode readTypeDeclaration(String name, TypeDeclaration type) {
+        ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
+        readFields(asList(type.getFields()), classBuilder);
+        readMethods(asList(type.getMethods()), classBuilder);
+        return classBuilder.build();
+    }
+
+    private void readFields(List<FieldDeclaration> fields, ClassNodeBuilder classBuilder) {
+        for (FieldDeclaration field : fields) {
             readField(field, classBuilder);
         }
     }
@@ -50,8 +63,8 @@ public class JavaReader {
         }
     }
     
-    private void readMethods(TypeDeclaration type, ClassNodeBuilder classBuilder) {
-        for (MethodDeclaration method : type.getMethods()) {
+    private void readMethods(List<MethodDeclaration> methods, ClassNodeBuilder classBuilder) {
+        for (MethodDeclaration method : methods) {
             readMethod(classBuilder, method);
         }
     }
@@ -60,7 +73,10 @@ public class JavaReader {
         if (method.isConstructor()) {
             classBuilder.constructor(builder -> buildMethod(method, builder));
         } else {
-            classBuilder.method(method.getName().getIdentifier(), true, builder -> buildMethod(method, builder));
+            classBuilder.method(
+                method.getName().getIdentifier(),
+                Modifier.isStatic(method.getModifiers()),
+                builder -> buildMethod(method, builder));
         }
     }
 
@@ -75,7 +91,7 @@ public class JavaReader {
         Optional<TypeName> returnType = method.getReturnType2() == null
             ? Optional.empty()
             : Optional.of(typeOf(method.getReturnType2()));
-        JavaStatementReader statementReader = new JavaStatementReader(new JavaExpressionReader(classes), returnType);
+        JavaStatementReader statementReader = new JavaStatementReader(new JavaExpressionReader(this, classes), returnType);
         for (Object statement : method.getBody().statements()) {
             for (StatementNode intermediateStatement : statementReader.readStatement((Statement)statement)) {
                 builder.statement(intermediateStatement);

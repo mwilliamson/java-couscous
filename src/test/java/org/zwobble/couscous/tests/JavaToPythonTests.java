@@ -82,14 +82,13 @@ public class JavaToPythonTests {
     }
 
     @Test
-    @Ignore
     public void anonymousClasses() throws Exception {
         assertEquals(
             value(42),
             execTestProgram(
                 "anonymous-class",
                 TypeName.of("com.example.AnonymousClass"),
-                "factorial",
+                "value",
                 asList()));
     }
     

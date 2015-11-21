@@ -11,5 +11,8 @@ def _mod_round_to_zero(a, b):
 def boxInt(value):
     return Integer(value)
 
+def unboxInt(value):
+    return value._value
+
 def boxBoolean(value):
     return Boolean(value)

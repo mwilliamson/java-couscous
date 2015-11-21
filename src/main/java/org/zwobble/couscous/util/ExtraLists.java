@@ -20,6 +20,13 @@ public class ExtraLists {
     }
 
     @SuppressWarnings("unchecked")
+    public static <T, R extends T> List<R> ofType(List<T> list, Class<R> clazz) {
+        return (List<R>)list.stream()
+            .filter(clazz::isInstance)
+            .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
     public static <T, R, E extends Exception> List<R> flatMap(
             Stream<T> stream,
             CheckedFunction<T, Iterable<R>, E> function) throws E {
