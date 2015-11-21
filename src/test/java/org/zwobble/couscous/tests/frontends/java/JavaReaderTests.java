@@ -24,6 +24,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.*;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.boxBoolean;
@@ -503,6 +504,21 @@ public class JavaReaderTests {
                 literal(true),
                 asList(returns(literal(1)))),
             readStatement("int", "while (true) { return 1; }"));
+    }
+
+    @Test
+    public void canReadForLoops() {
+        List<StatementNode> statements = readStatements("int", "for (int x = 0; true; ++x) { return 1; }");
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        assertEquals(
+            asList(
+                localVariableDeclaration(declaration.getDeclaration(), literal(0)),
+                whileLoop(
+                    literal(true),
+                    asList(
+                        returns(literal(1)),
+                        expressionStatement(assign(declaration, integerAdd(reference(declaration), literal(1))))))),
+            statements);
     }
     
     @Test

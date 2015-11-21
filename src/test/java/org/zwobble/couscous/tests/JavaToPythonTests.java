@@ -69,6 +69,17 @@ public class JavaToPythonTests {
                 "factorial",
                 asList(value(6))));
     }
+
+    @Test
+    public void forFactorial() throws Exception {
+        assertEquals(
+            value(720),
+            execTestProgram(
+                "for-factorial",
+                TypeName.of("com.example.ForFactorial"),
+                "factorial",
+                asList(value(6))));
+    }
     
     private PrimitiveValue execTestProgram(
             String directoryName,

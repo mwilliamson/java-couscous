@@ -7,6 +7,18 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class ExtraLists {
+    public static <T> List<T> cons(T value, List<T> list) {
+        return Stream.concat(Stream.of(value), list.stream()).collect(Collectors.toList());
+    }
+
+    public static <T> List<T> append(List<T> list, T value) {
+        return Stream.concat(list.stream(), Stream.of(value)).collect(Collectors.toList());
+    }
+
+    public static <T> List<T> concat(List<T> first, List<T> second) {
+        return Stream.concat(first.stream(), second.stream()).collect(Collectors.toList());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T, R, E extends Exception> List<R> map(
             Stream<T> stream,

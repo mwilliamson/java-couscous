@@ -7,6 +7,7 @@ import org.zwobble.couscous.values.BooleanValue;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
@@ -15,6 +16,8 @@ import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.frontends.java.JavaExpressionReader.readExpression;
 import static org.zwobble.couscous.frontends.java.JavaExpressionReader.readExpressionWithoutBoxing;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.util.ExtraLists.append;
+import static org.zwobble.couscous.util.ExtraLists.concat;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 class JavaStatementReader {
@@ -40,6 +43,9 @@ class JavaStatementReader {
 
             case ASTNode.WHILE_STATEMENT:
                 return asList(readWhileStatement((WhileStatement)statement));
+
+            case ASTNode.FOR_STATEMENT:
+                return readForStatement((ForStatement)statement);
 
             case ASTNode.VARIABLE_DECLARATION_STATEMENT:
                 return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
@@ -78,10 +84,34 @@ class JavaStatementReader {
             readStatement(statement.getBody()));
     }
 
+    private List<StatementNode> readForStatement(ForStatement statement) {
+        List javaInitialisers = statement.initializers();
+        if (javaInitialisers.size() != 1) {
+            throw new UnsupportedOperationException();
+        }
+        VariableDeclarationExpression javaDeclaration = (VariableDeclarationExpression) javaInitialisers.get(0);
+        @SuppressWarnings("unchecked")
+        List<VariableDeclarationFragment> fragments = javaDeclaration.fragments();
+        @SuppressWarnings("unchecked")
+        List<Expression> updaters = statement.updaters();
+
+        return append(
+            readDeclarationFragments(fragments, typeOf(javaDeclaration.getType())),
+            whileLoop(
+                readExpression(BooleanValue.REF, statement.getExpression()),
+                concat(
+                    readStatement(statement.getBody()),
+                    eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));
+    }
+
     private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = statement.fragments();
         TypeName type = typeOf(statement.getType());
+        return readDeclarationFragments(fragments, type);
+    }
+
+    private static List<StatementNode> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
         return eagerMap(fragments, fragment ->
             localVariableDeclaration(
                 fragment.resolveBinding().getKey(),
