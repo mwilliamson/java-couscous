@@ -37,9 +37,8 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     }
 
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
-        // TODO: add filter argument to descendantNodesAndSelf to allow recursion to be stopped early
         return body.stream()
-            .flatMap(NodeStructure::descendantNodesAndSelf)
+            .flatMap(statement -> descendantNodesAndSelf(statement, node -> node instanceof StatementNode))
             .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<VariableNode>>(Stream.empty()) {
                 @Override
                 public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
