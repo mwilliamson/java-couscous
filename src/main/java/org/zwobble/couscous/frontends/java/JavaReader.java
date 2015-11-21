@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.cons;
 import static org.zwobble.couscous.util.ExtraLists.ofType;
@@ -33,20 +32,13 @@ public class JavaReader {
     private ClassNode readCompilationUnit(CompilationUnit ast) {
         String name = generateClassName(ast);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        return readTypeDeclaration(name, type);
+        return readTypeDeclarationBody(name, type.bodyDeclarations());
     }
 
-    ClassNode readTypeDeclaration(String name, AnonymousClassDeclaration type) {
+    ClassNode readTypeDeclarationBody(String name, List bodyDeclarations) {
         ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
-        readFields(ofType(type.bodyDeclarations(), FieldDeclaration.class), classBuilder);
-        readMethods(ofType(type.bodyDeclarations(), MethodDeclaration.class), classBuilder);
-        return classBuilder.build();
-    }
-
-    ClassNode readTypeDeclaration(String name, TypeDeclaration type) {
-        ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
-        readFields(asList(type.getFields()), classBuilder);
-        readMethods(asList(type.getMethods()), classBuilder);
+        readFields(ofType(bodyDeclarations, FieldDeclaration.class), classBuilder);
+        readMethods(ofType(bodyDeclarations, MethodDeclaration.class), classBuilder);
         return classBuilder.build();
     }
 

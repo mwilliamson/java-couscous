@@ -196,7 +196,7 @@ public class JavaExpressionReader {
         if (constructor.getDeclaringClass().isAnonymous()) {
             // TODO: generate anonymous class name
             TypeName anonymousClassName = TypeName.of("ANONYMOUS");
-            classes.add(javaReader.readTypeDeclaration("ANONYMOUS", expression.getAnonymousClassDeclaration()));
+            classes.add(javaReader.readTypeDeclarationBody("ANONYMOUS", expression.getAnonymousClassDeclaration().bodyDeclarations()));
             return constructorCall(anonymousClassName, arguments);
         } else {
             return constructorCall(typeOf(expression), arguments);
