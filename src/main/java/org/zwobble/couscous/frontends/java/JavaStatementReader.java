@@ -7,23 +7,20 @@ import org.zwobble.couscous.values.BooleanValue;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
-import static org.zwobble.couscous.frontends.java.JavaExpressionReader.readExpression;
-import static org.zwobble.couscous.frontends.java.JavaExpressionReader.readExpressionWithoutBoxing;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
-import static org.zwobble.couscous.util.ExtraLists.append;
-import static org.zwobble.couscous.util.ExtraLists.concat;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 class JavaStatementReader {
+    private final JavaExpressionReader expressionReader;
     private final Optional<TypeName> returnType;
 
-    JavaStatementReader(Optional<TypeName> returnType) {
+    JavaStatementReader(JavaExpressionReader expressionReader, Optional<TypeName> returnType) {
+        this.expressionReader = expressionReader;
         this.returnType = returnType;
     }
 
@@ -67,7 +64,7 @@ class JavaStatementReader {
         return ReturnNode.returns(readExpression(returnType.get(), statement.getExpression()));
     }
 
-    private static StatementNode readExpressionStatement(ExpressionStatement statement) {
+    private StatementNode readExpressionStatement(ExpressionStatement statement) {
         return expressionStatement(readExpressionWithoutBoxing(statement.getExpression()));
     }
 
@@ -104,19 +101,27 @@ class JavaStatementReader {
                     eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));
     }
 
-    private static List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
+    private List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = statement.fragments();
         TypeName type = typeOf(statement.getType());
         return readDeclarationFragments(fragments, type);
     }
 
-    private static List<StatementNode> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
+    private List<StatementNode> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
         return eagerMap(fragments, fragment ->
             localVariableDeclaration(
                 fragment.resolveBinding().getKey(),
                 fragment.getName().getIdentifier(),
                 type,
                 readExpression(type, fragment.getInitializer())));
+    }
+
+    private ExpressionNode readExpressionWithoutBoxing(Expression expression) {
+        return expressionReader.readExpressionWithoutBoxing(expression);
+    }
+
+    private ExpressionNode readExpression(TypeName targetType, Expression expression) {
+        return expressionReader.readExpression(targetType, expression);
     }
 }

@@ -627,8 +627,7 @@ public class JavaReaderTests {
                 Files.createDirectories(directoryPath.resolve("com/example"));
                 Files.write(sourcePath, asList(javaClass));
                 
-                JavaReader reader = new JavaReader();
-                List<ClassNode> classes = reader.readClassFromFile(directoryPath, sourcePath);
+                List<ClassNode> classes = JavaReader.readClassFromFile(directoryPath, sourcePath);
                 assertThat(classes, hasSize(1));
                 return classes.get(0);
             } finally {

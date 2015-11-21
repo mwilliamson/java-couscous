@@ -13,10 +13,9 @@ import org.zwobble.couscous.util.ExtraLists;
 public class JavaFrontend implements Frontend {
     @Override
     public List<ClassNode> readSourceDirectory(Path directoryPath) throws IOException {
-        JavaReader reader = new JavaReader();
         return ExtraLists.flatMap(
             findJavaFiles(directoryPath),
-            javaFile -> reader.readClassFromFile(directoryPath, javaFile));
+            javaFile -> JavaReader.readClassFromFile(directoryPath, javaFile));
     }
     
     private Stream<Path> findJavaFiles(Path directoryPath) throws IOException {
