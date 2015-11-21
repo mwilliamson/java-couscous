@@ -10,8 +10,8 @@ public class AssignmentNode implements ExpressionNode {
         return expressionStatement(assign(target, value));
     }
     
-    public static AssignmentNode assign(AssignableExpressionNode target, ExpressionNode value) {
-        return new AssignmentNode(target, value);
+    public static AssignmentNode assign(ExpressionNode target, ExpressionNode value) {
+        return new AssignmentNode((AssignableExpressionNode)target, value);
     }
     
     public static StatementNode assignStatement(VariableNode target, ExpressionNode value) {

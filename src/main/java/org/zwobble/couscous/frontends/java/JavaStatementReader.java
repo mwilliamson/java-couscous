@@ -63,12 +63,14 @@ class JavaStatementReader {
             .collect(Collectors.toList());
     }
 
-    private StatementNode readReturnStatement(ReturnStatement statement) {
-        return ReturnNode.returns(readExpression(returnType.get(), statement.getExpression()));
+    private ReadResult<StatementNode> readReturnStatement(ReturnStatement statement) {
+        return readExpression(returnType.get(), statement.getExpression())
+            .map(ReturnNode::returns);
     }
 
     private static StatementNode readExpressionStatement(ExpressionStatement statement) {
-        return expressionStatement(readExpressionWithoutBoxing(statement.getExpression()));
+        return readExpressionWithoutBoxing(statement.getExpression())
+            .map(ExpressionStatementNode::expressionStatement);
     }
 
     private StatementNode readIfStatement(IfStatement statement) {
@@ -111,12 +113,13 @@ class JavaStatementReader {
         return readDeclarationFragments(fragments, type);
     }
 
-    private static List<StatementNode> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
-        return eagerMap(fragments, fragment ->
-            localVariableDeclaration(
-                fragment.resolveBinding().getKey(),
-                fragment.getName().getIdentifier(),
-                type,
-                readExpression(type, fragment.getInitializer())));
+    private static ReadResult<List<StatementNode>> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
+        return ReadResult.combine(fragments.stream().map(fragment ->
+            readExpression(type, fragment.getInitializer())
+                .map(value -> localVariableDeclaration(
+                    fragment.resolveBinding().getKey(),
+                    fragment.getName().getIdentifier(),
+                    type,
+                    value))));
     }
 }

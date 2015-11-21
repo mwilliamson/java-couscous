@@ -19,6 +19,11 @@ public class ExtraLists {
         return Stream.concat(first.stream(), second.stream()).collect(Collectors.toList());
     }
 
+    public static <T> List<T> concat(List<T> first, List<T> second, List<T> third) {
+        return Stream.concat(Stream.concat(first.stream(), second.stream()), third.stream())
+            .collect(Collectors.toList());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T, R, E extends Exception> List<R> flatMap(
             Stream<T> stream,

@@ -7,20 +7,22 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 
 public class JavaExpressionReader {
-    static ExpressionNode readExpression(TypeName targetType, Expression expression) {
-        ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
-        return handleBoxing(targetType, couscousExpression);
+    static ReadResult<ExpressionNode> readExpression(TypeName targetType, Expression expression) {
+        return readExpressionWithoutBoxing(expression)
+            .map(couscousExpression -> handleBoxing(targetType, couscousExpression));
     }
 
     private static ExpressionNode handleBoxing(TypeName targetType, ExpressionNode couscousExpression) {
@@ -67,22 +69,22 @@ public class JavaExpressionReader {
             targetType.equals(BooleanValue.REF);
     }
 
-    static ExpressionNode readExpressionWithoutBoxing(Expression expression) {
+    static ReadResult<ExpressionNode> readExpressionWithoutBoxing(Expression expression) {
         switch (expression.getNodeType()) {
             case ASTNode.BOOLEAN_LITERAL:
-                return readBooleanLiteral((BooleanLiteral)expression);
+                return ReadResult.of(readBooleanLiteral((BooleanLiteral)expression));
 
             case ASTNode.NUMBER_LITERAL:
-                return readNumberLiteral((NumberLiteral)expression);
+                return ReadResult.of(readNumberLiteral((NumberLiteral)expression));
 
             case ASTNode.STRING_LITERAL:
-                return readStringLiteral((StringLiteral)expression);
+                return ReadResult.of(readStringLiteral((StringLiteral)expression));
 
             case ASTNode.SIMPLE_NAME:
-                return readSimpleName((SimpleName)expression);
+                return ReadResult.of(readSimpleName((SimpleName)expression));
 
             case ASTNode.THIS_EXPRESSION:
-                return readThisExpression((ThisExpression)expression);
+                return ReadResult.of(readThisExpression((ThisExpression)expression));
 
             case ASTNode.FIELD_ACCESS:
                 return readFieldAccess((FieldAccess)expression);
@@ -145,55 +147,59 @@ public class JavaExpressionReader {
         return ThisReferenceNode.thisReference(typeOf(expression));
     }
 
-    private static ExpressionNode readFieldAccess(FieldAccess expression) {
-        return FieldAccessNode.fieldAccess(readExpressionWithoutBoxing(expression.getExpression()), expression.getName().getIdentifier(), typeOf(expression));
+    private static ReadResult<ExpressionNode> readFieldAccess(FieldAccess expression) {
+        return readExpressionWithoutBoxing(expression.getExpression())
+            .map(left -> FieldAccessNode.fieldAccess(left, expression.getName().getIdentifier(), typeOf(expression)));
     }
 
-    private static ExpressionNode readMethodInvocation(MethodInvocation expression) {
+    private static ReadResult<ExpressionNode> readMethodInvocation(MethodInvocation expression) {
         String methodName = expression.getName().getIdentifier();
-        @SuppressWarnings("unchecked")
-        List<ExpressionNode> arguments = readArguments(
-            expression.resolveMethodBinding(),
-            expression.arguments());
         final TypeName type = typeOf(expression);
-
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
-        if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
-            return StaticMethodCallNode.staticMethodCall(
-                receiverType,
-                methodName,
-                arguments,
-                type);
-        } else {
-            ExpressionNode receiver = expression.getExpression() == null
-                ? ThisReferenceNode.thisReference(receiverType)
-                : readExpressionWithoutBoxing(expression.getExpression());
-            return MethodCallNode.methodCall(
-                receiver,
-                methodName,
-                arguments,
-                type);
-        }
-    }
 
-    private static ExpressionNode readClassInstanceCreation(ClassInstanceCreation expression) {
         @SuppressWarnings("unchecked")
-        List<Expression> arguments = expression.arguments();
-        return ConstructorCallNode.constructorCall(
-            typeOf(expression),
-            readArguments(expression.resolveConstructorBinding(), arguments));
+        ReadResult<List<ExpressionNode>> argumentsResult = readArguments(
+            expression.resolveMethodBinding(),
+            expression.arguments());
+
+        return argumentsResult.flatMap(arguments -> {
+            if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
+                return ReadResult.of(staticMethodCall(
+                    receiverType,
+                    methodName,
+                    arguments,
+                    type));
+            } else {
+                ReadResult<ExpressionNode> receiverResult = expression.getExpression() == null
+                    ? ReadResult.of(ThisReferenceNode.thisReference(receiverType))
+                    : readExpressionWithoutBoxing(expression.getExpression());
+
+                return receiverResult.map(receiver -> MethodCallNode.methodCall(
+                    receiver,
+                    methodName,
+                    arguments,
+                    type));
+            }
+        });
     }
 
-    private static List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {
-        return IntStream.range(0, javaArguments.size())
+    private static ReadResult<ExpressionNode> readClassInstanceCreation(ClassInstanceCreation expression) {
+        @SuppressWarnings("unchecked")
+        List<Expression> javaArguments = expression.arguments();
+        return readArguments(expression.resolveConstructorBinding(), javaArguments)
+            .map(arguments -> constructorCall(typeOf(expression), arguments));
+    }
+
+    private static ReadResult<List<ExpressionNode>> readArguments(IMethodBinding method, List<Expression> javaArguments) {
+        Stream<ReadResult<ExpressionNode>> results = IntStream.range(0, javaArguments.size())
             .mapToObj(index -> readExpression(
                 typeOf(method.getParameterTypes()[index]),
-                javaArguments.get(index)))
-            .collect(Collectors.toList());
+                javaArguments.get(index)));
+        return ReadResult.combine(results);
     }
 
-    private static ExpressionNode readInfixExpression(InfixExpression expression) {
+    private static ReadResult<ExpressionNode> readInfixExpression(InfixExpression expression) {
         if (isPrimitiveOperation(expression)) {
             Operator operator = readOperator(expression.getOperator());
             return readPrimitiveOperation(
@@ -201,15 +207,18 @@ public class JavaExpressionReader {
                 expression.getLeftOperand(),
                 expression.getRightOperand());
         } else {
-            ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
-            ExpressionNode right = readExpression(ObjectValues.OBJECT, expression.getRightOperand());
-            if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
-                return StaticMethodCallNode.same(left, right);
-            } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
-                return MethodCallNode.not(StaticMethodCallNode.same(left, right));
-            } else {
-                throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
-            }
+            return ReadResult.map(
+                readExpression(ObjectValues.OBJECT, expression.getLeftOperand()),
+                readExpression(ObjectValues.OBJECT, expression.getRightOperand()),
+                (left, right) -> {
+                    if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
+                        return StaticMethodCallNode.same(left, right);
+                    } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
+                        return MethodCallNode.not(StaticMethodCallNode.same(left, right));
+                    } else {
+                        throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
+                    }
+                });
         }
     }
 
@@ -226,51 +235,59 @@ public class JavaExpressionReader {
         return type.equals(BooleanValue.REF) || type.equals(IntegerValue.REF);
     }
 
-    private static ExpressionNode readPrefixExpression(PrefixExpression expression) {
+    private static ReadResult<ExpressionNode> readPrefixExpression(PrefixExpression expression) {
         Operator operator = readOperator(expression.getOperator());
-        return AssignmentNode.assign(
-            (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
-            MethodCallNode.methodCall(
-                readExpression(IntegerValue.REF, expression.getOperand()),
-                operator.getMethodName(),
-                asList(literal(1)),
-                IntegerValue.REF));
+        return readExpression(IntegerValue.REF, expression.getOperand())
+            .map(operand -> AssignmentNode.assign(
+                (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
+                MethodCallNode.methodCall(
+                    operand,
+                    operator.getMethodName(),
+                    asList(literal(1)),
+                    IntegerValue.REF)));
     }
 
-    private static ExpressionNode readConditionalExpression(ConditionalExpression expression) {
+    private static ReadResult<ExpressionNode> readConditionalExpression(ConditionalExpression expression) {
         TypeName type = typeOf(expression);
-        return TernaryConditionalNode.ternaryConditional(
+        return ReadResult.map(
             readExpression(BooleanValue.REF, expression.getExpression()),
             readExpression(type, expression.getThenExpression()),
-            readExpression(type, expression.getElseExpression()));
+            readExpression(type, expression.getElseExpression()),
+            TernaryConditionalNode::ternaryConditional);
     }
 
-    private static ExpressionNode readAssignment(Assignment expression) {
-        AssignableExpressionNode left = (AssignableExpressionNode)readExpressionWithoutBoxing(expression.getLeftHandSide());
+    private static ReadResult<ExpressionNode> readAssignment(Assignment expression) {
+        ReadResult<ExpressionNode> leftResult = readExpressionWithoutBoxing(expression.getLeftHandSide());
         if (expression.getOperator() == Assignment.Operator.ASSIGN) {
-            ExpressionNode right = readExpression(left.getType(), expression.getRightHandSide());
-            return AssignmentNode.assign(left, right);
+            return ReadResult.map(
+                leftResult,
+                readExpression(leftResult.getValue().getType(), expression.getRightHandSide()),
+                AssignmentNode::assign);
         } else {
             Operator operator = readOperator(expression.getOperator());
-            return AssignmentNode.assign(
-                left,
-                handleBoxing(
-                    left.getType(),
-                    readPrimitiveOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
+            return ReadResult.map(
+                leftResult,
+                readPrimitiveOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide()),
+                (left, right) -> AssignmentNode.assign(
+                    left,
+                    handleBoxing(
+                        leftResult.getValue().getType(),
+                        right)));
         }
     }
 
-    private static ExpressionNode readPrimitiveOperation(Operator operator, Expression leftJava, Expression rightJava) {
-        ExpressionNode left = readUnboxedExpression(leftJava);
-        ExpressionNode right = readUnboxedExpression(rightJava);
-        return MethodCallNode.methodCall(
-            left,
-            operator.getMethodName(),
-            asList(right),
-            operator.isBoolean() ? BooleanValue.REF : left.getType());
+    private static ReadResult<ExpressionNode> readPrimitiveOperation(Operator operator, Expression leftJava, Expression rightJava) {
+        return ReadResult.map(
+            readUnboxedExpression(leftJava),
+            readUnboxedExpression(rightJava),
+            (left, right) -> MethodCallNode.methodCall(
+                left,
+                operator.getMethodName(),
+                asList(right),
+                operator.isBoolean() ? BooleanValue.REF : left.getType()));
     }
 
-    private static ExpressionNode readUnboxedExpression(Expression expression) {
+    private static ReadResult<ExpressionNode> readUnboxedExpression(Expression expression) {
         return readExpression(
             unboxedType(typeOf(expression)),
             expression);
