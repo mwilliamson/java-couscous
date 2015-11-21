@@ -19,7 +19,12 @@ public class PythonWriter {
 
     public void writeStringLiteral(String value) {
         builder.append("\"");
-        builder.append(value);
+        builder.append(value
+            .replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t"));
         builder.append("\"");
     }
 

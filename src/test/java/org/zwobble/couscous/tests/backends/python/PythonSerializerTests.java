@@ -36,9 +36,14 @@ public class PythonSerializerTests {
     
     @Test
     public void stringsAreNotBoxed() {
-        // TODO: escaping
         String output = serialize(pythonStringLiteral("blah"));
         assertEquals("\"blah\"", output);
+    }
+
+    @Test
+    public void stringsAreEscaped() {
+        String output = serialize(pythonStringLiteral("\"\n\r\t\\"));
+        assertEquals("\"\\\"\\n\\r\\t\\\\\"", output);
     }
     
     @Test
