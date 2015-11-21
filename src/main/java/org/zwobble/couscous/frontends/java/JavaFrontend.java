@@ -14,7 +14,7 @@ public class JavaFrontend implements Frontend {
     @Override
     public List<ClassNode> readSourceDirectory(Path directoryPath) throws IOException {
         JavaReader reader = new JavaReader();
-        return ExtraLists.map(
+        return ExtraLists.flatMap(
             findJavaFiles(directoryPath),
             javaFile -> reader.readClassFromFile(directoryPath, javaFile));
     }

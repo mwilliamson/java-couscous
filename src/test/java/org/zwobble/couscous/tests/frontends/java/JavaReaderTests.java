@@ -1,9 +1,5 @@
 package org.zwobble.couscous.tests.frontends.java;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -12,9 +8,15 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
@@ -27,11 +29,7 @@ import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.*;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.boxBoolean;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.boxInt;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.same;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.unboxInt;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.*;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -630,7 +628,9 @@ public class JavaReaderTests {
                 Files.write(sourcePath, asList(javaClass));
                 
                 JavaReader reader = new JavaReader();
-                return reader.readClassFromFile(directoryPath, sourcePath);
+                List<ClassNode> classes = reader.readClassFromFile(directoryPath, sourcePath);
+                assertThat(classes, hasSize(1));
+                return classes.get(0);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }

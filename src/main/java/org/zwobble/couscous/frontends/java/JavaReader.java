@@ -8,25 +8,27 @@ import org.zwobble.couscous.ast.TypeName;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 
 public class JavaReader {
     private final JavaParser parser = new JavaParser();
     
-    public ClassNode readClassFromFile(Path root, Path sourcePath) throws IOException {
+    public List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
         CompilationUnit ast = parser.parseCompilationUnit(root, sourcePath);
         return readCompilationUnit(ast);
     }
     
-    private static ClassNode readCompilationUnit(CompilationUnit ast) {
+    private static List<ClassNode> readCompilationUnit(CompilationUnit ast) {
         String name = generateClassName(ast);
         ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         readFields(type, classBuilder);
         readMethods(type, classBuilder);
-        return classBuilder.build();
+        return asList(classBuilder.build());
     }
     
     private static void readFields(TypeDeclaration type, ClassNodeBuilder classBuilder) {

@@ -20,14 +20,14 @@ public class ExtraLists {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T, R, E extends Exception> List<R> map(
+    public static <T, R, E extends Exception> List<R> flatMap(
             Stream<T> stream,
-            CheckedFunction<T, R, E> function) throws E {
+            CheckedFunction<T, Iterable<R>, E> function) throws E {
         try {
             return stream
-                .map(value -> {
+                .flatMap(value -> {
                     try {
-                        return function.apply(value);
+                        return StreamSupport.stream(function.apply(value).spliterator(), false);
                     } catch (Exception exception) {
                         throw new StashedException(exception);
                     }
