@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.values.BooleanValue;
@@ -50,9 +51,9 @@ public class PrimitiveMethods {
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
         
-        addMethod(methods, Operator.ADD.getMethodName(), "__add__");
-        addMethod(methods, Operator.SUBTRACT.getMethodName(), "__sub__");
-        addMethod(methods, Operator.MULTIPLY.getMethodName(), "__mul__");
+        addOperation(methods, Operator.ADD.getMethodName(), "+");
+        addOperation(methods, Operator.SUBTRACT.getMethodName(), "-");
+        addOperation(methods, Operator.MULTIPLY.getMethodName(), "*");
 
         methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
             pythonCall(
@@ -63,12 +64,12 @@ public class PrimitiveMethods {
                 internalReference("_mod_round_to_zero"),
                 asList(receiver, arguments.get(0))));
 
-        addMethod(methods, Operator.EQUALS.getMethodName(), "__eq__");
-        addMethod(methods, Operator.NOT_EQUALS.getMethodName(), "__ne__");
-        addMethod(methods, Operator.GREATER_THAN.getMethodName(), "__gt__");
-        addMethod(methods, Operator.GREATER_THAN_OR_EQUAL.getMethodName(), "__ge__");
-        addMethod(methods, Operator.LESS_THAN.getMethodName(), "__lt__");
-        addMethod(methods, Operator.LESS_THAN_OR_EQUAL.getMethodName(), "__le__");
+        addOperation(methods, Operator.EQUALS.getMethodName(), "==");
+        addOperation(methods, Operator.NOT_EQUALS.getMethodName(), "!=");
+        addOperation(methods, Operator.GREATER_THAN.getMethodName(), ">");
+        addOperation(methods, Operator.GREATER_THAN_OR_EQUAL.getMethodName(), ">=");
+        addOperation(methods, Operator.LESS_THAN.getMethodName(), "<");
+        addOperation(methods, Operator.LESS_THAN_OR_EQUAL.getMethodName(), "<=");
         
         INT_METHODS = methods.build();
     }
@@ -77,14 +78,15 @@ public class PrimitiveMethods {
         return pythonAttributeAccess(pythonVariableReference("_couscous"), name);
     }
     
-    private static void addMethod(
+    private static void addOperation(
             Builder<String, PrimitiveMethodGenerator> methods,
             String methodName,
-            String pythonMethodName) {
+            String operatorSymbol) {
         methods.put(methodName, (receiver, arguments) -> 
-            pythonCall(
-                pythonAttributeAccess(receiver, pythonMethodName),
-                arguments));
+            new PythonBinaryOperation(
+                operatorSymbol,
+                receiver,
+                arguments.get(0)));
     }
     
     private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS = 
