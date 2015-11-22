@@ -21,11 +21,9 @@ import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 
 public class JavaExpressionReader {
     private final JavaReader javaReader;
-    private final ImmutableList.Builder<ClassNode> classes;
 
-    JavaExpressionReader(JavaReader javaReader, ImmutableList.Builder<ClassNode> classes) {
+    JavaExpressionReader(JavaReader javaReader) {
         this.javaReader = javaReader;
-        this.classes = classes;
     }
 
     ExpressionNode readExpression(TypeName targetType, Expression expression) {
@@ -195,8 +193,7 @@ public class JavaExpressionReader {
 
         if (constructor.getDeclaringClass().isAnonymous()) {
             // TODO: generate anonymous class name
-            TypeName anonymousClassName = TypeName.of("ANONYMOUS");
-            classes.add(javaReader.readTypeDeclarationBody("ANONYMOUS", expression.getAnonymousClassDeclaration().bodyDeclarations()));
+            TypeName anonymousClassName = javaReader.readAnonymousClass(expression.getAnonymousClassDeclaration());
             return constructorCall(anonymousClassName, arguments);
         } else {
             return constructorCall(typeOf(expression), arguments);

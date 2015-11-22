@@ -35,7 +35,13 @@ public class JavaReader {
         return readTypeDeclarationBody(name, type.bodyDeclarations());
     }
 
-    ClassNode readTypeDeclarationBody(String name, List bodyDeclarations) {
+    TypeName readAnonymousClass(AnonymousClassDeclaration declaration) {
+        ClassNode classNode = readTypeDeclarationBody("ANONYMOUS", declaration.bodyDeclarations());
+        classes.add(classNode);
+        return classNode.getName();
+    }
+
+    private ClassNode readTypeDeclarationBody(String name, List bodyDeclarations) {
         ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
         readFields(ofType(bodyDeclarations, FieldDeclaration.class), classBuilder);
         readMethods(ofType(bodyDeclarations, MethodDeclaration.class), classBuilder);
@@ -83,7 +89,7 @@ public class JavaReader {
         Optional<TypeName> returnType = method.getReturnType2() == null
             ? Optional.empty()
             : Optional.of(typeOf(method.getReturnType2()));
-        JavaStatementReader statementReader = new JavaStatementReader(new JavaExpressionReader(this, classes), returnType);
+        JavaStatementReader statementReader = new JavaStatementReader(new JavaExpressionReader(this), returnType);
         for (Object statement : method.getBody().statements()) {
             for (StatementNode intermediateStatement : statementReader.readStatement((Statement)statement)) {
                 builder.statement(intermediateStatement);
