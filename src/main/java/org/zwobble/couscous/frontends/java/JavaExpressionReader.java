@@ -6,6 +6,7 @@ import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -99,6 +100,9 @@ public class JavaExpressionReader {
 
             case ASTNode.CLASS_INSTANCE_CREATION:
                 return readClassInstanceCreation((ClassInstanceCreation)expression);
+
+            case ASTNode.LAMBDA_EXPRESSION:
+                return readLambdaExpression((LambdaExpression)expression);
 
             case ASTNode.INFIX_EXPRESSION:
                 return readInfixExpression((InfixExpression)expression);
@@ -196,6 +200,11 @@ public class JavaExpressionReader {
         } else {
             return constructorCall(typeOf(expression), arguments);
         }
+    }
+
+    private ExpressionNode readLambdaExpression(LambdaExpression expression) {
+        TypeName anonymousClassName = javaReader.readLambda(expression);
+        return constructorCall(anonymousClassName, Collections.emptyList());
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

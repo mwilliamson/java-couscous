@@ -2,16 +2,14 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ClassNodeBuilder;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.cons;
 import static org.zwobble.couscous.util.ExtraLists.ofType;
@@ -36,6 +34,33 @@ public class JavaReader {
         return readTypeDeclarationBody(name, type.bodyDeclarations());
     }
 
+    TypeName readLambda(LambdaExpression expression) {
+        IMethodBinding methodBinding = expression.resolveMethodBinding();
+        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
+        TypeName returnType = typeOf(functionalInterfaceMethod.getReturnType());
+
+        ClassNodeBuilder classBuilder = new ClassNodeBuilder(generateClassName(expression));
+        classBuilder.method(functionalInterfaceMethod.getName(), method -> {
+            ASTNode body = expression.getBody();
+            if ((body instanceof Expression)) {
+                method.statement(returns(expressionReader().readExpression(
+                    returnType,
+                    (Expression)body)));
+            } else {
+                throw new UnsupportedOperationException();
+            }
+            return method;
+        });
+
+        ClassNode classNode = classBuilder.build();
+        classes.add(classNode);
+        return classNode.getName();
+    }
+
+    private String generateClassName(LambdaExpression expression) {
+        return generateClassName(expression.resolveMethodBinding().getDeclaringClass());
+    }
+
     TypeName readAnonymousClass(AnonymousClassDeclaration declaration) {
         String name = generateClassName(declaration);
         ClassNode classNode = readTypeDeclarationBody(name, declaration.bodyDeclarations());
@@ -45,6 +70,10 @@ public class JavaReader {
 
     private String generateClassName(AnonymousClassDeclaration declaration) {
         ITypeBinding type = declaration.resolveBinding();
+        return generateClassName(type);
+    }
+
+    private String generateClassName(ITypeBinding type) {
         while (type.isAnonymous()) {
             type = type.getDeclaringClass();
         }
@@ -63,20 +92,20 @@ public class JavaReader {
             readField(field, classBuilder);
         }
     }
-    
+
     private void readField(FieldDeclaration field, ClassNodeBuilder classBuilder) {
         for (Object fragment : field.fragments()) {
             String name = ((VariableDeclarationFragment)fragment).getName().getIdentifier();
             classBuilder.field(name, typeOf(field.getType()));
         }
     }
-    
+
     private void readMethods(List<MethodDeclaration> methods, ClassNodeBuilder classBuilder) {
         for (MethodDeclaration method : methods) {
             readMethod(classBuilder, method);
         }
     }
-    
+
     private void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
         if (method.isConstructor()) {
             classBuilder.constructor(builder -> buildMethod(method, builder));
@@ -99,7 +128,7 @@ public class JavaReader {
         Optional<TypeName> returnType = method.getReturnType2() == null
             ? Optional.empty()
             : Optional.of(typeOf(method.getReturnType2()));
-        JavaStatementReader statementReader = new JavaStatementReader(new JavaExpressionReader(this), returnType);
+        JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
         for (Object statement : method.getBody().statements()) {
             for (StatementNode intermediateStatement : statementReader.readStatement((Statement)statement)) {
                 builder.statement(intermediateStatement);
@@ -111,5 +140,9 @@ public class JavaReader {
     private String generateClassName(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         return ast.getPackage().getName().getFullyQualifiedName() + "." + type.getName().getFullyQualifiedName();
+    }
+
+    private JavaExpressionReader expressionReader() {
+        return new JavaExpressionReader(this);
     }
 }

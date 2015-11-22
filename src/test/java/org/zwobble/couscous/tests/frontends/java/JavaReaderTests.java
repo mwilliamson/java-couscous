@@ -153,6 +153,19 @@ public class JavaReaderTests {
             constructorCall(TypeName.of("java.lang.String"), asList(literal("_"))),
             readObjectExpression("new String(\"_\")"));
     }
+
+    @Test
+    public void lambdaIsReadAsAnonymousClassCreation() {
+        assertEquals(
+            readClasses(generateMethodSource("void",
+                "java.util.function.Supplier<Integer> supplier = new java.util.function.Supplier<Integer>() {\n" +
+                "    public Integer get() {\n" +
+                "        return 42;\n" +
+                "    }\n" +
+                "};")),
+            readClasses(generateMethodSource("void",
+                "java.util.function.Supplier<Integer> supplier = () -> 42;")));
+    }
     
     @Test
     public void argumentIsBoxedIfNecessary() {
@@ -604,21 +617,19 @@ public class JavaReaderTests {
     }
 
     private List<StatementNode> readStatements(String returnType, String statementsSource) {
-        String javaClass =
-            "public static " + returnType + " main() {" +
-            statementsSource +
-            "}";
-        
+        String javaClass = generateMethodSource(returnType, statementsSource);
         ClassNode classNode = readClass(javaClass);
         return classNode.getMethods().get(0).getBody();
     }
 
     private ClassNode readClass(String classBody) {
-        String javaClass =
-            "package com.example;" +
-            "public class Example {" +
-            classBody +
-            "}";
+        List<ClassNode> classes = readClasses(classBody);
+        assertThat(classes, hasSize(1));
+        return classes.get(0);
+    }
+
+    private List<ClassNode> readClasses(String classBody) {
+        String javaClass = generateClassSource(classBody);
         try {
 
             Path directoryPath = Files.createTempDirectory(null);
@@ -626,15 +637,26 @@ public class JavaReaderTests {
             try {
                 Files.createDirectories(directoryPath.resolve("com/example"));
                 Files.write(sourcePath, asList(javaClass));
-                
-                List<ClassNode> classes = JavaReader.readClassFromFile(directoryPath, sourcePath);
-                assertThat(classes, hasSize(1));
-                return classes.get(0);
+
+                return JavaReader.readClassFromFile(directoryPath, sourcePath);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
         } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
+    }
+
+    private String generateMethodSource(String returnType, String statementsSource) {
+        return "public static " + returnType + " main() {" +
+            statementsSource +
+            "}";
+    }
+
+    private String generateClassSource(String classBody) {
+        return "package com.example;" +
+            "public class Example {" +
+            classBody +
+            "}";
     }
 }
