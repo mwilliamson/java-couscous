@@ -166,7 +166,7 @@ public class JavaExpressionReader {
 
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
-        if ((methodBinding.getModifiers() & Modifier.STATIC) != 0) {
+        if ((Modifier.isStatic(methodBinding.getModifiers()))) {
             return StaticMethodCallNode.staticMethodCall(
                 receiverType,
                 methodName,
