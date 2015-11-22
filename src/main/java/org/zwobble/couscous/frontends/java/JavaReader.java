@@ -2,14 +2,11 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ClassNodeBuilder;
-import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.VariableDeclaration;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -114,7 +111,7 @@ public class JavaReader {
 
     private interface FunctionDeclaration {
         List<IAnnotationBinding> getAnnotations();
-        List<SingleVariableDeclaration> parameters();
+        Stream<FormalArgumentNode> getFormalArguments();
         // TODO: add tests around void methods
         Stream<StatementNode> getBody();
     }
@@ -131,10 +128,11 @@ public class JavaReader {
             return asList(method.resolveBinding().getAnnotations());
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public List<SingleVariableDeclaration> parameters() {
-            return method.parameters();
+        public Stream<FormalArgumentNode> getFormalArguments() {
+            @SuppressWarnings("unchecked")
+            List<SingleVariableDeclaration> parameters = method.parameters();
+            return parameters.stream().map(parameter -> readSingleVariableDeclaration(parameter));
         }
 
         @Override
@@ -164,8 +162,21 @@ public class JavaReader {
         }
 
         @Override
-        public List<SingleVariableDeclaration> parameters() {
-            return Collections.emptyList();
+        public Stream<FormalArgumentNode> getFormalArguments() {
+            return ((List<?>)expression.parameters()).stream()
+                .map(this::readParameter);
+        }
+
+        private FormalArgumentNode readParameter(Object parameter) {
+            if (parameter instanceof SingleVariableDeclaration) {
+                return readSingleVariableDeclaration((SingleVariableDeclaration) parameter);
+            } else {
+                VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
+                return FormalArgumentNode.formalArg(VariableDeclaration.var(
+                    fragment.resolveBinding().getKey(),
+                    fragment.getName().getIdentifier(),
+                    typeOf(fragment.resolveBinding().getType())));
+            }
         }
 
         @SuppressWarnings("unchecked")
@@ -191,10 +202,7 @@ public class JavaReader {
         for (IAnnotationBinding annotation : method.getAnnotations()) {
             builder.annotation(typeOf(annotation.getAnnotationType()));
         }
-        for (Object parameterObject : method.parameters()) {
-            SingleVariableDeclaration parameter = (SingleVariableDeclaration)parameterObject;
-            builder.argument(parameter.resolveBinding().getKey(), parameter.getName().getIdentifier(), typeOf(parameter.resolveBinding()));
-        }
+        method.getFormalArguments().forEach(builder::argument);
         method.getBody().forEach(builder::statement);
         return builder;
     }
@@ -208,6 +216,13 @@ public class JavaReader {
     private String generateClassName(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         return ast.getPackage().getName().getFullyQualifiedName() + "." + type.getName().getFullyQualifiedName();
+    }
+
+    private FormalArgumentNode readSingleVariableDeclaration(SingleVariableDeclaration parameter) {
+        return FormalArgumentNode.formalArg(VariableDeclaration.var(
+            parameter.resolveBinding().getKey(),
+            parameter.getName().getIdentifier(),
+            typeOf(parameter.resolveBinding())));
     }
 
     private JavaExpressionReader expressionReader() {

@@ -175,6 +175,15 @@ public class JavaReaderTests {
             readClasses(generateMethodSource("void",
                 "java.util.function.Supplier<Integer> supplier = () -> { return 42; };")));
     }
+
+    @Test
+    public void lambdaWithInferredArgumentsAndBlockBodyIsReadAsAnonymousClassCreation() {
+        assertEquals(
+            readClasses(generateMethodSource("void",
+                "java.util.function.Function<Integer, Integer> function = x -> x;")),
+            readClasses(generateMethodSource("void",
+                "java.util.function.Function<Integer, Integer> function = (Integer x) -> x;")));
+    }
     
     @Test
     public void argumentIsBoxedIfNecessary() {
