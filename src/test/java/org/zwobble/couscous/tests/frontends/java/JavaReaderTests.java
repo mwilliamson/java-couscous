@@ -155,7 +155,7 @@ public class JavaReaderTests {
     }
 
     @Test
-    public void lambdaIsReadAsAnonymousClassCreation() {
+    public void lambdaWithNoArgumentsAndExpressionBodyIsReadAsAnonymousClassCreation() {
         assertEquals(
             readClasses(generateMethodSource("void",
                 "java.util.function.Supplier<Integer> supplier = new java.util.function.Supplier<Integer>() {\n" +
@@ -165,6 +165,15 @@ public class JavaReaderTests {
                 "};")),
             readClasses(generateMethodSource("void",
                 "java.util.function.Supplier<Integer> supplier = () -> 42;")));
+    }
+
+    @Test
+    public void lambdaWithNoArgumentsAndBlockBodyIsReadAsAnonymousClassCreation() {
+        assertEquals(
+            readClasses(generateMethodSource("void",
+                "java.util.function.Supplier<Integer> supplier = () -> 42;")),
+            readClasses(generateMethodSource("void",
+                "java.util.function.Supplier<Integer> supplier = () -> { return 42; };")));
     }
     
     @Test

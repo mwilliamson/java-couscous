@@ -2,13 +2,19 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.ClassNodeBuilder;
+import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.TypeName;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.cons;
@@ -35,22 +41,10 @@ public class JavaReader {
     }
 
     TypeName readLambda(LambdaExpression expression) {
-        IMethodBinding methodBinding = expression.resolveMethodBinding();
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        TypeName returnType = typeOf(functionalInterfaceMethod.getReturnType());
 
         ClassNodeBuilder classBuilder = new ClassNodeBuilder(generateClassName(expression));
-        classBuilder.method(functionalInterfaceMethod.getName(), method -> {
-            ASTNode body = expression.getBody();
-            if ((body instanceof Expression)) {
-                method.statement(returns(expressionReader().readExpression(
-                    returnType,
-                    (Expression)body)));
-            } else {
-                throw new UnsupportedOperationException();
-            }
-            return method;
-        });
+        classBuilder.method(functionalInterfaceMethod.getName(), method -> buildMethod(new LambdaDeclarationAdaptor(expression), method));
 
         ClassNode classNode = classBuilder.build();
         classes.add(classNode);
@@ -107,34 +101,108 @@ public class JavaReader {
     }
 
     private void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
+        MethodDeclarationAdaptor function = new MethodDeclarationAdaptor(method);
         if (method.isConstructor()) {
-            classBuilder.constructor(builder -> buildMethod(method, builder));
+            classBuilder.constructor(builder -> buildMethod(function, builder));
         } else {
             classBuilder.method(
                 method.getName().getIdentifier(),
                 Modifier.isStatic(method.getModifiers()),
-                builder -> buildMethod(method, builder));
+                builder -> buildMethod(function, builder));
         }
     }
 
-    private <T> ClassNodeBuilder.MethodBuilder<T> buildMethod(MethodDeclaration method, ClassNodeBuilder.MethodBuilder<T> builder) {
-        for (IAnnotationBinding annotation : method.resolveBinding().getAnnotations()) {
+    private interface FunctionDeclaration {
+        List<IAnnotationBinding> getAnnotations();
+        List<SingleVariableDeclaration> parameters();
+        // TODO: add tests around void methods
+        Stream<StatementNode> getBody();
+    }
+
+    private class MethodDeclarationAdaptor implements FunctionDeclaration {
+        private final MethodDeclaration method;
+
+        public MethodDeclarationAdaptor(MethodDeclaration method) {
+            this.method = method;
+        }
+
+        @Override
+        public List<IAnnotationBinding> getAnnotations() {
+            return asList(method.resolveBinding().getAnnotations());
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public List<SingleVariableDeclaration> parameters() {
+            return method.parameters();
+        }
+
+        @Override
+        public Stream<StatementNode> getBody() {
+            @SuppressWarnings("unchecked")
+            List<Statement> statements = method.getBody().statements();
+            return readStatements(statements, getReturnType());
+        }
+
+        private Optional<TypeName> getReturnType() {
+            return Optional.ofNullable(method.getReturnType2())
+                .map(Type::resolveBinding)
+                .map(JavaTypes::typeOf);
+        }
+    }
+
+    private class LambdaDeclarationAdaptor implements FunctionDeclaration {
+        private final LambdaExpression expression;
+
+        public LambdaDeclarationAdaptor(LambdaExpression expression) {
+            this.expression = expression;
+        }
+
+        @Override
+        public List<IAnnotationBinding> getAnnotations() {
+            return asList(expression.resolveMethodBinding().getAnnotations());
+        }
+
+        @Override
+        public List<SingleVariableDeclaration> parameters() {
+            return Collections.emptyList();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Stream<StatementNode> getBody() {
+            TypeName returnType = typeOf(getReturnType());
+            if (expression.getBody() instanceof Block) {
+                @SuppressWarnings("unchecked")
+                List<Statement> statements = ((Block) expression.getBody()).statements();
+                return readStatements(statements, Optional.of(returnType));
+            } else {
+                Expression expression = (Expression) this.expression.getBody();
+                return Stream.of(returns(expressionReader().readExpression(returnType, expression)));
+            }
+        }
+
+        private ITypeBinding getReturnType() {
+            return expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType();
+        }
+    }
+
+    private <T> ClassNodeBuilder.MethodBuilder<T> buildMethod(FunctionDeclaration method, ClassNodeBuilder.MethodBuilder<T> builder) {
+        for (IAnnotationBinding annotation : method.getAnnotations()) {
             builder.annotation(typeOf(annotation.getAnnotationType()));
         }
         for (Object parameterObject : method.parameters()) {
             SingleVariableDeclaration parameter = (SingleVariableDeclaration)parameterObject;
             builder.argument(parameter.resolveBinding().getKey(), parameter.getName().getIdentifier(), typeOf(parameter.resolveBinding()));
         }
-        Optional<TypeName> returnType = method.getReturnType2() == null
-            ? Optional.empty()
-            : Optional.of(typeOf(method.getReturnType2()));
-        JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
-        for (Object statement : method.getBody().statements()) {
-            for (StatementNode intermediateStatement : statementReader.readStatement((Statement)statement)) {
-                builder.statement(intermediateStatement);
-            }
-        }
+        method.getBody().forEach(builder::statement);
         return builder;
+    }
+
+    private Stream<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
+        JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
+        return body.stream()
+            .flatMap(statement -> statementReader.readStatement(statement).stream());
     }
 
     private String generateClassName(CompilationUnit ast) {
