@@ -1,6 +1,5 @@
 package org.zwobble.couscous.frontends.java;
 
-import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.values.BooleanValue;
@@ -192,7 +191,6 @@ public class JavaExpressionReader {
         List<ExpressionNode> arguments = readArguments(constructor, javaArguments);
 
         if (constructor.getDeclaringClass().isAnonymous()) {
-            // TODO: generate anonymous class name
             TypeName anonymousClassName = javaReader.readAnonymousClass(expression.getAnonymousClassDeclaration());
             return constructorCall(anonymousClassName, arguments);
         } else {

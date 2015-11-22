@@ -24,6 +24,7 @@ public class JavaReader {
     }
 
     private final ImmutableList.Builder<ClassNode> classes;
+    private int anonymousClassCount = 0;
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -36,9 +37,18 @@ public class JavaReader {
     }
 
     TypeName readAnonymousClass(AnonymousClassDeclaration declaration) {
-        ClassNode classNode = readTypeDeclarationBody("ANONYMOUS", declaration.bodyDeclarations());
+        String name = generateClassName(declaration);
+        ClassNode classNode = readTypeDeclarationBody(name, declaration.bodyDeclarations());
         classes.add(classNode);
         return classNode.getName();
+    }
+
+    private String generateClassName(AnonymousClassDeclaration declaration) {
+        ITypeBinding type = declaration.resolveBinding();
+        while (type.isAnonymous()) {
+            type = type.getDeclaringClass();
+        }
+        return type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++);
     }
 
     private ClassNode readTypeDeclarationBody(String name, List bodyDeclarations) {
