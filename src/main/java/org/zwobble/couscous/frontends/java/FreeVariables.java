@@ -12,7 +12,7 @@ import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
-    public static List<VariableDeclaration> findFreeVariables(List<FormalArgumentNode> formalArguments, List<StatementNode> body) {
+    public static List<VariableDeclaration> findFreeVariables(List<FormalArgumentNode> formalArguments, List<? extends Node> body) {
         Stream<VariableDeclaration> referencedDeclarations = body.stream()
             .flatMap(FreeVariables::findReferencedDeclarations);
         // TODO: consider nested arguments
