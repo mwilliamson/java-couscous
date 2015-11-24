@@ -179,7 +179,6 @@ public class JavaReader {
             }
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public Stream<StatementNode> getBody() {
             TypeName returnType = typeOf(getReturnType());
