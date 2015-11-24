@@ -15,10 +15,10 @@ public class FreeVariables {
     public static List<VariableDeclaration> findFreeVariables(List<FormalArgumentNode> formalArguments, List<? extends Node> body) {
         Stream<VariableDeclaration> referencedDeclarations = body.stream()
             .flatMap(FreeVariables::findReferencedDeclarations);
-        // TODO: consider nested arguments
-        // Stream<VariableDeclaration> declarations = body.stream().flatMap(this::findDeclarations);
-        Stream<VariableDeclaration> declarations = formalArguments.stream()
-            .map(argument -> argument.getDeclaration());
+        Stream<VariableDeclaration> declarations = Stream.concat(
+            formalArguments.stream()
+                .map(argument -> argument.getDeclaration()),
+            body.stream().flatMap(FreeVariables::findDeclarations));
         return Sets.difference(
             referencedDeclarations.collect(Collectors.toSet()),
             declarations.collect(Collectors.toSet())).stream().collect(Collectors.toList());
