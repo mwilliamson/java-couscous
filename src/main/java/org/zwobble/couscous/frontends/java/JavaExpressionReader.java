@@ -6,7 +6,6 @@ import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -203,8 +202,13 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readLambdaExpression(LambdaExpression expression) {
-        TypeName anonymousClassName = javaReader.readLambda(expression);
-        return constructorCall(anonymousClassName, Collections.emptyList());
+        GeneratedClosure closure = javaReader.readLambda(expression);
+        return constructorCall(
+            closure.getType(),
+            closure.getCaptures()
+                .stream()
+                .map(VariableReferenceNode::reference)
+                .collect(Collectors.toList()));
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

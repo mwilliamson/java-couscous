@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -9,13 +10,22 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.cons;
 import static org.zwobble.couscous.util.ExtraLists.ofType;
+import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
@@ -37,15 +47,70 @@ public class JavaReader {
         return readTypeDeclarationBody(name, type.bodyDeclarations());
     }
 
-    TypeName readLambda(LambdaExpression expression) {
+    GeneratedClosure readLambda(LambdaExpression expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
+        String className = generateClassName(expression);
+        List<VariableDeclaration> freeVariables = findFreeVariables(expression);
 
-        ClassNodeBuilder classBuilder = new ClassNodeBuilder(generateClassName(expression));
-        classBuilder.method(functionalInterfaceMethod.getName(), method -> buildMethod(new LambdaDeclarationAdaptor(expression), method));
+        ClassNode classNode = new ClassNodeBuilder(className)
+            .constructor(buildConstructor(TypeName.of(className), freeVariables))
+            .method(
+                functionalInterfaceMethod.getName(),
+                method -> {
+                    // TODO: rewrite the AST to reference field directly rather than assigning
+                    // This is especially bad since we use the same declaration in three places
+                    // (the original declaration, the captured field, and the local to alias the field)
+                    for (VariableDeclaration freeVariable : freeVariables) {
+                        method.statement(localVariableDeclaration(
+                            freeVariable,
+                            fieldAccess(
+                                method.thisReference(),
+                                freeVariable.getName(),
+                                freeVariable.getType())));
+                    }
+                    return buildMethod(new LambdaDeclarationAdaptor(expression), method);
+                })
+            .build();
 
-        ClassNode classNode = classBuilder.build();
         classes.add(classNode);
-        return classNode.getName();
+        return new GeneratedClosure(classNode.getName(), freeVariables);
+    }
+
+    private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
+        // TODO: generate fresh variables for captures
+        List<FormalArgumentNode> arguments = freeVariables.stream()
+            .map(FormalArgumentNode::formalArg)
+            .collect(Collectors.toList());
+        List<StatementNode> body = freeVariables.stream()
+            .map(freeVariable -> assignStatement(
+                fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType()),
+                reference(freeVariable)))
+            .collect(Collectors.toList());
+        return ConstructorNode.constructor(arguments, body);
+    }
+
+    private List<VariableDeclaration> findFreeVariables(LambdaExpression expression) {
+        List<StatementNode> body = new LambdaDeclarationAdaptor(expression).getBody();
+        Stream<VariableDeclaration> referencedDeclarations = body.stream().flatMap(this::findReferencedDeclarations);
+        // TODO: consider nested arguments
+        // Stream<VariableDeclaration> declarations = body.stream().flatMap(this::findDeclarations);
+        Stream<VariableDeclaration> declarations = new LambdaDeclarationAdaptor(expression).getFormalArguments()
+            .map(argument -> argument.getDeclaration());
+        return Sets.difference(
+            referencedDeclarations.collect(Collectors.toSet()),
+            declarations.collect(Collectors.toSet())).stream().collect(Collectors.toList());
+    }
+
+    private Stream<VariableDeclaration> findReferencedDeclarations(Node root) {
+        Stream<VariableReferenceNode> references = descendantNodesAndSelf(root).flatMap(node ->
+            toStream(tryCast(VariableReferenceNode.class, node)));
+        return references.map(VariableReferenceNode::getReferent);
+    }
+
+    private Stream<VariableDeclaration> findDeclarations(Node root) {
+        Stream<VariableNode> declarations = descendantNodesAndSelf(root).flatMap(node ->
+            toStream(tryCast(VariableNode.class, node)));
+        return declarations.map(VariableNode::getDeclaration);
     }
 
     private String generateClassName(LambdaExpression expression) {
@@ -113,14 +178,19 @@ public class JavaReader {
         List<IAnnotationBinding> getAnnotations();
         Stream<FormalArgumentNode> getFormalArguments();
         // TODO: add tests around void methods
-        Stream<StatementNode> getBody();
+        List<StatementNode> getBody();
     }
 
     private class MethodDeclarationAdaptor implements FunctionDeclaration {
         private final MethodDeclaration method;
+        private final List<StatementNode> body;
 
         public MethodDeclarationAdaptor(MethodDeclaration method) {
             this.method = method;
+            List<Statement> statements = method.getBody().statements();
+            this.body = readStatements(
+                statements,
+                getReturnType()).collect(Collectors.toList());
         }
 
         @Override
@@ -136,10 +206,8 @@ public class JavaReader {
         }
 
         @Override
-        public Stream<StatementNode> getBody() {
-            @SuppressWarnings("unchecked")
-            List<Statement> statements = method.getBody().statements();
-            return readStatements(statements, getReturnType());
+        public List<StatementNode> getBody() {
+            return body;
         }
 
         private Optional<TypeName> getReturnType() {
@@ -180,15 +248,15 @@ public class JavaReader {
         }
 
         @Override
-        public Stream<StatementNode> getBody() {
+        public List<StatementNode> getBody() {
             TypeName returnType = typeOf(getReturnType());
             if (expression.getBody() instanceof Block) {
                 @SuppressWarnings("unchecked")
                 List<Statement> statements = ((Block) expression.getBody()).statements();
-                return readStatements(statements, Optional.of(returnType));
+                return readStatements(statements, Optional.of(returnType)).collect(Collectors.toList());
             } else {
                 Expression expression = (Expression) this.expression.getBody();
-                return Stream.of(returns(expressionReader().readExpression(returnType, expression)));
+                return asList(returns(expressionReader().readExpression(returnType, expression)));
             }
         }
 
@@ -197,7 +265,10 @@ public class JavaReader {
         }
     }
 
-    private <T> ClassNodeBuilder.MethodBuilder<T> buildMethod(FunctionDeclaration method, ClassNodeBuilder.MethodBuilder<T> builder) {
+    private <T> ClassNodeBuilder.MethodBuilder<T> buildMethod(
+        FunctionDeclaration method,
+        ClassNodeBuilder.MethodBuilder<T> builder)
+    {
         for (IAnnotationBinding annotation : method.getAnnotations()) {
             builder.annotation(typeOf(annotation.getAnnotationType()));
         }

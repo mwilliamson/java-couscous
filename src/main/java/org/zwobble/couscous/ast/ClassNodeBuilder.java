@@ -25,10 +25,14 @@ public class ClassNodeBuilder {
         this.fields.add(FieldDeclarationNode.field(name, type));
         return this;
     }
+
+    public ClassNodeBuilder constructor(ConstructorNode constructor) {
+        this.constructor = Optional.of(constructor);
+        return this;
+    }
     
     public ClassNodeBuilder constructor(Function<MethodBuilder<ConstructorNode>, MethodBuilder<ConstructorNode>> build) {
-        this.constructor = Optional.of(build.apply(constructorBuilder()).build());
-        return this;
+        return constructor(build.apply(constructorBuilder()).build());
     }
 
     private MethodBuilder<ConstructorNode> constructorBuilder() {
@@ -72,7 +76,7 @@ public class ClassNodeBuilder {
             constructor.orElse(constructorBuilder().build()),
             methods.build());
     }
-    
+
     public class MethodBuilder<T> {
         private final Function<MethodBuilder<?>, T> build;
         private final ImmutableList.Builder<AnnotationNode> annotations;

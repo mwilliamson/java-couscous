@@ -102,6 +102,17 @@ public class JavaToPythonTests {
                 "value",
                 asList()));
     }
+
+    @Test
+    public void lambdasWithCapture() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "lambda-capture",
+                TypeName.of("com.example.Lambda"),
+                "value",
+                asList(value(2))));
+    }
     
     private PrimitiveValue execTestProgram(
             String directoryName,
