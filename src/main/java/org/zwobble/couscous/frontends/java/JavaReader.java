@@ -1,7 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -20,12 +19,10 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
+import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
-import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.cons;
 import static org.zwobble.couscous.util.ExtraLists.ofType;
-import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
@@ -50,7 +47,10 @@ public class JavaReader {
     GeneratedClosure readLambda(LambdaExpression expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         String className = generateClassName(expression);
-        List<VariableDeclaration> freeVariables = findFreeVariables(expression);
+        LambdaDeclarationAdaptor lambda = new LambdaDeclarationAdaptor(expression);
+        List<VariableDeclaration> freeVariables = findFreeVariables(
+            lambda.getFormalArguments().collect(Collectors.toList()),
+            lambda.getBody());
 
         ClassNode classNode = new ClassNodeBuilder(className)
             .constructor(buildConstructor(TypeName.of(className), freeVariables))
@@ -68,7 +68,7 @@ public class JavaReader {
                                 freeVariable.getName(),
                                 freeVariable.getType())));
                     }
-                    return buildMethod(new LambdaDeclarationAdaptor(expression), method);
+                    return buildMethod(lambda, method);
                 })
             .build();
 
@@ -87,30 +87,6 @@ public class JavaReader {
                 reference(freeVariable)))
             .collect(Collectors.toList());
         return ConstructorNode.constructor(arguments, body);
-    }
-
-    private List<VariableDeclaration> findFreeVariables(LambdaExpression expression) {
-        List<StatementNode> body = new LambdaDeclarationAdaptor(expression).getBody();
-        Stream<VariableDeclaration> referencedDeclarations = body.stream().flatMap(this::findReferencedDeclarations);
-        // TODO: consider nested arguments
-        // Stream<VariableDeclaration> declarations = body.stream().flatMap(this::findDeclarations);
-        Stream<VariableDeclaration> declarations = new LambdaDeclarationAdaptor(expression).getFormalArguments()
-            .map(argument -> argument.getDeclaration());
-        return Sets.difference(
-            referencedDeclarations.collect(Collectors.toSet()),
-            declarations.collect(Collectors.toSet())).stream().collect(Collectors.toList());
-    }
-
-    private Stream<VariableDeclaration> findReferencedDeclarations(Node root) {
-        Stream<VariableReferenceNode> references = descendantNodesAndSelf(root).flatMap(node ->
-            toStream(tryCast(VariableReferenceNode.class, node)));
-        return references.map(VariableReferenceNode::getReferent);
-    }
-
-    private Stream<VariableDeclaration> findDeclarations(Node root) {
-        Stream<VariableNode> declarations = descendantNodesAndSelf(root).flatMap(node ->
-            toStream(tryCast(VariableNode.class, node)));
-        return declarations.map(VariableNode::getDeclaration);
     }
 
     private String generateClassName(LambdaExpression expression) {
