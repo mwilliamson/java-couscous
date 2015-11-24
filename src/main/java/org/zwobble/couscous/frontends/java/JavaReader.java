@@ -49,8 +49,9 @@ public class JavaReader {
         String className = generateClassName(expression);
         LambdaDeclarationAdaptor lambda = new LambdaDeclarationAdaptor(expression);
         List<VariableDeclaration> freeVariables = findFreeVariables(
-            lambda.getFormalArguments().collect(Collectors.toList()),
-            lambda.getBody());
+            Stream.concat(
+                lambda.getFormalArguments(),
+                lambda.getBody().stream()).collect(Collectors.toList()));
 
         ClassNode classNode = new ClassNodeBuilder(className)
             .constructor(buildConstructor(TypeName.of(className), freeVariables))

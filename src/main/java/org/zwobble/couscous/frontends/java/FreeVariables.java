@@ -12,13 +12,10 @@ import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
-    public static List<VariableDeclaration> findFreeVariables(List<FormalArgumentNode> formalArguments, List<? extends Node> body) {
+    public static List<VariableDeclaration> findFreeVariables(List<? extends Node> body) {
         Stream<VariableDeclaration> referencedDeclarations = body.stream()
             .flatMap(FreeVariables::findReferencedDeclarations);
-        Stream<VariableDeclaration> declarations = Stream.concat(
-            formalArguments.stream()
-                .map(argument -> argument.getDeclaration()),
-            body.stream().flatMap(FreeVariables::findDeclarations));
+        Stream<VariableDeclaration> declarations = body.stream().flatMap(FreeVariables::findDeclarations);
         return Sets.difference(
             referencedDeclarations.collect(Collectors.toSet()),
             declarations.collect(Collectors.toSet())).stream().collect(Collectors.toList());
