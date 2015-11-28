@@ -50,7 +50,7 @@ public class JavaReader {
         LambdaDeclarationAdaptor lambda = new LambdaDeclarationAdaptor(expression);
         List<VariableDeclaration> freeVariables = findFreeVariables(
             Stream.concat(
-                lambda.getFormalArguments(),
+                lambda.getFormalArguments().stream(),
                 lambda.getBody().stream()).collect(Collectors.toList()));
 
         ClassNode classNode = new ClassNodeBuilder(className)
@@ -153,7 +153,7 @@ public class JavaReader {
 
     private interface FunctionDeclaration {
         List<IAnnotationBinding> getAnnotations();
-        Stream<FormalArgumentNode> getFormalArguments();
+        List<FormalArgumentNode> getFormalArguments();
         // TODO: add tests around void methods
         List<StatementNode> getBody();
     }
@@ -176,10 +176,12 @@ public class JavaReader {
         }
 
         @Override
-        public Stream<FormalArgumentNode> getFormalArguments() {
+        public List<FormalArgumentNode> getFormalArguments() {
             @SuppressWarnings("unchecked")
             List<SingleVariableDeclaration> parameters = method.parameters();
-            return parameters.stream().map(parameter -> readSingleVariableDeclaration(parameter));
+            return parameters.stream()
+                .map(parameter -> readSingleVariableDeclaration(parameter))
+                .collect(Collectors.toList());
         }
 
         @Override
@@ -207,9 +209,10 @@ public class JavaReader {
         }
 
         @Override
-        public Stream<FormalArgumentNode> getFormalArguments() {
+        public List<FormalArgumentNode> getFormalArguments() {
             return ((List<?>)expression.parameters()).stream()
-                .map(this::readParameter);
+                .map(this::readParameter)
+                .collect(Collectors.toList());
         }
 
         private FormalArgumentNode readParameter(Object parameter) {
