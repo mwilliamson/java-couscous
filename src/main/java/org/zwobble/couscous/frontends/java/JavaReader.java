@@ -41,11 +41,11 @@ public class JavaReader {
     }
 
     private ClassNode readCompilationUnit(CompilationUnit ast) {
-        String name = generateClassName(ast);
+        TypeName name = generateClassName(ast);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         TypeDeclarationBody body = readTypeDeclarationBody(type.bodyDeclarations());
         return ClassNode.declareClass(
-            TypeName.of(name),
+            name,
             body.getFields(),
             body.getConstructor(),
             body.getMethods());
@@ -53,7 +53,7 @@ public class JavaReader {
 
     GeneratedClosure readLambda(LambdaExpression expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        String className = generateClassName(expression);
+        TypeName className = generateClassName(expression);
         FunctionDeclaration lambda = functionDeclaration(expression);
         List<VariableDeclaration> freeVariables = findFreeVariables(
             Stream.concat(
@@ -70,7 +70,7 @@ public class JavaReader {
             concat(restoreCaptures, lambda.getBody()));
 
         ClassNode classNode = new ClassNodeBuilder(className)
-            .constructor(buildConstructor(TypeName.of(className), freeVariables))
+            .constructor(buildConstructor(className, freeVariables))
             .method(method)
             .build();
 
@@ -78,7 +78,7 @@ public class JavaReader {
         return new GeneratedClosure(classNode.getName(), freeVariables);
     }
 
-    private List<StatementNode> generateCaptureRestoration(String className, List<VariableDeclaration> freeVariables) {
+    private List<StatementNode> generateCaptureRestoration(TypeName className, List<VariableDeclaration> freeVariables) {
         // TODO: rewrite the AST to reference field directly rather than assigning
         // This is especially bad since we use the same declaration in three places
         // (the original declaration, the captured field, and the local to alias the field)
@@ -86,7 +86,7 @@ public class JavaReader {
             localVariableDeclaration(
                 freeVariable,
                 fieldAccess(
-                    thisReference(TypeName.of(className)),
+                    thisReference(className),
                     freeVariable.getName(),
                     freeVariable.getType())));
     }
@@ -104,12 +104,12 @@ public class JavaReader {
         return constructor(arguments, body);
     }
 
-    private String generateClassName(LambdaExpression expression) {
-        return generateClassName(expression.resolveMethodBinding().getDeclaringClass());
+    private TypeName generateClassName(LambdaExpression expression) {
+        return generateAnonymousClassName(expression.resolveMethodBinding().getDeclaringClass());
     }
 
     GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
-        String className = generateClassName(declaration);
+        TypeName className = generateClassName(declaration);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
         List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
         List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
@@ -118,24 +118,24 @@ public class JavaReader {
             method.mapBody(body -> concat(restoreCaptures, body)));
 
         ClassNode classNode = ClassNode.declareClass(
-            TypeName.of(className),
+            className,
             bodyDeclarations.getFields(),
-            buildConstructor(TypeName.of(className), freeVariables),
+            buildConstructor(className, freeVariables),
             methods);
         classes.add(classNode);
         return new GeneratedClosure(classNode.getName(), freeVariables);
     }
 
-    private String generateClassName(AnonymousClassDeclaration declaration) {
+    private TypeName generateClassName(AnonymousClassDeclaration declaration) {
         ITypeBinding type = declaration.resolveBinding();
-        return generateClassName(type);
+        return generateAnonymousClassName(type);
     }
 
-    private String generateClassName(ITypeBinding type) {
+    private TypeName generateAnonymousClassName(ITypeBinding type) {
         while (type.isAnonymous()) {
             type = type.getDeclaringClass();
         }
-        return type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++);
+        return TypeName.of(type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
     }
 
     private static class TypeDeclarationBody {
@@ -304,9 +304,11 @@ public class JavaReader {
             .flatMap(statement -> statementReader.readStatement(statement).stream());
     }
 
-    private String generateClassName(CompilationUnit ast) {
+    private TypeName generateClassName(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        return ast.getPackage().getName().getFullyQualifiedName() + "." + type.getName().getFullyQualifiedName();
+        String packageName = ast.getPackage().getName().getFullyQualifiedName();
+        String className = type.getName().getFullyQualifiedName();
+        return TypeName.of(packageName + "." + className);
     }
 
     private FormalArgumentNode readSingleVariableDeclaration(SingleVariableDeclaration parameter) {
