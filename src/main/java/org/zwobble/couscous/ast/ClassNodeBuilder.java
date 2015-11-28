@@ -13,12 +13,17 @@ public class ClassNodeBuilder {
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
     private Optional<ConstructorNode> constructor;
     private final ImmutableList.Builder<MethodNode> methods;
-    
-    public ClassNodeBuilder(String name) {
-        this.name = TypeName.of(name);
+
+    public ClassNodeBuilder(TypeName name) {
+        this.name = name;
         this.fields = ImmutableList.builder();
         this.constructor = Optional.empty();
         this.methods = ImmutableList.builder();
+
+    }
+
+    public ClassNodeBuilder(String name) {
+        this(TypeName.of(name));
     }
 
     public ClassNodeBuilder field(String name, TypeName type) {
@@ -28,14 +33,6 @@ public class ClassNodeBuilder {
     public ClassNodeBuilder field(FieldDeclarationNode field) {
         this.fields.add(field);
         return this;
-    }
-
-    public ClassNodeBuilder callable(CallableNode callable) {
-        if (callable instanceof ConstructorNode) {
-            return constructor((ConstructorNode) callable);
-        } else {
-            return method((MethodNode) callable);
-        }
     }
 
     public ClassNodeBuilder constructor(ConstructorNode constructor) {
@@ -85,7 +82,7 @@ public class ClassNodeBuilder {
         return ClassNode.declareClass(
             name,
             fields.build(),
-            constructor.orElse(constructorBuilder().build()),
+            constructor.orElse(ConstructorNode.DEFAULT),
             methods.build());
     }
 

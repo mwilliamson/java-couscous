@@ -1,11 +1,13 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.visitors.NodeMapper;
+
+import java.util.Collections;
 import java.util.List;
 
-import org.zwobble.couscous.ast.visitors.NodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
-
 public class ConstructorNode implements CallableNode {
+    public static final ConstructorNode DEFAULT = constructor(Collections.emptyList(), Collections.emptyList());
+
     public static ConstructorNode constructor(
             List<FormalArgumentNode> arguments,
             List<StatementNode> body) {

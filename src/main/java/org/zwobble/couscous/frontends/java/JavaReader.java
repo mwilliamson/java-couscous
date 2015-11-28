@@ -43,7 +43,12 @@ public class JavaReader {
     private ClassNode readCompilationUnit(CompilationUnit ast) {
         String name = generateClassName(ast);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        return readTypeDeclarationBody(name, type.bodyDeclarations());
+        TypeDeclarationBody body = readTypeDeclarationBody(type.bodyDeclarations());
+        return ClassNode.declareClass(
+            TypeName.of(name),
+            body.getFields(),
+            body.getConstructor(),
+            body.getMethods());
     }
 
     GeneratedClosure readLambda(LambdaExpression expression) {
@@ -105,23 +110,19 @@ public class JavaReader {
 
     GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
         String className = generateClassName(declaration);
-        ClassNode classNode = readTypeDeclarationBody(className, declaration.bodyDeclarations());
-        List<VariableDeclaration> freeVariables = findFreeVariables(asList(classNode));
+        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
+        List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
         List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
 
-        // TODO: map over methods rather than rebuilding entire class
-        ClassNodeBuilder classBuilder = new ClassNodeBuilder(className);
-        classBuilder.constructor(buildConstructor(TypeName.of(className), freeVariables));
-        classNode.getFields().forEach(classBuilder::field);
-        classNode.getMethods().forEach(method ->
-            classBuilder.method(MethodNode.method(
-                method.getAnnotations(),
-                method.isStatic(),
-                method.getName(),
-                method.getArguments(),
-                concat(restoreCaptures, method.getBody()))));
+        List<MethodNode> methods = eagerMap(bodyDeclarations.getMethods(), method ->
+            method.mapBody(body -> concat(restoreCaptures, body)));
 
-        classes.add(classBuilder.build());
+        ClassNode classNode = ClassNode.declareClass(
+            TypeName.of(className),
+            bodyDeclarations.getFields(),
+            buildConstructor(TypeName.of(className), freeVariables),
+            methods);
+        classes.add(classNode);
         return new GeneratedClosure(classNode.getName(), freeVariables);
     }
 
@@ -137,25 +138,61 @@ public class JavaReader {
         return type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++);
     }
 
-    private ClassNode readTypeDeclarationBody(String name, List<Object> bodyDeclarations) {
-        ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
-        readFields(ofType(bodyDeclarations, FieldDeclaration.class), classBuilder);
-        readMethods(ofType(bodyDeclarations, MethodDeclaration.class))
-            .forEach(classBuilder::callable);
-        return classBuilder.build();
-    }
+    private static class TypeDeclarationBody {
+        private final List<FieldDeclarationNode> fields;
+        private final ConstructorNode constructor;
+        private final List<MethodNode> methods;
 
-    private void readFields(List<FieldDeclaration> fields, ClassNodeBuilder classBuilder) {
-        for (FieldDeclaration field : fields) {
-            readField(field, classBuilder);
+        public TypeDeclarationBody(List<FieldDeclarationNode> fields, ConstructorNode constructor, List<MethodNode> methods) {
+            this.fields = fields;
+            this.constructor = constructor;
+            this.methods = methods;
+        }
+
+        public List<FieldDeclarationNode> getFields() {
+            return fields;
+        }
+
+        public ConstructorNode getConstructor() {
+            return constructor;
+        }
+
+        public List<MethodNode> getMethods() {
+            return methods;
+        }
+
+        public List<Node> getNodes() {
+            return concat(fields, asList(constructor), methods);
         }
     }
 
-    private void readField(FieldDeclaration field, ClassNodeBuilder classBuilder) {
-        for (Object fragment : field.fragments()) {
-            String name = ((VariableDeclarationFragment)fragment).getName().getIdentifier();
-            classBuilder.field(name, typeOf(field.getType()));
+    private TypeDeclarationBody readTypeDeclarationBody(List<Object> bodyDeclarations) {
+        ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
+        ConstructorNode constructor = ConstructorNode.DEFAULT;
+
+        for (CallableNode callable : readMethods(ofType(bodyDeclarations, MethodDeclaration.class))) {
+            if (callable instanceof ConstructorNode) {
+                constructor = (ConstructorNode) callable;
+            } else {
+                methods.add((MethodNode) callable);
+            }
         }
+        return new TypeDeclarationBody(
+            readFields(ofType(bodyDeclarations, FieldDeclaration.class)),
+            constructor,
+            methods.build());
+    }
+
+    private List<FieldDeclarationNode> readFields(List<FieldDeclaration> fields) {
+        return eagerFlatMap(fields, this::readField);
+    }
+
+    private List<FieldDeclarationNode> readField(FieldDeclaration field) {
+        @SuppressWarnings("unchecked")
+        List<VariableDeclarationFragment> fragments = field.fragments();
+        TypeName type = typeOf(field.getType());
+        return eagerMap(fragments, fragment ->
+            FieldDeclarationNode.field(fragment.getName().getIdentifier(), type));
     }
 
     private List<CallableNode> readMethods(List<MethodDeclaration> methods) {

@@ -23,6 +23,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.zwobble.couscous.util.ExtraArrays.stream;
+import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
 
 @RunWith(Parameterized.class)
 public class ValueObjectTests {
@@ -63,9 +64,9 @@ public class ValueObjectTests {
     @Test
     public <T> void toStringIncludesAllFields() {
         GeneratedValue value = generateValue(clazz, ValueObjectTests::generateInstance);
-        Field[] fields = clazz.getDeclaredFields();
-        Object[] fieldStrings = IntStream.range(0, fields.length)
-            .mapToObj(index -> String.format("%s=%s", fields[index].getName(), value.arguments[index]))
+        List<Field> fields = eagerFilter(asList(clazz.getDeclaredFields()), field -> !Modifier.isStatic(field.getModifiers()));
+        Object[] fieldStrings = IntStream.range(0, fields.size())
+            .mapToObj(index -> String.format("%s=%s", fields.get(index).getName(), value.arguments[index]))
             .toArray();
         assertEquals(
             String.format("%s(%s)",

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class MethodNode implements CallableNode {
     public static Builder staticMethod(String name) {
@@ -113,6 +114,10 @@ public class MethodNode implements CallableNode {
     
     public List<StatementNode> getBody() {
         return body;
+    }
+
+    public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
+        return new MethodNode(annotations, isStatic, name, arguments, function.apply(body));
     }
 
     @Override

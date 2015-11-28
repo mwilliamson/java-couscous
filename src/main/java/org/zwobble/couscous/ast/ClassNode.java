@@ -8,7 +8,6 @@ public class ClassNode implements Node {
     public static ClassNodeBuilder builder(String name) {
         return new ClassNodeBuilder(name);
     }
-    
     public static ClassNode declareClass(
             TypeName name,
             List<FieldDeclarationNode> fields,
