@@ -10,8 +10,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
@@ -56,9 +54,7 @@ public class JavaReader {
         TypeName className = generateClassName(expression);
         FunctionDeclaration lambda = functionDeclaration(expression);
         List<VariableDeclaration> freeVariables = findFreeVariables(
-            Stream.concat(
-                lambda.getFormalArguments().stream(),
-                lambda.getBody().stream()).collect(Collectors.toList()));
+            concat(lambda.getFormalArguments(), lambda.getBody()));
 
         List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
 
@@ -93,14 +89,10 @@ public class JavaReader {
 
     private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
         // TODO: generate fresh variables for captures
-        List<FormalArgumentNode> arguments = freeVariables.stream()
-            .map(FormalArgumentNode::formalArg)
-            .collect(Collectors.toList());
-        List<StatementNode> body = freeVariables.stream()
-            .map(freeVariable -> assignStatement(
+        List<FormalArgumentNode> arguments = eagerMap(freeVariables, FormalArgumentNode::formalArg);
+        List<StatementNode> body = eagerMap(freeVariables, freeVariable -> assignStatement(
                 fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType()),
-                reference(freeVariable)))
-            .collect(Collectors.toList());
+                reference(freeVariable)));
         return constructor(arguments, body);
     }
 
@@ -228,7 +220,7 @@ public class JavaReader {
         return new FunctionDeclaration(
             eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation),
             formalArguments,
-            readStatements(statements, returnType).collect(Collectors.toList()));
+            readStatements(statements, returnType));
     }
 
     private FunctionDeclaration functionDeclaration(LambdaExpression expression) {
@@ -263,7 +255,7 @@ public class JavaReader {
         if (expression.getBody() instanceof Block) {
             @SuppressWarnings("unchecked")
             List<Statement> statements = ((Block) expression.getBody()).statements();
-            return readStatements(statements, Optional.of(returnType)).collect(Collectors.toList());
+            return readStatements(statements, Optional.of(returnType));
         } else {
             Expression body = (Expression) expression.getBody();
             return asList(returns(expressionReader().readExpression(returnType, body)));
@@ -298,10 +290,9 @@ public class JavaReader {
         }
     }
 
-    private Stream<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
+    private List<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
         JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
-        return body.stream()
-            .flatMap(statement -> statementReader.readStatement(statement).stream());
+        return eagerFlatMap(body, statementReader::readStatement);
     }
 
     private TypeName generateClassName(CompilationUnit ast) {
