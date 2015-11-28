@@ -22,7 +22,11 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder field(String name, TypeName type) {
-        this.fields.add(FieldDeclarationNode.field(name, type));
+        return field(FieldDeclarationNode.field(name, type));
+    }
+
+    public ClassNodeBuilder field(FieldDeclarationNode field) {
+        this.fields.add(field);
         return this;
     }
 

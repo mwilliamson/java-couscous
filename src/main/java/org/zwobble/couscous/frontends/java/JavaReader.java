@@ -55,16 +55,7 @@ public class JavaReader {
                 lambda.getFormalArguments().stream(),
                 lambda.getBody().stream()).collect(Collectors.toList()));
 
-        // TODO: rewrite the AST to reference field directly rather than assigning
-        // This is especially bad since we use the same declaration in three places
-        // (the original declaration, the captured field, and the local to alias the field)
-        List<StatementNode> restoreCaptures = eagerMap(freeVariables, freeVariable ->
-            localVariableDeclaration(
-                freeVariable,
-                fieldAccess(
-                    thisReference(TypeName.of(className)),
-                    freeVariable.getName(),
-                    freeVariable.getType())));
+        List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
 
         MethodNode method = MethodNode.method(
             Collections.emptyList(),
@@ -80,6 +71,19 @@ public class JavaReader {
 
         classes.add(classNode);
         return new GeneratedClosure(classNode.getName(), freeVariables);
+    }
+
+    private List<StatementNode> generateCaptureRestoration(String className, List<VariableDeclaration> freeVariables) {
+        // TODO: rewrite the AST to reference field directly rather than assigning
+        // This is especially bad since we use the same declaration in three places
+        // (the original declaration, the captured field, and the local to alias the field)
+        return eagerMap(freeVariables, freeVariable ->
+            localVariableDeclaration(
+                freeVariable,
+                fieldAccess(
+                    thisReference(TypeName.of(className)),
+                    freeVariable.getName(),
+                    freeVariable.getType())));
     }
 
     private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
@@ -99,11 +103,26 @@ public class JavaReader {
         return generateClassName(expression.resolveMethodBinding().getDeclaringClass());
     }
 
-    TypeName readAnonymousClass(AnonymousClassDeclaration declaration) {
-        String name = generateClassName(declaration);
-        ClassNode classNode = readTypeDeclarationBody(name, declaration.bodyDeclarations());
-        classes.add(classNode);
-        return classNode.getName();
+    GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
+        String className = generateClassName(declaration);
+        ClassNode classNode = readTypeDeclarationBody(className, declaration.bodyDeclarations());
+        List<VariableDeclaration> freeVariables = findFreeVariables(asList(classNode));
+        List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
+
+        // TODO: map over methods rather than rebuilding entire class
+        ClassNodeBuilder classBuilder = new ClassNodeBuilder(className);
+        classBuilder.constructor(buildConstructor(TypeName.of(className), freeVariables));
+        classNode.getFields().forEach(classBuilder::field);
+        classNode.getMethods().forEach(method ->
+            classBuilder.method(MethodNode.method(
+                method.getAnnotations(),
+                method.isStatic(),
+                method.getName(),
+                method.getArguments(),
+                concat(restoreCaptures, method.getBody()))));
+
+        classes.add(classBuilder.build());
+        return new GeneratedClosure(classNode.getName(), freeVariables);
     }
 
     private String generateClassName(AnonymousClassDeclaration declaration) {

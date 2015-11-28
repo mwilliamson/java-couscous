@@ -93,6 +93,17 @@ public class JavaToPythonTests {
     }
 
     @Test
+    public void anonymousClassesWithCapture() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "anonymous-class-capture",
+                TypeName.of("com.example.AnonymousClass"),
+                "value",
+                asList(value(42))));
+    }
+
+    @Test
     public void lambdasWithoutCapture() throws Exception {
         assertEquals(
             value(42),

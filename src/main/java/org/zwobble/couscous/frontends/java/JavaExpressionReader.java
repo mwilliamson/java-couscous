@@ -17,6 +17,8 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.util.ExtraLists.concat;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaExpressionReader {
     private final JavaReader javaReader;
@@ -194,8 +196,11 @@ public class JavaExpressionReader {
         List<ExpressionNode> arguments = readArguments(constructor, javaArguments);
 
         if (constructor.getDeclaringClass().isAnonymous()) {
-            TypeName anonymousClassName = javaReader.readAnonymousClass(expression.getAnonymousClassDeclaration());
-            return constructorCall(anonymousClassName, arguments);
+            GeneratedClosure closure =
+                javaReader.readAnonymousClass(expression.getAnonymousClassDeclaration());
+            return constructorCall(
+                closure.getType(),
+                concat(captureArguments(closure), arguments));
         } else {
             return constructorCall(typeOf(expression), arguments);
         }
@@ -205,10 +210,11 @@ public class JavaExpressionReader {
         GeneratedClosure closure = javaReader.readLambda(expression);
         return constructorCall(
             closure.getType(),
-            closure.getCaptures()
-                .stream()
-                .map(VariableReferenceNode::reference)
-                .collect(Collectors.toList()));
+            captureArguments(closure));
+    }
+
+    private List<ExpressionNode> captureArguments(GeneratedClosure closure) {
+        return eagerMap(closure.getCaptures(), VariableReferenceNode::reference);
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {
