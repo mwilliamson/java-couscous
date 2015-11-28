@@ -26,6 +26,14 @@ public class ClassNodeBuilder {
         return this;
     }
 
+    public ClassNodeBuilder callable(CallableNode callable) {
+        if (callable instanceof ConstructorNode) {
+            return constructor((ConstructorNode) callable);
+        } else {
+            return method((MethodNode) callable);
+        }
+    }
+
     public ClassNodeBuilder constructor(ConstructorNode constructor) {
         this.constructor = Optional.of(constructor);
         return this;
@@ -36,7 +44,7 @@ public class ClassNodeBuilder {
     }
 
     private MethodBuilder<ConstructorNode> constructorBuilder() {
-        return new MethodBuilder<ConstructorNode>(builder ->
+        return new MethodBuilder<>(builder ->
             ConstructorNode.constructor(
                 builder.arguments.build(),
                 builder.statements.build()));
@@ -61,7 +69,7 @@ public class ClassNodeBuilder {
     }
 
     private MethodBuilder<MethodNode> methodBuilder(String name, boolean isStatic) {
-        return new MethodBuilder<MethodNode>(builder -> MethodNode.builder(name)
+        return new MethodBuilder<>(builder -> MethodNode.builder(name)
             .isStatic(isStatic)
             .annotations(builder.annotations.build())
             .arguments(builder.arguments.build())

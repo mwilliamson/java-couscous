@@ -7,13 +7,16 @@ import org.zwobble.couscous.ast.VariableDeclaration;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -21,9 +24,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
-import static org.zwobble.couscous.util.ExtraLists.cons;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-import static org.zwobble.couscous.util.ExtraLists.ofType;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
@@ -54,24 +55,27 @@ public class JavaReader {
                 lambda.getFormalArguments().stream(),
                 lambda.getBody().stream()).collect(Collectors.toList()));
 
+        // TODO: rewrite the AST to reference field directly rather than assigning
+        // This is especially bad since we use the same declaration in three places
+        // (the original declaration, the captured field, and the local to alias the field)
+        List<StatementNode> restoreCaptures = eagerMap(freeVariables, freeVariable ->
+            localVariableDeclaration(
+                freeVariable,
+                fieldAccess(
+                    thisReference(TypeName.of(className)),
+                    freeVariable.getName(),
+                    freeVariable.getType())));
+
+        MethodNode method = MethodNode.method(
+            Collections.emptyList(),
+            false,
+            functionalInterfaceMethod.getName(),
+            lambda.getFormalArguments(),
+            concat(restoreCaptures, lambda.getBody()));
+
         ClassNode classNode = new ClassNodeBuilder(className)
             .constructor(buildConstructor(TypeName.of(className), freeVariables))
-            .method(
-                functionalInterfaceMethod.getName(),
-                method -> {
-                    // TODO: rewrite the AST to reference field directly rather than assigning
-                    // This is especially bad since we use the same declaration in three places
-                    // (the original declaration, the captured field, and the local to alias the field)
-                    for (VariableDeclaration freeVariable : freeVariables) {
-                        method.statement(localVariableDeclaration(
-                            freeVariable,
-                            fieldAccess(
-                                method.thisReference(),
-                                freeVariable.getName(),
-                                freeVariable.getType())));
-                    }
-                    return buildMethod(lambda, method);
-                })
+            .method(method)
             .build();
 
         classes.add(classNode);
@@ -88,7 +92,7 @@ public class JavaReader {
                 fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType()),
                 reference(freeVariable)))
             .collect(Collectors.toList());
-        return ConstructorNode.constructor(arguments, body);
+        return constructor(arguments, body);
     }
 
     private String generateClassName(LambdaExpression expression) {
@@ -114,10 +118,11 @@ public class JavaReader {
         return type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++);
     }
 
-    private ClassNode readTypeDeclarationBody(String name, List bodyDeclarations) {
+    private ClassNode readTypeDeclarationBody(String name, List<Object> bodyDeclarations) {
         ClassNodeBuilder classBuilder = new ClassNodeBuilder(name);
         readFields(ofType(bodyDeclarations, FieldDeclaration.class), classBuilder);
-        readMethods(ofType(bodyDeclarations, MethodDeclaration.class), classBuilder);
+        readMethods(ofType(bodyDeclarations, MethodDeclaration.class))
+            .forEach(classBuilder::callable);
         return classBuilder.build();
     }
 
@@ -134,21 +139,23 @@ public class JavaReader {
         }
     }
 
-    private void readMethods(List<MethodDeclaration> methods, ClassNodeBuilder classBuilder) {
-        for (MethodDeclaration method : methods) {
-            readMethod(classBuilder, method);
-        }
+    private List<CallableNode> readMethods(List<MethodDeclaration> methods) {
+        return eagerMap(methods, this::readMethod);
     }
 
-    private void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
+    private CallableNode readMethod(MethodDeclaration method) {
         FunctionDeclaration function = functionDeclaration(method);
         if (method.isConstructor()) {
-            classBuilder.constructor(builder -> buildMethod(function, builder));
+            return constructor(
+                function.getFormalArguments(),
+                function.getBody());
         } else {
-            classBuilder.method(
-                method.getName().getIdentifier(),
+            return MethodNode.method(
+                function.getAnnotations(),
                 Modifier.isStatic(method.getModifiers()),
-                builder -> buildMethod(function, builder));
+                method.getName().getIdentifier(),
+                function.getFormalArguments(),
+                function.getBody());
         }
     }
 
@@ -163,7 +170,7 @@ public class JavaReader {
             .map(JavaTypes::typeOf);
 
         return new FunctionDeclaration(
-            asList(method.resolveBinding().getAnnotations()),
+            eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation),
             formalArguments,
             readStatements(statements, returnType).collect(Collectors.toList()));
     }
@@ -174,9 +181,13 @@ public class JavaReader {
             this::readLambdaExpressionParameter);
 
         return new FunctionDeclaration(
-            asList(expression.resolveMethodBinding().getAnnotations()),
+            eagerMap(asList(expression.resolveMethodBinding().getAnnotations()), this::readAnnotation),
             formalArguments,
             readLambdaExpressionBody(expression));
+    }
+
+    private AnnotationNode readAnnotation(IAnnotationBinding annotationBinding) {
+        return annotation(typeOf(annotationBinding.getAnnotationType()));
     }
 
     private FormalArgumentNode readLambdaExpressionParameter(Object parameter) {
@@ -204,12 +215,12 @@ public class JavaReader {
     }
 
     private class FunctionDeclaration {
-        private final List<IAnnotationBinding> annotations;
+        private final List<AnnotationNode> annotations;
         private final List<FormalArgumentNode> formalArguments;
         private final List<StatementNode> body;
 
         private FunctionDeclaration(
-            List<IAnnotationBinding> annotations,
+            List<AnnotationNode> annotations,
             List<FormalArgumentNode> formalArguments,
             List<StatementNode> body)
         {
@@ -218,7 +229,7 @@ public class JavaReader {
             this.body = body;
         }
 
-        public List<IAnnotationBinding> getAnnotations() {
+        public List<AnnotationNode> getAnnotations() {
             return annotations;
         }
 
@@ -229,18 +240,6 @@ public class JavaReader {
         public List<StatementNode> getBody() {
             return body;
         }
-    }
-
-    private <T> ClassNodeBuilder.MethodBuilder<T> buildMethod(
-        FunctionDeclaration method,
-        ClassNodeBuilder.MethodBuilder<T> builder)
-    {
-        for (IAnnotationBinding annotation : method.getAnnotations()) {
-            builder.annotation(typeOf(annotation.getAnnotationType()));
-        }
-        method.getFormalArguments().forEach(builder::argument);
-        method.getBody().forEach(builder::statement);
-        return builder;
     }
 
     private Stream<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
