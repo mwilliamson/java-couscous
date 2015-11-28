@@ -22,6 +22,7 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.cons;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.ofType;
 
 public class JavaReader {
@@ -47,7 +48,7 @@ public class JavaReader {
     GeneratedClosure readLambda(LambdaExpression expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         String className = generateClassName(expression);
-        LambdaDeclarationAdaptor lambda = new LambdaDeclarationAdaptor(expression);
+        FunctionDeclaration lambda = functionDeclaration(expression);
         List<VariableDeclaration> freeVariables = findFreeVariables(
             Stream.concat(
                 lambda.getFormalArguments().stream(),
@@ -140,7 +141,7 @@ public class JavaReader {
     }
 
     private void readMethod(ClassNodeBuilder classBuilder, MethodDeclaration method) {
-        MethodDeclarationAdaptor function = new MethodDeclarationAdaptor(method);
+        FunctionDeclaration function = functionDeclaration(method);
         if (method.isConstructor()) {
             classBuilder.constructor(builder -> buildMethod(function, builder));
         } else {
@@ -151,97 +152,82 @@ public class JavaReader {
         }
     }
 
-    private interface FunctionDeclaration {
-        List<IAnnotationBinding> getAnnotations();
-        List<FormalArgumentNode> getFormalArguments();
-        // TODO: add tests around void methods
-        List<StatementNode> getBody();
+    private FunctionDeclaration functionDeclaration(MethodDeclaration method) {
+        @SuppressWarnings("unchecked")
+        List<SingleVariableDeclaration> parameters = method.parameters();
+        List<FormalArgumentNode> formalArguments = eagerMap(parameters, this::readSingleVariableDeclaration);
+        @SuppressWarnings("unchecked")
+        List<Statement> statements = method.getBody().statements();
+        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
+            .map(Type::resolveBinding)
+            .map(JavaTypes::typeOf);
+
+        return new FunctionDeclaration(
+            asList(method.resolveBinding().getAnnotations()),
+            formalArguments,
+            readStatements(statements, returnType).collect(Collectors.toList()));
     }
 
-    private class MethodDeclarationAdaptor implements FunctionDeclaration {
-        private final MethodDeclaration method;
+    private FunctionDeclaration functionDeclaration(LambdaExpression expression) {
+        List<FormalArgumentNode> formalArguments = eagerMap(
+            (List<?>)expression.parameters(),
+            this::readLambdaExpressionParameter);
+
+        return new FunctionDeclaration(
+            asList(expression.resolveMethodBinding().getAnnotations()),
+            formalArguments,
+            readLambdaExpressionBody(expression));
+    }
+
+    private FormalArgumentNode readLambdaExpressionParameter(Object parameter) {
+        if (parameter instanceof SingleVariableDeclaration) {
+            return readSingleVariableDeclaration((SingleVariableDeclaration) parameter);
+        } else {
+            VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
+            return FormalArgumentNode.formalArg(VariableDeclaration.var(
+                fragment.resolveBinding().getKey(),
+                fragment.getName().getIdentifier(),
+                typeOf(fragment.resolveBinding().getType())));
+        }
+    }
+
+    private List<StatementNode> readLambdaExpressionBody(LambdaExpression expression) {
+        TypeName returnType = typeOf(expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType());
+        if (expression.getBody() instanceof Block) {
+            @SuppressWarnings("unchecked")
+            List<Statement> statements = ((Block) expression.getBody()).statements();
+            return readStatements(statements, Optional.of(returnType)).collect(Collectors.toList());
+        } else {
+            Expression body = (Expression) expression.getBody();
+            return asList(returns(expressionReader().readExpression(returnType, body)));
+        }
+    }
+
+    private class FunctionDeclaration {
+        private final List<IAnnotationBinding> annotations;
+        private final List<FormalArgumentNode> formalArguments;
         private final List<StatementNode> body;
 
-        public MethodDeclarationAdaptor(MethodDeclaration method) {
-            this.method = method;
-            List<Statement> statements = method.getBody().statements();
-            this.body = readStatements(
-                statements,
-                getReturnType()).collect(Collectors.toList());
+        private FunctionDeclaration(
+            List<IAnnotationBinding> annotations,
+            List<FormalArgumentNode> formalArguments,
+            List<StatementNode> body)
+        {
+            this.annotations = annotations;
+            this.formalArguments = formalArguments;
+            this.body = body;
         }
 
-        @Override
         public List<IAnnotationBinding> getAnnotations() {
-            return asList(method.resolveBinding().getAnnotations());
+            return annotations;
         }
 
-        @Override
         public List<FormalArgumentNode> getFormalArguments() {
-            @SuppressWarnings("unchecked")
-            List<SingleVariableDeclaration> parameters = method.parameters();
-            return parameters.stream()
-                .map(parameter -> readSingleVariableDeclaration(parameter))
-                .collect(Collectors.toList());
+            return formalArguments;
         }
 
-        @Override
         public List<StatementNode> getBody() {
             return body;
-        }
-
-        private Optional<TypeName> getReturnType() {
-            return Optional.ofNullable(method.getReturnType2())
-                .map(Type::resolveBinding)
-                .map(JavaTypes::typeOf);
-        }
-    }
-
-    private class LambdaDeclarationAdaptor implements FunctionDeclaration {
-        private final LambdaExpression expression;
-
-        public LambdaDeclarationAdaptor(LambdaExpression expression) {
-            this.expression = expression;
-        }
-
-        @Override
-        public List<IAnnotationBinding> getAnnotations() {
-            return asList(expression.resolveMethodBinding().getAnnotations());
-        }
-
-        @Override
-        public List<FormalArgumentNode> getFormalArguments() {
-            return ((List<?>)expression.parameters()).stream()
-                .map(this::readParameter)
-                .collect(Collectors.toList());
-        }
-
-        private FormalArgumentNode readParameter(Object parameter) {
-            if (parameter instanceof SingleVariableDeclaration) {
-                return readSingleVariableDeclaration((SingleVariableDeclaration) parameter);
-            } else {
-                VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
-                return FormalArgumentNode.formalArg(VariableDeclaration.var(
-                    fragment.resolveBinding().getKey(),
-                    fragment.getName().getIdentifier(),
-                    typeOf(fragment.resolveBinding().getType())));
-            }
-        }
-
-        @Override
-        public List<StatementNode> getBody() {
-            TypeName returnType = typeOf(getReturnType());
-            if (expression.getBody() instanceof Block) {
-                @SuppressWarnings("unchecked")
-                List<Statement> statements = ((Block) expression.getBody()).statements();
-                return readStatements(statements, Optional.of(returnType)).collect(Collectors.toList());
-            } else {
-                Expression expression = (Expression) this.expression.getBody();
-                return asList(returns(expressionReader().readExpression(returnType, expression)));
-            }
-        }
-
-        private ITypeBinding getReturnType() {
-            return expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType();
         }
     }
 
