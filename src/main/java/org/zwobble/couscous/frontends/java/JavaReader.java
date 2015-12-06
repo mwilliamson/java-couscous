@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
@@ -19,8 +20,10 @@ import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
@@ -103,11 +106,19 @@ public class JavaReader {
     }
 
     private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
-        // TODO: generate fresh variables for captures
-        List<FormalArgumentNode> arguments = eagerMap(freeVariables, FormalArgumentNode::formalArg);
+        // TODO: find a more reliable of generating IDs. For instance, this clashes if
+        // the same variable is captured more than once
+        Map<String, VariableDeclaration> argumentDeclarationsById = Maps.transformValues(
+            Maps.uniqueIndex(
+                freeVariables,
+                VariableDeclaration::getId),
+            freeVariable -> var(freeVariable.getId() + "__capture", freeVariable.getName(), freeVariable.getType()));
+        List<FormalArgumentNode> arguments = eagerMap(
+            freeVariables,
+            freeVariable -> formalArg(argumentDeclarationsById.get(freeVariable.getId())));
         List<StatementNode> body = eagerMap(freeVariables, freeVariable -> assignStatement(
             captureAccess(type, freeVariable),
-            reference(freeVariable)));
+            reference(argumentDeclarationsById.get(freeVariable.getId()))));
         return constructor(arguments, body);
     }
 
@@ -261,7 +272,7 @@ public class JavaReader {
             return readSingleVariableDeclaration((SingleVariableDeclaration) parameter);
         } else {
             VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
-            return FormalArgumentNode.formalArg(VariableDeclaration.var(
+            return formalArg(var(
                 fragment.resolveBinding().getKey(),
                 fragment.getName().getIdentifier(),
                 typeOf(fragment.resolveBinding().getType())));
@@ -321,7 +332,7 @@ public class JavaReader {
     }
 
     private FormalArgumentNode readSingleVariableDeclaration(SingleVariableDeclaration parameter) {
-        return FormalArgumentNode.formalArg(VariableDeclaration.var(
+        return formalArg(var(
             parameter.resolveBinding().getKey(),
             parameter.getName().getIdentifier(),
             typeOf(parameter.resolveBinding())));

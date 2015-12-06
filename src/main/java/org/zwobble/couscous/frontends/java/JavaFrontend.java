@@ -26,7 +26,7 @@ public class JavaFrontend implements Frontend {
         List<ClassNode> classNodes = flatMap(
             findJavaFiles(directoryPath),
             javaFile -> JavaReader.readClassFromFile(directoryPath, javaFile));
-        //ensureDeclarationsAreUnique(classNodes);
+        ensureDeclarationsAreUnique(classNodes);
         return classNodes;
     }
 
