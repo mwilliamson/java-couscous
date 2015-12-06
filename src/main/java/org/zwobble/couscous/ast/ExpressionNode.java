@@ -3,6 +3,8 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 
+import java.util.function.Function;
+
 public interface ExpressionNode extends Node {
     TypeName getType();
     <T> T accept(ExpressionNodeMapper<T> visitor);
@@ -56,4 +58,6 @@ public interface ExpressionNode extends Node {
             }
         });
     }
+
+    ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace);
 }

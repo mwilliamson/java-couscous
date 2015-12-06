@@ -4,6 +4,9 @@ import com.google.common.base.Objects;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
+import java.util.function.Function;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class WhileNode implements StatementNode {
     public static WhileNode whileLoop(ExpressionNode condition, List<StatementNode> body) {
@@ -29,6 +32,13 @@ public class WhileNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new WhileNode(
+            replace.apply(condition),
+            eagerMap(body, statement -> statement.replaceExpressions(replace)));
     }
 
     @Override

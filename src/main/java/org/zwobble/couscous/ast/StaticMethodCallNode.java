@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.BooleanValue;
@@ -9,6 +10,7 @@ import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.ObjectValues;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class StaticMethodCallNode implements ExpressionNode {
     public static ExpressionNode same(ExpressionNode left, ExpressionNode right) {
@@ -98,6 +100,15 @@ public class StaticMethodCallNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new StaticMethodCallNode(
+            className,
+            methodName,
+            eagerMap(arguments, replace::apply),
+            type);
     }
 
     @Override

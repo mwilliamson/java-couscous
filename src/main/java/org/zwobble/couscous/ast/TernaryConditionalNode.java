@@ -2,6 +2,8 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
+import java.util.function.Function;
+
 public class TernaryConditionalNode implements ExpressionNode {
     public static TernaryConditionalNode ternaryConditional(
             ExpressionNode condition,
@@ -38,6 +40,14 @@ public class TernaryConditionalNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new TernaryConditionalNode(
+            replace.apply(condition),
+            replace.apply(ifTrue),
+            replace.apply(ifFalse));
     }
 
     @Override

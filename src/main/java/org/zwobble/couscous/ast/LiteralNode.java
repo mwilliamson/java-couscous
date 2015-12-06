@@ -6,6 +6,8 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
+import java.util.function.Function;
+
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class LiteralNode implements ExpressionNode {
@@ -48,6 +50,11 @@ public class LiteralNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return this;
     }
 
     @Override

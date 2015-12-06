@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -9,19 +10,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
-import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class JavaReader {
@@ -56,14 +59,12 @@ public class JavaReader {
         List<VariableDeclaration> freeVariables = findFreeVariables(
             concat(lambda.getFormalArguments(), lambda.getBody()));
 
-        List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
-
         MethodNode method = MethodNode.method(
             Collections.emptyList(),
             false,
             functionalInterfaceMethod.getName(),
             lambda.getFormalArguments(),
-            concat(restoreCaptures, lambda.getBody()));
+            replaceCaptureReferences(className, lambda.getBody(), freeVariables));
 
         ClassNode classNode = new ClassNodeBuilder(className)
             .constructor(buildConstructor(className, freeVariables))
@@ -74,17 +75,34 @@ public class JavaReader {
         return new GeneratedClosure(classNode.getName(), freeVariables);
     }
 
-    private List<StatementNode> generateCaptureRestoration(TypeName className, List<VariableDeclaration> freeVariables) {
-        // TODO: rewrite the AST to reference field directly rather than assigning
-        // This is especially bad since we use the same declaration in three places
-        // (the original declaration, the captured field, and the local to alias the field)
-        return eagerMap(freeVariables, freeVariable ->
-            localVariableDeclaration(
-                freeVariable,
-                fieldAccess(
-                    thisReference(className),
-                    freeVariable.getName(),
-                    freeVariable.getType())));
+    private List<StatementNode> replaceCaptureReferences(
+        TypeName className,
+        List<StatementNode> body,
+        List<VariableDeclaration> freeVariables)
+    {
+        Map<String, ExpressionNode> freeVariablesById = Maps.transformValues(
+            Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
+            freeVariable -> fieldAccess(
+                thisReference(className),
+                freeVariable.getName(),
+                freeVariable.getType()));
+        Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(freeVariablesById);
+        return eagerMap(body, statement -> statement.replaceExpressions(replaceExpression));
+    }
+
+    private class CaptureReplacer implements Function<ExpressionNode, ExpressionNode> {
+        private final Map<String, ExpressionNode> freeVariablesById;
+
+        public CaptureReplacer(Map<String, ExpressionNode> freeVariablesById) {
+            this.freeVariablesById = freeVariablesById;
+        }
+
+        @Override
+        public ExpressionNode apply(ExpressionNode expression) {
+            return tryCast(VariableReferenceNode.class, expression)
+                .flatMap(variableNode -> Optional.ofNullable(freeVariablesById.get(variableNode.getReferentId())))
+                .orElseGet(() -> expression.replaceExpressions(this));
+        }
     }
 
     private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
@@ -104,10 +122,9 @@ public class JavaReader {
         TypeName className = generateClassName(declaration);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
         List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
-        List<StatementNode> restoreCaptures = generateCaptureRestoration(className, freeVariables);
 
         List<MethodNode> methods = eagerMap(bodyDeclarations.getMethods(), method ->
-            method.mapBody(body -> concat(restoreCaptures, body)));
+            method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables)));
 
         ClassNode classNode = ClassNode.declareClass(
             className,

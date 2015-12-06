@@ -2,6 +2,8 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
+import java.util.function.Function;
+
 public class ReturnNode implements StatementNode {
     public static ReturnNode returns(ExpressionNode value) {
         return new ReturnNode(value);
@@ -20,6 +22,11 @@ public class ReturnNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new ReturnNode(replace.apply(value));
     }
 
     @Override

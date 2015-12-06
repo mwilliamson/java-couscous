@@ -2,6 +2,8 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
+import java.util.function.Function;
+
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
 public class LocalVariableDeclarationNode implements VariableNode, StatementNode {
@@ -48,6 +50,11 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new LocalVariableDeclarationNode(declaration, replace.apply(initialValue));
     }
 
     @Override

@@ -1,14 +1,15 @@
 package org.zwobble.couscous.ast;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class MethodCallNode implements ExpressionNode {
     public static ExpressionNode not(ExpressionNode value) {
@@ -114,6 +115,15 @@ public class MethodCallNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new MethodCallNode(
+            replace.apply(receiver),
+            methodName,
+            eagerMap(arguments, replace::apply),
+            type);
     }
 
     @Override

@@ -3,6 +3,8 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
+import java.util.function.Function;
+
 public class FieldAccessNode implements AssignableExpressionNode {
     public static FieldAccessNode fieldAccess(
             ExpressionNode left,
@@ -39,6 +41,11 @@ public class FieldAccessNode implements AssignableExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new FieldAccessNode(replace.apply(left), fieldName, type);
     }
 
     @Override

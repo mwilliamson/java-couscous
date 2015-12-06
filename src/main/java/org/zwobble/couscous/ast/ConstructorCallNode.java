@@ -1,8 +1,11 @@
 package org.zwobble.couscous.ast;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ConstructorCallNode implements ExpressionNode {
     public static ConstructorCallNode constructorCall(
@@ -33,6 +36,11 @@ public class ConstructorCallNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new ConstructorCallNode(type, eagerMap(arguments, replace::apply));
     }
 
     @Override

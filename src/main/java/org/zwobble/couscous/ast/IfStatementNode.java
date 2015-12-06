@@ -1,8 +1,11 @@
 package org.zwobble.couscous.ast;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class IfStatementNode implements StatementNode {
     public static IfStatementNode ifStatement(
@@ -40,6 +43,14 @@ public class IfStatementNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return new IfStatementNode(
+            replace.apply(condition),
+            eagerMap(trueBranch, statement -> statement.replaceExpressions(replace)),
+            eagerMap(falseBranch, statement -> statement.replaceExpressions(replace)));
     }
 
     @Override

@@ -3,6 +3,8 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
+import java.util.function.Function;
+
 public class VariableReferenceNode implements AssignableExpressionNode {
     public static VariableReferenceNode reference(VariableNode variable) {
         return new VariableReferenceNode(variable.getDeclaration());
@@ -26,7 +28,12 @@ public class VariableReferenceNode implements AssignableExpressionNode {
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
     }
-    
+
+    @Override
+    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return this;
+    }
+
     public String getReferentId() {
         return referent.getId();
     }

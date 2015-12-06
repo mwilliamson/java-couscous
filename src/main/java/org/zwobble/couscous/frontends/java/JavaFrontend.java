@@ -37,11 +37,11 @@ public class JavaFrontend implements Frontend {
 
     private void ensureDeclarationsAreUnique(List<ClassNode> classNodes) {
         List<VariableDeclaration> declarations = eagerFlatMap(classNodes, this::findDeclarations);
-        Multimaps.index(declarations, declaration -> declaration.getId())
+        Multimaps.index(declarations, VariableDeclaration::getId)
             .asMap()
             .forEach((id, declarationsWithId) -> {
                 if (declarationsWithId.size() > 1) {
-                    throw new RuntimeException("Declaration " + id + " is declared more than once");
+                    throw new RuntimeException("Declaration " + id + " is declared " + declarationsWithId.size() + " times");
                 }
             });
     }
