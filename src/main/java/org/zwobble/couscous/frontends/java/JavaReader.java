@@ -82,10 +82,7 @@ public class JavaReader {
     {
         Map<String, ExpressionNode> freeVariablesById = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
-            freeVariable -> fieldAccess(
-                thisReference(className),
-                freeVariable.getName(),
-                freeVariable.getType()));
+            freeVariable -> captureAccess(className, freeVariable));
         Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(freeVariablesById);
         return eagerMap(body, statement -> statement.replaceExpressions(replaceExpression));
     }
@@ -109,9 +106,13 @@ public class JavaReader {
         // TODO: generate fresh variables for captures
         List<FormalArgumentNode> arguments = eagerMap(freeVariables, FormalArgumentNode::formalArg);
         List<StatementNode> body = eagerMap(freeVariables, freeVariable -> assignStatement(
-                fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType()),
-                reference(freeVariable)));
+            captureAccess(type, freeVariable),
+            reference(freeVariable)));
         return constructor(arguments, body);
+    }
+
+    private FieldAccessNode captureAccess(TypeName type, VariableDeclaration freeVariable) {
+        return fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType());
     }
 
     private TypeName generateClassName(LambdaExpression expression) {
