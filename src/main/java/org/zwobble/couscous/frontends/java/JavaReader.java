@@ -36,6 +36,7 @@ public class JavaReader {
         return cons(reader.readCompilationUnit(ast), reader.classes.build());
     }
 
+    private final UniqueIdentifiers identifiers = new UniqueIdentifiers();
     private final ImmutableList.Builder<ClassNode> classes;
     private int anonymousClassCount = 0;
 
@@ -105,11 +106,9 @@ public class JavaReader {
     }
 
     private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
-        // TODO: find a more reliable of generating IDs. For instance, this clashes if
-        // the same variable is captured more than once
         Map<String, VariableDeclaration> argumentDeclarationsById = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
-            freeVariable -> var(freeVariable.getId() + "__capture", freeVariable.getName(), freeVariable.getType()));
+            freeVariable -> var(identifiers.generate(freeVariable.getId() + "__capture"), freeVariable.getName(), freeVariable.getType()));
         List<FormalArgumentNode> arguments = eagerMap(
             freeVariables,
             freeVariable -> formalArg(argumentDeclarationsById.get(freeVariable.getId())));
