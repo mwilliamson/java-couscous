@@ -109,9 +109,7 @@ public class JavaReader {
         // TODO: find a more reliable of generating IDs. For instance, this clashes if
         // the same variable is captured more than once
         Map<String, VariableDeclaration> argumentDeclarationsById = Maps.transformValues(
-            Maps.uniqueIndex(
-                freeVariables,
-                VariableDeclaration::getId),
+            Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
             freeVariable -> var(freeVariable.getId() + "__capture", freeVariable.getName(), freeVariable.getType()));
         List<FormalArgumentNode> arguments = eagerMap(
             freeVariables,
