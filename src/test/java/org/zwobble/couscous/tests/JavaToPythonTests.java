@@ -35,6 +35,7 @@ public class JavaToPythonTests {
         assertEquals(value(false), evalExpression("1 > 2"));
         assertEquals(value(true), evalExpression("1 == 1"));
         assertEquals(value(false), evalExpression("1 != 1"));
+        assertEquals(value(true), evalExpression("!false"));
     }
     
     @Test

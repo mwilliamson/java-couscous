@@ -13,6 +13,7 @@ import java.util.stream.IntStream;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.MethodCallNode.not;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
@@ -238,7 +239,7 @@ public class JavaExpressionReader {
             if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
                 return StaticMethodCallNode.same(left, right);
             } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
-                return MethodCallNode.not(StaticMethodCallNode.same(left, right));
+                return not(StaticMethodCallNode.same(left, right));
             } else {
                 throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
             }
@@ -259,14 +260,18 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readPrefixExpression(PrefixExpression expression) {
-        Operator operator = readOperator(expression.getOperator());
-        return AssignmentNode.assign(
-            (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
-            MethodCallNode.methodCall(
-                readExpression(IntegerValue.REF, expression.getOperand()),
-                operator.getMethodName(),
-                asList(literal(1)),
-                IntegerValue.REF));
+        if (expression.getOperator() == PrefixExpression.Operator.NOT) {
+            return not(readExpression(BooleanValue.REF, expression.getOperand()));
+        } else {
+            Operator operator = readOperator(expression.getOperator());
+            return AssignmentNode.assign(
+                (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
+                MethodCallNode.methodCall(
+                    readExpression(IntegerValue.REF, expression.getOperand()),
+                    operator.getMethodName(),
+                    asList(literal(1)),
+                    IntegerValue.REF));
+        }
     }
 
     private ExpressionNode readConditionalExpression(ConditionalExpression expression) {

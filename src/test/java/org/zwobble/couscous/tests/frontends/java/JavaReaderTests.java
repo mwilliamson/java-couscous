@@ -405,6 +405,13 @@ public class JavaReaderTests {
     }
 
     @Test
+    public void canReadPrefixBooleanNegation() {
+        assertEquals(
+            not(literal(true)),
+            readBooleanExpression("!true"));
+    }
+
+    @Test
     public void canReadPrefixIncrement() {
         ClassNode classNode = readClass(
             "public void go(int value) {" +
