@@ -7,5 +7,5 @@ import java.util.List;
 import org.zwobble.couscous.ast.ClassNode;
 
 public interface Frontend {
-    List<ClassNode> readSourceDirectory(Path path) throws IOException;
+    List<ClassNode> readSourceDirectory(Path sourceRoot, Path path) throws IOException;
 }

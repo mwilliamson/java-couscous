@@ -32,6 +32,10 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(root, sourcePath);
+        System.out.println(sourcePath);
+        for (Message message : ast.getMessages()) {
+            System.out.println(message.getMessage());
+        }
         JavaReader reader = new JavaReader();
         return cons(reader.readCompilationUnit(ast), reader.classes.build());
     }

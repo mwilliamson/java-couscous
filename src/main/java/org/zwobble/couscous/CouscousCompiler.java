@@ -15,8 +15,8 @@ public class CouscousCompiler {
         this.backend = backend;
     }
 
-    public void compileDirectory(Path path) throws IOException {
-        List<ClassNode> classes = frontend.readSourceDirectory(path);
+    public void compileDirectory(Path sourceRoot, Path path) throws IOException {
+        List<ClassNode> classes = frontend.readSourceDirectory(sourceRoot, path);
         backend.compile(classes);
     }
 

@@ -18,7 +18,7 @@ public class JavaParser {
     
     public JavaParser() {
         parser = ASTParser.newParser(AST.JLS8);
-        parser.setBindingsRecovery(true);
+        parser.setBindingsRecovery(false);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         @SuppressWarnings("unchecked")
         Hashtable<String, String> options = JavaCore.getOptions();
@@ -26,16 +26,16 @@ public class JavaParser {
         options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
         options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
         parser.setCompilerOptions(options);
-        parser.setEnvironment(
-            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"},
-            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"},
-            new String[]{"UTF-8"},
-            false);
         parser.setResolveBindings(true);
     }
     
     public CompilationUnit parseCompilationUnit(Path root, Path sourcePath) throws IOException {
         parser.setUnitName("/" + root.relativize(sourcePath).toString());
+        parser.setEnvironment(
+            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"},
+            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip",  root.toString()},
+            new String[]{"UTF-8", "UTF-8"},
+            false);
         final byte[] javaFileBytes = Files.readAllBytes(sourcePath);
         CharBuffer source = Charsets.UTF_8.decode(ByteBuffer.wrap(javaFileBytes));
         parser.setSource(source.array());

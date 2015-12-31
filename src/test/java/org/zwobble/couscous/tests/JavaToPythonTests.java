@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -134,7 +135,7 @@ public class JavaToPythonTests {
             "/java/" + directoryName + "/" + type.getQualifiedName().replace(".", "/") + ".java");
         
         return execProgram(
-            directoryName(path, type.getQualifiedName().split(".").length),
+            directoryName(path, type.getQualifiedName().split("\\.").length),
             type,
             methodName,
             arguments);
@@ -151,7 +152,7 @@ public class JavaToPythonTests {
             CouscousCompiler compiler = new CouscousCompiler(
                 new JavaFrontend(),
                 new PythonBackend(directoryPath, "couscous"));
-            compiler.compileDirectory(directory);
+            compiler.compileDirectory(directory, directory);
             return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
         } finally {
             deleteRecursively(directoryPath.toFile());
