@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
-import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
@@ -24,35 +22,35 @@ public class JavaLambdaExpressionReader {
         this.reader = reader;
     }
 
-    public Lambda javaLambdaToLambda(LambdaExpression expression) {
+    public Lambda toLambda(Scope scope, LambdaExpression expression) {
         List<FormalArgumentNode> formalArguments = eagerMap(
             (List<?>)expression.parameters(),
-            this::readLambdaExpressionParameter);
+            parameter -> readLambdaExpressionParameter(scope, parameter));
 
-        return lambda(formalArguments, readLambdaExpressionBody(expression));
+        return lambda(formalArguments, readLambdaExpressionBody(scope, expression));
     }
 
-    private FormalArgumentNode readLambdaExpressionParameter(Object parameter) {
+    private FormalArgumentNode readLambdaExpressionParameter(Scope scope, Object parameter) {
         if (parameter instanceof SingleVariableDeclaration) {
-            return JavaVariableDeclarationReader.read((SingleVariableDeclaration) parameter);
+            return JavaVariableDeclarationReader.read(scope, (SingleVariableDeclaration) parameter);
         } else {
             VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
-            return formalArg(var(
+            return scope.formalArgument(
                 fragment.resolveBinding().getKey(),
                 fragment.getName().getIdentifier(),
-                typeOf(fragment.resolveBinding().getType())));
+                typeOf(fragment.resolveBinding().getType()));
         }
     }
 
-    private List<StatementNode> readLambdaExpressionBody(LambdaExpression expression) {
+    private List<StatementNode> readLambdaExpressionBody(Scope scope, LambdaExpression expression) {
         TypeName returnType = typeOf(expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType());
         if (expression.getBody() instanceof Block) {
             @SuppressWarnings("unchecked")
             List<Statement> statements = ((Block) expression.getBody()).statements();
-            return reader.readStatements(statements, Optional.of(returnType));
+            return reader.readStatements(scope, statements, Optional.of(returnType));
         } else {
             Expression body = (Expression) expression.getBody();
-            return asList(returns(reader.readExpression(returnType, body)));
+            return asList(returns(reader.readExpression(scope, returnType, body)));
         }
     }
 }

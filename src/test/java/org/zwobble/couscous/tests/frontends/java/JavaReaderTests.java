@@ -186,7 +186,6 @@ public class JavaReaderTests {
                 "java.util.function.Function<Integer, Integer> function = (Integer x) -> x;")));
     }
 
-    @Ignore("This works except for making the IDs match up")
     @Test
     public void expressionMethodReferenceIsReadAsLambda() {
         assertEquals(

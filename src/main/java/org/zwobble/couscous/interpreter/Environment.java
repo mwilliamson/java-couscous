@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import static java.util.stream.Collectors.toMap;
@@ -12,7 +13,7 @@ import static java.util.stream.Collectors.toMap;
 public class Environment {
     private final Project project;
     private final Optional<InterpreterValue> thisValue;
-    private final Map<String, VariableEntry> stackFrame;
+    private final Map<Identifier, VariableEntry> stackFrame;
     
     public Environment(Project project, Optional<InterpreterValue> thisValue, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
         this.project = project;
@@ -27,13 +28,13 @@ public class Environment {
         return thisValue;
     }
     
-    public InterpreterValue get(String variableId) {
+    public InterpreterValue get(Identifier variableId) {
         checkVariableIsInScope(variableId);
         final org.zwobble.couscous.interpreter.Environment.VariableEntry entry = stackFrame.get(variableId);
         return entry.getValue().orElseThrow(() -> new UnboundVariable(variableId));
     }
     
-    public void put(String variableId, InterpreterValue value) {
+    public void put(Identifier variableId, InterpreterValue value) {
         checkVariableIsInScope(variableId);
         checkVariableType(variableId, value);
         stackFrame.get(variableId).setValue(Optional.of(value));
@@ -51,13 +52,13 @@ public class Environment {
         return new Environment(project, thisValue, stackFrame);
     }
     
-    private void checkVariableIsInScope(String variableId) {
+    private void checkVariableIsInScope(Identifier variableId) {
         if (!stackFrame.containsKey(variableId)) {
             throw new VariableNotInScope(variableId);
         }
     }
     
-    private void checkVariableType(String variableId, InterpreterValue value) {
+    private void checkVariableType(Identifier variableId, InterpreterValue value) {
         TypeName variableType = stackFrame.get(variableId).getType();
         InterpreterTypes.checkIsInstance(variableType, value);
     }

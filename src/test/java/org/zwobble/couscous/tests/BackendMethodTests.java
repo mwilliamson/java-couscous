@@ -114,8 +114,8 @@ public abstract class BackendMethodTests {
 
     @Test
     public void whileLoopIsExecutedWhileConditionIsTrue() {
-        LocalVariableDeclarationNode x = localVariableDeclaration("x", "x", IntegerValue.REF, literal(0));
-        LocalVariableDeclarationNode y = localVariableDeclaration("y", "y", IntegerValue.REF, literal(2));
+        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
         MethodNode.Builder method = staticMethod("hello")
             .statement(x)
             .statement(y)
@@ -128,8 +128,8 @@ public abstract class BackendMethodTests {
 
     @Test
     public void returnWillExitWhileLoopEarly() {
-        LocalVariableDeclarationNode x = localVariableDeclaration("x", "x", IntegerValue.REF, literal(0));
-        LocalVariableDeclarationNode y = localVariableDeclaration("y", "y", IntegerValue.REF, literal(2));
+        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
         MethodNode.Builder method = staticMethod("hello")
             .statement(x)
             .statement(y)

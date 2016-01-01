@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -110,7 +111,7 @@ public class ClassNodeBuilder {
             return ThisReferenceNode.thisReference(name);
         }
         
-        public MethodBuilder<T> argument(String id, String name, TypeName type) {
+        public MethodBuilder<T> argument(Identifier id, String name, TypeName type) {
             arguments.add(formalArg(var(id, name, type)));
             return this;
         }

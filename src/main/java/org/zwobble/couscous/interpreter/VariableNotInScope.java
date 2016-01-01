@@ -1,14 +1,16 @@
 package org.zwobble.couscous.interpreter;
 
+import org.zwobble.couscous.ast.identifiers.Identifier;
+
 public final class VariableNotInScope extends InterpreterException {
     private static final long serialVersionUID = 1L;
-    private final String variableId;
+    private final Identifier variableId;
     
-    public VariableNotInScope(final String variableId) {
+    public VariableNotInScope(final Identifier variableId) {
         this.variableId = variableId;
     }
     
-    public String getVariableId() {
+    public Identifier getVariableId() {
         return this.variableId;
     }
     

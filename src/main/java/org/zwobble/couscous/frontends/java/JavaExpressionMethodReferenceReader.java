@@ -10,18 +10,16 @@ import org.zwobble.couscous.ast.sugar.Lambda;
 
 import java.util.List;
 
-import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
-import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaExpressionMethodReferenceReader {
-    public static Lambda javaExpressionMethodReferenceToLambda(ExpressionMethodReference expression) {
+    public static Lambda expressionMethodReferenceToLambda(Scope scope, ExpressionMethodReference expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        List<FormalArgumentNode> formalArguments = formalArguments(functionalInterfaceMethod);
+        List<FormalArgumentNode> formalArguments = formalArguments(scope, functionalInterfaceMethod);
 
         return lambda(
             formalArguments,
@@ -34,13 +32,13 @@ public class JavaExpressionMethodReferenceReader {
                     typeOf(expression.resolveMethodBinding().getReturnType()))))));
     }
 
-    private static List<FormalArgumentNode> formalArguments(IMethodBinding functionalInterfaceMethod) {
+    private static List<FormalArgumentNode> formalArguments(Scope scope, IMethodBinding functionalInterfaceMethod) {
         ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
 
         ITypeBinding[] parameterTypes = functionalInterfaceMethod.getParameterTypes();
         for (int index = 0; index < parameterTypes.length; index++) {
             ITypeBinding parameterType = parameterTypes[index];
-            arguments.add(formalArg(var("arg" + index, "arg" + index, typeOf(parameterType))));
+            arguments.add(scope.formalArgument("arg" + index, typeOf(parameterType)));
         }
 
         return arguments.build();

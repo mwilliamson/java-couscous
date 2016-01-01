@@ -10,16 +10,21 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
-import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 class JavaStatementReader {
+    private final Scope scope;
     private final JavaExpressionReader expressionReader;
     private final Optional<TypeName> returnType;
 
-    JavaStatementReader(JavaExpressionReader expressionReader, Optional<TypeName> returnType) {
+    JavaStatementReader(
+        Scope scope,
+        JavaExpressionReader expressionReader,
+        Optional<TypeName> returnType
+    ) {
+        this.scope = scope;
         this.expressionReader = expressionReader;
         this.returnType = returnType;
     }
@@ -108,13 +113,15 @@ class JavaStatementReader {
         return readDeclarationFragments(fragments, type);
     }
 
-    private List<StatementNode> readDeclarationFragments(List<VariableDeclarationFragment> fragments, TypeName type) {
-        return eagerMap(fragments, fragment ->
-            localVariableDeclaration(
-                fragment.resolveBinding().getKey(),
-                fragment.getName().getIdentifier(),
-                type,
-                readExpression(type, fragment.getInitializer())));
+    private List<StatementNode> readDeclarationFragments(
+        List<VariableDeclarationFragment> fragments,
+        TypeName type
+    ) {
+        return eagerMap(fragments, fragment -> scope.localVariable(
+            fragment.resolveBinding().getKey(),
+            fragment.getName().getIdentifier(),
+            type,
+            readExpression(type, fragment.getInitializer())));
     }
 
     private ExpressionNode readExpressionWithoutBoxing(Expression expression) {

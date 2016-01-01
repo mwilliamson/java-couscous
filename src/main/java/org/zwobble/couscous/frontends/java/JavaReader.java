@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -18,6 +19,7 @@ import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Maps.immutableEntry;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
@@ -27,13 +29,13 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
-import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
-import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionMethodReferenceToLambda;
+import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.expressionMethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraMaps.toMap;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
@@ -46,7 +48,6 @@ public class JavaReader {
         return cons(reader.readCompilationUnit(ast), reader.classes.build());
     }
 
-    private final UniqueIdentifiers identifiers = new UniqueIdentifiers();
     private final ImmutableList.Builder<ClassNode> classes;
     private int anonymousClassCount = 0;
 
@@ -56,8 +57,9 @@ public class JavaReader {
 
     private ClassNode readCompilationUnit(CompilationUnit ast) {
         TypeName name = generateClassName(ast);
+        Scope scope = Scope.create().enterClass(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        TypeDeclarationBody body = readTypeDeclarationBody(type.bodyDeclarations());
+        TypeDeclarationBody body = readTypeDeclarationBody(scope, type.bodyDeclarations());
         return ClassNode.declareClass(
             name,
             superTypes(type),
@@ -66,28 +68,27 @@ public class JavaReader {
             body.getMethods());
     }
 
-    GeneratedClosure readExpressionMethodReference(ExpressionMethodReference expression) {
+    GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
+        TypeName name = generateAnonymousName(expression);
+        Scope scope = outerScope.enterClass(name);
         return generateClosure(
-            expression,
+            scope,
+            name,
             expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            javaExpressionMethodReferenceToLambda(expression));
+            expressionMethodReferenceToLambda(scope, expression));
     }
 
-    private ITypeBinding findDeclaringClass(ASTNode node) {
-        while (!(node instanceof AbstractTypeDeclaration)) {
-            node = node.getParent();
-        }
-        return ((AbstractTypeDeclaration)node).resolveBinding();
-    }
-
-    GeneratedClosure readLambda(LambdaExpression expression) {
+    GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {
+        TypeName name = generateAnonymousName(expression);
+        Scope scope = outerScope.enterClass(name);
         return generateClosure(
-            expression,
+            scope,
+            name,
             expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            new JavaLambdaExpressionReader(this).javaLambdaToLambda(expression));
+            new JavaLambdaExpressionReader(this).toLambda(scope, expression));
     }
 
-    GeneratedClosure generateClosure(ASTNode node, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
+    GeneratedClosure generateClosure(Scope scope, TypeName name, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
         MethodNode method = MethodNode.method(
             emptyList(),
             false,
@@ -96,7 +97,8 @@ public class JavaReader {
             lambda.getBody());
 
         GeneratedClosure closure = classWithCapture(
-            generateAnonymousClassName(findDeclaringClass(node)),
+            scope,
+            name,
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             emptyList(),
             ImmutableList.of(method));
@@ -110,7 +112,7 @@ public class JavaReader {
         List<StatementNode> body,
         List<VariableDeclaration> freeVariables)
     {
-        Map<String, ExpressionNode> freeVariablesById = Maps.transformValues(
+        Map<Identifier, ExpressionNode> freeVariablesById = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
             freeVariable -> captureAccess(className, freeVariable));
         Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(freeVariablesById);
@@ -118,9 +120,9 @@ public class JavaReader {
     }
 
     private class CaptureReplacer implements Function<ExpressionNode, ExpressionNode> {
-        private final Map<String, ExpressionNode> freeVariablesById;
+        private final Map<Identifier, ExpressionNode> freeVariablesById;
 
-        public CaptureReplacer(Map<String, ExpressionNode> freeVariablesById) {
+        public CaptureReplacer(Map<Identifier, ExpressionNode> freeVariablesById) {
             this.freeVariablesById = freeVariablesById;
         }
 
@@ -132,16 +134,22 @@ public class JavaReader {
         }
     }
 
-    private ConstructorNode buildConstructor(TypeName type, List<VariableDeclaration> freeVariables) {
-        Map<String, VariableDeclaration> argumentDeclarationsById = Maps.transformValues(
-            Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
-            freeVariable -> var(identifiers.generate(freeVariable.getId() + "__capture"), freeVariable.getName(), freeVariable.getType()));
+    private ConstructorNode buildConstructor(Scope outerScope, TypeName type, List<VariableDeclaration> freeVariables) {
+        Scope scope = outerScope.enterConstructor();
+        Map<Identifier, VariableDeclaration> argumentDeclarationsById = toMap(
+            freeVariables,
+            freeVariable -> immutableEntry(
+                freeVariable.getId(),
+                scope.generateVariable(freeVariable.getName(), freeVariable.getType())));
+
         List<FormalArgumentNode> arguments = eagerMap(
             freeVariables,
             freeVariable -> formalArg(argumentDeclarationsById.get(freeVariable.getId())));
+
         List<StatementNode> body = eagerMap(freeVariables, freeVariable -> assignStatement(
             captureAccess(type, freeVariable),
             reference(argumentDeclarationsById.get(freeVariable.getId()))));
+
         return constructor(arguments, body);
     }
 
@@ -149,10 +157,12 @@ public class JavaReader {
         return fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType());
     }
 
-    GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
-        TypeName className = generateClassName(declaration);
-        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
+    GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
+        TypeName className = generateAnonymousName(declaration);
+        Scope scope = outerScope.enterClass(className);
+        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, declaration.bodyDeclarations());
         GeneratedClosure closure = classWithCapture(
+            scope,
             className,
             superTypes(declaration),
             bodyDeclarations.getFields(),
@@ -162,6 +172,7 @@ public class JavaReader {
     }
 
     private GeneratedClosure classWithCapture(
+        Scope scope,
         TypeName className,
         Set<TypeName> superTypes,
         List<FieldDeclarationNode> declaredFields,
@@ -178,22 +189,25 @@ public class JavaReader {
             className,
             superTypes,
             fields,
-            buildConstructor(className, freeVariables),
+            buildConstructor(scope, className, freeVariables),
             eagerMap(methods, method ->
                 method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables))));
         return new GeneratedClosure(classNode, freeVariables);
     }
 
-    private TypeName generateClassName(AnonymousClassDeclaration declaration) {
-        ITypeBinding type = declaration.resolveBinding();
-        return generateAnonymousClassName(type);
-    }
-
-    private TypeName generateAnonymousClassName(ITypeBinding type) {
+    private TypeName generateAnonymousName(ASTNode node) {
+        ITypeBinding type = findDeclaringClass(node);
         while (type.isAnonymous()) {
             type = type.getDeclaringClass();
         }
         return TypeName.of(type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
+    }
+
+    private ITypeBinding findDeclaringClass(ASTNode node) {
+        while (!(node instanceof AbstractTypeDeclaration)) {
+            node = node.getParent();
+        }
+        return ((AbstractTypeDeclaration)node).resolveBinding();
     }
 
     private static class TypeDeclarationBody {
@@ -220,11 +234,11 @@ public class JavaReader {
         }
     }
 
-    private TypeDeclarationBody readTypeDeclarationBody(List<Object> bodyDeclarations) {
+    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, List<Object> bodyDeclarations) {
         ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
         ConstructorNode constructor = ConstructorNode.DEFAULT;
 
-        for (CallableNode callable : readMethods(ofType(bodyDeclarations, MethodDeclaration.class))) {
+        for (CallableNode callable : readMethods(scope, ofType(bodyDeclarations, MethodDeclaration.class))) {
             if (callable instanceof ConstructorNode) {
                 constructor = (ConstructorNode) callable;
             } else {
@@ -249,81 +263,61 @@ public class JavaReader {
             field(fragment.getName().getIdentifier(), type));
     }
 
-    private List<CallableNode> readMethods(List<MethodDeclaration> methods) {
-        return eagerMap(methods, this::readMethod);
+    private List<CallableNode> readMethods(Scope scope, List<MethodDeclaration> methods) {
+        return eagerMap(methods, method -> readMethod(scope, method));
     }
 
-    private CallableNode readMethod(MethodDeclaration method) {
-        FunctionDeclaration function = functionDeclaration(method);
+    private CallableNode readMethod(Scope outerScope, MethodDeclaration method) {
+        Scope scope = outerScope.enterMethod(method.getName().getIdentifier());
+
+        List<FormalArgumentNode> formalArguments = readFormalArguments(scope, method);
+        List<StatementNode> body = readBody(scope, method);
+        List<AnnotationNode> annotations = readAnnotations(method);
+
         if (method.isConstructor()) {
             return constructor(
-                function.getFormalArguments(),
-                function.getBody());
+                formalArguments,
+                body);
         } else {
             return MethodNode.method(
-                function.getAnnotations(),
+                annotations,
                 Modifier.isStatic(method.getModifiers()),
                 method.getName().getIdentifier(),
-                function.getFormalArguments(),
-                function.getBody());
+                formalArguments,
+                body);
         }
     }
 
-    private FunctionDeclaration functionDeclaration(MethodDeclaration method) {
-        @SuppressWarnings("unchecked")
-        List<SingleVariableDeclaration> parameters = method.parameters();
-        List<FormalArgumentNode> formalArguments = eagerMap(parameters, JavaVariableDeclarationReader::read);
-        @SuppressWarnings("unchecked")
-        List<Statement> statements = method.getBody().statements();
-        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
-            .map(Type::resolveBinding)
-            .map(JavaTypes::typeOf);
-
-        return new FunctionDeclaration(
-            eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation),
-            formalArguments,
-            readStatements(statements, returnType));
+    private List<AnnotationNode> readAnnotations(MethodDeclaration method) {
+        return eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation);
     }
 
     private AnnotationNode readAnnotation(IAnnotationBinding annotationBinding) {
         return annotation(typeOf(annotationBinding.getAnnotationType()));
     }
 
-    private class FunctionDeclaration {
-        private final List<AnnotationNode> annotations;
-        private final List<FormalArgumentNode> formalArguments;
-        private final List<StatementNode> body;
-
-        private FunctionDeclaration(
-            List<AnnotationNode> annotations,
-            List<FormalArgumentNode> formalArguments,
-            List<StatementNode> body)
-        {
-            this.annotations = annotations;
-            this.formalArguments = formalArguments;
-            this.body = body;
-        }
-
-        public List<AnnotationNode> getAnnotations() {
-            return annotations;
-        }
-
-        public List<FormalArgumentNode> getFormalArguments() {
-            return formalArguments;
-        }
-
-        public List<StatementNode> getBody() {
-            return body;
-        }
+    private List<FormalArgumentNode> readFormalArguments(Scope scope, MethodDeclaration method) {
+        @SuppressWarnings("unchecked")
+        List<SingleVariableDeclaration> parameters = method.parameters();
+        return eagerMap(parameters, parameter -> JavaVariableDeclarationReader.read(scope, parameter));
     }
 
-    List<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
-        JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
+    private List<StatementNode> readBody(Scope scope, MethodDeclaration method) {
+        @SuppressWarnings("unchecked")
+        List<Statement> statements = method.getBody().statements();
+        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
+            .map(Type::resolveBinding)
+            .map(JavaTypes::typeOf);
+        return readStatements(scope, statements, returnType);
+    }
+
+    List<StatementNode> readStatements(Scope scope, List<Statement> body, Optional<TypeName> returnType) {
+        JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), returnType);
         return eagerFlatMap(body, statementReader::readStatement);
     }
 
-    ExpressionNode readExpression(TypeName targetType, Expression body) {
-        return expressionReader().readExpression(targetType, body);
+    ExpressionNode readExpression(Scope scope, TypeName targetType, Expression body) {
+        return expressionReader(scope).readExpression(targetType, body);
     }
 
     private TypeName generateClassName(CompilationUnit ast) {
@@ -333,7 +327,7 @@ public class JavaReader {
         return TypeName.of(packageName + "." + className);
     }
 
-    private JavaExpressionReader expressionReader() {
-        return new JavaExpressionReader(this);
+    private JavaExpressionReader expressionReader(Scope scope) {
+        return new JavaExpressionReader(scope, this);
     }
 }

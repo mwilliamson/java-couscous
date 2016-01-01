@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -131,6 +132,8 @@ public class ValueObjectTests {
             return asList("[list 1]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 1]");
+        } else if (type.equals(Identifier.class)) {
+            return TestIds.id((String)generateFirstInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateFirstInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -151,6 +154,8 @@ public class ValueObjectTests {
             return asList("[list 2]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 2]");
+        } else if (type.equals(Identifier.class)) {
+            return TestIds.id((String)generateSecondInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateSecondInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -171,6 +176,8 @@ public class ValueObjectTests {
             return asList("[list]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set]");
+        } else if (type.equals(Identifier.class)) {
+            return TestIds.id((String)generateInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {

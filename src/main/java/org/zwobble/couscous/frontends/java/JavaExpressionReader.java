@@ -14,17 +14,17 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
-import static org.zwobble.couscous.ast.VariableDeclaration.var;
-import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.concat;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaExpressionReader {
+    private final Scope scope;
     private final JavaReader javaReader;
 
-    JavaExpressionReader(JavaReader javaReader) {
+    JavaExpressionReader(Scope scope, JavaReader javaReader) {
+        this.scope = scope;
         this.javaReader = javaReader;
     }
 
@@ -139,7 +139,7 @@ public class JavaExpressionReader {
         return literal(expression.getLiteralValue());
     }
 
-    private static ExpressionNode readSimpleName(SimpleName expression) {
+    private ExpressionNode readSimpleName(SimpleName expression) {
         IBinding binding = expression.resolveBinding();
         if (binding.getKind() == IBinding.VARIABLE) {
             return readVariableBinding((IVariableBinding)binding);
@@ -148,10 +148,10 @@ public class JavaExpressionReader {
         }
     }
 
-    private static ExpressionNode readVariableBinding(IVariableBinding binding) {
+    private ExpressionNode readVariableBinding(IVariableBinding binding) {
         TypeName type = typeOf(binding);
         if (binding.getDeclaringClass() == null) {
-            return reference(var(binding.getKey(), binding.getName(), type));
+            return scope.reference(binding.getKey());
         } else {
             return FieldAccessNode.fieldAccess(ThisReferenceNode.thisReference(typeOf(binding.getDeclaringClass())), binding.getName(), type);
         }
@@ -201,7 +201,7 @@ public class JavaExpressionReader {
 
         if (constructor.getDeclaringClass().isAnonymous()) {
             GeneratedClosure closure =
-                javaReader.readAnonymousClass(expression.getAnonymousClassDeclaration());
+                javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
             return constructorCall(
                 closure.getType(),
                 concat(captureArguments(closure), arguments));
@@ -211,14 +211,14 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readLambdaExpression(LambdaExpression expression) {
-        GeneratedClosure closure = javaReader.readLambda(expression);
+        GeneratedClosure closure = javaReader.readLambda(scope, expression);
         return constructorCall(
             closure.getType(),
             captureArguments(closure));
     }
 
     private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
-        GeneratedClosure closure = javaReader.readExpressionMethodReference(expression);
+        GeneratedClosure closure = javaReader.readExpressionMethodReference(scope, expression);
         return constructorCall(
             closure.getType(),
             captureArguments(closure));

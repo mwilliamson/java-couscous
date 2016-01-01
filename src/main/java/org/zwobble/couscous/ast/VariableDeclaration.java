@@ -1,21 +1,23 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.identifiers.Identifier;
+
 public class VariableDeclaration {
-    public static VariableDeclaration var(String id, String name, TypeName type) {
+    public static VariableDeclaration var(Identifier id, String name, TypeName type) {
         return new VariableDeclaration(id, name, type);
     }
     
-    private final String id;
+    private final Identifier id;
     private final String name;
     private final TypeName type;
     
-    private VariableDeclaration(String id, String name, TypeName type) {
+    private VariableDeclaration(Identifier id, String name, TypeName type) {
         this.id = id;
         this.name = name;
         this.type = type;
     }
     
-    public String getId() {
+    public Identifier getId() {
         return id;
     }
     

@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
@@ -34,7 +35,7 @@ public class VariableReferenceNode implements AssignableExpressionNode {
         return this;
     }
 
-    public String getReferentId() {
+    public Identifier getReferentId() {
         return referent.getId();
     }
 
