@@ -15,7 +15,13 @@ public class InternalCouscousInterpeterValue {
         .staticMethod("boxBoolean", asList(BooleanValue.REF),
             ((environment, arguments) ->  arguments.get(0)))
 
+        .staticMethod("unboxBoolean", asList(BooleanValue.REF),
+            ((environment, arguments) ->  arguments.get(0)))
+
         .staticMethod("boxInt", asList(IntegerValue.REF),
+            ((environment, arguments) ->  arguments.get(0)))
+
+        .staticMethod("unboxInt", asList(IntegerValue.REF),
             ((environment, arguments) ->  arguments.get(0)))
 
         .build();
