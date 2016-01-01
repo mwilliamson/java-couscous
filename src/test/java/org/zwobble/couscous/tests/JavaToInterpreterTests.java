@@ -1,7 +1,6 @@
 package org.zwobble.couscous.tests;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Ignore;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
@@ -18,7 +17,6 @@ import java.util.List;
 
 import static com.google.common.collect.Iterables.transform;
 
-@Ignore
 public class JavaToInterpreterTests extends CompilerTests {
     @Override
     protected PrimitiveValue execProgram(

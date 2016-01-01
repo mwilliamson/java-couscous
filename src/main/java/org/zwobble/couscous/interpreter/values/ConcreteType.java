@@ -1,8 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.zwobble.couscous.ast.ClassNode;
@@ -34,6 +32,7 @@ public class ConcreteType {
     }
     
     public static class Builder<T> {
+        private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
         private final ImmutableMap.Builder<String, MethodValue> methods = ImmutableMap.builder();
         private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods = ImmutableMap.builder();
         private final Class<T> interpreterValueType;
@@ -43,7 +42,12 @@ public class ConcreteType {
             this.interpreterValueType = interpreterValueType;
             this.name = name;
         }
-        
+
+        public Builder<T> field(String name, TypeName type) {
+            fields.put(name, new FieldValue(name, type));
+            return this;
+        }
+
         public Builder<T> method(String name, List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
             methods.put(name, new MethodValue(argumentsTypes, (environment, arguments) -> {
                 return Casts.tryCast(interpreterValueType, arguments.getReceiver()).map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments()))).orElseThrow(() -> new RuntimeException("receiver is of wrong type"));
@@ -57,7 +61,13 @@ public class ConcreteType {
         }
         
         public ConcreteType build() {
-            return new ConcreteType(name, ImmutableMap.of(), new MethodValue(ImmutableList.of(), (environment, arguments) -> InterpreterValues.UNIT), methods.build(), staticMethods.build());
+            return new ConcreteType(
+                name,
+                Collections.emptySet(),
+                fields.build(),
+                new MethodValue(ImmutableList.of(), (environment, arguments) -> InterpreterValues.UNIT),
+                methods.build(),
+                staticMethods.build());
         }
     }
     
@@ -76,20 +86,28 @@ public class ConcreteType {
                 return Executor.callMethod(environment, method, Optional.empty(), arguments);
             });
         }));
-        return new ConcreteType(classNode.getName(), fields, constructor, methods, staticMethods);
+        return new ConcreteType(classNode.getName(), classNode.getSuperTypes(), fields, constructor, methods, staticMethods);
     }
     
     private static List<TypeName> getArgumentTypes(List<FormalArgumentNode> arguments) {
         return arguments.stream().map(arg -> arg.getType()).collect(Collectors.toList());
     }
     private final TypeName name;
+    private final Set<TypeName> superTypes;
     private final Map<String, FieldValue> fields;
     private final MethodValue constructor;
     private final Map<String, MethodValue> methods;
     private final Map<String, StaticMethodValue> staticMethods;
     
-    private ConcreteType(TypeName name, Map<String, FieldValue> fields, MethodValue constructor, Map<String, MethodValue> methods, Map<String, StaticMethodValue> staticMethods) {
+    private ConcreteType(
+        TypeName name,
+        Set<TypeName> superTypes,
+        Map<String, FieldValue> fields,
+        MethodValue constructor,
+        Map<String, MethodValue> methods,
+        Map<String, StaticMethodValue> staticMethods) {
         this.name = name;
+        this.superTypes = superTypes;
         this.fields = fields;
         this.constructor = constructor;
         this.methods = methods;
@@ -99,7 +117,11 @@ public class ConcreteType {
     public TypeName getName() {
         return name;
     }
-    
+
+    public Set<TypeName> getSuperTypes() {
+        return superTypes;
+    }
+
     public Optional<FieldValue> getField(String fieldName) {
         return Optional.ofNullable(fields.get(fieldName));
     }

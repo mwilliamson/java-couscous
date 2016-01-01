@@ -1,10 +1,14 @@
 package org.zwobble.couscous.frontends.java;
 
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Type;
+import com.google.common.collect.ImmutableSet;
+import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.values.ObjectValues;
+
+import java.util.Set;
+
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Arrays.asList;
 
 class JavaTypes {
     static TypeName typeOf(Expression expression) {
@@ -21,5 +25,38 @@ class JavaTypes {
 
     static TypeName typeOf(ITypeBinding typeBinding) {
         return TypeName.of(typeBinding.getQualifiedName());
+    }
+
+    static Set<TypeName> superTypes(TypeDeclaration declaration) {
+        return superTypes(declaration.resolveBinding());
+    }
+
+    static Set<TypeName> superTypes(AnonymousClassDeclaration declaration) {
+        return superTypes(declaration.resolveBinding());
+    }
+
+    static Set<TypeName> superTypes(LambdaExpression expression) {
+        ImmutableSet.Builder<TypeName> superTypes = ImmutableSet.builder();
+        ITypeBinding typeBinding = expression.resolveTypeBinding();
+        superTypes.addAll(superTypes(typeBinding));
+        superTypes.add(typeOf(typeBinding));
+        return superTypes.build();
+    }
+
+    private static Set<TypeName> superTypes(ITypeBinding typeBinding) {
+        ImmutableSet.Builder<TypeName> superTypes = ImmutableSet.builder();
+        superTypes.addAll(transform(
+            asList(typeBinding.getInterfaces()),
+            JavaTypes::typeOf));
+        superTypes.add(superClass(typeBinding));
+        return superTypes.build();
+    }
+
+    private static TypeName superClass(ITypeBinding typeBinding) {
+        if (typeBinding.getSuperclass() == null) {
+            return ObjectValues.OBJECT;
+        } else {
+            return typeOf(typeBinding.getSuperclass());
+        }
     }
 }

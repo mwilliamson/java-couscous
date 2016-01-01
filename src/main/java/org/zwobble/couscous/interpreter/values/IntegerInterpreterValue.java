@@ -97,6 +97,12 @@ public final class IntegerInterpreterValue implements InterpreterValue {
     public int getValue() {
         return this.value;
     }
+
+    public InterpreterValue box() {
+        ObjectInterpreterValue box = new ObjectInterpreterValue(BoxedIntegerInterpreterValue.TYPE);
+        box.setField("value", this);
+        return box;
+    }
     
     @java.lang.Override
     public boolean equals(final java.lang.Object o) {

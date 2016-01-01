@@ -1,10 +1,11 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.google.common.collect.ImmutableList;
-
+import static java.util.Collections.emptySet;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
@@ -81,6 +82,7 @@ public class ClassNodeBuilder {
     public ClassNode build() {
         return ClassNode.declareClass(
             name,
+            emptySet(),
             fields.build(),
             constructor.orElse(ConstructorNode.DEFAULT),
             methods.build());

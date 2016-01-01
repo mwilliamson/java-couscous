@@ -19,10 +19,10 @@ public class InternalCouscousInterpreterValue {
             ((environment, arguments) ->  arguments.get(0)))
 
         .staticMethod("boxInt", asList(IntegerValue.REF),
-            ((environment, arguments) ->  arguments.get(0)))
+            ((environment, arguments) ->  ((IntegerInterpreterValue)arguments.get(0)).box()))
 
-        .staticMethod("unboxInt", asList(IntegerValue.REF),
-            ((environment, arguments) ->  arguments.get(0)))
+        .staticMethod("unboxInt", asList(ObjectValues.BOXED_INT),
+            ((environment, arguments) ->  arguments.get(0).getField("value")))
 
         .build();
 }

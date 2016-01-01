@@ -20,28 +20,28 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 public abstract class CompilerTests {
     @Test
     public void canEvaluateLiterals() {
-        assertEquals(value("hello"), evalExpression("\"hello\""));
-        assertEquals(value(42), evalExpression("42"));
+        assertEquals(value("hello"), evalObjectExpression("\"hello\""));
+        assertEquals(value(42), evalIntExpression("42"));
     }
 
     @Test
     public void canUseOperatorsOnPrimitives() {
-        assertEquals(value(3), evalExpression("1 + 2"));
-        assertEquals(value(false), evalExpression("1 > 2"));
-        assertEquals(value(true), evalExpression("1 == 1"));
-        assertEquals(value(false), evalExpression("1 != 1"));
-        assertEquals(value(true), evalExpression("!false"));
+        assertEquals(value(3), evalIntExpression("1 + 2"));
+        assertEquals(value(false), evalBooleanExpression("1 > 2"));
+        assertEquals(value(true), evalBooleanExpression("1 == 1"));
+        assertEquals(value(false), evalBooleanExpression("1 != 1"));
+        assertEquals(value(true), evalBooleanExpression("!false"));
     }
 
     @Test
     public void equalityOnReferenceTypesChecksForIdentity() {
-        assertEquals(value(false), evalExpression("new Object() == new Object()"));
-        assertEquals(value(true), exec("Object x = new Object(); return x == x;"));
+        assertEquals(value(false), evalBooleanExpression("new Object() == new Object()"));
+        assertEquals(value(true), exec("boolean", "Object x = new Object(); return x == x;"));
     }
 
     @Test
     public void integersCanBeAssignedToObjectVariable() {
-        assertEquals(value(false), exec("Object x = 1; return x.equals(new Object());"));
+        assertEquals(value(false), exec("boolean", "Object x = 1; return x.equals(new Object());"));
     }
 
     @Test
@@ -150,12 +150,12 @@ public abstract class CompilerTests {
         return path;
     }
 
-    private PrimitiveValue exec(String source) {
+    private PrimitiveValue exec(String returnType, String source) {
         try {
             String javaClass =
                 "package com.example;" +
                     "public class Example {" +
-                    "    public static Object main() {" + source + "}" +
+                    "    public static " + returnType + " main() {" + source + "}" +
                     "}";
             Path directoryPath = Files.createTempDirectory(null);
             try {
@@ -174,8 +174,20 @@ public abstract class CompilerTests {
         }
     }
 
-    private PrimitiveValue evalExpression(String expressionSource) {
-        return exec("return " + expressionSource + ";");
+    private PrimitiveValue evalBooleanExpression(String expressionSource) {
+        return evalExpression("boolean", expressionSource);
+    }
+
+    private PrimitiveValue evalIntExpression(String expressionSource) {
+        return evalExpression("int", expressionSource);
+    }
+
+    private PrimitiveValue evalObjectExpression(String expressionSource) {
+        return evalExpression("Object", expressionSource);
+    }
+
+    private PrimitiveValue evalExpression(String type, String expressionSource) {
+        return exec(type, "return " + expressionSource + ";");
     }
 
     private static Path pathForResource(String name) {

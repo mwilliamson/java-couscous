@@ -1,6 +1,7 @@
 package org.zwobble.couscous.values;
 
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 public final class BooleanValue implements PrimitiveValue {
     public static final TypeName REF = TypeName.of("boolean");

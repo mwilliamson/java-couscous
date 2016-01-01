@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -29,6 +30,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
+import static org.zwobble.couscous.frontends.java.JavaTypes.superTypes;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
@@ -58,6 +60,7 @@ public class JavaReader {
         TypeDeclarationBody body = readTypeDeclarationBody(type.bodyDeclarations());
         return ClassNode.declareClass(
             name,
+            superTypes(type),
             body.getFields(),
             body.getConstructor(),
             body.getMethods());
@@ -75,7 +78,11 @@ public class JavaReader {
             lambda.getFormalArguments(),
             lambda.getBody());
 
-        GeneratedClosure closure = classWithCapture(className, emptyList(), ImmutableList.of(method));
+        GeneratedClosure closure = classWithCapture(
+            className,
+            superTypes(expression),
+            emptyList(),
+            ImmutableList.of(method));
 
         classes.add(closure.getClassNode());
         return closure;
@@ -132,13 +139,18 @@ public class JavaReader {
     GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
         TypeName className = generateClassName(declaration);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
-        GeneratedClosure closure = classWithCapture(className, bodyDeclarations.getFields(), bodyDeclarations.getMethods());
+        GeneratedClosure closure = classWithCapture(
+            className,
+            superTypes(declaration),
+            bodyDeclarations.getFields(),
+            bodyDeclarations.getMethods());
         classes.add(closure.getClassNode());
         return closure;
     }
 
     private GeneratedClosure classWithCapture(
         TypeName className,
+        Set<TypeName> superTypes,
         List<FieldDeclarationNode> declaredFields,
         List<MethodNode> methods
     ) {
@@ -151,6 +163,7 @@ public class JavaReader {
 
         ClassNode classNode = ClassNode.declareClass(
             className,
+            superTypes,
             fields,
             buildConstructor(className, freeVariables),
             eagerMap(methods, method ->
