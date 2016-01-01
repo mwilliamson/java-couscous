@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
@@ -14,11 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -135,12 +138,17 @@ public class JavaReader {
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
         List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
 
+        Iterable<FieldDeclarationNode> captureFields = transform(
+            freeVariables,
+            freeVariable -> field(freeVariable.getName(), freeVariable.getType()));
+        List<FieldDeclarationNode> fields = ImmutableList.copyOf(Iterables.concat(bodyDeclarations.getFields(), captureFields));
+
         List<MethodNode> methods = eagerMap(bodyDeclarations.getMethods(), method ->
             method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables)));
 
         ClassNode classNode = ClassNode.declareClass(
             className,
-            bodyDeclarations.getFields(),
+            fields,
             buildConstructor(className, freeVariables),
             methods);
         classes.add(classNode);
@@ -213,7 +221,7 @@ public class JavaReader {
         List<VariableDeclarationFragment> fragments = field.fragments();
         TypeName type = typeOf(field.getType());
         return eagerMap(fragments, fragment ->
-            FieldDeclarationNode.field(fragment.getName().getIdentifier(), type));
+            field(fragment.getName().getIdentifier(), type));
     }
 
     private List<CallableNode> readMethods(List<MethodDeclaration> methods) {
