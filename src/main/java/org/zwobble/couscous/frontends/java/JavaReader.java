@@ -1,11 +1,11 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
+import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -66,8 +67,6 @@ public class JavaReader {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         TypeName className = generateClassName(expression);
         FunctionDeclaration lambda = functionDeclaration(expression);
-        List<VariableDeclaration> freeVariables = findFreeVariables(
-            concat(lambda.getFormalArguments(), lambda.getBody()));
 
         MethodNode method = MethodNode.method(
             emptyList(),
@@ -76,10 +75,10 @@ public class JavaReader {
             lambda.getFormalArguments(),
             lambda.getBody());
 
-        ClassNode classNode = classWithCapture(className, freeVariables, emptyList(), ImmutableList.of(method));
+        GeneratedClosure closure = classWithCapture(className, emptyList(), ImmutableList.of(method));
 
-        classes.add(classNode);
-        return new GeneratedClosure(classNode.getName(), freeVariables);
+        classes.add(closure.getClassNode());
+        return closure;
     }
 
     private List<StatementNode> replaceCaptureReferences(
@@ -133,31 +132,30 @@ public class JavaReader {
     GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
         TypeName className = generateClassName(declaration);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
-        List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
-
-        ClassNode classNode = classWithCapture(className, freeVariables, bodyDeclarations.getFields(), bodyDeclarations.getMethods());
-        classes.add(classNode);
-        return new GeneratedClosure(classNode.getName(), freeVariables);
+        GeneratedClosure closure = classWithCapture(className, bodyDeclarations.getFields(), bodyDeclarations.getMethods());
+        classes.add(closure.getClassNode());
+        return closure;
     }
 
-    private ClassNode classWithCapture(
+    private GeneratedClosure classWithCapture(
         TypeName className,
-        List<VariableDeclaration> freeVariables,
         List<FieldDeclarationNode> declaredFields,
         List<MethodNode> methods
     ) {
+        List<VariableDeclaration> freeVariables = findFreeVariables(ExtraLists.concat(declaredFields, methods));
         Iterable<FieldDeclarationNode> captureFields = transform(
             freeVariables,
             freeVariable -> field(freeVariable.getName(), freeVariable.getType()));
 
-        List<FieldDeclarationNode> fields = ImmutableList.copyOf(Iterables.concat(declaredFields, captureFields));
+        List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(declaredFields, captureFields));
 
-        return ClassNode.declareClass(
+        ClassNode classNode = ClassNode.declareClass(
             className,
             fields,
             buildConstructor(className, freeVariables),
             eagerMap(methods, method ->
                 method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables))));
+        return new GeneratedClosure(classNode, freeVariables);
     }
 
     private TypeName generateClassName(AnonymousClassDeclaration declaration) {
@@ -196,7 +194,7 @@ public class JavaReader {
         }
 
         public List<Node> getNodes() {
-            return concat(fields, asList(constructor), methods);
+            return ExtraLists.concat(fields, asList(constructor), methods);
         }
     }
 
