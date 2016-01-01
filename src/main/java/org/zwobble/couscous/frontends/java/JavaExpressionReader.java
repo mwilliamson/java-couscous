@@ -33,7 +33,7 @@ public class JavaExpressionReader {
         return handleBoxing(targetType, couscousExpression);
     }
 
-    private static ExpressionNode handleBoxing(TypeName targetType, ExpressionNode couscousExpression) {
+    static ExpressionNode handleBoxing(TypeName targetType, ExpressionNode couscousExpression) {
         if (isIntegerBox(targetType, couscousExpression)) {
             return StaticMethodCallNode.boxInt(couscousExpression);
         } else if (isIntegerUnbox(targetType, couscousExpression)) {
@@ -105,6 +105,9 @@ public class JavaExpressionReader {
 
             case ASTNode.LAMBDA_EXPRESSION:
                 return readLambdaExpression((LambdaExpression)expression);
+
+            case ASTNode.EXPRESSION_METHOD_REFERENCE:
+                return readExpressionMethodReference((ExpressionMethodReference)expression);
 
             case ASTNode.INFIX_EXPRESSION:
                 return readInfixExpression((InfixExpression)expression);
@@ -209,6 +212,13 @@ public class JavaExpressionReader {
 
     private ExpressionNode readLambdaExpression(LambdaExpression expression) {
         GeneratedClosure closure = javaReader.readLambda(expression);
+        return constructorCall(
+            closure.getType(),
+            captureArguments(closure));
+    }
+
+    private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
+        GeneratedClosure closure = javaReader.readExpressionMethodReference(expression);
         return constructorCall(
             closure.getType(),
             captureArguments(closure));

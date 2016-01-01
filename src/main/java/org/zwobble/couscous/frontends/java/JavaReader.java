@@ -26,6 +26,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -64,6 +65,52 @@ public class JavaReader {
             body.getFields(),
             body.getConstructor(),
             body.getMethods());
+    }
+
+    GeneratedClosure readExpressionMethodReference(ExpressionMethodReference expression) {
+        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
+
+        List<FormalArgumentNode> formalArguments = formalArguments(functionalInterfaceMethod);
+
+        MethodNode method = MethodNode.method(
+            emptyList(),
+            false,
+            functionalInterfaceMethod.getName(),
+            formalArguments,
+            ImmutableList.of(returns(JavaExpressionReader.handleBoxing(
+                typeOf(functionalInterfaceMethod.getReturnType()),
+                staticMethodCall(
+                    typeOf(expression.resolveMethodBinding().getDeclaringClass()),
+                    expression.getName().getIdentifier(),
+                    eagerMap(formalArguments, VariableReferenceNode::reference),
+                    typeOf(expression.resolveMethodBinding().getReturnType()))))));
+
+        GeneratedClosure closure = classWithCapture(
+            generateAnonymousClassName(findDeclaringClass(expression)),
+            superTypes(expression),
+            emptyList(),
+            ImmutableList.of(method));
+        classes.add(closure.getClassNode());
+        return closure;
+    }
+
+    private ITypeBinding findDeclaringClass(ASTNode node) {
+        while (!(node instanceof AbstractTypeDeclaration)) {
+            node = node.getParent();
+        }
+        return ((AbstractTypeDeclaration)node).resolveBinding();
+    }
+
+    private List<FormalArgumentNode> formalArguments(IMethodBinding functionalInterfaceMethod) {
+        ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
+
+        ITypeBinding[] parameterTypes = functionalInterfaceMethod.getParameterTypes();
+        for (int index = 0; index < parameterTypes.length; index++) {
+            ITypeBinding parameterType = parameterTypes[index];
+            arguments.add(formalArg(var("arg" + index, "arg" + index, typeOf(parameterType))));
+        }
+
+        return arguments.build();
     }
 
     GeneratedClosure readLambda(LambdaExpression expression) {

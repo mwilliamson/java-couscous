@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests.frontends.java;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -183,6 +184,16 @@ public class JavaReaderTests {
                 "java.util.function.Function<Integer, Integer> function = x -> x;")),
             readClasses(generateMethodSource("void",
                 "java.util.function.Function<Integer, Integer> function = (Integer x) -> x;")));
+    }
+
+    @Ignore("This works except for making the IDs match up")
+    @Test
+    public void expressionMethodReferenceIsReadAsLambda() {
+        assertEquals(
+            readClasses(generateMethodSource("void",
+                "java.util.function.Function<String, Integer> function = arg0 -> Integer.parseInt(arg0);")),
+            readClasses(generateMethodSource("void",
+                "java.util.function.Function<String, Integer> function = Integer::parseInt;")));
     }
     
     @Test
