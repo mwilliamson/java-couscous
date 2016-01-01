@@ -7,6 +7,7 @@ import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
@@ -24,8 +25,15 @@ public final class IntegerInterpreterValue implements InterpreterValue {
             infixReturningInteger((left, right) -> left / right))
         .method(Operator.MOD.getMethodName(), asList(IntegerValue.REF),
             infixReturningInteger((left, right) -> left % right))
-        .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
-            infixReturningBoolean(Integer::equals))
+        .method(Operator.EQUALS.getMethodName(), asList(ObjectValues.OBJECT),
+            (environment, arguments) -> {
+                InterpreterValue right = arguments.getPositionalArguments().get(0);
+                if (right instanceof IntegerInterpreterValue) {
+                    return new BooleanInterpreterValue(arguments.getReceiver().getValue() == ((IntegerInterpreterValue)right).getValue());
+                } else {
+                    return new BooleanInterpreterValue(false);
+                }
+            })
         .method(Operator.NOT_EQUALS.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> !left.equals(right)))
         .method(Operator.GREATER_THAN.getMethodName(), asList(IntegerValue.REF),
