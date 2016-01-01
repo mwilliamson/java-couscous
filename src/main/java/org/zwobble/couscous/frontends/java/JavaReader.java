@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.VariableDeclaration;
+import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
@@ -30,9 +31,10 @@ import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
+import static org.zwobble.couscous.frontends.java.ExpressionMethodReferenceReader.toLambda;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
-import static org.zwobble.couscous.frontends.java.JavaTypes.superTypes;
-import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
@@ -70,28 +72,10 @@ public class JavaReader {
     GeneratedClosure readExpressionMethodReference(ExpressionMethodReference expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
 
-        List<FormalArgumentNode> formalArguments = formalArguments(functionalInterfaceMethod);
-
-        MethodNode method = MethodNode.method(
-            emptyList(),
-            false,
-            functionalInterfaceMethod.getName(),
-            formalArguments,
-            ImmutableList.of(returns(JavaExpressionReader.handleBoxing(
-                typeOf(functionalInterfaceMethod.getReturnType()),
-                staticMethodCall(
-                    typeOf(expression.resolveMethodBinding().getDeclaringClass()),
-                    expression.getName().getIdentifier(),
-                    eagerMap(formalArguments, VariableReferenceNode::reference),
-                    typeOf(expression.resolveMethodBinding().getReturnType()))))));
-
-        GeneratedClosure closure = classWithCapture(
-            generateAnonymousClassName(findDeclaringClass(expression)),
-            superTypes(expression),
-            emptyList(),
-            ImmutableList.of(method));
-        classes.add(closure.getClassNode());
-        return closure;
+        return generateClosure(
+            expression,
+            functionalInterfaceMethod,
+            toLambda(expression));
     }
 
     private ITypeBinding findDeclaringClass(ASTNode node) {
@@ -101,23 +85,19 @@ public class JavaReader {
         return ((AbstractTypeDeclaration)node).resolveBinding();
     }
 
-    private List<FormalArgumentNode> formalArguments(IMethodBinding functionalInterfaceMethod) {
-        ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
-
-        ITypeBinding[] parameterTypes = functionalInterfaceMethod.getParameterTypes();
-        for (int index = 0; index < parameterTypes.length; index++) {
-            ITypeBinding parameterType = parameterTypes[index];
-            arguments.add(formalArg(var("arg" + index, "arg" + index, typeOf(parameterType))));
-        }
-
-        return arguments.build();
-    }
-
     GeneratedClosure readLambda(LambdaExpression expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        TypeName className = generateClassName(expression);
         FunctionDeclaration lambda = functionDeclaration(expression);
 
+        return generateClosure(
+            expression,
+            functionalInterfaceMethod,
+            lambda(
+                lambda.getFormalArguments(),
+                lambda.getBody()));
+    }
+
+    GeneratedClosure generateClosure(ASTNode node, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
         MethodNode method = MethodNode.method(
             emptyList(),
             false,
@@ -126,8 +106,8 @@ public class JavaReader {
             lambda.getBody());
 
         GeneratedClosure closure = classWithCapture(
-            className,
-            superTypes(expression),
+            generateAnonymousClassName(findDeclaringClass(node)),
+            superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             emptyList(),
             ImmutableList.of(method));
 
@@ -177,10 +157,6 @@ public class JavaReader {
 
     private FieldAccessNode captureAccess(TypeName type, VariableDeclaration freeVariable) {
         return fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType());
-    }
-
-    private TypeName generateClassName(LambdaExpression expression) {
-        return generateAnonymousClassName(expression.resolveMethodBinding().getDeclaringClass());
     }
 
     GeneratedClosure readAnonymousClass(AnonymousClassDeclaration declaration) {
@@ -251,10 +227,6 @@ public class JavaReader {
 
         public List<MethodNode> getMethods() {
             return methods;
-        }
-
-        public List<Node> getNodes() {
-            return ExtraLists.concat(fields, asList(constructor), methods);
         }
     }
 
