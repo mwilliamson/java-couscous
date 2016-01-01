@@ -26,13 +26,11 @@ import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
-import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
-import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
+import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
@@ -86,7 +84,7 @@ public class JavaReader {
         return generateClosure(
             expression,
             expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            javaLambdaToLambda(expression));
+            new JavaLambdaExpressionReader(this).javaLambdaToLambda(expression));
     }
 
     GeneratedClosure generateClosure(ASTNode node, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
@@ -274,7 +272,7 @@ public class JavaReader {
     private FunctionDeclaration functionDeclaration(MethodDeclaration method) {
         @SuppressWarnings("unchecked")
         List<SingleVariableDeclaration> parameters = method.parameters();
-        List<FormalArgumentNode> formalArguments = eagerMap(parameters, this::readSingleVariableDeclaration);
+        List<FormalArgumentNode> formalArguments = eagerMap(parameters, JavaVariableDeclarationReader::read);
         @SuppressWarnings("unchecked")
         List<Statement> statements = method.getBody().statements();
         Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
@@ -287,40 +285,8 @@ public class JavaReader {
             readStatements(statements, returnType));
     }
 
-    private Lambda javaLambdaToLambda(LambdaExpression expression) {
-        List<FormalArgumentNode> formalArguments = eagerMap(
-            (List<?>)expression.parameters(),
-            this::readLambdaExpressionParameter);
-
-        return lambda(formalArguments, readLambdaExpressionBody(expression));
-    }
-
     private AnnotationNode readAnnotation(IAnnotationBinding annotationBinding) {
         return annotation(typeOf(annotationBinding.getAnnotationType()));
-    }
-
-    private FormalArgumentNode readLambdaExpressionParameter(Object parameter) {
-        if (parameter instanceof SingleVariableDeclaration) {
-            return readSingleVariableDeclaration((SingleVariableDeclaration) parameter);
-        } else {
-            VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
-            return formalArg(var(
-                fragment.resolveBinding().getKey(),
-                fragment.getName().getIdentifier(),
-                typeOf(fragment.resolveBinding().getType())));
-        }
-    }
-
-    private List<StatementNode> readLambdaExpressionBody(LambdaExpression expression) {
-        TypeName returnType = typeOf(expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType());
-        if (expression.getBody() instanceof Block) {
-            @SuppressWarnings("unchecked")
-            List<Statement> statements = ((Block) expression.getBody()).statements();
-            return readStatements(statements, Optional.of(returnType));
-        } else {
-            Expression body = (Expression) expression.getBody();
-            return asList(returns(expressionReader().readExpression(returnType, body)));
-        }
     }
 
     private class FunctionDeclaration {
@@ -351,9 +317,13 @@ public class JavaReader {
         }
     }
 
-    private List<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
+    List<StatementNode> readStatements(List<Statement> body, Optional<TypeName> returnType) {
         JavaStatementReader statementReader = new JavaStatementReader(expressionReader(), returnType);
         return eagerFlatMap(body, statementReader::readStatement);
+    }
+
+    ExpressionNode readExpression(TypeName targetType, Expression body) {
+        return expressionReader().readExpression(targetType, body);
     }
 
     private TypeName generateClassName(CompilationUnit ast) {
@@ -361,13 +331,6 @@ public class JavaReader {
         String packageName = ast.getPackage().getName().getFullyQualifiedName();
         String className = type.getName().getFullyQualifiedName();
         return TypeName.of(packageName + "." + className);
-    }
-
-    private FormalArgumentNode readSingleVariableDeclaration(SingleVariableDeclaration parameter) {
-        return formalArg(var(
-            parameter.resolveBinding().getKey(),
-            parameter.getName().getIdentifier(),
-            typeOf(parameter.resolveBinding())));
     }
 
     private JavaExpressionReader expressionReader() {
