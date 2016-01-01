@@ -2,8 +2,6 @@
 
 * `this` capture for lambdas/anonymous classes
 
-* Expression method references
-
 * `String::lower`, `String::equals`, `String::add`
 
 * Boxing and unboxing for `String`s
