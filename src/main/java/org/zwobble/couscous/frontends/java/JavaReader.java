@@ -9,7 +9,6 @@ import org.zwobble.couscous.ast.VariableDeclaration;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +16,7 @@ import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
@@ -70,16 +70,13 @@ public class JavaReader {
             concat(lambda.getFormalArguments(), lambda.getBody()));
 
         MethodNode method = MethodNode.method(
-            Collections.emptyList(),
+            emptyList(),
             false,
             functionalInterfaceMethod.getName(),
             lambda.getFormalArguments(),
-            replaceCaptureReferences(className, lambda.getBody(), freeVariables));
+            lambda.getBody());
 
-        ClassNode classNode = new ClassNodeBuilder(className)
-            .constructor(buildConstructor(className, freeVariables))
-            .method(method)
-            .build();
+        ClassNode classNode = classWithCapture(className, freeVariables, emptyList(), ImmutableList.of(method));
 
         classes.add(classNode);
         return new GeneratedClosure(classNode.getName(), freeVariables);
@@ -138,21 +135,29 @@ public class JavaReader {
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(declaration.bodyDeclarations());
         List<VariableDeclaration> freeVariables = findFreeVariables(bodyDeclarations.getNodes());
 
+        ClassNode classNode = classWithCapture(className, freeVariables, bodyDeclarations.getFields(), bodyDeclarations.getMethods());
+        classes.add(classNode);
+        return new GeneratedClosure(classNode.getName(), freeVariables);
+    }
+
+    private ClassNode classWithCapture(
+        TypeName className,
+        List<VariableDeclaration> freeVariables,
+        List<FieldDeclarationNode> declaredFields,
+        List<MethodNode> methods
+    ) {
         Iterable<FieldDeclarationNode> captureFields = transform(
             freeVariables,
             freeVariable -> field(freeVariable.getName(), freeVariable.getType()));
-        List<FieldDeclarationNode> fields = ImmutableList.copyOf(Iterables.concat(bodyDeclarations.getFields(), captureFields));
 
-        List<MethodNode> methods = eagerMap(bodyDeclarations.getMethods(), method ->
-            method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables)));
+        List<FieldDeclarationNode> fields = ImmutableList.copyOf(Iterables.concat(declaredFields, captureFields));
 
-        ClassNode classNode = ClassNode.declareClass(
+        return ClassNode.declareClass(
             className,
             fields,
             buildConstructor(className, freeVariables),
-            methods);
-        classes.add(classNode);
-        return new GeneratedClosure(classNode.getName(), freeVariables);
+            eagerMap(methods, method ->
+                method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables))));
     }
 
     private TypeName generateClassName(AnonymousClassDeclaration declaration) {
