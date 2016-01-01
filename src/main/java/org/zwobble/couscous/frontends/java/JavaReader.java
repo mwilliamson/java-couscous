@@ -30,7 +30,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
-import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
+import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionMethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
@@ -70,7 +70,7 @@ public class JavaReader {
         return generateClosure(
             expression,
             expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            javaExpressionmethodReferenceToLambda(expression));
+            javaExpressionMethodReferenceToLambda(expression));
     }
 
     private ITypeBinding findDeclaringClass(ASTNode node) {
