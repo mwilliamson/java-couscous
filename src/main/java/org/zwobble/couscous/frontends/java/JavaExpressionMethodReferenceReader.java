@@ -18,7 +18,7 @@ import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
-public class ExpressionMethodReferenceReader {
+public class JavaExpressionMethodReferenceReader {
     public static Lambda javaExpressionmethodReferenceToLambda(ExpressionMethodReference expression) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         List<FormalArgumentNode> formalArguments = formalArguments(functionalInterfaceMethod);

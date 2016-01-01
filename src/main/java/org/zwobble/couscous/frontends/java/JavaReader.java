@@ -31,7 +31,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
-import static org.zwobble.couscous.frontends.java.ExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
+import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
