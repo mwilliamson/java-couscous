@@ -5,7 +5,7 @@ import java.util.List;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
-import org.zwobble.couscous.interpreter.values.InternalCouscousInterpeterValue;
+import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
 
 import com.google.common.collect.Iterables;
 
@@ -15,7 +15,7 @@ public class JavaProject {
     
     public static MapBackedProject.Builder builder() {
         return MapBackedProject.builder()
-            .addClass(InternalCouscousInterpeterValue.TYPE)
+            .addClass(InternalCouscousInterpreterValue.TYPE)
             .addClass(OBJECT_TYPE)
             .addClass(BoxedIntegerInterpreterValue.TYPE);
     }
