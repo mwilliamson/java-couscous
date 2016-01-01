@@ -31,7 +31,6 @@ import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
-import static org.zwobble.couscous.frontends.java.JavaExpressionMethodReferenceReader.expressionMethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
@@ -75,7 +74,7 @@ public class JavaReader {
             scope,
             name,
             expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            expressionMethodReferenceToLambda(scope, expression));
+            new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
     }
 
     GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {
@@ -318,6 +317,10 @@ public class JavaReader {
 
     ExpressionNode readExpression(Scope scope, TypeName targetType, Expression body) {
         return expressionReader(scope).readExpression(targetType, body);
+    }
+
+    ExpressionNode readExpressionWithoutBoxing(Scope scope, Expression body) {
+        return expressionReader(scope).readExpressionWithoutBoxing(body);
     }
 
     private TypeName generateClassName(CompilationUnit ast) {

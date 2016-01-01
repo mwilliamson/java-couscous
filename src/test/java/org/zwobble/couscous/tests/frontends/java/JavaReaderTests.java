@@ -187,12 +187,21 @@ public class JavaReaderTests {
     }
 
     @Test
-    public void expressionMethodReferenceIsReadAsLambda() {
+    public void expressionMethodReferenceWithStaticReceiverIsReadAsLambda() {
         assertEquals(
             readClasses(generateMethodSource("void",
                 "java.util.function.Function<String, Integer> function = arg0 -> Integer.parseInt(arg0);")),
             readClasses(generateMethodSource("void",
                 "java.util.function.Function<String, Integer> function = Integer::parseInt;")));
+    }
+
+    @Test
+    public void expressionMethodReferenceWithInstanceReceiverIsReadAsLambda() {
+        assertEquals(
+            readClasses(generateMethodSource("void",
+                "Integer x = 0; java.util.function.Supplier<String> function = () -> x.toString();")),
+            readClasses(generateMethodSource("void",
+                "Integer x = 0; java.util.function.Supplier<String> function = x::toString;")));
     }
     
     @Test
