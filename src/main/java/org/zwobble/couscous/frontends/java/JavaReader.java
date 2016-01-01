@@ -27,12 +27,11 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
-import static org.zwobble.couscous.frontends.java.ExpressionMethodReferenceReader.toLambda;
+import static org.zwobble.couscous.frontends.java.ExpressionMethodReferenceReader.javaExpressionmethodReferenceToLambda;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
@@ -70,12 +69,10 @@ public class JavaReader {
     }
 
     GeneratedClosure readExpressionMethodReference(ExpressionMethodReference expression) {
-        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-
         return generateClosure(
             expression,
-            functionalInterfaceMethod,
-            toLambda(expression));
+            expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
+            javaExpressionmethodReferenceToLambda(expression));
     }
 
     private ITypeBinding findDeclaringClass(ASTNode node) {
@@ -86,15 +83,10 @@ public class JavaReader {
     }
 
     GeneratedClosure readLambda(LambdaExpression expression) {
-        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        FunctionDeclaration lambda = functionDeclaration(expression);
-
         return generateClosure(
             expression,
-            functionalInterfaceMethod,
-            lambda(
-                lambda.getFormalArguments(),
-                lambda.getBody()));
+            expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
+            javaLambdaToLambda(expression));
     }
 
     GeneratedClosure generateClosure(ASTNode node, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
@@ -295,15 +287,12 @@ public class JavaReader {
             readStatements(statements, returnType));
     }
 
-    private FunctionDeclaration functionDeclaration(LambdaExpression expression) {
+    private Lambda javaLambdaToLambda(LambdaExpression expression) {
         List<FormalArgumentNode> formalArguments = eagerMap(
             (List<?>)expression.parameters(),
             this::readLambdaExpressionParameter);
 
-        return new FunctionDeclaration(
-            eagerMap(asList(expression.resolveMethodBinding().getAnnotations()), this::readAnnotation),
-            formalArguments,
-            readLambdaExpressionBody(expression));
+        return lambda(formalArguments, readLambdaExpressionBody(expression));
     }
 
     private AnnotationNode readAnnotation(IAnnotationBinding annotationBinding) {
