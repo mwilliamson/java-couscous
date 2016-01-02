@@ -85,6 +85,9 @@ public class JavaExpressionReader {
             case ASTNode.NUMBER_LITERAL:
                 return readNumberLiteral((NumberLiteral)expression);
 
+            case ASTNode.CHARACTER_LITERAL:
+                return readCharacterLiteral((CharacterLiteral)expression);
+
             case ASTNode.STRING_LITERAL:
                 return readStringLiteral((StringLiteral)expression);
 
@@ -133,6 +136,11 @@ public class JavaExpressionReader {
 
     private static LiteralNode readNumberLiteral(NumberLiteral expression) {
         return literal(Integer.parseInt(expression.getToken()));
+    }
+
+    private ExpressionNode readCharacterLiteral(CharacterLiteral expression) {
+        // TODO: handle characters properly
+        return literal(expression.charValue());
     }
 
     private static ExpressionNode readStringLiteral(StringLiteral expression) {

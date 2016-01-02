@@ -44,6 +44,7 @@ public class JavaReaderTests {
         assertEquals(literal(true), readBooleanExpression("true"));
         assertEquals(literal(false), readBooleanExpression("false"));
         assertEquals(literal(42), readIntExpression("42"));
+        assertEquals(literal('h'), readIntExpression("'h'"));
     }
     
     @Test
