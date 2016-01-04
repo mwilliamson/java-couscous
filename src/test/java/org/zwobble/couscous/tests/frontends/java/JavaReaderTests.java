@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests.frontends.java;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -33,6 +32,7 @@ import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.*;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
@@ -40,7 +40,7 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 public class JavaReaderTests {
     @Test
     public void canReadLiterals() {
-        assertEquals(literal("hello"), readObjectExpression("\"hello\""));
+        assertEquals(literal("hello"), readExpression("String", "\"hello\""));
         assertEquals(literal(true), readBooleanExpression("true"));
         assertEquals(literal(false), readBooleanExpression("false"));
         assertEquals(literal(42), readIntExpression("42"));
@@ -51,7 +51,7 @@ public class JavaReaderTests {
     public void canReadThisReference() {
         assertEquals(
             thisReference(TypeName.of("com.example.Example")),
-            readExpressionInInstanceMethod("this"));
+            readExpressionInInstanceMethod("com.example.Example", "this"));
     }
     
     @Test
@@ -153,7 +153,7 @@ public class JavaReaderTests {
     public void canReadConstructorCalls() {
         assertEquals(
             constructorCall(TypeName.of("java.lang.String"), asList(literal("_"))),
-            readObjectExpression("new String(\"_\")"));
+            readExpression("String", "new String(\"_\")"));
     }
 
     @Test
@@ -207,10 +207,11 @@ public class JavaReaderTests {
     
     @Test
     public void argumentIsBoxedIfNecessary() {
-        StaticMethodCallNode expression = (StaticMethodCallNode) readObjectExpression(
+        StaticMethodCallNode expression = (StaticMethodCallNode) readExpression(
+            "String",
             "java.util.Objects.toString(42)");
         assertEquals(
-            boxInt(literal(42)),
+            typeCoercion(literal(42), ObjectValues.OBJECT),
             expression.getArguments().get(0));
     }
     
@@ -286,14 +287,14 @@ public class JavaReaderTests {
     public void equalityOperatorDoesNotUnboxIfBothOperandsAreBoxed() {
         assertEquals(
             same(
-                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
-                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2)))),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(1))), ObjectValues.OBJECT),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(2))), ObjectValues.OBJECT)),
             readBooleanExpression("new Integer(1) == new Integer(2)"));
 
         assertEquals(
             not(same(
-                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))),
-                constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(1))), ObjectValues.OBJECT),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(2))), ObjectValues.OBJECT))),
             readBooleanExpression("new Integer(1) != new Integer(2)"));
     }
 
@@ -333,7 +334,7 @@ public class JavaReaderTests {
     }
     
     @Test
-    public void valuesOfAssignmentsAreBoxedIfNecessary() {
+    public void valuesOfAssignmentsAreTypeCoercedIfNecessary() {
         ClassNode classNode = readClass(
             "private Object value;" +
             "public Object getValue() {" +
@@ -347,7 +348,7 @@ public class JavaReaderTests {
                     thisReference(TypeName.of("com.example.Example")),
                     "value",
                     ObjectValues.OBJECT),
-                boxInt(literal(4))),
+                typeCoercion(literal(4), ObjectValues.OBJECT)),
             returnNode.getValue());
     }
     
@@ -366,45 +367,11 @@ public class JavaReaderTests {
     }
     
     @Test
-    public void initialValueOfLocalVariableDeclarationsAreBoxedIfNecessary() {
+    public void initialValueOfLocalVariableDeclarationsAreTypeCoercedIfNecessary() {
         List<StatementNode> statements = readStatements("Object x = 4;");
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
-        assertEquals(boxInt(literal(4)), declaration.getInitialValue());
-    }
-    
-    @Test
-    public void integersAreBoxedWhenTargetTypeIsObject() {
-        List<StatementNode> statements = readStatements("Object x = 4;");
-        
-        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
-        assertEquals(boxInt(literal(4)), declaration.getInitialValue());
-    }
-    
-    @Test
-    public void booleansAreBoxedWhenTargetTypeIsObject() {
-        List<StatementNode> statements = readStatements("Object x = true;");
-        
-        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
-        assertEquals(boxBoolean(literal(true)), declaration.getInitialValue());
-    }
-    
-    @Test
-    public void integersAreUnboxedIfTargetTypeIsPrimitive() {
-        List<StatementNode> statements = readStatements("Integer x = 4; int y = x;");
-        
-        LocalVariableDeclarationNode boxedDeclaration = (LocalVariableDeclarationNode) statements.get(0);
-        LocalVariableDeclarationNode unboxedDeclaration = (LocalVariableDeclarationNode) statements.get(1);
-        assertEquals(unboxInt(reference(boxedDeclaration)), unboxedDeclaration.getInitialValue());
-    }
-    
-    @Test
-    public void booleansAreUnboxedIfTargetTypeIsPrimitive() {
-        List<StatementNode> statements = readStatements("Boolean x = false; boolean y = x;");
-        
-        LocalVariableDeclarationNode boxedDeclaration = (LocalVariableDeclarationNode) statements.get(0);
-        LocalVariableDeclarationNode unboxedDeclaration = (LocalVariableDeclarationNode) statements.get(1);
-        assertEquals(StaticMethodCallNode.unboxBoolean(reference(boxedDeclaration)), unboxedDeclaration.getInitialValue());
+        assertEquals(typeCoercion(literal(4), ObjectValues.OBJECT), declaration.getInitialValue());
     }
     
     @Test
@@ -621,19 +588,15 @@ public class JavaReaderTests {
             method.getBody());
     }
 
-    private ExpressionNode readExpressionInInstanceMethod(String expressionSource) {
+    private ExpressionNode readExpressionInInstanceMethod(String returnType, String expressionSource) {
         String javaClass =
-            "public Object main() {" +
+            "public " + returnType + " main() {" +
             "    return " + expressionSource + ";" +
             "}";
         
         ClassNode classNode = readClass(javaClass);
         ReturnNode returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
         return returnStatement.getValue();
-    }
-
-    private ExpressionNode readObjectExpression(String expressionSource) {
-        return readExpression("Object", expressionSource);
     }
 
     private ExpressionNode readBooleanExpression(String expressionSource) {

@@ -56,6 +56,11 @@ public interface ExpressionNode extends Node {
             public T visit(FieldAccessNode fieldAccess) {
                 return visitor.visit(fieldAccess);
             }
+
+            @Override
+            public T visit(TypeCoercionNode typeCoercion) {
+                return visitor.visit(typeCoercion);
+            }
         });
     }
 

@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.not;
+import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.concat;
@@ -29,20 +30,14 @@ public class JavaExpressionReader {
 
     ExpressionNode readExpression(TypeName targetType, Expression expression) {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
-        return handleBoxing(targetType, couscousExpression);
+        return coerceExpression(targetType, couscousExpression);
     }
 
-    static ExpressionNode handleBoxing(TypeName targetType, ExpressionNode couscousExpression) {
-        if (isIntegerBox(targetType, couscousExpression)) {
-            return StaticMethodCallNode.boxInt(couscousExpression);
-        } else if (isIntegerUnbox(targetType, couscousExpression)) {
-            return StaticMethodCallNode.unboxInt(couscousExpression);
-        } else if (isBooleanBox(targetType, couscousExpression)) {
-            return StaticMethodCallNode.boxBoolean(couscousExpression);
-        } else if (isBooleanUnbox(targetType, couscousExpression)) {
-            return StaticMethodCallNode.unboxBoolean(couscousExpression);
-        } else {
+    static ExpressionNode coerceExpression(TypeName targetType, ExpressionNode couscousExpression) {
+        if (targetType.equals(couscousExpression.getType())) {
             return couscousExpression;
+        } else {
+            return typeCoercion(couscousExpression, targetType);
         }
     }
 
@@ -54,26 +49,6 @@ public class JavaExpressionReader {
         } else {
             return type;
         }
-    }
-
-    private static boolean isIntegerBox(TypeName targetType, ExpressionNode expression) {
-        return expression.getType().equals(IntegerValue.REF) &&
-            !targetType.equals(IntegerValue.REF);
-    }
-
-    private static boolean isIntegerUnbox(TypeName targetType, ExpressionNode expression) {
-        return !expression.getType().equals(IntegerValue.REF) &&
-            targetType.equals(IntegerValue.REF);
-    }
-
-    private static boolean isBooleanBox(TypeName targetType, ExpressionNode expression) {
-        return expression.getType().equals(BooleanValue.REF) &&
-            !targetType.equals(BooleanValue.REF);
-    }
-
-    private static boolean isBooleanUnbox(TypeName targetType, ExpressionNode expression) {
-        return !expression.getType().equals(BooleanValue.REF) &&
-            targetType.equals(BooleanValue.REF);
     }
 
     ExpressionNode readExpressionWithoutBoxing(Expression expression) {
@@ -308,7 +283,7 @@ public class JavaExpressionReader {
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
                 left,
-                handleBoxing(
+                coerceExpression(
                     left.getType(),
                     readPrimitiveOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
         }

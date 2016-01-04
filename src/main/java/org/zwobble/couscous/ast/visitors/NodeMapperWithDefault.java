@@ -55,6 +55,11 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
 
     @Override
+    public T visit(TypeCoercionNode typeCoercion) {
+        return defaultValue;
+    }
+
+    @Override
     public T visit(ReturnNode returnNode) {
         return defaultValue;
     }

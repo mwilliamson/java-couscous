@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonBackend;
@@ -8,13 +9,12 @@ import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
-import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class JavaToPythonTests extends CompilerTests {
     protected PrimitiveValue execProgram(

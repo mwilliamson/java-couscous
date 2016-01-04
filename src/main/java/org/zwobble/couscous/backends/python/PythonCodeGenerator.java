@@ -261,6 +261,22 @@ public class PythonCodeGenerator {
         public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
             return pythonAttributeAccess(generateExpression(fieldAccess.getLeft()), fieldAccess.getFieldName());
         }
+
+        @Override
+        public PythonExpressionNode visit(TypeCoercionNode typeCoercion) {
+            PythonExpressionNode value = generateExpression(typeCoercion.getExpression());
+            if (typeCoercion.isIntegerBox()) {
+                return internalMethod("boxInt", asList(value));
+            } else if (typeCoercion.isIntegerUnbox()) {
+                return internalMethod("unboxInt", asList(value));
+            } else {
+                return value;
+            }
+        }
+
+        private PythonExpressionNode internalMethod(String name, List<PythonExpressionNode> arguments) {
+            return pythonCall(pythonAttributeAccess(pythonVariableReference("_couscous"), name), arguments);
+        }
     }
     
     private static boolean isPrimitive(ExpressionNode value) {

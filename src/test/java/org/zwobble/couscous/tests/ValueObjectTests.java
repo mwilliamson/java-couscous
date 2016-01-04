@@ -57,6 +57,7 @@ public class ValueObjectTests {
             {StaticMethodCallNode.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
+            {TypeCoercionNode.class},
             {TypeName.class},
             {VariableDeclaration.class},
             {VariableReferenceNode.class},

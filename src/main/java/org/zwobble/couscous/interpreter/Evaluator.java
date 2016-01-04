@@ -1,23 +1,12 @@
 package org.zwobble.couscous.interpreter;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
-import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.interpreter.values.InterpreterValues;
+import org.zwobble.couscous.interpreter.values.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
@@ -107,7 +96,21 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         InterpreterValue left = eval(fieldAccess.getLeft());
         return left.getField(fieldAccess.getFieldName());
     }
-    
+
+    @Override
+    public InterpreterValue visit(TypeCoercionNode typeCoercion) {
+        // TODO: check that the type coercion is valid
+        // TODO: boxing booleans
+        InterpreterValue value = eval(typeCoercion.getExpression());
+        if (typeCoercion.isIntegerBox()) {
+            return ((IntegerInterpreterValue)value).box();
+        } else if (typeCoercion.isIntegerUnbox()) {
+            return value.getField("value");
+        } else {
+            return value;
+        }
+    }
+
     private List<InterpreterValue> evalArguments(List<? extends ExpressionNode> arguments) {
         return arguments.stream()
             .map(argument -> eval(argument))

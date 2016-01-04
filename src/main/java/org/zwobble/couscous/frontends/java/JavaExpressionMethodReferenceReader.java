@@ -30,7 +30,7 @@ public class JavaExpressionMethodReferenceReader {
 
         return lambda(
             formalArguments,
-            ImmutableList.of(returns(JavaExpressionReader.handleBoxing(
+            ImmutableList.of(returns(JavaExpressionReader.coerceExpression(
                 typeOf(functionalInterfaceMethod.getReturnType()),
                 generateValue(scope, expression, formalArguments)))));
     }

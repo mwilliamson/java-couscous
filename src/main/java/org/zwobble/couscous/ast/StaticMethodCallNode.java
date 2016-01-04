@@ -10,6 +10,7 @@ import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.ObjectValues;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class StaticMethodCallNode implements ExpressionNode {
@@ -18,35 +19,19 @@ public class StaticMethodCallNode implements ExpressionNode {
     }
     
     public static ExpressionNode boxInt(ExpressionNode value) {
-        return staticMethodCall(
-            InternalCouscousValue.REF,
-            "boxInt",
-            asList(value),
-            ObjectValues.BOXED_INT);
+        return typeCoercion(value, ObjectValues.BOXED_INT);
     }
 
     public static ExpressionNode unboxInt(ExpressionNode value) {
-        return staticMethodCall(
-            InternalCouscousValue.REF,
-            "unboxInt",
-            asList(value),
-            IntegerValue.REF);
+        return typeCoercion(value, IntegerValue.REF);
     }
     
     public static ExpressionNode boxBoolean(ExpressionNode value) {
-        return staticMethodCall(
-            InternalCouscousValue.REF,
-            "boxBoolean",
-            asList(value),
-            ObjectValues.BOXED_BOOLEAN);
+        return typeCoercion(value, ObjectValues.BOXED_BOOLEAN);
     }
 
     public static ExpressionNode unboxBoolean(ExpressionNode value) {
-        return staticMethodCall(
-            InternalCouscousValue.REF,
-            "unboxBoolean",
-            asList(value),
-            BooleanValue.REF);
+        return typeCoercion(value, BooleanValue.REF);
     }
     
     public static StaticMethodCallNode staticMethodCall(

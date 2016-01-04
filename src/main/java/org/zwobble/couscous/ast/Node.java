@@ -61,6 +61,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(TypeCoercionNode typeCoercion) {
+                visitor.visit(typeCoercion);
+                return null;
+            }
+
+            @Override
             public Void visit(ReturnNode returnNode) {
                 visitor.visit(returnNode);
                 return null;

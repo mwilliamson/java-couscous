@@ -1,14 +1,6 @@
 package org.zwobble.couscous.ast.visitors;
 
-import org.zwobble.couscous.ast.AssignmentNode;
-import org.zwobble.couscous.ast.ConstructorCallNode;
-import org.zwobble.couscous.ast.FieldAccessNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.MethodCallNode;
-import org.zwobble.couscous.ast.StaticMethodCallNode;
-import org.zwobble.couscous.ast.TernaryConditionalNode;
-import org.zwobble.couscous.ast.ThisReferenceNode;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 
 public interface ExpressionNodeMapper<T> {
     T visit(LiteralNode literal);
@@ -20,4 +12,5 @@ public interface ExpressionNodeMapper<T> {
     T visit(StaticMethodCallNode staticMethodCall);
     T visit(ConstructorCallNode call);
     T visit(FieldAccessNode fieldAccess);
+    T visit(TypeCoercionNode typeCoercion);
 }

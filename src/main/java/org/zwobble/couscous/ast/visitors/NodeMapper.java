@@ -12,6 +12,7 @@ public interface NodeMapper<T> {
     T visit(StaticMethodCallNode staticMethodCall);
     T visit(ConstructorCallNode call);
     T visit(FieldAccessNode fieldAccess);
+    T visit(TypeCoercionNode typeCoercion);
 
     T visit(ReturnNode returnNode);
     T visit(ExpressionStatementNode expressionStatement);

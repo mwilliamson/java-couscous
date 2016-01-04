@@ -80,6 +80,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(TypeCoercionNode typeCoercion) {
+                return Stream.of(typeCoercion.getExpression());
+            }
+
+            @Override
             public Stream<Node> visit(ReturnNode returnNode) {
                 return Stream.of(returnNode.getValue());
             }
