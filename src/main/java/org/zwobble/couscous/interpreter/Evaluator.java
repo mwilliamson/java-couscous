@@ -46,7 +46,10 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     
     @Override
     public InterpreterValue visit(ThisReferenceNode reference) {
-        return environment.getThis().get();
+        InterpreterValue thisValue = environment.getThis().get();
+        // TODO: add a test for this
+        InterpreterTypes.checkIsInstance(reference.getType(), thisValue);
+        return thisValue;
     }
     
     @Override
