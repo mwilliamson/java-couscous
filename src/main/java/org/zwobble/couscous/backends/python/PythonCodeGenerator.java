@@ -266,9 +266,10 @@ public class PythonCodeGenerator {
         public PythonExpressionNode visit(TypeCoercionNode typeCoercion) {
             PythonExpressionNode value = generateExpression(typeCoercion.getExpression());
             if (isIntegerBox(typeCoercion)) {
+                // TODO: replace with direct access to java.lang.Integer
                 return internalMethod("boxInt", asList(value));
             } else if (isIntegerUnbox(typeCoercion)) {
-                return internalMethod("unboxInt", asList(value));
+                return pythonAttributeAccess(value, "_value");
             } else {
                 return value;
             }
