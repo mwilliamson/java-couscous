@@ -1,7 +1,5 @@
 ## TODO
 
-* `this` capture for lambdas/anonymous classes
-
 * `String::lower`, `String::equals`, `String::add`
 
 * Boxing and unboxing for `String`s
