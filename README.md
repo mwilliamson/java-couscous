@@ -13,8 +13,6 @@
   just the simple name of the class, with an integer ID if the codebase
   has more than one type of the same name?
 
-* Treat boxed primitives the same as the raw primitives.
-
 * Handle boxing/unboxing when overriding method in supertype with more/less
   specific return types/arguments. For instance, if an interface defines a
   method that returns `Object`, then a subtype may override that method
