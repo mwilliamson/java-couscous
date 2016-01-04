@@ -1,8 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
 
 import java.util.function.Function;
 
@@ -26,26 +24,6 @@ public class TypeCoercionNode implements ExpressionNode {
     @Override
     public TypeName getType() {
         return type;
-    }
-
-    public boolean isIntegerBox() {
-        return expression.getType().equals(IntegerValue.REF) &&
-            !type.equals(IntegerValue.REF);
-    }
-
-    public boolean isIntegerUnbox() {
-        return !expression.getType().equals(IntegerValue.REF) &&
-            type.equals(IntegerValue.REF);
-    }
-
-    public boolean isBooleanBox() {
-        return expression.getType().equals(BooleanValue.REF) &&
-            !type.equals(BooleanValue.REF);
-    }
-
-    public boolean isBooleanUnbox() {
-        return !expression.getType().equals(BooleanValue.REF) &&
-            type.equals(BooleanValue.REF);
     }
 
     @Override

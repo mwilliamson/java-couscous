@@ -4,6 +4,8 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.values.*;
+import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,13 +104,33 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         // TODO: check that the type coercion is valid
         // TODO: boxing booleans
         InterpreterValue value = eval(typeCoercion.getExpression());
-        if (typeCoercion.isIntegerBox()) {
+        if (isIntegerBox(typeCoercion)) {
             return ((IntegerInterpreterValue)value).box();
-        } else if (typeCoercion.isIntegerUnbox()) {
+        } else if (isIntegerUnbox(typeCoercion)) {
             return value.getField("value");
         } else {
             return value;
         }
+    }
+
+    private static boolean isIntegerBox(TypeCoercionNode typeCoercion) {
+        return typeCoercion.getExpression().getType().equals(IntegerValue.REF) &&
+            !typeCoercion.getType().equals(IntegerValue.REF);
+    }
+
+    private static boolean isIntegerUnbox(TypeCoercionNode typeCoercion) {
+        return !typeCoercion.getExpression().getType().equals(IntegerValue.REF) &&
+            typeCoercion.getType().equals(IntegerValue.REF);
+    }
+
+    private static boolean isBooleanBox(TypeCoercionNode typeCoercion) {
+        return typeCoercion.getExpression().getType().equals(BooleanValue.REF) &&
+            !typeCoercion.getType().equals(BooleanValue.REF);
+    }
+
+    private static boolean isBooleanUnbox(TypeCoercionNode typeCoercion) {
+        return !typeCoercion.getExpression().getType().equals(BooleanValue.REF) &&
+            typeCoercion.getType().equals(BooleanValue.REF);
     }
 
     private List<InterpreterValue> evalArguments(List<? extends ExpressionNode> arguments) {
