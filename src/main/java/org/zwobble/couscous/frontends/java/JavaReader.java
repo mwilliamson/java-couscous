@@ -32,7 +32,6 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
-import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.toMap;
 
@@ -109,51 +108,47 @@ public class JavaReader {
     private List<StatementNode> replaceCaptureReferences(
         TypeName className,
         List<StatementNode> body,
-        List<VariableDeclaration> freeVariables)
+        List<CapturedVariable> freeVariables)
     {
-        Map<Identifier, ExpressionNode> freeVariablesById = Maps.transformValues(
-            Maps.uniqueIndex(freeVariables, VariableDeclaration::getId),
+        Map<ExpressionNode, ExpressionNode> replacements = Maps.transformValues(
+            Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
             freeVariable -> captureAccess(className, freeVariable));
-        Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(freeVariablesById);
+        Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(replacements);
         return eagerMap(body, statement -> statement.replaceExpressions(replaceExpression));
     }
 
     private class CaptureReplacer implements Function<ExpressionNode, ExpressionNode> {
-        private final Map<Identifier, ExpressionNode> freeVariablesById;
+        private final Map<ExpressionNode, ExpressionNode> replacements;
 
-        public CaptureReplacer(Map<Identifier, ExpressionNode> freeVariablesById) {
-            this.freeVariablesById = freeVariablesById;
+        public CaptureReplacer(Map<ExpressionNode, ExpressionNode> replacements) {
+            this.replacements = replacements;
         }
 
         @Override
         public ExpressionNode apply(ExpressionNode expression) {
-            return tryCast(VariableReferenceNode.class, expression)
-                .flatMap(variableNode -> Optional.ofNullable(freeVariablesById.get(variableNode.getReferentId())))
+            return Optional.ofNullable(replacements.get(expression))
                 .orElseGet(() -> expression.replaceExpressions(this));
         }
     }
 
-    private ConstructorNode buildConstructor(Scope outerScope, TypeName type, List<VariableDeclaration> freeVariables) {
+    private ConstructorNode buildConstructor(Scope outerScope, TypeName type, List<CapturedVariable> freeVariables) {
         Scope scope = outerScope.enterConstructor();
-        Map<Identifier, VariableDeclaration> argumentDeclarationsById = toMap(
-            freeVariables,
-            freeVariable -> immutableEntry(
-                freeVariable.getId(),
-                scope.generateVariable(freeVariable.getName(), freeVariable.getType())));
 
-        List<FormalArgumentNode> arguments = eagerMap(
-            freeVariables,
-            freeVariable -> formalArg(argumentDeclarationsById.get(freeVariable.getId())));
+        ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
+        ImmutableList.Builder<StatementNode> body = ImmutableList.builder();
 
-        List<StatementNode> body = eagerMap(freeVariables, freeVariable -> assignStatement(
-            captureAccess(type, freeVariable),
-            reference(argumentDeclarationsById.get(freeVariable.getId()))));
+        for (CapturedVariable variable : freeVariables) {
+            FormalArgumentNode argument = scope.formalArgument(variable.field.getName(), variable.field.getType());
+            arguments.add(argument);
+            body.add(assignStatement(captureAccess(type, variable), reference(argument)));
+        }
 
-        return constructor(arguments, body);
+        return constructor(arguments.build(), body.build());
     }
 
-    private FieldAccessNode captureAccess(TypeName type, VariableDeclaration freeVariable) {
-        return fieldAccess(thisReference(type), freeVariable.getName(), freeVariable.getType());
+    private FieldAccessNode captureAccess(TypeName type, CapturedVariable freeVariable) {
+        FieldDeclarationNode field = freeVariable.field;
+        return fieldAccess(thisReference(type), field.getName(), field.getType());
     }
 
     GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
@@ -170,6 +165,16 @@ public class JavaReader {
         return closure;
     }
 
+    private static class CapturedVariable {
+        private final ReferenceNode freeVariable;
+        private final FieldDeclarationNode field;
+
+        public CapturedVariable(ReferenceNode freeVariable, FieldDeclarationNode field) {
+            this.freeVariable = freeVariable;
+            this.field = field;
+        }
+    }
+
     private GeneratedClosure classWithCapture(
         Scope scope,
         TypeName className,
@@ -177,10 +182,11 @@ public class JavaReader {
         List<FieldDeclarationNode> declaredFields,
         List<MethodNode> methods
     ) {
-        List<VariableDeclaration> freeVariables = findFreeVariables(ExtraLists.concat(declaredFields, methods));
-        Iterable<FieldDeclarationNode> captureFields = transform(
+        List<ReferenceNode> freeVariables = findFreeVariables(ExtraLists.concat(declaredFields, methods));
+        List<CapturedVariable> capturedVariables = ImmutableList.copyOf(transform(
             freeVariables,
-            freeVariable -> field(freeVariable.getName(), freeVariable.getType()));
+            freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
+        Iterable<FieldDeclarationNode> captureFields = transform(capturedVariables, capture -> capture.field);
 
         List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(declaredFields, captureFields));
 
@@ -188,10 +194,26 @@ public class JavaReader {
             className,
             superTypes,
             fields,
-            buildConstructor(scope, className, freeVariables),
+            buildConstructor(scope, className, capturedVariables),
             eagerMap(methods, method ->
-                method.mapBody(body -> replaceCaptureReferences(className, body, freeVariables))));
+                method.mapBody(body -> replaceCaptureReferences(className, body, capturedVariables))));
         return new GeneratedClosure(classNode, freeVariables);
+    }
+
+    private FieldDeclarationNode fieldForCapture(ReferenceNode freeVariable) {
+        return freeVariable.accept(new ReferenceNode.Visitor<FieldDeclarationNode>() {
+            @Override
+            public FieldDeclarationNode visit(VariableReferenceNode reference) {
+                return field(reference.getReferent().getName(), reference.getType());
+            }
+
+            @Override
+            public FieldDeclarationNode visit(ThisReferenceNode thisReference) {
+                TypeName type = thisReference.getType();
+                String name = "this_" + type.getQualifiedName().replace(".", "__");
+                return field(name, type);
+            }
+        });
     }
 
     private TypeName generateAnonymousName(ASTNode node) {

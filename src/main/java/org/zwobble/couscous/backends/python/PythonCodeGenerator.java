@@ -194,7 +194,7 @@ public class PythonCodeGenerator {
         return expression.accept(EXPRESSION_GENERATOR);
     }
     
-    private static List<PythonExpressionNode> generateExpressions(Iterable<ExpressionNode> expressions) {
+    private static List<PythonExpressionNode> generateExpressions(Iterable<? extends ExpressionNode> expressions) {
         return ImmutableList.copyOf(Iterables.transform(expressions, PythonCodeGenerator::generateExpression));
     }
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();

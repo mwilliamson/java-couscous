@@ -70,7 +70,7 @@ public class NodeStructure {
             }
 
             @Override
-            public Stream<ExpressionNode> visit(ConstructorCallNode call) {
+            public Stream<? extends ExpressionNode> visit(ConstructorCallNode call) {
                 return call.getArguments().stream();
             }
 

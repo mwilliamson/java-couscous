@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -14,7 +13,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
@@ -124,7 +122,6 @@ public abstract class CompilerTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void lambdasWithThisCapture() throws Exception {
         assertEquals(
             value(42),

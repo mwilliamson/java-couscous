@@ -10,16 +10,16 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 public class ConstructorCallNode implements ExpressionNode {
     public static ConstructorCallNode constructorCall(
             TypeName type,
-            List<ExpressionNode> arguments) {
+            List<? extends ExpressionNode> arguments) {
         return new ConstructorCallNode(type, arguments);
     }
     
     private final TypeName type;
-    private final List<ExpressionNode> arguments;
+    private final List<? extends ExpressionNode> arguments;
     
     public ConstructorCallNode(
             TypeName type,
-            List<ExpressionNode> arguments) {
+            List<? extends ExpressionNode> arguments) {
         this.type = type;
         this.arguments = arguments;
     }
@@ -29,7 +29,7 @@ public class ConstructorCallNode implements ExpressionNode {
         return type;
     }
     
-    public List<ExpressionNode> getArguments() {
+    public List<? extends ExpressionNode> getArguments() {
         return arguments;
     }
     

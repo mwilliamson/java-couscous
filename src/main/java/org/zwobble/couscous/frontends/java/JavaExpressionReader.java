@@ -17,7 +17,6 @@ import static org.zwobble.couscous.ast.MethodCallNode.not;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.concat;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaExpressionReader {
     private final Scope scope;
@@ -232,8 +231,8 @@ public class JavaExpressionReader {
             captureArguments(closure));
     }
 
-    private List<ExpressionNode> captureArguments(GeneratedClosure closure) {
-        return eagerMap(closure.getCaptures(), VariableReferenceNode::reference);
+    private List<? extends ExpressionNode> captureArguments(GeneratedClosure closure) {
+        return closure.getCaptures();
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

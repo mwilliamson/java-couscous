@@ -6,7 +6,7 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 
 import java.util.function.Function;
 
-public class VariableReferenceNode implements AssignableExpressionNode {
+public class VariableReferenceNode implements AssignableExpressionNode, ReferenceNode {
     public static VariableReferenceNode reference(VariableNode variable) {
         return new VariableReferenceNode(variable.getDeclaration());
     }
@@ -47,6 +47,11 @@ public class VariableReferenceNode implements AssignableExpressionNode {
     @Override
     public void accept(AssignableExpressionNodeVisitor mapper) {
         mapper.visit(this);
+    }
+
+    @Override
+    public <T> T accept(Visitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

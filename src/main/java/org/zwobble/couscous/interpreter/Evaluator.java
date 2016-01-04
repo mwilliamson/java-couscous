@@ -108,7 +108,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return left.getField(fieldAccess.getFieldName());
     }
     
-    private List<InterpreterValue> evalArguments(List<ExpressionNode> arguments) {
+    private List<InterpreterValue> evalArguments(List<? extends ExpressionNode> arguments) {
         return arguments.stream()
             .map(argument -> eval(argument))
             .collect(Collectors.toList());
