@@ -12,17 +12,5 @@ public class InternalCouscousInterpreterValue {
             (environment, arguments) ->
                 new BooleanInterpreterValue(arguments.get(0) == arguments.get(1)))
 
-        .staticMethod("boxBoolean", asList(BooleanValue.REF),
-            ((environment, arguments) ->  arguments.get(0)))
-
-        .staticMethod("unboxBoolean", asList(BooleanValue.REF),
-            ((environment, arguments) ->  arguments.get(0)))
-
-        .staticMethod("boxInt", asList(IntegerValue.REF),
-            ((environment, arguments) ->  ((IntegerInterpreterValue)arguments.get(0)).box()))
-
-        .staticMethod("unboxInt", asList(ObjectValues.BOXED_INT),
-            ((environment, arguments) ->  arguments.get(0).getField("value")))
-
         .build();
 }
