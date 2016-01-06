@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
+import org.zwobble.couscous.backends.python.ast.PythonCallNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.values.*;
@@ -47,6 +49,9 @@ public class PrimitiveMethods {
         
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
+
+        methods.put("toString", (receiver, arguments) ->
+            pythonCall(pythonVariableReference("str"), ImmutableList.of(receiver)));
         
         addOperation(methods, Operator.ADD.getMethodName(), "+");
         addOperation(methods, Operator.SUBTRACT.getMethodName(), "-");
@@ -91,6 +96,7 @@ public class PrimitiveMethods {
             .put(StringValue.REF, STRING_METHODS)
             .put(BooleanValue.REF, BOOLEAN_METHODS)
             .put(IntegerValue.REF, INT_METHODS)
+            .put(ObjectValues.BOXED_INT, INT_METHODS)
             .build();
     
     private static final Map<String, PrimitiveStaticMethodGenerator> INTERNAL_METHODS =

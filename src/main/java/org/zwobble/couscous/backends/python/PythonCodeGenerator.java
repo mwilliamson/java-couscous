@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
@@ -50,7 +52,7 @@ public class PythonCodeGenerator {
         PythonFunctionDefinitionNode constructor =
             generateConstructor(classNode.getConstructor());
 
-        Iterable<PythonFunctionDefinitionNode> pythonMethods = Iterables.transform(
+        Iterable<PythonFunctionDefinitionNode> pythonMethods = transform(
             classNode.getMethods(),
             PythonCodeGenerator::generateFunction);
 
@@ -128,14 +130,14 @@ public class PythonCodeGenerator {
     }
 
     private static PythonFunctionDefinitionNode generateConstructor(ConstructorNode constructor) {
-        Iterable<String> explicitArgumentNames = Iterables.transform(constructor.getArguments(), argument -> argument.getName());
+        Iterable<String> explicitArgumentNames = transform(constructor.getArguments(), argument -> argument.getName());
         Iterable<String> argumentNames = Iterables.concat(asList("self"), explicitArgumentNames);
         List<PythonStatementNode> pythonBody = constructor.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
         return pythonFunctionDefinition("__init__", ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
 
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
-        Iterable<String> explicitArgumentNames = Iterables.transform(method.getArguments(), argument -> argument.getName());
+        Iterable<String> explicitArgumentNames = transform(method.getArguments(), argument -> argument.getName());
         Iterable<String> argumentNames = Iterables.concat(
             method.isStatic() ? Collections.<String>emptyList() : asList("self"),
             explicitArgumentNames);
@@ -195,7 +197,7 @@ public class PythonCodeGenerator {
     }
 
     private static List<PythonExpressionNode> generateExpressions(Iterable<? extends ExpressionNode> expressions) {
-        return ImmutableList.copyOf(Iterables.transform(expressions, PythonCodeGenerator::generateExpression));
+        return ImmutableList.copyOf(transform(expressions, PythonCodeGenerator::generateExpression));
     }
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
 
@@ -294,7 +296,9 @@ public class PythonCodeGenerator {
     }
 
     public static String toName(MethodSignature signature) {
-        return signature.getName() + "_" + signature.getArguments().size();
+        return Joiner.on("__").join(Iterables.concat(
+            ImmutableList.of(signature.getName()),
+            transform(signature.getArguments(), argument -> argument.getQualifiedName().replace('.', '_'))));
     }
 
     private static boolean isPrimitive(ExpressionNode value) {

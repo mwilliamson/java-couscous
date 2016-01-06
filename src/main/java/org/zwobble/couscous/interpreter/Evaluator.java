@@ -113,7 +113,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         // TODO: boxing booleans
         InterpreterValue value = eval(typeCoercion.getExpression());
         if (isIntegerBox(typeCoercion)) {
-            return ((IntegerInterpreterValue)value).box();
+            return BoxedIntegerInterpreterValue.of(((IntegerInterpreterValue)value));
         } else if (isIntegerUnbox(typeCoercion)) {
             return value.getField("value");
         } else {
