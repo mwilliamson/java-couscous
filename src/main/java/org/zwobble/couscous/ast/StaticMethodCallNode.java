@@ -26,14 +26,6 @@ public class StaticMethodCallNode implements ExpressionNode {
         return typeCoercion(value, IntegerValue.REF);
     }
     
-    public static ExpressionNode boxBoolean(ExpressionNode value) {
-        return typeCoercion(value, ObjectValues.BOXED_BOOLEAN);
-    }
-
-    public static ExpressionNode unboxBoolean(ExpressionNode value) {
-        return typeCoercion(value, BooleanValue.REF);
-    }
-    
     public static StaticMethodCallNode staticMethodCall(
             String className,
             String methodName,
