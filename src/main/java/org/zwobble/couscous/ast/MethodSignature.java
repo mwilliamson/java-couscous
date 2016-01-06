@@ -1,6 +1,4 @@
-package org.zwobble.couscous.interpreter;
-
-import org.zwobble.couscous.ast.TypeName;
+package org.zwobble.couscous.ast;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +10,14 @@ public class MethodSignature {
     public MethodSignature(String name, List<TypeName> arguments) {
         this.name = name;
         this.arguments = arguments;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<TypeName> getArguments() {
+        return arguments;
     }
 
     @Override

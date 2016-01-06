@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonBackend;
@@ -19,6 +20,7 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import static java.lang.Integer.parseInt;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class PythonMethodRunner implements MethodRunner {
@@ -46,7 +48,11 @@ public class PythonMethodRunner implements MethodRunner {
             throws IOException, InterruptedException {
         
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
-        String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";print(repr(" + className.getSimpleName() + "." + methodName + "(" + argumentsString + ")))";
+        String pythonMethodName = PythonCodeGenerator.toName(new MethodSignature(
+            methodName,
+            eagerMap(arguments, argument -> argument.getType())));
+        String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
+            "print(repr(" + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ")))";
         Process process = new ProcessBuilder("python3.4", "-c", program).directory(directoryPath.toFile()).start();
         int exitCode = process.waitFor();
         String output = readString(process.getInputStream()).trim();

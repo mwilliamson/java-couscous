@@ -6,6 +6,8 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import java.util.List;
 import java.util.function.Function;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+
 public class MethodNode implements CallableNode {
     public static Builder staticMethod(String name) {
         return builder(name).isStatic(true);
@@ -114,6 +116,12 @@ public class MethodNode implements CallableNode {
     
     public List<StatementNode> getBody() {
         return body;
+    }
+
+    public MethodSignature signature() {
+        return new MethodSignature(
+            name,
+            eagerMap(arguments, argument -> argument.getType()));
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {

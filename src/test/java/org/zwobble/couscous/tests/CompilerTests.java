@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -134,7 +133,6 @@ public abstract class CompilerTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void staticMethodOverloads() throws Exception {
         assertEquals(
             value(42),

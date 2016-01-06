@@ -4,12 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;

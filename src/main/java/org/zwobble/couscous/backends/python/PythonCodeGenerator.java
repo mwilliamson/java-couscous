@@ -140,7 +140,7 @@ public class PythonCodeGenerator {
             method.isStatic() ? Collections.<String>emptyList() : asList("self"),
             explicitArgumentNames);
         List<PythonStatementNode> pythonBody = generateStatements(method.getBody());
-        return pythonFunctionDefinition(method.getName(), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
+        return pythonFunctionDefinition(toName(method.signature()), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
 
     private static List<PythonStatementNode> generateStatements(List<StatementNode> statements) {
@@ -233,7 +233,7 @@ public class PythonCodeGenerator {
                 PrimitiveMethodGenerator primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(methodCall.getReceiver().getType(), methodCall.getMethodName()).get();
                 return primitiveMethodGenerator.generate(receiver, arguments);
             } else {
-                return pythonCall(pythonAttributeAccess(receiver, methodCall.getMethodName()), arguments);
+                return pythonCall(pythonAttributeAccess(receiver, toName(methodCall.signature())), arguments);
             }
         }
 
@@ -241,7 +241,8 @@ public class PythonCodeGenerator {
         public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
             TypeName className = staticMethodCall.getClassName();
             PythonVariableReferenceNode classReference = pythonVariableReference(className.getSimpleName());
-            PythonAttributeAccessNode methodReference = pythonAttributeAccess(classReference, staticMethodCall.getMethodName());
+            PythonAttributeAccessNode methodReference =
+                pythonAttributeAccess(classReference, toName(staticMethodCall.signature()));
             List<PythonExpressionNode> arguments = generateExpressions(staticMethodCall.getArguments());
 
             return PrimitiveMethods.getPrimitiveStaticMethod(className, staticMethodCall.getMethodName())
@@ -290,6 +291,10 @@ public class PythonCodeGenerator {
         private PythonExpressionNode internalMethod(String name, List<PythonExpressionNode> arguments) {
             return pythonCall(pythonAttributeAccess(pythonVariableReference("_couscous"), name), arguments);
         }
+    }
+
+    public static String toName(MethodSignature signature) {
+        return signature.getName() + "_" + signature.getArguments().size();
     }
 
     private static boolean isPrimitive(ExpressionNode value) {

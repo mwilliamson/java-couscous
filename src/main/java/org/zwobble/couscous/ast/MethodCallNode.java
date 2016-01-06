@@ -111,6 +111,10 @@ public class MethodCallNode implements ExpressionNode {
     public TypeName getType() {
         return type;
     }
+
+    public MethodSignature signature() {
+        return new MethodSignature(methodName, eagerMap(arguments, argument -> argument.getType()));
+    }
     
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {

@@ -3,6 +3,7 @@ package org.zwobble.couscous.interpreter;
 import java.util.List;
 import java.util.Optional;
 
+import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;

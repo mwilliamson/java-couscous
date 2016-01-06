@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
+import org.zwobble.couscous.ast.MethodSignature;
+
 public final class NoSuchMethod extends InterpreterException {
     private static final long serialVersionUID = 1L;
     private MethodSignature signature;

@@ -3,16 +3,13 @@ package org.zwobble.couscous.interpreter.values;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.TypeName;
+
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.util.Casts;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import static java.util.stream.Collectors.toMap;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ConcreteType {
     
@@ -74,7 +71,7 @@ public class ConcreteType {
         Map<MethodSignature, MethodValue> methods = classNode.getMethods()
             .stream()
             .filter(method -> !method.isStatic())
-            .collect(toMap(method -> signature(method), method -> {
+            .collect(toMap(method -> method.signature(), method -> {
                 List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
                 return new MethodValue(argumentTypes, (environment, arguments) -> {
                     return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
@@ -83,19 +80,13 @@ public class ConcreteType {
         Map<MethodSignature, StaticMethodValue> staticMethods = classNode.getMethods()
             .stream()
             .filter(method -> method.isStatic())
-            .collect(toMap(method -> signature(method), method -> {
+            .collect(toMap(method -> method.signature(), method -> {
                 List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
                 return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
                     return Executor.callMethod(environment, method, Optional.empty(), arguments);
                 });
             }));
         return new ConcreteType(classNode.getName(), classNode.getSuperTypes(), fields, constructor, methods, staticMethods);
-    }
-
-    private static MethodSignature signature(MethodNode method) {
-        return new MethodSignature(
-            method.getName(),
-            eagerMap(method.getArguments(), argument -> argument.getType()));
     }
 
     private static List<TypeName> getArgumentTypes(List<FormalArgumentNode> arguments) {
