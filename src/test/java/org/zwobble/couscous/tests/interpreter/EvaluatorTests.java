@@ -7,16 +7,7 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.interpreter.ConditionMustBeBoolean;
-import org.zwobble.couscous.interpreter.Environment;
-import org.zwobble.couscous.interpreter.JavaProject;
-import org.zwobble.couscous.interpreter.MapBackedProject;
-import org.zwobble.couscous.interpreter.NoSuchField;
-import org.zwobble.couscous.interpreter.NoSuchMethod;
-import org.zwobble.couscous.interpreter.StackFrameBuilder;
-import org.zwobble.couscous.interpreter.UnboundField;
-import org.zwobble.couscous.interpreter.UnexpectedValueType;
-import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
@@ -72,31 +63,33 @@ public class EvaluatorTests extends BackendEvalTests {
                     "size",
                     asList(),
                     IntegerValue.REF)));
-        assertEquals(new NoSuchMethod("size"), exception);
+        assertEquals(new MethodSignature("size", asList()), exception.getSignature());
     }
     
     @Test
     public void errorIfWrongNumberOfArgumentsArePassed() {
-        WrongNumberOfArguments exception = assertThrows(WrongNumberOfArguments.class,
+        NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> eval(emptyEnvironment(),
                 methodCall(
                     literal("hello"),
                     "substring",
                     asList(literal(1)),
                     StringValue.REF)));
-        assertEquals(new WrongNumberOfArguments(2, 1), exception);
+        assertEquals(new MethodSignature("substring", asList(IntegerValue.REF)), exception.getSignature());
     }
     
     @Test
     public void errorIfArgumentIsWrongType() {
-        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
+        NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> eval(emptyEnvironment(),
                 methodCall(
                     literal("hello"),
                     "substring",
                     asList(literal(0), literal("")),
                     StringValue.REF)));
-        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+        assertEquals(
+            new MethodSignature("substring", asList(IntegerValue.REF, StringValue.REF)),
+            exception.getSignature());
     }
     
     @Test

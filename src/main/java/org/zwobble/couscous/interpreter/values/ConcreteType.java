@@ -5,17 +5,14 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.interpreter.Environment;
-import org.zwobble.couscous.interpreter.Executor;
-import org.zwobble.couscous.interpreter.InterpreterTypes;
-import org.zwobble.couscous.interpreter.NoSuchMethod;
-import org.zwobble.couscous.interpreter.PositionalArguments;
-import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.util.Casts;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ConcreteType {
     
@@ -33,8 +30,8 @@ public class ConcreteType {
     
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
-        private final ImmutableMap.Builder<String, MethodValue> methods = ImmutableMap.builder();
-        private final ImmutableMap.Builder<String, StaticMethodValue> staticMethods = ImmutableMap.builder();
+        private final ImmutableMap.Builder<MethodSignature, MethodValue> methods = ImmutableMap.builder();
+        private final ImmutableMap.Builder<MethodSignature, StaticMethodValue> staticMethods = ImmutableMap.builder();
         private final Class<T> interpreterValueType;
         private final TypeName name;
         
@@ -49,14 +46,14 @@ public class ConcreteType {
         }
 
         public Builder<T> method(String name, List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
-            methods.put(name, new MethodValue(argumentsTypes, (environment, arguments) -> {
+            methods.put(new MethodSignature(name, argumentsTypes), new MethodValue(argumentsTypes, (environment, arguments) -> {
                 return Casts.tryCast(interpreterValueType, arguments.getReceiver()).map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments()))).orElseThrow(() -> new RuntimeException("receiver is of wrong type"));
             }));
             return this;
         }
         
         public Builder<T> staticMethod(String name, List<TypeName> argumentsTypes, BiFunction<Environment, PositionalArguments, InterpreterValue> method) {
-            staticMethods.put(name, new StaticMethodValue(argumentsTypes, method));
+            staticMethods.put(new MethodSignature(name, argumentsTypes), new StaticMethodValue(argumentsTypes, method));
             return this;
         }
         
@@ -74,19 +71,19 @@ public class ConcreteType {
     public static ConcreteType fromNode(ClassNode classNode) {
         Map<String, FieldValue> fields = classNode.getFields().stream().collect(toMap(field -> field.getName(), field -> new FieldValue(field.getName(), field.getType())));
         MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
-        Map<String, MethodValue> methods = classNode.getMethods()
+        Map<MethodSignature, MethodValue> methods = classNode.getMethods()
             .stream()
             .filter(method -> !method.isStatic())
-            .collect(toMap(method -> method.getName(), method -> {
+            .collect(toMap(method -> signature(method), method -> {
                 List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
                 return new MethodValue(argumentTypes, (environment, arguments) -> {
                     return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
                 });
             }));
-        Map<String, StaticMethodValue> staticMethods = classNode.getMethods()
+        Map<MethodSignature, StaticMethodValue> staticMethods = classNode.getMethods()
             .stream()
             .filter(method -> method.isStatic())
-            .collect(toMap(method -> method.getName(), method -> {
+            .collect(toMap(method -> signature(method), method -> {
                 List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
                 return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
                     return Executor.callMethod(environment, method, Optional.empty(), arguments);
@@ -94,7 +91,13 @@ public class ConcreteType {
             }));
         return new ConcreteType(classNode.getName(), classNode.getSuperTypes(), fields, constructor, methods, staticMethods);
     }
-    
+
+    private static MethodSignature signature(MethodNode method) {
+        return new MethodSignature(
+            method.getName(),
+            eagerMap(method.getArguments(), argument -> argument.getType()));
+    }
+
     private static List<TypeName> getArgumentTypes(List<FormalArgumentNode> arguments) {
         return arguments.stream().map(arg -> arg.getType()).collect(Collectors.toList());
     }
@@ -102,16 +105,17 @@ public class ConcreteType {
     private final Set<TypeName> superTypes;
     private final Map<String, FieldValue> fields;
     private final MethodValue constructor;
-    private final Map<String, MethodValue> methods;
-    private final Map<String, StaticMethodValue> staticMethods;
+    private final Map<MethodSignature, MethodValue> methods;
+    private final Map<MethodSignature, StaticMethodValue> staticMethods;
     
     private ConcreteType(
         TypeName name,
         Set<TypeName> superTypes,
         Map<String, FieldValue> fields,
         MethodValue constructor,
-        Map<String, MethodValue> methods,
-        Map<String, StaticMethodValue> staticMethods) {
+        Map<MethodSignature, MethodValue> methods,
+        Map<MethodSignature, StaticMethodValue> staticMethods)
+    {
         this.name = name;
         this.superTypes = superTypes;
         this.fields = fields;
@@ -132,13 +136,13 @@ public class ConcreteType {
         return Optional.ofNullable(fields.get(fieldName));
     }
     
-    public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, String methodName, List<InterpreterValue> arguments) {
-        final org.zwobble.couscous.interpreter.values.MethodValue method = findMethod(methods, methodName, arguments);
+    public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, MethodSignature signature, List<InterpreterValue> arguments) {
+        MethodValue method = findMethod(methods, signature, arguments);
         return method.apply(environment, MethodCallArguments.of(receiver, new PositionalArguments(arguments)));
     }
     
-    public InterpreterValue callStaticMethod(Environment environment, String methodName, List<InterpreterValue> arguments) {
-        final org.zwobble.couscous.interpreter.values.StaticMethodValue method = findMethod(staticMethods, methodName, arguments);
+    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
+        StaticMethodValue method = findMethod(staticMethods, signature, arguments);
         return method.apply(environment, new PositionalArguments(arguments));
     }
     
@@ -149,11 +153,11 @@ public class ConcreteType {
         return object;
     }
     
-    private static <T extends Callable> T findMethod(Map<String, T> methods, String methodName, List<InterpreterValue> arguments) {
-        if (!methods.containsKey(methodName)) {
-            throw new NoSuchMethod(methodName);
+    private static <T extends Callable> T findMethod(Map<MethodSignature, T> methods, MethodSignature signature, List<InterpreterValue> arguments) {
+        if (!methods.containsKey(signature)) {
+            throw new NoSuchMethod(signature);
         }
-        final T method = methods.get(methodName);
+        final T method = methods.get(signature);
         checkMethodArguments(method, arguments);
         return method;
     }

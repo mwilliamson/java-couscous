@@ -10,13 +10,7 @@ import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.interpreter.Interpreter;
-import org.zwobble.couscous.interpreter.JavaProject;
-import org.zwobble.couscous.interpreter.Project;
-import org.zwobble.couscous.interpreter.UnboundVariable;
-import org.zwobble.couscous.interpreter.UnexpectedValueType;
-import org.zwobble.couscous.interpreter.VariableNotInScope;
-import org.zwobble.couscous.interpreter.WrongNumberOfArguments;
+import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendMethodTests;
@@ -25,6 +19,7 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
@@ -44,10 +39,10 @@ public class InterpreterMethodTests extends BackendMethodTests {
     public void errorIfWrongNumberOfArgumentsArePassed() {
         MethodNode.Builder method = staticMethod("hello");
         
-        WrongNumberOfArguments exception = assertThrows(WrongNumberOfArguments.class,
+        NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> runMethod(method, value("hello, world!")));
         
-        assertEquals(new WrongNumberOfArguments(0, 1), exception);
+        assertEquals(new MethodSignature("hello", asList(StringValue.REF)), exception.getSignature());
     }
     
     @Test

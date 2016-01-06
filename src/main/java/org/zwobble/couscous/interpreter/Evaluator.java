@@ -10,6 +10,8 @@ import org.zwobble.couscous.values.IntegerValue;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
         return new Evaluator(environment).eval(expression);
@@ -76,14 +78,20 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         InterpreterValue receiver = eval(methodCall.getReceiver());
         ConcreteType type = receiver.getType();
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
-        return type.callMethod(environment, receiver, methodCall.getMethodName(), arguments);
+        MethodSignature signature = new MethodSignature(
+            methodCall.getMethodName(),
+            eagerMap(arguments, argument -> argument.getType().getName()));
+        return type.callMethod(environment, receiver, signature, arguments);
     }
     
     @Override
     public InterpreterValue visit(StaticMethodCallNode staticMethodCall) {
         ConcreteType clazz = environment.findClass(staticMethodCall.getClassName());
         List<InterpreterValue> arguments = evalArguments(staticMethodCall.getArguments());
-        return clazz.callStaticMethod(environment, staticMethodCall.getMethodName(), arguments);
+        MethodSignature signature = new MethodSignature(
+            staticMethodCall.getMethodName(),
+            eagerMap(arguments, argument -> argument.getType().getName()));
+        return clazz.callStaticMethod(environment, signature, arguments);
     }
     
     @Override

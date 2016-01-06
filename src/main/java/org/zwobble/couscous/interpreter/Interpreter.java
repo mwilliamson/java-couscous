@@ -9,6 +9,8 @@ import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
 import com.google.common.collect.ImmutableMap;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+
 public class Interpreter {
     private Project project;
     
@@ -23,6 +25,9 @@ public class Interpreter {
             ImmutableMap.of());
         
         ConcreteType clazz = environment.findClass(className);
-        return clazz.callStaticMethod(environment, methodName, arguments);
+        MethodSignature signature = new MethodSignature(
+            methodName,
+            eagerMap(arguments, argument -> argument.getType().getName()));
+        return clazz.callStaticMethod(environment, signature, arguments);
     }
 }

@@ -4,8 +4,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import org.zwobble.couscous.ast.Operator;
-import org.zwobble.couscous.interpreter.Environment;
-import org.zwobble.couscous.interpreter.NoSuchField;
+import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -29,10 +28,15 @@ public final class IntegerInterpreterValue implements InterpreterValue {
             (environment, arguments) -> {
                 InterpreterValue right = arguments.getPositionalArguments().get(0);
                 if (right instanceof IntegerInterpreterValue) {
-                    return new BooleanInterpreterValue(arguments.getReceiver().getValue() == ((IntegerInterpreterValue)right).getValue());
+                    return integerEquals(arguments, ((IntegerInterpreterValue)right));
                 } else {
                     return new BooleanInterpreterValue(false);
                 }
+            })
+        .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
+            (environment, arguments) -> {
+                IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getPositionalArguments().get(0);
+                return integerEquals(arguments, right);
             })
         .method(Operator.NOT_EQUALS.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> !left.equals(right)))
@@ -45,7 +49,11 @@ public final class IntegerInterpreterValue implements InterpreterValue {
         .method(Operator.LESS_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left <= right))
         .build();
-    
+
+    private static BooleanInterpreterValue integerEquals(MethodCallArguments<IntegerInterpreterValue> arguments, IntegerInterpreterValue right) {
+        return new BooleanInterpreterValue(arguments.getReceiver().getValue() == right.getValue());
+    }
+
     private static
             BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
             infixReturningInteger(BiFunction<Integer, Integer, Integer> func) {
