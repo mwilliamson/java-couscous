@@ -72,20 +72,26 @@ public class ConcreteType {
     }
     
     public static ConcreteType fromNode(ClassNode classNode) {
-        final java.util.Map<String, FieldValue> fields = classNode.getFields().stream().collect(toMap(field -> field.getName(), field -> new FieldValue(field.getName(), field.getType())));
-        final org.zwobble.couscous.interpreter.values.MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
-        final java.util.Map<String, MethodValue> methods = classNode.getMethods().stream().filter(method -> !method.isStatic()).collect(toMap(method -> method.getName(), method -> {
-            List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
-            return new MethodValue(argumentTypes, (environment, arguments) -> {
-                return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
-            });
-        }));
-        final java.util.Map<String, StaticMethodValue> staticMethods = classNode.getMethods().stream().filter(method -> method.isStatic()).collect(toMap(method -> method.getName(), method -> {
-            List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
-            return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
-                return Executor.callMethod(environment, method, Optional.empty(), arguments);
-            });
-        }));
+        Map<String, FieldValue> fields = classNode.getFields().stream().collect(toMap(field -> field.getName(), field -> new FieldValue(field.getName(), field.getType())));
+        MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
+        Map<String, MethodValue> methods = classNode.getMethods()
+            .stream()
+            .filter(method -> !method.isStatic())
+            .collect(toMap(method -> method.getName(), method -> {
+                List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
+                return new MethodValue(argumentTypes, (environment, arguments) -> {
+                    return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
+                });
+            }));
+        Map<String, StaticMethodValue> staticMethods = classNode.getMethods()
+            .stream()
+            .filter(method -> method.isStatic())
+            .collect(toMap(method -> method.getName(), method -> {
+                List<TypeName> argumentTypes = getArgumentTypes(method.getArguments());
+                return new StaticMethodValue(argumentTypes, (environment, arguments) -> {
+                    return Executor.callMethod(environment, method, Optional.empty(), arguments);
+                });
+            }));
         return new ConcreteType(classNode.getName(), classNode.getSuperTypes(), fields, constructor, methods, staticMethods);
     }
     
