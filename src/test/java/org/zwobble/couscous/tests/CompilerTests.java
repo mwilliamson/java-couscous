@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -130,6 +131,18 @@ public abstract class CompilerTests {
                 TypeName.of("com.example.Lambda"),
                 "value",
                 asList(value(2))));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void staticMethodOverloads() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "static-method-overloads",
+                TypeName.of("com.example.StaticMethodOverloads"),
+                "value",
+                asList()));
     }
 
     private PrimitiveValue execTestProgram(
