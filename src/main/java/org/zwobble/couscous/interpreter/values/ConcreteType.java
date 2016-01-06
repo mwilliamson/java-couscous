@@ -27,6 +27,7 @@ public class ConcreteType {
     
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
+        private MethodValue constructor = new MethodValue(ImmutableList.of(), (environment, arguments) -> InterpreterValues.UNIT);
         private final ImmutableMap.Builder<MethodSignature, MethodValue> methods = ImmutableMap.builder();
         private final ImmutableMap.Builder<MethodSignature, StaticMethodValue> staticMethods = ImmutableMap.builder();
         private final Class<T> interpreterValueType;
@@ -42,13 +43,25 @@ public class ConcreteType {
             return this;
         }
 
-        public Builder<T> method(String name, List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
-            methods.put(new MethodSignature(name, argumentsTypes), new MethodValue(argumentsTypes, (environment, arguments) -> {
-                return Casts.tryCast(interpreterValueType, arguments.getReceiver()).map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments()))).orElseThrow(() -> new RuntimeException("receiver is of wrong type"));
-            }));
+        public Builder<T> constructor(List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
+            constructor = toMethodValue(argumentsTypes, method);
             return this;
         }
-        
+
+        public Builder<T> method(String name, List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
+            methods.put(new MethodSignature(name, argumentsTypes), toMethodValue(argumentsTypes, method));
+            return this;
+        }
+
+        private MethodValue toMethodValue(List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
+            return new MethodValue(
+                argumentsTypes,
+                (environment, arguments) ->
+                    Casts.tryCast(interpreterValueType, arguments.getReceiver())
+                        .map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments())))
+                        .orElseThrow(() -> new RuntimeException("receiver is of wrong type")));
+        }
+
         public Builder<T> staticMethod(String name, List<TypeName> argumentsTypes, BiFunction<Environment, PositionalArguments, InterpreterValue> method) {
             staticMethods.put(new MethodSignature(name, argumentsTypes), new StaticMethodValue(argumentsTypes, method));
             return this;
@@ -59,7 +72,7 @@ public class ConcreteType {
                 name,
                 Collections.emptySet(),
                 fields.build(),
-                new MethodValue(ImmutableList.of(), (environment, arguments) -> InterpreterValues.UNIT),
+                constructor,
                 methods.build(),
                 staticMethods.build());
         }
