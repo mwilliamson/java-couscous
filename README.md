@@ -15,5 +15,3 @@
 
   This needs doing regardless of changes to boxing/unboxing primitives since
   we currently use raw strings rather than boxing them into Java strings.
-
-* Support adding other paths to source e.g. third party libraries
