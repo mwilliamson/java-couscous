@@ -38,6 +38,9 @@ public class PrimitiveMethods {
 
             .put("add", (receiver, arguments) ->
                 PythonBinaryOperation.pythonAdd(receiver, arguments.get(0)))
+
+            .put("toLowerCase", (receiver, arguments) ->
+                pythonCall(pythonAttributeAccess(receiver, "lower"), list()))
             
             .build();
     

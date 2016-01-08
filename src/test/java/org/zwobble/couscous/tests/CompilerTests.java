@@ -149,6 +149,11 @@ public abstract class CompilerTests {
         assertEquals(value("42"), evalExpression("String", "\"4\" + \"2\""));
     }
 
+    @Test
+    public void stringToLowerCase() throws Exception {
+        assertEquals(value("patrick wolf"), evalExpression("String", "\"Patrick Wolf\".toLowerCase()"));
+    }
+
     private PrimitiveValue execTestProgram(
         String directoryName,
         TypeName type,

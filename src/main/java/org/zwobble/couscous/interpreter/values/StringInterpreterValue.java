@@ -26,6 +26,9 @@ public final class StringInterpreterValue implements InterpreterValue {
             return of(arguments.getReceiver().value + right.value);
         })
 
+        .method("toLowerCase", list(), (environment, arguments) ->
+            of(arguments.getReceiver().value.toLowerCase()))
+
         .build();
 
     private final String value;
