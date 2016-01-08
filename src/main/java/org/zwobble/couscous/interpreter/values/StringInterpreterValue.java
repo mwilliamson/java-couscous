@@ -1,20 +1,33 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.Optional;
 import org.zwobble.couscous.interpreter.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 import org.zwobble.couscous.values.StringValue;
-import static java.util.Arrays.asList;
+
+import java.util.Optional;
+
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class StringInterpreterValue implements InterpreterValue {
-    public static final ConcreteType TYPE = ConcreteType.builder(StringInterpreterValue.class, StringValue.REF).method("length", list(), (environment, arguments) -> new IntegerInterpreterValue(arguments.getReceiver().value.length())).method("substring", list(IntegerValue.REF, IntegerValue.REF), (environment, arguments) -> {
-        IntegerInterpreterValue startIndex = (IntegerInterpreterValue)arguments.get(0);
-        IntegerInterpreterValue endIndex = (IntegerInterpreterValue)arguments.get(1);
-        return new StringInterpreterValue(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
-    }).build();
+    public static final ConcreteType TYPE = ConcreteType.builder(StringInterpreterValue.class, StringValue.REF)
+        .method("length", list(), (environment, arguments) ->
+            new IntegerInterpreterValue(arguments.getReceiver().value.length()))
+
+        .method("substring", list(IntegerValue.REF, IntegerValue.REF), (environment, arguments) -> {
+            IntegerInterpreterValue startIndex = (IntegerInterpreterValue)arguments.get(0);
+            IntegerInterpreterValue endIndex = (IntegerInterpreterValue)arguments.get(1);
+            return new StringInterpreterValue(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
+        })
+
+        .method("add", list(StringValue.REF), (environment, arguments) -> {
+            StringInterpreterValue right = (StringInterpreterValue)arguments.get(0);
+            return new StringInterpreterValue(arguments.getReceiver().value + right.value);
+        })
+
+        .build();
+
     private final String value;
     
     @Override

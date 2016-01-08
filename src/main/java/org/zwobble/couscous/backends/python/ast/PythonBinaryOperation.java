@@ -6,6 +6,10 @@ public class PythonBinaryOperation implements PythonExpressionNode {
     public static PythonExpressionNode pythonIs(PythonExpressionNode left, PythonExpressionNode right) {
         return new PythonBinaryOperation("is", left, right);
     }
+
+    public static PythonExpressionNode pythonAdd(PythonExpressionNode left, PythonExpressionNode right) {
+        return new PythonBinaryOperation("+", left, right);
+    }
     
     private final String operator;
     private final PythonExpressionNode left;

@@ -35,6 +35,9 @@ public class PrimitiveMethods {
             
             .put("substring", (receiver, arguments) ->
                 pythonGetSlice(receiver, arguments))
+
+            .put("add", (receiver, arguments) ->
+                PythonBinaryOperation.pythonAdd(receiver, arguments.get(0)))
             
             .build();
     

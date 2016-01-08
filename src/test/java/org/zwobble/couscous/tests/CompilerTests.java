@@ -144,6 +144,11 @@ public abstract class CompilerTests {
                 list()));
     }
 
+    @Test
+    public void stringAdd() throws Exception {
+        assertEquals(value("42"), evalExpression("String", "\"4\" + \"2\""));
+    }
+
     private PrimitiveValue execTestProgram(
         String directoryName,
         TypeName type,
