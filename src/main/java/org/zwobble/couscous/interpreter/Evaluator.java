@@ -80,7 +80,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
         MethodSignature signature = new MethodSignature(
             methodCall.getMethodName(),
-            eagerMap(arguments, argument -> argument.getType().getName()));
+            eagerMap(methodCall.getArguments(), argument -> argument.getType()));
         return type.callMethod(environment, receiver, signature, arguments);
     }
     

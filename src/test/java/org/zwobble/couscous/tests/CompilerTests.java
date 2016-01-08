@@ -154,6 +154,13 @@ public abstract class CompilerTests {
         assertEquals(value("patrick wolf"), evalExpression("String", "\"Patrick Wolf\".toLowerCase()"));
     }
 
+    @Test
+    public void stringEquals() throws Exception {
+        assertEquals(value(true), evalExpression("boolean", "\"a\".equals(\"a\")"));
+        assertEquals(value(false), evalExpression("boolean", "\"a\".equals(\"b\")"));
+        assertEquals(value(false), evalExpression("boolean", "\"a\".equals(42)"));
+    }
+
     private PrimitiveValue execTestProgram(
         String directoryName,
         TypeName type,

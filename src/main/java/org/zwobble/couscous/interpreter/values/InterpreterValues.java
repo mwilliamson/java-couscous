@@ -9,7 +9,9 @@ import org.zwobble.couscous.values.UnitValue;
 
 public class InterpreterValues {
     public static final UnitInterpreterValue UNIT = UnitInterpreterValue.UNIT;
-    
+    public static final BooleanInterpreterValue FALSE = BooleanInterpreterValue.FALSE;
+    public static final BooleanInterpreterValue TRUE = BooleanInterpreterValue.TRUE;
+
     public static InterpreterValue value(int value) {
         return new IntegerInterpreterValue(value);
     }

@@ -1,10 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.interpreter.NoSuchField;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValues;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.*;
 
 import java.util.Optional;
 
@@ -28,6 +25,15 @@ public final class StringInterpreterValue implements InterpreterValue {
 
         .method("toLowerCase", list(), (environment, arguments) ->
             of(arguments.getReceiver().value.toLowerCase()))
+
+        .method("equals", list(ObjectValues.OBJECT), (environment, arguments) -> {
+            InterpreterValue right = arguments.get(0);
+            if (right instanceof StringInterpreterValue) {
+                return new BooleanInterpreterValue(arguments.getReceiver().value.equals(((StringInterpreterValue)right).value));
+            } else {
+                return InterpreterValues.FALSE;
+            }
+        })
 
         .build();
 

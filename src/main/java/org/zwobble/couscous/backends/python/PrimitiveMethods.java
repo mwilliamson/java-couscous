@@ -41,7 +41,10 @@ public class PrimitiveMethods {
 
             .put("toLowerCase", (receiver, arguments) ->
                 pythonCall(pythonAttributeAccess(receiver, "lower"), list()))
-            
+
+            .put("equals", (receiver, arguments) ->
+                PythonBinaryOperation.pythonEq(receiver, arguments.get(0)))
+
             .build();
     
     private static final Map<String, PrimitiveMethodGenerator> BOOLEAN_METHODS =

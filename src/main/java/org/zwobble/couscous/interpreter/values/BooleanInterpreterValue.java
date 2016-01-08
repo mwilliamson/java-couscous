@@ -7,6 +7,9 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
 public final class BooleanInterpreterValue implements InterpreterValue {
+    public static final BooleanInterpreterValue TRUE = new BooleanInterpreterValue(true);
+    public static final BooleanInterpreterValue FALSE = new BooleanInterpreterValue(false);
+
     private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
         
         .method("negate", Collections.emptyList(), (environment, arguments) -> 
