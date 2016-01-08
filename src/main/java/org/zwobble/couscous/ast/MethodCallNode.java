@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class MethodCallNode implements ExpressionNode {
     public static ExpressionNode not(ExpressionNode value) {
@@ -41,7 +42,7 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
-        return methodCall(left, methodName, asList(right), IntegerValue.REF);
+        return methodCall(left, methodName, list(right), IntegerValue.REF);
     }
 
     public static ExpressionNode equal(ExpressionNode left, ExpressionNode right) {
@@ -69,7 +70,7 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     private static ExpressionNode booleanOperation(String methodName, ExpressionNode left, ExpressionNode right) {
-        return methodCall(left, methodName, asList(right), BooleanValue.REF);
+        return methodCall(left, methodName, list(right), BooleanValue.REF);
     }
 
     public static MethodCallNode methodCall(

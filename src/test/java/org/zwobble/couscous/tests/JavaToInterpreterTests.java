@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToInterpreterTests extends CompilerTests {
     @Override
@@ -26,7 +27,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         List<PrimitiveValue> arguments
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
-        List<ClassNode> classNodes = frontend.readSourceDirectory(ImmutableList.of(directory), directory);
+        List<ClassNode> classNodes = frontend.readSourceDirectory(list(directory), directory);
 
         Project project = JavaProject.of(classNodes);
         Interpreter interpreter = new Interpreter(project);

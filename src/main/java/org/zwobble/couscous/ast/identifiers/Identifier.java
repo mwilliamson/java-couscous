@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class Identifier {
-    public static final Identifier TOP = new Identifier(ImmutableList.of());
+    public static final Identifier TOP = new Identifier(list());
 
     private final List<String> parts;
 

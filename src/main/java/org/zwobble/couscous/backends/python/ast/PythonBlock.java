@@ -6,13 +6,14 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonBlock implements Iterable<PythonStatementNode> {
     private final List<PythonStatementNode> statements;
 
     public PythonBlock(List<? extends PythonStatementNode> statements) {
         if (statements.isEmpty()) {
-            this.statements = asList(PythonPassNode.PASS);
+            this.statements = list(PythonPassNode.PASS);
         } else {
             this.statements = ImmutableList.copyOf(statements);   
         }

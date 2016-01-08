@@ -40,6 +40,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonRe
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(ClassNode classNode) {
@@ -47,7 +48,7 @@ public class PythonCodeGenerator {
 
         PythonImportNode internalsImport = pythonImport(
             importPathToRoot(classNode),
-            asList(pythonImportAlias("_couscous")));
+            list(pythonImportAlias("_couscous")));
 
         PythonFunctionDefinitionNode constructor =
             generateConstructor(classNode.getConstructor());
@@ -58,7 +59,7 @@ public class PythonCodeGenerator {
 
         PythonClassNode pythonClass = pythonClass(
             classNode.getSimpleName(),
-            ImmutableList.copyOf(Iterables.concat(asList(constructor), pythonMethods)));
+            ImmutableList.copyOf(Iterables.concat(list(constructor), pythonMethods)));
 
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             singletonIterator(pythonClass),
@@ -70,7 +71,7 @@ public class PythonCodeGenerator {
         Set<TypeName> classes = findReferencedClasses(classNode);
         return classes.stream()
             .filter(name -> !name.equals(InternalCouscousValue.REF))
-            .map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), asList(pythonImportAlias(name.getSimpleName()))));
+            .map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), list(pythonImportAlias(name.getSimpleName()))));
     }
 
     private static String importPathToRoot(ClassNode classNode) {
@@ -131,7 +132,7 @@ public class PythonCodeGenerator {
 
     private static PythonFunctionDefinitionNode generateConstructor(ConstructorNode constructor) {
         Iterable<String> explicitArgumentNames = transform(constructor.getArguments(), argument -> argument.getName());
-        Iterable<String> argumentNames = Iterables.concat(asList("self"), explicitArgumentNames);
+        Iterable<String> argumentNames = Iterables.concat(list("self"), explicitArgumentNames);
         List<PythonStatementNode> pythonBody = constructor.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
         return pythonFunctionDefinition("__init__", ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
@@ -139,7 +140,7 @@ public class PythonCodeGenerator {
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {
         Iterable<String> explicitArgumentNames = transform(method.getArguments(), argument -> argument.getName());
         Iterable<String> argumentNames = Iterables.concat(
-            method.isStatic() ? Collections.<String>emptyList() : asList("self"),
+            method.isStatic() ? Collections.<String>emptyList() : list("self"),
             explicitArgumentNames);
         List<PythonStatementNode> pythonBody = generateStatements(method.getBody());
         return pythonFunctionDefinition(toName(method.signature()), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
@@ -270,7 +271,7 @@ public class PythonCodeGenerator {
             PythonExpressionNode value = generateExpression(typeCoercion.getExpression());
             if (isIntegerBox(typeCoercion)) {
                 // TODO: replace with direct access to java.lang.Integer
-                return internalMethod("boxInt", asList(value));
+                return internalMethod("boxInt", list(value));
             } else if (isIntegerUnbox(typeCoercion)) {
                 return pythonAttributeAccess(value, "_value");
             } else {
@@ -297,7 +298,7 @@ public class PythonCodeGenerator {
 
     public static String toName(MethodSignature signature) {
         return Joiner.on("__").join(Iterables.concat(
-            ImmutableList.of(signature.getName()),
+            list(signature.getName()),
             transform(signature.getArguments(), argument -> argument.getQualifiedName().replace('.', '_'))));
     }
 

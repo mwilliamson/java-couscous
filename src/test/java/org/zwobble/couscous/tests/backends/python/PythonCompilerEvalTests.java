@@ -10,6 +10,7 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonCompilerEvalTests extends BackendEvalTests {
     @Override
@@ -23,9 +24,9 @@ public class PythonCompilerEvalTests extends BackendEvalTests {
         return runner.runMethod(
             ImmutableList.copyOf(Iterables.concat(
                 classes,
-                asList(programNode))),
+                list(programNode))),
             programNode.getName(),
             "run",
-            ImmutableList.of());
+            list());
     }
 }

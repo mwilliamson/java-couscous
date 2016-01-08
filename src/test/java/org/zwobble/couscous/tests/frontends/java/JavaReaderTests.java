@@ -37,6 +37,7 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaReaderTests {
     @Test
@@ -61,7 +62,7 @@ public class JavaReaderTests {
             "private String name;");
         
         assertEquals(
-            asList(field("name", TypeName.of("java.lang.String"))),
+            list(field("name", TypeName.of("java.lang.String"))),
             classNode.getFields());
     }
     
@@ -94,14 +95,14 @@ public class JavaReaderTests {
     @Test
     public void canReadInstanceMethodCalls() {
         assertEquals(
-            methodCall(literal("hello"), "startsWith", asList(literal("h")), BooleanValue.REF),
+            methodCall(literal("hello"), "startsWith", list(literal("h")), BooleanValue.REF),
             readBooleanExpression("\"hello\".startsWith(\"h\")"));
         
         List<StatementNode> statements = readStatements("int", "Object x = 1; return x.hashCode();");
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         ReturnNode returnNode = (ReturnNode) statements.get(1);
         assertEquals(
-            methodCall(reference(declaration), "hashCode", asList(), IntegerValue.REF),
+            methodCall(reference(declaration), "hashCode", list(), IntegerValue.REF),
             returnNode.getValue());
     }
     
@@ -117,7 +118,7 @@ public class JavaReaderTests {
             methodCall(
                 ThisReferenceNode.thisReference(TypeName.of("com.example.Example")),
                 "loop",
-                asList(),
+                list(),
                 StringValue.REF),
             returnNode.getValue());
     }
@@ -128,7 +129,7 @@ public class JavaReaderTests {
             staticMethodCall(
                 TypeName.of("java.lang.Integer"),
                 "parseInt",
-                asList(literal("42")),
+                list(literal("42")),
                 IntegerValue.REF),
             readIntExpression("Integer.parseInt(\"42\")"));
     }
@@ -145,7 +146,7 @@ public class JavaReaderTests {
             staticMethodCall(
                 TypeName.of("com.example.Example"),
                 "loop",
-                asList(),
+                list(),
                 StringValue.REF),
             returnNode.getValue());
     }
@@ -153,7 +154,7 @@ public class JavaReaderTests {
     @Test
     public void canReadConstructorCalls() {
         assertEquals(
-            constructorCall(TypeName.of("java.lang.String"), asList(literal("_"))),
+            constructorCall(TypeName.of("java.lang.String"), list(literal("_"))),
             readExpression("String", "new String(\"_\")"));
     }
 
@@ -274,13 +275,13 @@ public class JavaReaderTests {
         assertEquals(
             equal(
                 literal(1),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 == new Integer(1)"));
 
         assertEquals(
             notEqual(
                 literal(1),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1))))),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 != new Integer(1)"));
     }
 
@@ -288,14 +289,14 @@ public class JavaReaderTests {
     public void equalityOperatorDoesNotUnboxIfBothOperandsAreBoxed() {
         assertEquals(
             same(
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(1))), ObjectValues.OBJECT),
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(2))), ObjectValues.OBJECT)),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(1))), ObjectValues.OBJECT),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(2))), ObjectValues.OBJECT)),
             readBooleanExpression("new Integer(1) == new Integer(2)"));
 
         assertEquals(
             not(same(
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(1))), ObjectValues.OBJECT),
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, asList(literal(2))), ObjectValues.OBJECT))),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(1))), ObjectValues.OBJECT),
+                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(2))), ObjectValues.OBJECT))),
             readBooleanExpression("new Integer(1) != new Integer(2)"));
     }
 
@@ -303,8 +304,8 @@ public class JavaReaderTests {
     public void integerOperatorUnboxesWhenBothOperandsAreBoxed() {
         assertEquals(
             integerAdd(
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(1)))),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), asList(literal(2))))),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1)))),
+                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(2))))),
             readIntExpression("new Integer(1) + new Integer(2)"));
     }
 
@@ -506,7 +507,7 @@ public class JavaReaderTests {
                 staticMethodCall(
                     TypeName.of("java.lang.Integer"),
                     "parseInt",
-                    asList(literal("42")),
+                    list(literal("42")),
                     IntegerValue.REF)),
             readStatement("Integer.parseInt(\"42\");"));
     }
@@ -516,8 +517,8 @@ public class JavaReaderTests {
         assertEquals(
             ifStatement(
                 literal(true),
-                asList(returns(literal(1))),
-                asList(returns(literal(2)))),
+                list(returns(literal(1))),
+                list(returns(literal(2)))),
             readStatement("int", "if (true) { return 1; } else { return 2; }"));
     }
 
@@ -526,7 +527,7 @@ public class JavaReaderTests {
         assertEquals(
             whileLoop(
                 literal(true),
-                asList(returns(literal(1)))),
+                list(returns(literal(1)))),
             readStatement("int", "while (true) { return 1; }"));
     }
 
@@ -535,11 +536,11 @@ public class JavaReaderTests {
         List<StatementNode> statements = readStatements("int", "for (int x = 0; true; ++x) { return 1; }");
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         assertEquals(
-            asList(
+            list(
                 localVariableDeclaration(declaration.getDeclaration(), literal(0)),
                 whileLoop(
                     literal(true),
-                    asList(
+                    list(
                         returns(literal(1)),
                         expressionStatement(assign(declaration, integerAdd(reference(declaration), literal(1))))))),
             statements);
@@ -555,10 +556,10 @@ public class JavaReaderTests {
         
         ConstructorNode constructor = classNode.getConstructor();
         
-        assertEquals(asList(), constructor.getArguments());
+        assertEquals(list(), constructor.getArguments());
         
         assertEquals(
-            asList(assignStatement(
+            list(assignStatement(
                 fieldAccess(
                     thisReference(TypeName.of("com.example.Example")),
                     "name",
@@ -574,7 +575,7 @@ public class JavaReaderTests {
         
         MethodNode method = classNode.getMethods().get(0);
         assertEquals(
-            asList(annotation(TypeName.of("java.lang.Deprecated"))),
+            list(annotation(TypeName.of("java.lang.Deprecated"))),
             method.getAnnotations());
     }
 
@@ -585,7 +586,7 @@ public class JavaReaderTests {
 
         MethodNode method = classNode.getMethods().get(0);
         assertEquals(
-            asList(returns(boxInt(literal(1)))),
+            list(returns(boxInt(literal(1)))),
             method.getBody());
     }
 
@@ -645,9 +646,9 @@ public class JavaReaderTests {
             Path sourcePath = directoryPath.resolve("com/example/Example.java");
             try {
                 Files.createDirectories(directoryPath.resolve("com/example"));
-                Files.write(sourcePath, asList(javaClass));
+                Files.write(sourcePath, list(javaClass));
 
-                return JavaReader.readClassFromFile(ImmutableList.of(directoryPath), sourcePath);
+                return JavaReader.readClassFromFile(list(directoryPath), sourcePath);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }

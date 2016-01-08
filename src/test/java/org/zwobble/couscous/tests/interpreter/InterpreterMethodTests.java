@@ -27,6 +27,7 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class InterpreterMethodTests extends BackendMethodTests {
@@ -37,7 +38,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> runMethod(method, value("hello, world!")));
         
-        assertEquals(new MethodSignature("hello", asList(StringValue.REF)), exception.getSignature());
+        assertEquals(new MethodSignature("hello", list(StringValue.REF)), exception.getSignature());
     }
     
     @Test

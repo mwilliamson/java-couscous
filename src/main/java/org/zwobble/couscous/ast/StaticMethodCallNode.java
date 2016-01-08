@@ -12,10 +12,11 @@ import org.zwobble.couscous.values.ObjectValues;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class StaticMethodCallNode implements ExpressionNode {
     public static ExpressionNode same(ExpressionNode left, ExpressionNode right) {
-        return staticMethodCall(InternalCouscousValue.REF, "same", asList(left, right), BooleanValue.REF);
+        return staticMethodCall(InternalCouscousValue.REF, "same", list(left, right), BooleanValue.REF);
     }
     
     public static ExpressionNode boxInt(ExpressionNode value) {

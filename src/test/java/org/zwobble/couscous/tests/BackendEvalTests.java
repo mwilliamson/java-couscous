@@ -30,6 +30,7 @@ import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public abstract class BackendEvalTests {
@@ -129,7 +130,7 @@ public abstract class BackendEvalTests {
         PrimitiveValue result = evalExpression(methodCall(
             literal("hello"),
             "length",
-            asList(),
+            list(),
             IntegerValue.REF));
         assertEquals(value(5), result);
     }
@@ -139,7 +140,7 @@ public abstract class BackendEvalTests {
         PrimitiveValue result = evalExpression(methodCall(
             literal("hello"),
             "substring",
-            asList(literal(1), literal(4)),
+            list(literal(1), literal(4)),
             StringValue.REF));
         assertEquals(value("ell"), result);
     }
@@ -149,7 +150,7 @@ public abstract class BackendEvalTests {
         PrimitiveValue result = evalExpression(staticMethodCall(
             "java.lang.Integer",
             "parseInt",
-            asList(literal("42")),
+            list(literal("42")),
             IntegerValue.REF));
         assertEquals(value(42), result);
     }
@@ -161,11 +162,11 @@ public abstract class BackendEvalTests {
                 .statement(returns(staticMethodCall(
                     "java.lang.Integer",
                     "parseInt",
-                    asList(literal("42")),
+                    list(literal("42")),
                     IntegerValue.REF))))
             .build();
-        PrimitiveValue result = evalExpression(asList(classNode),
-            staticMethodCall("com.example.Example", "main", asList(), IntegerValue.REF));
+        PrimitiveValue result = evalExpression(list(classNode),
+            staticMethodCall("com.example.Example", "main", list(), IntegerValue.REF));
         assertEquals(value(42), result);
     }
     
@@ -175,8 +176,8 @@ public abstract class BackendEvalTests {
             .method("main", method -> method
                 .statement(returns(literal(42))))
             .build();
-        PrimitiveValue result = evalExpression(asList(classNode),
-            methodCall(constructorCall(classNode.getName(), asList()), "main", asList(), IntegerValue.REF));
+        PrimitiveValue result = evalExpression(list(classNode),
+            methodCall(constructorCall(classNode.getName(), list()), "main", list(), IntegerValue.REF));
         assertEquals(value(42), result);
     }
     
@@ -190,11 +191,11 @@ public abstract class BackendEvalTests {
             .build();
         
         PrimitiveValue result = evalExpression(
-            asList(classNode),
+            list(classNode),
             methodCall(
-                constructorCall(classNode.getName(), asList()),
+                constructorCall(classNode.getName(), list()),
                 "main",
-                asList(literal(42)),
+                list(literal(42)),
                 IntegerValue.REF));
         
         assertEquals(value(42), result);
@@ -216,18 +217,18 @@ public abstract class BackendEvalTests {
             .build();
         
         PrimitiveValue result = evalExpression(
-            asList(classNode),
+            list(classNode),
             methodCall(
-                constructorCall(classNode.getName(), asList(literal(42))),
+                constructorCall(classNode.getName(), list(literal(42))),
                 "main",
-                asList(),
+                list(),
                 IntegerValue.REF));
         
         assertEquals(value(42), result);
     }
     
     private PrimitiveValue evalExpression(ExpressionNode expression) {
-        return evalExpression(ImmutableList.of(), expression);
+        return evalExpression(list(), expression);
     }
     
     protected abstract PrimitiveValue evalExpression(

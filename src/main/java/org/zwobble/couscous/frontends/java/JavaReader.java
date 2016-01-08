@@ -4,8 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.VariableDeclaration;
-import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -19,7 +17,6 @@ import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Maps.immutableEntry;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
@@ -27,13 +24,11 @@ import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
-import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.ExtraLists.*;
-import static org.zwobble.couscous.util.ExtraMaps.toMap;
 
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
@@ -99,7 +94,7 @@ public class JavaReader {
             name,
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             emptyList(),
-            ImmutableList.of(method));
+            list(method));
 
         classes.add(closure.getClassNode());
         return closure;

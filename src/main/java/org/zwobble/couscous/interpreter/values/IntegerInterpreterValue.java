@@ -11,20 +11,21 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
     public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
-        .method(Operator.ADD.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.ADD.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left + right))
-        .method(Operator.SUBTRACT.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.SUBTRACT.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left - right))
-        .method(Operator.MULTIPLY.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.MULTIPLY.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left * right))
-        .method(Operator.DIVIDE.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.DIVIDE.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left / right))
-        .method(Operator.MOD.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.MOD.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left % right))
-        .method(Operator.EQUALS.getMethodName(), asList(ObjectValues.OBJECT),
+        .method(Operator.EQUALS.getMethodName(), list(ObjectValues.OBJECT),
             (environment, arguments) -> {
                 InterpreterValue right = arguments.getPositionalArguments().get(0);
                 if (right instanceof IntegerInterpreterValue) {
@@ -33,20 +34,20 @@ public final class IntegerInterpreterValue implements InterpreterValue {
                     return new BooleanInterpreterValue(false);
                 }
             })
-        .method(Operator.EQUALS.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.EQUALS.getMethodName(), list(IntegerValue.REF),
             (environment, arguments) -> {
                 IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getPositionalArguments().get(0);
                 return integerEquals(arguments, right);
             })
-        .method(Operator.NOT_EQUALS.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.NOT_EQUALS.getMethodName(), list(IntegerValue.REF),
             infixReturningBoolean((left, right) -> !left.equals(right)))
-        .method(Operator.GREATER_THAN.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.GREATER_THAN.getMethodName(), list(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left > right))
-        .method(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), list(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left >= right))
-        .method(Operator.LESS_THAN.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.LESS_THAN.getMethodName(), list(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left < right))
-        .method(Operator.LESS_THAN_OR_EQUAL.getMethodName(), asList(IntegerValue.REF),
+        .method(Operator.LESS_THAN_OR_EQUAL.getMethodName(), list(IntegerValue.REF),
             infixReturningBoolean((left, right) -> left <= right))
         .build();
 

@@ -14,6 +14,7 @@ import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaLambdaExpressionReader {
     private final JavaReader reader;
@@ -50,7 +51,7 @@ public class JavaLambdaExpressionReader {
             return reader.readStatements(scope, statements, Optional.of(returnType));
         } else {
             Expression body = (Expression) expression.getBody();
-            return asList(returns(reader.readExpression(scope, returnType, body)));
+            return list(returns(reader.readExpression(scope, returnType, body)));
         }
     }
 }

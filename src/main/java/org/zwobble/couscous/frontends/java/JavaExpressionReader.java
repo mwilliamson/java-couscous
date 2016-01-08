@@ -18,6 +18,7 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.concat;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaExpressionReader {
     private final Scope scope;
@@ -261,7 +262,7 @@ public class JavaExpressionReader {
                 MethodCallNode.methodCall(
                     readExpression(IntegerValue.REF, expression.getOperand()),
                     operator.getMethodName(),
-                    asList(literal(1)),
+                    list(literal(1)),
                     IntegerValue.REF));
         }
     }
@@ -295,7 +296,7 @@ public class JavaExpressionReader {
         return MethodCallNode.methodCall(
             left,
             operator.getMethodName(),
-            asList(right),
+            list(right),
             operator.isBoolean() ? BooleanValue.REF : left.getType());
     }
 

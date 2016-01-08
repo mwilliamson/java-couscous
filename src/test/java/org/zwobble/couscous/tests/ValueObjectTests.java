@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.zwobble.couscous.util.ExtraArrays.stream;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 @RunWith(Parameterized.class)
 public class ValueObjectTests {
@@ -130,7 +131,7 @@ public class ValueObjectTests {
         } else if (type.equals(boolean.class)) {
             return true;
         } else if (type.equals(List.class)) {
-            return asList("[list 1]");
+            return list("[list 1]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 1]");
         } else if (type.equals(Identifier.class)) {
@@ -152,7 +153,7 @@ public class ValueObjectTests {
         } else if (type.equals(boolean.class)) {
             return false;
         } else if (type.equals(List.class)) {
-            return asList("[list 2]");
+            return list("[list 2]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 2]");
         } else if (type.equals(Identifier.class)) {
@@ -174,7 +175,7 @@ public class ValueObjectTests {
         } else if (type.equals(boolean.class)) {
             return true;
         } else if (type.equals(List.class)) {
-            return asList("[list]");
+            return list("[list]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set]");
         } else if (type.equals(Identifier.class)) {

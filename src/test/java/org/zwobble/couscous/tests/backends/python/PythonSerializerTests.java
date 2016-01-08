@@ -26,6 +26,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonRe
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonSerializerTests {
     @Test
@@ -69,12 +70,12 @@ public class PythonSerializerTests {
     
     @Test
     public void callIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(f)(x, y)", serialize(pythonCall(pythonVariableReference("f"), asList(pythonVariableReference("x"), pythonVariableReference("y")))));
+        assertEquals("(f)(x, y)", serialize(pythonCall(pythonVariableReference("f"), list(pythonVariableReference("x"), pythonVariableReference("y")))));
     }
     
     @Test
     public void getSliceIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(x)[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), asList(pythonVariableReference("y"), pythonVariableReference("z")))));
+        assertEquals("(x)[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), list(pythonVariableReference("y"), pythonVariableReference("z")))));
     }
     
     @Test
@@ -148,7 +149,7 @@ public class PythonSerializerTests {
     public void importIsSerializedUsingImportKeyword() {
         String output = serialize(pythonImport(
             "com.example",
-            asList(pythonImportAlias("Program"))));
+            list(pythonImportAlias("Program"))));
         assertEquals("from com.example import Program\n", output);
     }
     
@@ -156,7 +157,7 @@ public class PythonSerializerTests {
     public void importAliasesAreSeparatedByCommas() {
         String output = serialize(pythonImport(
             "com.example",
-            asList(pythonImportAlias("Program"),pythonImportAlias("Runner"))));
+            list(pythonImportAlias("Program"),pythonImportAlias("Runner"))));
         assertEquals("from com.example import Program, Runner\n", output);
     }
     
@@ -164,8 +165,8 @@ public class PythonSerializerTests {
     public void ifStatementIsSerializedWithIfKeyword() {
         String output = serialize(pythonIfStatement(
             pythonBooleanLiteral(true),
-            asList(pythonReturn(pythonIntegerLiteral(1))),
-            asList(pythonReturn(pythonIntegerLiteral(2)))));
+            list(pythonReturn(pythonIntegerLiteral(1))),
+            list(pythonReturn(pythonIntegerLiteral(2)))));
         assertEquals("if True:\n    return 1\nelse:\n    return 2\n", output);
     }
 
@@ -173,13 +174,13 @@ public class PythonSerializerTests {
     public void whileIsSerializedWithWhileKeyword() {
         String output = serialize(pythonWhile(
             pythonBooleanLiteral(true),
-            asList(pythonReturn(pythonIntegerLiteral(1)))));
+            list(pythonReturn(pythonIntegerLiteral(1)))));
         assertEquals("while True:\n    return 1\n", output);
     }
     
     @Test
     public void moduleIsSerializedStatements() {
-        PythonModuleNode classNode = pythonModule(asList(PASS));
+        PythonModuleNode classNode = pythonModule(list(PASS));
         String output = serialize(classNode);
         assertEquals("pass\n", output);
     }

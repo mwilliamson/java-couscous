@@ -34,6 +34,7 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class EvaluatorTests extends BackendEvalTests {
     @Test
@@ -62,9 +63,9 @@ public class EvaluatorTests extends BackendEvalTests {
                 methodCall(
                     literal("hello"),
                     "size",
-                    asList(),
+                    list(),
                     IntegerValue.REF)));
-        assertEquals(new MethodSignature("size", asList()), exception.getSignature());
+        assertEquals(new MethodSignature("size", list()), exception.getSignature());
     }
     
     @Test
@@ -74,9 +75,9 @@ public class EvaluatorTests extends BackendEvalTests {
                 methodCall(
                     literal("hello"),
                     "substring",
-                    asList(literal(1)),
+                    list(literal(1)),
                     StringValue.REF)));
-        assertEquals(new MethodSignature("substring", asList(IntegerValue.REF)), exception.getSignature());
+        assertEquals(new MethodSignature("substring", list(IntegerValue.REF)), exception.getSignature());
     }
     
     @Test
@@ -86,10 +87,10 @@ public class EvaluatorTests extends BackendEvalTests {
                 methodCall(
                     literal("hello"),
                     "substring",
-                    asList(literal(0), literal("")),
+                    list(literal(0), literal("")),
                     StringValue.REF)));
         assertEquals(
-            new MethodSignature("substring", asList(IntegerValue.REF, StringValue.REF)),
+            new MethodSignature("substring", list(IntegerValue.REF, StringValue.REF)),
             exception.getSignature());
     }
     
@@ -103,10 +104,10 @@ public class EvaluatorTests extends BackendEvalTests {
         
         UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> evalExpression(
-                asList(classNode),
+                list(classNode),
                 constructorCall(
                     classNode.getName(),
-                    asList(literal("")))));
+                    list(literal("")))));
         
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }
@@ -118,11 +119,11 @@ public class EvaluatorTests extends BackendEvalTests {
         
         NoSuchField exception = assertThrows(NoSuchField.class,
             () -> evalExpression(
-                asList(classNode),
+                list(classNode),
                 fieldAccess(
                     constructorCall(
                         classNode.getName(),
-                        asList()),
+                        list()),
                     "value",
                     IntegerValue.REF)));
         
@@ -137,11 +138,11 @@ public class EvaluatorTests extends BackendEvalTests {
         
         UnboundField exception = assertThrows(UnboundField.class,
             () -> evalExpression(
-                asList(classNode),
+                list(classNode),
                 fieldAccess(
                     constructorCall(
                         classNode.getName(),
-                        asList()),
+                        list()),
                     "value",
                     IntegerValue.REF)));
         
@@ -159,10 +160,10 @@ public class EvaluatorTests extends BackendEvalTests {
         
         NoSuchField exception = assertThrows(NoSuchField.class,
             () -> evalExpression(
-                asList(classNode),
+                list(classNode),
                 constructorCall(
                     classNode.getName(),
-                    asList())));
+                    list())));
         
         assertEquals(new NoSuchField("value"), exception);
     }
@@ -179,10 +180,10 @@ public class EvaluatorTests extends BackendEvalTests {
         
         UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> evalExpression(
-                asList(classNode),
+                list(classNode),
                 constructorCall(
                     classNode.getName(),
-                    asList())));
+                    list())));
         
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
     }

@@ -15,6 +15,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public abstract class CompilerTests {
@@ -52,7 +53,7 @@ public abstract class CompilerTests {
                 "recursive-factorial",
                 TypeName.of("com.example.RecursiveFactorial"),
                 "factorial",
-                asList(value(6))));
+                list(value(6))));
     }
 
     @Test
@@ -63,7 +64,7 @@ public abstract class CompilerTests {
                 "while-factorial",
                 TypeName.of("com.example.WhileFactorial"),
                 "factorial",
-                asList(value(6))));
+                list(value(6))));
     }
 
     @Test
@@ -74,7 +75,7 @@ public abstract class CompilerTests {
                 "for-factorial",
                 TypeName.of("com.example.ForFactorial"),
                 "factorial",
-                asList(value(6))));
+                list(value(6))));
     }
 
     @Test
@@ -85,7 +86,7 @@ public abstract class CompilerTests {
                 "anonymous-class",
                 TypeName.of("com.example.AnonymousClass"),
                 "value",
-                asList()));
+                list()));
     }
 
     @Test
@@ -96,7 +97,7 @@ public abstract class CompilerTests {
                 "anonymous-class-capture",
                 TypeName.of("com.example.AnonymousClass"),
                 "value",
-                asList(value(42))));
+                list(value(42))));
     }
 
     @Test
@@ -107,7 +108,7 @@ public abstract class CompilerTests {
                 "lambda",
                 TypeName.of("com.example.Lambda"),
                 "value",
-                asList()));
+                list()));
     }
 
     @Test
@@ -118,7 +119,7 @@ public abstract class CompilerTests {
                 "lambda-capture",
                 TypeName.of("com.example.Lambda"),
                 "value",
-                asList(value(2))));
+                list(value(2))));
     }
 
     @Test
@@ -129,7 +130,7 @@ public abstract class CompilerTests {
                 "lambda-this-capture",
                 TypeName.of("com.example.Lambda"),
                 "value",
-                asList(value(2))));
+                list(value(2))));
     }
 
     @Test
@@ -140,7 +141,7 @@ public abstract class CompilerTests {
                 "static-method-overloads",
                 TypeName.of("com.example.StaticMethodOverloads"),
                 "value",
-                asList()));
+                list()));
     }
 
     private PrimitiveValue execTestProgram(
@@ -182,12 +183,12 @@ public abstract class CompilerTests {
             Path directoryPath = Files.createTempDirectory(null);
             try {
                 Files.createDirectories(directoryPath.resolve("com/example"));
-                Files.write(directoryPath.resolve("com/example/Example.java"), asList(javaClass));
+                Files.write(directoryPath.resolve("com/example/Example.java"), list(javaClass));
                 return execProgram(
                     directoryPath,
                     TypeName.of("com.example.Example"),
                     "main",
-                    asList());
+                    list());
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }

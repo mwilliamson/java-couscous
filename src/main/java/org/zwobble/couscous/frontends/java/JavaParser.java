@@ -1,5 +1,12 @@
 package org.zwobble.couscous.frontends.java;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -8,17 +15,10 @@ import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import com.google.common.base.Charsets;
-
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaParser {
     private final ASTParser parser;
@@ -41,7 +41,7 @@ public class JavaParser {
 
         String[] sourcePathArguments = Iterables.toArray(
             concat(
-                ImmutableList.of("/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"),
+                list("/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"),
                 transform(sourcePaths, Object::toString)),
             String.class);
 

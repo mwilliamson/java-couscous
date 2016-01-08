@@ -17,20 +17,21 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class FreeVariablesTests {
     @Test
     public void referenceIsFreeIfThereIsNoAssociatedDeclaration() {
         VariableDeclaration declaration = var(TestIds.ANY_ID, "[name]", StringValue.REF);
-        List<ReferenceNode> freeVariables = findFreeVariables(asList(reference(declaration)));
-        assertEquals(asList(reference(declaration)), freeVariables);
+        List<ReferenceNode> freeVariables = findFreeVariables(list(reference(declaration)));
+        assertEquals(list(reference(declaration)), freeVariables);
     }
 
     @Test
     public void referenceIsNotFreeIfIsDeclaredAsArgument() {
         VariableDeclaration declaration = var(TestIds.ANY_ID, "[name]", StringValue.REF);
         List<ReferenceNode> freeVariables = findFreeVariables(
-            asList(formalArg(declaration), reference(declaration)));
+            list(formalArg(declaration), reference(declaration)));
         assertEquals(emptyList(), freeVariables);
     }
 
@@ -38,7 +39,7 @@ public class FreeVariablesTests {
     public void referenceIsNotFreeIfIsReferenceToLocalDefinedInBody() {
         VariableDeclaration declaration = var(TestIds.ANY_ID, "[name]", StringValue.REF);
         List<ReferenceNode> freeVariables = findFreeVariables(
-            asList(
+            list(
                 localVariableDeclaration(declaration, literal("[value]")),
                 reference(declaration)));
         assertEquals(emptyList(), freeVariables);

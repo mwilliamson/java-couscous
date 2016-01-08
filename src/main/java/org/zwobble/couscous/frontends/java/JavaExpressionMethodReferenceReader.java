@@ -16,6 +16,7 @@ import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaExpressionMethodReferenceReader {
     private final JavaReader javaReader;
@@ -30,7 +31,7 @@ public class JavaExpressionMethodReferenceReader {
 
         return lambda(
             formalArguments,
-            ImmutableList.of(returns(JavaExpressionReader.coerceExpression(
+            list(returns(JavaExpressionReader.coerceExpression(
                 typeOf(functionalInterfaceMethod.getReturnType()),
                 generateValue(scope, expression, formalArguments)))));
     }

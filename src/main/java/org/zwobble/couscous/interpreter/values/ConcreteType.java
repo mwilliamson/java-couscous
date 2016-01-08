@@ -1,15 +1,19 @@
 package org.zwobble.couscous.interpreter.values;
 
+import com.google.common.collect.ImmutableMap;
+import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.util.Casts;
+
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.interpreter.*;
-import org.zwobble.couscous.util.Casts;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ConcreteType {
     
@@ -27,7 +31,7 @@ public class ConcreteType {
     
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
-        private MethodValue constructor = new MethodValue(ImmutableList.of(), (environment, arguments) -> InterpreterValues.UNIT);
+        private MethodValue constructor = new MethodValue(list(), (environment, arguments) -> InterpreterValues.UNIT);
         private final ImmutableMap.Builder<MethodSignature, MethodValue> methods = ImmutableMap.builder();
         private final ImmutableMap.Builder<MethodSignature, StaticMethodValue> staticMethods = ImmutableMap.builder();
         private final Class<T> interpreterValueType;

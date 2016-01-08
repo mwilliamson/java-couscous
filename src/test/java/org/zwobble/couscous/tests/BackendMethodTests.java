@@ -28,6 +28,7 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public abstract class BackendMethodTests {
@@ -97,8 +98,8 @@ public abstract class BackendMethodTests {
         MethodNode.Builder method = staticMethod("hello")
             .statement(ifStatement(
                 literal(true),
-                asList(returns(literal("[true]"))),
-                asList(returns(literal("[false]")))));
+                list(returns(literal("[true]"))),
+                list(returns(literal("[false]")))));
         assertEquals(value("[true]"), runMethod(method));
     }
 
@@ -107,8 +108,8 @@ public abstract class BackendMethodTests {
         MethodNode.Builder method = staticMethod("hello")
             .statement(ifStatement(
                 literal(false),
-                asList(returns(literal("[true]"))),
-                asList(returns(literal("[false]")))));
+                list(returns(literal("[true]"))),
+                list(returns(literal("[false]")))));
         assertEquals(value("[false]"), runMethod(method));
     }
 
@@ -121,7 +122,7 @@ public abstract class BackendMethodTests {
             .statement(y)
             .statement(whileLoop(
                 notEqual(reference(x), reference(y)),
-                asList(assignStatement(x, integerAdd(reference(x), literal(1))))))
+                list(assignStatement(x, integerAdd(reference(x), literal(1))))))
             .statement(returns(reference(x)));
         assertEquals(value(2), runMethod(method));
     }
@@ -135,7 +136,7 @@ public abstract class BackendMethodTests {
             .statement(y)
             .statement(whileLoop(
                 notEqual(reference(x), reference(y)),
-                asList(
+                list(
                     assignStatement(x, integerAdd(reference(x), literal(1))),
                     returns(reference(x)))))
             .statement(returns(reference(x)));
@@ -147,7 +148,7 @@ public abstract class BackendMethodTests {
         String className = "com.example.Program";
         ClassNode classNode = ClassNode.builder(className).method(method).build();
         MethodRunner runner = buildMethodRunner();
-        return runner.runMethod(asList(classNode), classNode.getName(), method.getName(), asList(arguments));
+        return runner.runMethod(list(classNode), classNode.getName(), method.getName(), asList(arguments));
     }
     
     protected abstract MethodRunner buildMethodRunner();

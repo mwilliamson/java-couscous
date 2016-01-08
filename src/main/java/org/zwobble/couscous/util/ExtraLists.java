@@ -1,5 +1,7 @@
 package org.zwobble.couscous.util;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -8,6 +10,18 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class ExtraLists {
+    public static <T> List<T> list() {
+        return ImmutableList.of();
+    }
+
+    public static <T> List<T> list(T value1) {
+        return ImmutableList.of(value1);
+    }
+
+    public static <T> List<T> list(T value1, T value2) {
+        return ImmutableList.of(value1, value2);
+    }
+
     public static <T> List<T> cons(T value, List<T> list) {
         return Stream.concat(Stream.of(value), list.stream()).collect(Collectors.toList());
     }

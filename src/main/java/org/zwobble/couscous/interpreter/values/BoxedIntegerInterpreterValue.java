@@ -6,6 +6,7 @@ import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class BoxedIntegerInterpreterValue {
     public static ObjectInterpreterValue of(int value) {
@@ -21,19 +22,19 @@ public class BoxedIntegerInterpreterValue {
     public static final ConcreteType TYPE = ConcreteType.classBuilder("java.lang.Integer")
         .field("value", IntegerValue.REF)
 
-        .staticMethod("parseInt", asList(StringValue.REF),
+        .staticMethod("parseInt", list(StringValue.REF),
             (environment, arguments) -> {
                 StringInterpreterValue value = (StringInterpreterValue)arguments.get(0);
                 return new IntegerInterpreterValue(Integer.parseInt(value.getValue()));
             })
 
-        .staticMethod("valueOf", asList(IntegerValue.REF),
+        .staticMethod("valueOf", list(IntegerValue.REF),
             (environment, arguments) -> {
                 IntegerInterpreterValue value = (IntegerInterpreterValue)arguments.get(0);
                 return of(value);
             })
 
-        .method(Operator.EQUALS.getMethodName(), asList(ObjectValues.OBJECT),
+        .method(Operator.EQUALS.getMethodName(), list(ObjectValues.OBJECT),
             (environment, arguments) -> {
                 InterpreterValue right = arguments.getPositionalArguments().get(0);
                 if (right.getType().getName().equals(ObjectValues.BOXED_INT)) {
@@ -45,7 +46,7 @@ public class BoxedIntegerInterpreterValue {
                 }
             })
 
-        .method("toString", asList(),
+        .method("toString", list(),
             (environment, arguments) -> {
                 IntegerInterpreterValue value = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
                 return new StringInterpreterValue(Integer.toString(value.getValue()));

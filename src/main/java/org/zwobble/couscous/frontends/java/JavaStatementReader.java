@@ -35,16 +35,16 @@ class JavaStatementReader {
                 return readBlock((Block)statement);
 
             case ASTNode.RETURN_STATEMENT:
-                return asList(readReturnStatement((ReturnStatement)statement));
+                return list(readReturnStatement((ReturnStatement)statement));
 
             case ASTNode.EXPRESSION_STATEMENT:
-                return asList(readExpressionStatement((ExpressionStatement)statement));
+                return list(readExpressionStatement((ExpressionStatement)statement));
 
             case ASTNode.IF_STATEMENT:
-                return asList(readIfStatement((IfStatement)statement));
+                return list(readIfStatement((IfStatement)statement));
 
             case ASTNode.WHILE_STATEMENT:
-                return asList(readWhileStatement((WhileStatement)statement));
+                return list(readWhileStatement((WhileStatement)statement));
 
             case ASTNode.FOR_STATEMENT:
                 return readForStatement((ForStatement)statement);

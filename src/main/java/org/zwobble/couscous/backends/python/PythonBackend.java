@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
 
@@ -16,9 +17,10 @@ import com.google.common.io.Resources;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonBackend implements Backend {
-    private static final List<String> RUNTIME_FILES = asList(
+    private static final List<String> RUNTIME_FILES = ImmutableList.of(
         "java.lang.Object",
         "java.lang.Boolean",
         "java.lang.Integer",
@@ -63,7 +65,7 @@ public class PythonBackend implements Backend {
         Path path = destinationPathForModule(name);
         Files.createDirectories(path.getParent());
         createPythonPackages(path.getParent());
-        Files.write(path, asList(contents));
+        Files.write(path, list(contents));
     }
     
     private void createPythonPackages(Path packagePath) throws IOException {

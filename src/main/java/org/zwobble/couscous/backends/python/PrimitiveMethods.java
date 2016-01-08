@@ -22,6 +22,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pyt
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
 import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.pythonGetSlice;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PrimitiveMethods {
     private static final Map<String, PrimitiveMethodGenerator> STRING_METHODS =
@@ -30,7 +31,7 @@ public class PrimitiveMethods {
             .put("length", (receiver, arguments) ->
                 pythonCall(
                     pythonVariableReference("len"),
-                    asList(receiver)))
+                    list(receiver)))
             
             .put("substring", (receiver, arguments) ->
                 pythonGetSlice(receiver, arguments))
@@ -51,7 +52,7 @@ public class PrimitiveMethods {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
 
         methods.put("toString", (receiver, arguments) ->
-            pythonCall(pythonVariableReference("str"), ImmutableList.of(receiver)));
+            pythonCall(pythonVariableReference("str"), list(receiver)));
         
         addOperation(methods, Operator.ADD.getMethodName(), "+");
         addOperation(methods, Operator.SUBTRACT.getMethodName(), "-");
@@ -60,11 +61,11 @@ public class PrimitiveMethods {
         methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_div_round_to_zero"),
-                asList(receiver, arguments.get(0))));
+                list(receiver, arguments.get(0))));
         methods.put(Operator.MOD.getMethodName(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_mod_round_to_zero"),
-                asList(receiver, arguments.get(0))));
+                list(receiver, arguments.get(0))));
 
         addOperation(methods, Operator.EQUALS.getMethodName(), "==");
         addOperation(methods, Operator.NOT_EQUALS.getMethodName(), "!=");

@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToPythonTests extends CompilerTests {
     protected PrimitiveValue execProgram(
@@ -29,7 +30,7 @@ public class JavaToPythonTests extends CompilerTests {
             CouscousCompiler compiler = new CouscousCompiler(
                 new JavaFrontend(),
                 new PythonBackend(directoryPath, "couscous"));
-            compiler.compileDirectory(ImmutableList.of(directory), directory);
+            compiler.compileDirectory(list(directory), directory);
             return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
         } finally {
             deleteRecursively(directoryPath.toFile());
