@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -12,7 +13,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -62,26 +62,27 @@ public class JavaReader {
     }
 
     GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
-        TypeName name = generateAnonymousName(expression);
-        Scope scope = outerScope.enterClass(name);
-        return generateClosure(
-            scope,
-            name,
-            expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
+        return readLambda(
+            outerScope,
+            expression,
+            scope -> new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
     }
 
     GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {
-        TypeName name = generateAnonymousName(expression);
-        Scope scope = outerScope.enterClass(name);
-        return generateClosure(
-            scope,
-            name,
-            expression.resolveTypeBinding().getFunctionalInterfaceMethod(),
-            new JavaLambdaExpressionReader(this).toLambda(scope, expression));
+        return readLambda(
+            outerScope,
+            expression,
+            scope -> new JavaLambdaExpressionReader(this).toLambda(scope, expression));
     }
 
-    GeneratedClosure generateClosure(Scope scope, TypeName name, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
+    private GeneratedClosure readLambda(Scope outerScope, Expression expression, Function<Scope, Lambda> lambda) {
+        TypeName name = generateAnonymousName(expression);
+        Scope scope = outerScope.enterClass(name);
+        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
+        return generateClosure(scope, name, toAnonymousClass(functionalInterfaceMethod, lambda.apply(scope)));
+    }
+
+    private AnonymousClass toAnonymousClass(IMethodBinding functionalInterfaceMethod, Lambda lambda) {
         MethodNode method = MethodNode.method(
             emptyList(),
             false,
@@ -89,15 +90,10 @@ public class JavaReader {
             lambda.getFormalArguments(),
             lambda.getBody());
 
-        GeneratedClosure closure = classWithCapture(
-            scope,
-            name,
+        return new AnonymousClass(
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
-            emptyList(),
+            list(),
             list(method));
-
-        classes.add(closure.getClassNode());
-        return closure;
     }
 
     private List<StatementNode> replaceCaptureReferences(
@@ -150,12 +146,15 @@ public class JavaReader {
         TypeName className = generateAnonymousName(declaration);
         Scope scope = outerScope.enterClass(className);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, declaration.bodyDeclarations());
-        GeneratedClosure closure = classWithCapture(
-            scope,
-            className,
+        AnonymousClass anonymousClass = new AnonymousClass(
             superTypes(declaration),
             bodyDeclarations.getFields(),
             bodyDeclarations.getMethods());
+        return generateClosure(scope, className, anonymousClass);
+    }
+
+    GeneratedClosure generateClosure(Scope scope, TypeName className, AnonymousClass anonymousClass) {
+        GeneratedClosure closure = classWithCapture(scope, className, anonymousClass);
         classes.add(closure.getClassNode());
         return closure;
     }
@@ -173,24 +172,26 @@ public class JavaReader {
     private GeneratedClosure classWithCapture(
         Scope scope,
         TypeName className,
-        Set<TypeName> superTypes,
-        List<FieldDeclarationNode> declaredFields,
-        List<MethodNode> methods
+        AnonymousClass anonymousClass
     ) {
-        List<ReferenceNode> freeVariables = findFreeVariables(ExtraLists.concat(declaredFields, methods));
+        List<ReferenceNode> freeVariables = findFreeVariables(ExtraLists.concat(
+            anonymousClass.getFields(),
+            anonymousClass.getMethods()));
         List<CapturedVariable> capturedVariables = ImmutableList.copyOf(transform(
             freeVariables,
             freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
         Iterable<FieldDeclarationNode> captureFields = transform(capturedVariables, capture -> capture.field);
 
-        List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(declaredFields, captureFields));
+        List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(
+            anonymousClass.getFields(),
+            captureFields));
 
         ClassNode classNode = ClassNode.declareClass(
             className,
-            superTypes,
+            anonymousClass.getSuperTypes(),
             fields,
             buildConstructor(scope, className, capturedVariables),
-            eagerMap(methods, method ->
+            eagerMap(anonymousClass.getMethods(), method ->
                 method.mapBody(body -> replaceCaptureReferences(className, body, capturedVariables))));
         return new GeneratedClosure(classNode, freeVariables);
     }
