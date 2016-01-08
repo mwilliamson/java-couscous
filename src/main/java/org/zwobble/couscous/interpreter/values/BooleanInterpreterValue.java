@@ -10,14 +10,23 @@ public final class BooleanInterpreterValue implements InterpreterValue {
     public static final BooleanInterpreterValue TRUE = new BooleanInterpreterValue(true);
     public static final BooleanInterpreterValue FALSE = new BooleanInterpreterValue(false);
 
+    public static BooleanInterpreterValue of(final boolean value) {
+        return value ? TRUE : FALSE;
+    }
+
     private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
         
-        .method("negate", Collections.emptyList(), (environment, arguments) -> 
-            new BooleanInterpreterValue(!arguments.getReceiver().getValue()))
+        .method("negate", Collections.emptyList(), (environment, arguments) ->
+            of(!arguments.getReceiver().getValue()))
         
         .build();
+
     private final boolean value;
-    
+
+    private BooleanInterpreterValue(final boolean value) {
+        this.value = value;
+    }
+
     public boolean getValue() {
         return value;
     }
@@ -40,10 +49,6 @@ public final class BooleanInterpreterValue implements InterpreterValue {
     @Override
     public void setField(String fieldName, InterpreterValue value) {
         throw new NoSuchField(fieldName);
-    }
-    
-    public BooleanInterpreterValue(final boolean value) {
-        this.value = value;
     }
     
     @java.lang.Override

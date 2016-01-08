@@ -34,7 +34,7 @@ public class InterpreterValues {
 
             @Override
             public InterpreterValue visit(BooleanValue value) {
-                return new BooleanInterpreterValue(value.getValue());
+                return BooleanInterpreterValue.of(value.getValue());
             }
 
             @Override

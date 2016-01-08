@@ -29,7 +29,7 @@ public final class StringInterpreterValue implements InterpreterValue {
         .method("equals", list(ObjectValues.OBJECT), (environment, arguments) -> {
             InterpreterValue right = arguments.get(0);
             if (right instanceof StringInterpreterValue) {
-                return new BooleanInterpreterValue(arguments.getReceiver().value.equals(((StringInterpreterValue)right).value));
+                return BooleanInterpreterValue.of(arguments.getReceiver().value.equals(((StringInterpreterValue)right).value));
             } else {
                 return InterpreterValues.FALSE;
             }

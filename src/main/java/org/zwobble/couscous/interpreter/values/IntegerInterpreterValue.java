@@ -10,7 +10,6 @@ import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
@@ -31,7 +30,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
                 if (right instanceof IntegerInterpreterValue) {
                     return integerEquals(arguments, ((IntegerInterpreterValue)right));
                 } else {
-                    return new BooleanInterpreterValue(false);
+                    return BooleanInterpreterValue.of(false);
                 }
             })
         .method(Operator.EQUALS.getMethodName(), list(IntegerValue.REF),
@@ -52,7 +51,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
         .build();
 
     private static BooleanInterpreterValue integerEquals(MethodCallArguments<IntegerInterpreterValue> arguments, IntegerInterpreterValue right) {
-        return new BooleanInterpreterValue(arguments.getReceiver().getValue() == right.getValue());
+        return BooleanInterpreterValue.of(arguments.getReceiver().getValue() == right.getValue());
     }
 
     private static
@@ -64,7 +63,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
     private static
             BiFunction<Environment, MethodCallArguments<IntegerInterpreterValue>, InterpreterValue>
             infixReturningBoolean(BiFunction<Integer, Integer, Boolean> func) {
-        return infix((left, right) -> new BooleanInterpreterValue(func.apply(left, right)));
+        return infix((left, right) -> BooleanInterpreterValue.of(func.apply(left, right)));
     }
     
     private static

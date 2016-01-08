@@ -39,9 +39,9 @@ public class BoxedIntegerInterpreterValue {
                 if (right.getType().getName().equals(ObjectValues.BOXED_INT)) {
                     IntegerInterpreterValue leftValue = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
                     IntegerInterpreterValue rightValue = (IntegerInterpreterValue)right.getField("value");
-                    return new BooleanInterpreterValue(leftValue.getValue() == rightValue.getValue());
+                    return BooleanInterpreterValue.of(leftValue.getValue() == rightValue.getValue());
                 } else {
-                    return new BooleanInterpreterValue(false);
+                    return BooleanInterpreterValue.of(false);
                 }
             })
 
