@@ -6,12 +6,19 @@ import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Hashtable;
+import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import com.google.common.base.Charsets;
+
+import static com.google.common.collect.Iterables.concat;
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Arrays.asList;
 
 public class JavaParser {
     private final ASTParser parser;
@@ -29,12 +36,19 @@ public class JavaParser {
         parser.setResolveBindings(true);
     }
     
-    public CompilationUnit parseCompilationUnit(Path root, Path sourcePath) throws IOException {
-        parser.setUnitName("/" + root.relativize(sourcePath).toString());
+    public CompilationUnit parseCompilationUnit(List<Path> sourcePaths, Path sourcePath) throws IOException {
+        parser.setUnitName(sourcePath.toString());
+
+        String[] sourcePathArguments = Iterables.toArray(
+            concat(
+                ImmutableList.of("/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"),
+                transform(sourcePaths, Object::toString)),
+            String.class);
+
         parser.setEnvironment(
             new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"},
-            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip",  root.toString()},
-            new String[]{"UTF-8", "UTF-8"},
+            sourcePathArguments,
+            Iterables.toArray(transform(asList(sourcePathArguments), argument -> "UTF-8"), String.class),
             false);
         final byte[] javaFileBytes = Files.readAllBytes(sourcePath);
         CharBuffer source = Charsets.UTF_8.decode(ByteBuffer.wrap(javaFileBytes));

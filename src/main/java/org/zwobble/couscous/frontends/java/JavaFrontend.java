@@ -1,7 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.Multimaps;
-import org.zwobble.couscous.Frontend;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.VariableDeclaration;
@@ -20,12 +19,11 @@ import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
 import static org.zwobble.couscous.util.ExtraLists.flatMap;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
-public class JavaFrontend implements Frontend {
-    @Override
-    public List<ClassNode> readSourceDirectory(Path sourceRoot, Path directoryPath) throws IOException {
+public class JavaFrontend {
+    public List<ClassNode> readSourceDirectory(List<Path> sourcePaths, Path directoryPath) throws IOException {
         List<ClassNode> classNodes = flatMap(
             findJavaFiles(directoryPath),
-            javaFile -> JavaReader.readClassFromFile(sourceRoot, javaFile));
+            javaFile -> JavaReader.readClassFromFile(sourcePaths, javaFile));
         ensureDeclarationsAreUnique(classNodes);
         return classNodes;
     }

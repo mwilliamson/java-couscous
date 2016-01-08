@@ -26,7 +26,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         List<PrimitiveValue> arguments
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
-        List<ClassNode> classNodes = frontend.readSourceDirectory(directory, directory);
+        List<ClassNode> classNodes = frontend.readSourceDirectory(ImmutableList.of(directory), directory);
 
         Project project = JavaProject.of(classNodes);
         Interpreter interpreter = new Interpreter(project);

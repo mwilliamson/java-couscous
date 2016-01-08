@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.TypeName;
@@ -28,7 +29,7 @@ public class JavaToPythonTests extends CompilerTests {
             CouscousCompiler compiler = new CouscousCompiler(
                 new JavaFrontend(),
                 new PythonBackend(directoryPath, "couscous"));
-            compiler.compileDirectory(directory, directory);
+            compiler.compileDirectory(ImmutableList.of(directory), directory);
             return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
         } finally {
             deleteRecursively(directoryPath.toFile());

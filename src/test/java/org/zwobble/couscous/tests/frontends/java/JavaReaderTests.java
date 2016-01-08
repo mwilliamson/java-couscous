@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests.frontends.java;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -646,7 +647,7 @@ public class JavaReaderTests {
                 Files.createDirectories(directoryPath.resolve("com/example"));
                 Files.write(sourcePath, asList(javaClass));
 
-                return JavaReader.readClassFromFile(directoryPath, sourcePath);
+                return JavaReader.readClassFromFile(ImmutableList.of(directoryPath), sourcePath);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }

@@ -36,8 +36,8 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.toMap;
 
 public class JavaReader {
-    public static List<ClassNode> readClassFromFile(Path root, Path sourcePath) throws IOException {
-        CompilationUnit ast = new JavaParser().parseCompilationUnit(root, sourcePath);
+    public static List<ClassNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
+        CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
         System.out.println(sourcePath);
         for (Message message : ast.getMessages()) {
             System.out.println(message.getMessage());
