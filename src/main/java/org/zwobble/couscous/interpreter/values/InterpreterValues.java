@@ -15,7 +15,7 @@ public class InterpreterValues {
     }
     
     public static InterpreterValue value(String value) {
-        return new StringInterpreterValue(value);
+        return StringInterpreterValue.of(value);
     }
 
     public static InterpreterValue value(PrimitiveValue value) {
@@ -27,7 +27,7 @@ public class InterpreterValues {
 
             @Override
             public InterpreterValue visit(StringValue value) {
-                return new StringInterpreterValue(value.getValue());
+                return StringInterpreterValue.of(value.getValue());
             }
 
             @Override

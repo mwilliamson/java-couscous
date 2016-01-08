@@ -5,7 +5,6 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class BoxedIntegerInterpreterValue {
@@ -49,7 +48,7 @@ public class BoxedIntegerInterpreterValue {
         .method("toString", list(),
             (environment, arguments) -> {
                 IntegerInterpreterValue value = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
-                return new StringInterpreterValue(Integer.toString(value.getValue()));
+                return StringInterpreterValue.of(Integer.toString(value.getValue()));
             })
 
         .build();

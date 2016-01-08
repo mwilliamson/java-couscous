@@ -18,18 +18,26 @@ public final class StringInterpreterValue implements InterpreterValue {
         .method("substring", list(IntegerValue.REF, IntegerValue.REF), (environment, arguments) -> {
             IntegerInterpreterValue startIndex = (IntegerInterpreterValue)arguments.get(0);
             IntegerInterpreterValue endIndex = (IntegerInterpreterValue)arguments.get(1);
-            return new StringInterpreterValue(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
+            return of(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
         })
 
         .method("add", list(StringValue.REF), (environment, arguments) -> {
             StringInterpreterValue right = (StringInterpreterValue)arguments.get(0);
-            return new StringInterpreterValue(arguments.getReceiver().value + right.value);
+            return of(arguments.getReceiver().value + right.value);
         })
 
         .build();
 
     private final String value;
-    
+
+    private StringInterpreterValue(final String value) {
+        this.value = value;
+    }
+
+    public static StringInterpreterValue of(final String value) {
+        return new StringInterpreterValue(value);
+    }
+
     @Override
     public ConcreteType getType() {
         return TYPE;
@@ -48,10 +56,6 @@ public final class StringInterpreterValue implements InterpreterValue {
     @Override
     public void setField(String fieldName, InterpreterValue value) {
         throw new NoSuchField(fieldName);
-    }
-    
-    public StringInterpreterValue(final String value) {
-        this.value = value;
     }
     
     public String getValue() {

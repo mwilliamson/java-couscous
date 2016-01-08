@@ -19,7 +19,6 @@ import org.zwobble.couscous.values.StringValue;
 
 import com.google.common.collect.ImmutableMap;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
@@ -45,7 +44,7 @@ public class EvaluatorTests extends BackendEvalTests {
             Optional.empty(),
             new StackFrameBuilder().declare(arg, value("[initial value]")).build());
         InterpreterValue result = eval(environment, assign(arg, literal("[updated value]")));
-        assertEquals(new StringInterpreterValue("[updated value]"), result);
+        assertEquals(StringInterpreterValue.of("[updated value]"), result);
     }
     
     @Test
