@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.list;

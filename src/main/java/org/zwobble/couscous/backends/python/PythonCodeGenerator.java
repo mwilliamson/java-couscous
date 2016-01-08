@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
@@ -100,6 +99,15 @@ public class PythonCodeGenerator {
                 @Override
                 public Stream<TypeName> visit(ConstructorCallNode call) {
                     return Stream.of(call.getType());
+                }
+
+                @Override
+                public Stream<TypeName> visit(TypeCoercionNode typeCoercion) {
+                    if (isIntegerBox(typeCoercion)) {
+                        return Stream.of(ObjectValues.BOXED_INT);
+                    } else {
+                        return Stream.empty();
+                    }
                 }
             }))
             .collect(Collectors.toSet());
@@ -270,30 +278,28 @@ public class PythonCodeGenerator {
         public PythonExpressionNode visit(TypeCoercionNode typeCoercion) {
             PythonExpressionNode value = generateExpression(typeCoercion.getExpression());
             if (isIntegerBox(typeCoercion)) {
-                // TODO: replace with direct access to java.lang.Integer
-                return internalMethod("boxInt", list(value));
+                // TODO: perform this replacement at the start so that we don't split the import handling and actual expression
+                return visit(ConstructorCallNode.constructorCall(
+                    ObjectValues.BOXED_INT,
+                    list(typeCoercion.getExpression())));
             } else if (isIntegerUnbox(typeCoercion)) {
                 return pythonAttributeAccess(value, "_value");
             } else {
                 return value;
             }
         }
+    }
 
-        private boolean isIntegerBox(TypeCoercionNode typeCoercion) {
-            return isInteger(typeCoercion.getExpression().getType()) && !isInteger(typeCoercion.getType());
-        }
+    private static boolean isIntegerBox(TypeCoercionNode typeCoercion) {
+        return isInteger(typeCoercion.getExpression().getType()) && !isInteger(typeCoercion.getType());
+    }
 
-        private boolean isIntegerUnbox(TypeCoercionNode typeCoercion) {
-            return !isInteger(typeCoercion.getExpression().getType()) && isInteger(typeCoercion.getType());
-        }
+    private static boolean isIntegerUnbox(TypeCoercionNode typeCoercion) {
+        return !isInteger(typeCoercion.getExpression().getType()) && isInteger(typeCoercion.getType());
+    }
 
-        private boolean isInteger(TypeName type) {
-            return type.equals(IntegerValue.REF) || type.equals(ObjectValues.BOXED_INT);
-        }
-
-        private PythonExpressionNode internalMethod(String name, List<PythonExpressionNode> arguments) {
-            return pythonCall(pythonAttributeAccess(pythonVariableReference("_couscous"), name), arguments);
-        }
+    private static boolean isInteger(TypeName type) {
+        return type.equals(IntegerValue.REF) || type.equals(ObjectValues.BOXED_INT);
     }
 
     public static String toName(MethodSignature signature) {
