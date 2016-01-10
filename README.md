@@ -1,7 +1,5 @@
 ## TODO
 
-* Type literals
-
 * Casts
 
 * Switch statements
