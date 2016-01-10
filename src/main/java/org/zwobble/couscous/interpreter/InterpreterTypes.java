@@ -16,7 +16,7 @@ public class InterpreterTypes {
         }
     }
 
-    private static boolean isSubType(TypeName superTypeName, ConcreteType subType) {
+    public static boolean isSubType(TypeName superTypeName, ConcreteType subType) {
         return
             superTypeName.equals(subType.getName()) ||
             superTypeName.equals(ObjectValues.OBJECT) ||

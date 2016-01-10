@@ -1,8 +1,6 @@
 package org.zwobble.couscous.tests.interpreter;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
@@ -14,14 +12,17 @@ import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
 import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -185,6 +186,23 @@ public class EvaluatorTests extends BackendEvalTests {
                     list())));
         
         assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+    }
+
+    @Test
+    public void validCastPassesValueThrough() {
+        InterpreterValue value = eval(
+            emptyEnvironment(),
+            cast(literal("42"), ObjectValues.OBJECT));
+        assertEquals(value("42"), value);
+    }
+
+    @Test
+    public void errorIfCastIsNotValid() {
+        InvalidCast exception = assertThrows(InvalidCast.class,
+            () -> eval(emptyEnvironment(),
+                cast(literal(42), StringValue.REF)));
+        assertEquals(StringValue.REF, exception.getExpected());
+        assertEquals(IntegerValue.REF, exception.getActual());
     }
     
     private static Environment emptyEnvironment() {
