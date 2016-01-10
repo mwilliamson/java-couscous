@@ -2,7 +2,7 @@ package org.zwobble.couscous.interpreter.errors;
 
 import org.zwobble.couscous.ast.TypeName;
 
-public class InvalidCast extends RuntimeException {
+public class InvalidCast extends InterpreterException {
     private final TypeName expected;
     private final TypeName actual;
 
