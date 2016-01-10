@@ -9,10 +9,12 @@ public interface NodeMapper<T> {
     T visit(AssignmentNode assignment);
     T visit(TernaryConditionalNode ternaryConditional);
     T visit(MethodCallNode methodCall);
-    T visit(StaticMethodCallNode staticMethodCall);
     T visit(ConstructorCallNode call);
     T visit(FieldAccessNode fieldAccess);
     T visit(TypeCoercionNode typeCoercion);
+
+    T visit(InstanceReceiver receiver);
+    T visit(StaticReceiver receiver);
 
     T visit(ReturnNode returnNode);
     T visit(ExpressionStatementNode expressionStatement);

@@ -43,11 +43,6 @@ public interface ExpressionNode extends Node {
             }
 
             @Override
-            public T visit(StaticMethodCallNode staticMethodCall) {
-                return visitor.visit(staticMethodCall);
-            }
-
-            @Override
             public T visit(ConstructorCallNode call) {
                 return visitor.visit(call);
             }

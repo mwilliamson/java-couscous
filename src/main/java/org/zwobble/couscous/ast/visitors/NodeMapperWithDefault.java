@@ -40,11 +40,6 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
     
     @Override
-    public T visit(StaticMethodCallNode staticMethodCall) {
-        return defaultValue;
-    }
-    
-    @Override
     public T visit(ConstructorCallNode call) {
         return defaultValue;
     }
@@ -56,6 +51,16 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
 
     @Override
     public T visit(TypeCoercionNode typeCoercion) {
+        return defaultValue;
+    }
+
+    @Override
+    public T visit(InstanceReceiver receiver) {
+        return defaultValue;
+    }
+
+    @Override
+    public T visit(StaticReceiver receiver) {
         return defaultValue;
     }
 

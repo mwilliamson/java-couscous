@@ -130,10 +130,6 @@ public class PrimitiveMethods {
         ImmutableMap.<TypeName, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(InternalCouscousValue.REF, INTERNAL_METHODS)
             .build();
-    
-    public static boolean isPrimitive(TypeName type) {
-        return METHODS.containsKey(type);
-    }
 
     public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(TypeName type, String methodName) {
         return Optional.ofNullable(METHODS.get(type))

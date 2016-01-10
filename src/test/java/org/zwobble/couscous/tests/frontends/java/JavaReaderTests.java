@@ -207,7 +207,7 @@ public class JavaReaderTests {
     
     @Test
     public void argumentIsBoxedIfNecessary() {
-        StaticMethodCallNode expression = (StaticMethodCallNode) readExpression(
+        MethodCallNode expression = (MethodCallNode) readExpression(
             "String",
             "java.util.Objects.toString(42)");
         assertEquals(

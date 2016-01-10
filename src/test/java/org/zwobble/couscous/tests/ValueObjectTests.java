@@ -1,15 +1,6 @@
 package org.zwobble.couscous.tests;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+import com.google.common.base.Joiner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -20,7 +11,15 @@ import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
-import com.google.common.base.Joiner;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -50,12 +49,13 @@ public class ValueObjectTests {
             {FieldDeclarationNode.class},
             {FormalArgumentNode.class},
             {IfStatementNode.class},
+            {InstanceReceiver.class},
             {LiteralNode.class},
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
             {MethodNode.class},
             {ReturnNode.class},
-            {StaticMethodCallNode.class},
+            {StaticReceiver.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
             {TypeCoercionNode.class},
@@ -140,6 +140,8 @@ public class ValueObjectTests {
             return generateFirstInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
             return generateFirstInstance(LiteralNode.class);
+        } else if (type.equals(Receiver.class)) {
+            return generateFirstInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateFirstInstance(VariableReferenceNode.class);
         } else {
@@ -162,6 +164,8 @@ public class ValueObjectTests {
             return generateSecondInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
             return generateSecondInstance(LiteralNode.class);
+        } else if (type.equals(Receiver.class)) {
+            return generateSecondInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateSecondInstance(VariableReferenceNode.class);
         } else {
@@ -184,6 +188,8 @@ public class ValueObjectTests {
             return generateInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
             return generateInstance(LiteralNode.class);
+        } else if (type.equals(Receiver.class)) {
+            return generateInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateInstance(VariableReferenceNode.class);
         } else {
@@ -221,7 +227,7 @@ public class ValueObjectTests {
     }
     
     private static boolean isStaticConstructor(Class<?> type, Class<?>[] fieldTypes, Method method) {
-        return method.getReturnType().equals(type) &&
+        return method.getReturnType().isAssignableFrom(type) &&
             asList(fieldTypes).equals(asList(method.getParameterTypes()));
     }
 

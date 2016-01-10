@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
+import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -81,30 +82,41 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static MethodCallNode methodCall(
-            ExpressionNode receiver,
-            String methodName,
-            List<ExpressionNode> arguments,
-            TypeName type) {
+        ExpressionNode receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        TypeName type)
+    {
+        return methodCall(instanceReceiver(receiver), methodName, arguments, type);
+    }
+
+    public static MethodCallNode methodCall(
+        Receiver receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        TypeName type)
+    {
         return new MethodCallNode(receiver, methodName, arguments, type);
     }
     
-    private final ExpressionNode receiver;
+    private final Receiver receiver;
     private final String methodName;
     private final List<ExpressionNode> arguments;
     private final TypeName type;
     
-    public MethodCallNode(
-            ExpressionNode receiver,
-            String methodName,
-            List<ExpressionNode> arguments,
-            TypeName type) {
+    private MethodCallNode(
+        Receiver receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        TypeName type)
+    {
         this.receiver = receiver;
         this.methodName = methodName;
         this.arguments = arguments;
         this.type = type;
     }
     
-    public ExpressionNode getReceiver() {
+    public Receiver getReceiver() {
         return receiver;
     }
     
@@ -132,7 +144,7 @@ public class MethodCallNode implements ExpressionNode {
     @Override
     public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
         return new MethodCallNode(
-            replace.apply(receiver),
+            receiver.replaceExpressions(replace),
             methodName,
             eagerMap(arguments, replace::apply),
             type);

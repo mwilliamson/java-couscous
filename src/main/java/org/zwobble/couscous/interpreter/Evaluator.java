@@ -75,23 +75,25 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     
     @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
-        InterpreterValue receiver = eval(methodCall.getReceiver());
-        ConcreteType type = receiver.getType();
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
         MethodSignature signature = new MethodSignature(
             methodCall.getMethodName(),
             eagerMap(methodCall.getArguments(), argument -> argument.getType()));
-        return type.callMethod(environment, receiver, signature, arguments);
-    }
-    
-    @Override
-    public InterpreterValue visit(StaticMethodCallNode staticMethodCall) {
-        ConcreteType clazz = environment.findClass(staticMethodCall.getClassName());
-        List<InterpreterValue> arguments = evalArguments(staticMethodCall.getArguments());
-        MethodSignature signature = new MethodSignature(
-            staticMethodCall.getMethodName(),
-            eagerMap(arguments, argument -> argument.getType().getName()));
-        return clazz.callStaticMethod(environment, signature, arguments);
+
+        return methodCall.getReceiver().accept(new Receiver.Mapper<InterpreterValue>() {
+            @Override
+            public InterpreterValue visit(ExpressionNode receiverExpression) {
+                InterpreterValue receiver = eval(receiverExpression);
+                ConcreteType type = receiver.getType();
+                return type.callMethod(environment, receiver, signature, arguments);
+            }
+
+            @Override
+            public InterpreterValue visit(TypeName receiver) {
+                ConcreteType clazz = environment.findClass(receiver);
+                return clazz.callStaticMethod(environment, signature, arguments);
+            }
+        });
     }
     
     @Override

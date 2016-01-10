@@ -65,11 +65,6 @@ public class NodeStructure {
             }
 
             @Override
-            public Stream<ExpressionNode> visit(StaticMethodCallNode staticMethodCall) {
-                return staticMethodCall.getArguments().stream();
-            }
-
-            @Override
             public Stream<? extends ExpressionNode> visit(ConstructorCallNode call) {
                 return call.getArguments().stream();
             }
@@ -82,6 +77,16 @@ public class NodeStructure {
             @Override
             public Stream<? extends Node> visit(TypeCoercionNode typeCoercion) {
                 return Stream.of(typeCoercion.getExpression());
+            }
+
+            @Override
+            public Stream<? extends Node> visit(InstanceReceiver receiver) {
+                return Stream.of(receiver.getExpression());
+            }
+
+            @Override
+            public Stream<? extends Node> visit(StaticReceiver receiver) {
+                return Stream.empty();
             }
 
             @Override

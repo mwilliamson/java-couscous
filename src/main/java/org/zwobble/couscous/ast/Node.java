@@ -43,12 +43,6 @@ public interface Node {
             }
 
             @Override
-            public Void visit(StaticMethodCallNode staticMethodCall) {
-                visitor.visit(staticMethodCall);
-                return null;
-            }
-
-            @Override
             public Void visit(ConstructorCallNode call) {
                 visitor.visit(call);
                 return null;
@@ -63,6 +57,18 @@ public interface Node {
             @Override
             public Void visit(TypeCoercionNode typeCoercion) {
                 visitor.visit(typeCoercion);
+                return null;
+            }
+
+            @Override
+            public Void visit(InstanceReceiver receiver) {
+                visitor.visit(receiver);
+                return null;
+            }
+
+            @Override
+            public Void visit(StaticReceiver receiver) {
+                visitor.visit(receiver);
                 return null;
             }
 

@@ -10,14 +10,10 @@ import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
-import org.zwobble.couscous.backends.python.PrimitiveMethods.PrimitiveMethodGenerator;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.values.*;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -92,8 +88,8 @@ public class PythonCodeGenerator {
         return NodeStructure.descendantNodes(classNode)
             .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<TypeName>>(Stream.empty()) {
                 @Override
-                public Stream<TypeName> visit(StaticMethodCallNode staticMethodCall) {
-                    return Stream.of(staticMethodCall.getClassName());
+                public Stream<TypeName> visit(StaticReceiver receiver) {
+                    return Stream.of(receiver.getType());
                 }
 
                 @Override
@@ -238,27 +234,31 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
-            PythonExpressionNode receiver = generateExpression(methodCall.getReceiver());
+            PythonExpressionNode receiver = generateReceiver(methodCall.getReceiver());
             List<PythonExpressionNode> arguments = generateExpressions(methodCall.getArguments());
-            if (isPrimitive(methodCall.getReceiver())) {
-                PrimitiveMethodGenerator primitiveMethodGenerator = PrimitiveMethods.getPrimitiveMethod(methodCall.getReceiver().getType(), methodCall.getMethodName()).get();
-                return primitiveMethodGenerator.generate(receiver, arguments);
-            } else {
-                return pythonCall(pythonAttributeAccess(receiver, toName(methodCall.signature())), arguments);
-            }
+
+            return getPrimitiveMethod(methodCall, receiver, arguments)
+                .orElseGet(() -> pythonCall(pythonAttributeAccess(receiver, toName(methodCall.signature())), arguments));
         }
 
-        @Override
-        public PythonExpressionNode visit(StaticMethodCallNode staticMethodCall) {
-            TypeName className = staticMethodCall.getClassName();
-            PythonVariableReferenceNode classReference = pythonVariableReference(className.getSimpleName());
-            PythonAttributeAccessNode methodReference =
-                pythonAttributeAccess(classReference, toName(staticMethodCall.signature()));
-            List<PythonExpressionNode> arguments = generateExpressions(staticMethodCall.getArguments());
+        private Optional<PythonExpressionNode> getPrimitiveMethod(
+            MethodCallNode methodCall,
+            PythonExpressionNode pythonReceiver,
+            List<PythonExpressionNode> pythonArguments
+        ) {
+            return methodCall.getReceiver().accept(new Receiver.Mapper<Optional<PythonExpressionNode>>() {
+                @Override
+                public Optional<PythonExpressionNode> visit(ExpressionNode receiver) {
+                    return PrimitiveMethods.getPrimitiveMethod(receiver.getType(), methodCall.getMethodName())
+                        .map(generator -> generator.generate(pythonReceiver, pythonArguments));
+                }
 
-            return PrimitiveMethods.getPrimitiveStaticMethod(className, staticMethodCall.getMethodName())
-                .map(generator -> generator.generate(arguments))
-                .orElseGet(() -> pythonCall(methodReference, arguments));
+                @Override
+                public Optional<PythonExpressionNode> visit(TypeName receiver) {
+                    return PrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
+                        .map(generator -> generator.generate(pythonArguments));
+                }
+            });
         }
 
         @Override
@@ -290,6 +290,20 @@ public class PythonCodeGenerator {
         }
     }
 
+    private static PythonExpressionNode generateReceiver(Receiver receiver) {
+        return receiver.accept(new Receiver.Mapper<PythonExpressionNode>() {
+            @Override
+            public PythonExpressionNode visit(ExpressionNode receiver) {
+                return generateExpression(receiver);
+            }
+
+            @Override
+            public PythonExpressionNode visit(TypeName receiver) {
+                return pythonVariableReference(receiver.getSimpleName());
+            }
+        });
+    }
+
     private static boolean isIntegerBox(TypeCoercionNode typeCoercion) {
         return isInteger(typeCoercion.getExpression().getType()) && !isInteger(typeCoercion.getType());
     }
@@ -306,9 +320,5 @@ public class PythonCodeGenerator {
         return Joiner.on("__").join(Iterables.concat(
             list(signature.getName()),
             transform(signature.getArguments(), argument -> argument.getQualifiedName().replace('.', '_'))));
-    }
-
-    private static boolean isPrimitive(ExpressionNode value) {
-        return PrimitiveMethods.isPrimitive(value.getType());
     }
 }

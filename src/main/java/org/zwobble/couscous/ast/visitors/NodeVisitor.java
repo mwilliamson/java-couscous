@@ -9,10 +9,12 @@ public interface NodeVisitor {
     void visit(AssignmentNode assignment);
     void visit(TernaryConditionalNode ternaryConditional);
     void visit(MethodCallNode methodCall);
-    void visit(StaticMethodCallNode staticMethodCall);
     void visit(ConstructorCallNode call);
     void visit(FieldAccessNode fieldAccess);
     void visit(TypeCoercionNode typeCoercion);
+
+    void visit(InstanceReceiver receiver);
+    void visit(StaticReceiver receiver);
 
     void visit(ReturnNode returnNode);
     void visit(ExpressionStatementNode expressionStatement);
