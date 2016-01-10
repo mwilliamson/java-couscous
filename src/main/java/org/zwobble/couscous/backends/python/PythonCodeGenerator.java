@@ -131,6 +131,12 @@ public class PythonCodeGenerator {
             public PythonExpressionNode visit(UnitValue unitValue) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            public PythonExpressionNode visit(TypeValue value) {
+                // TODO:
+                throw new UnsupportedOperationException();
+            }
         });
     }
 

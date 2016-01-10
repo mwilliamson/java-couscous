@@ -5,4 +5,5 @@ public interface PrimitiveValueVisitor<T> {
     T visit(StringValue value);
     T visit(BooleanValue value);
     T visit(UnitValue unitValue);
+    T visit(TypeValue value);
 }

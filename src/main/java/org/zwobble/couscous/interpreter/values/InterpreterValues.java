@@ -1,11 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
-import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.UnitValue;
+import org.zwobble.couscous.values.*;
 
 public class InterpreterValues {
     public static final UnitInterpreterValue UNIT = UnitInterpreterValue.UNIT;
@@ -40,6 +35,12 @@ public class InterpreterValues {
             @Override
             public InterpreterValue visit(UnitValue unitValue) {
                 return UNIT;
+            }
+
+            @Override
+            public InterpreterValue visit(TypeValue value) {
+                // TODO:
+                throw new UnsupportedOperationException();
             }
         });
     }

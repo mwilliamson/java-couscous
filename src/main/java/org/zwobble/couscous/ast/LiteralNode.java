@@ -1,10 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.*;
 
 import java.util.function.Function;
 
@@ -25,6 +22,10 @@ public class LiteralNode implements ExpressionNode {
     
     public static LiteralNode literal(boolean value) {
         return new LiteralNode(value(value), BooleanValue.REF);
+    }
+
+    public static LiteralNode literal(TypeName type) {
+        return new LiteralNode(value(type), ObjectValues.CLASS);
     }
     
     public static LiteralNode of(PrimitiveValue value, TypeName type) {

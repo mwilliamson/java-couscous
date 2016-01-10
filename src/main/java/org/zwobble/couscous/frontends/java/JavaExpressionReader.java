@@ -66,6 +66,9 @@ public class JavaExpressionReader {
             case ASTNode.STRING_LITERAL:
                 return readStringLiteral((StringLiteral)expression);
 
+            case ASTNode.TYPE_LITERAL:
+                return readTypeLiteral((TypeLiteral)expression);
+
             case ASTNode.SIMPLE_NAME:
                 return readSimpleName((SimpleName)expression);
 
@@ -120,6 +123,10 @@ public class JavaExpressionReader {
 
     private static ExpressionNode readStringLiteral(StringLiteral expression) {
         return literal(expression.getLiteralValue());
+    }
+
+    private ExpressionNode readTypeLiteral(TypeLiteral expression) {
+        return literal(typeOf(expression.getType()));
     }
 
     private ExpressionNode readSimpleName(SimpleName expression) {
