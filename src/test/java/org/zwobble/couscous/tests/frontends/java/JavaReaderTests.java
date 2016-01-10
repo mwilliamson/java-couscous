@@ -27,6 +27,7 @@ import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.*;
+import static org.zwobble.couscous.ast.Operations.*;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticMethodCallNode.*;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
