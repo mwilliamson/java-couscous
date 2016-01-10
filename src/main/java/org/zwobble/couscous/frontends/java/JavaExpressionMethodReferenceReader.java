@@ -11,8 +11,8 @@ import org.zwobble.couscous.ast.sugar.Lambda;
 import java.util.List;
 
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
-import static org.zwobble.couscous.ast.StaticMethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;

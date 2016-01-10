@@ -6,9 +6,26 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
+import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class MethodCallNode implements ExpressionNode {
+    public static ExpressionNode staticMethodCall(
+        String className,
+        String methodName,
+        List<ExpressionNode> arguments,
+        TypeName type) {
+        return staticMethodCall(TypeName.of(className), methodName, arguments, type);
+    }
+
+    public static ExpressionNode staticMethodCall(
+        TypeName className,
+        String methodName,
+        List<ExpressionNode> arguments,
+        TypeName type) {
+        return MethodCallNode.methodCall(staticReceiver(className), methodName, arguments, type);
+    }
+
     public static MethodCallNode methodCall(
         ExpressionNode receiver,
         String methodName,

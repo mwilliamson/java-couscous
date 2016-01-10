@@ -12,6 +12,7 @@ import java.util.stream.IntStream;
 
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
@@ -158,7 +159,7 @@ public class JavaExpressionReader {
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
         if ((Modifier.isStatic(methodBinding.getModifiers()))) {
-            return StaticMethodCallNode.staticMethodCall(
+            return staticMethodCall(
                 receiverType,
                 methodName,
                 arguments,
@@ -229,9 +230,9 @@ public class JavaExpressionReader {
             ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
             ExpressionNode right = readExpression(ObjectValues.OBJECT, expression.getRightOperand());
             if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
-                return StaticMethodCallNode.same(left, right);
+                return Operations.same(left, right);
             } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
-                return not(StaticMethodCallNode.same(left, right));
+                return not(Operations.same(left, right));
             } else {
                 throw new IllegalArgumentException("Unsupported operator: " + expression.getOperator());
             }
