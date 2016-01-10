@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -19,6 +18,14 @@ public class MethodCallNode implements ExpressionNode {
         } else {
             throw new IllegalArgumentException("Can only negate booleans");
         }
+    }
+
+    public static ExpressionNode booleanAnd(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation(Operator.BOOLEAN_AND.getMethodName(), left, right);
+    }
+
+    public static ExpressionNode booleanOr(ExpressionNode left, ExpressionNode right) {
+        return booleanOperation(Operator.BOOLEAN_OR.getMethodName(), left, right);
     }
 
     public static ExpressionNode integerAdd(ExpressionNode left, ExpressionNode right) {

@@ -17,7 +17,11 @@ public class JavaOperators {
     }
 
     static Operator readOperator(InfixExpression.Operator operator) {
-        if (operator == InfixExpression.Operator.PLUS) {
+        if (operator == InfixExpression.Operator.CONDITIONAL_AND) {
+            return Operator.BOOLEAN_AND;
+        } else if (operator == InfixExpression.Operator.CONDITIONAL_OR) {
+            return Operator.BOOLEAN_OR;
+        } else if (operator == InfixExpression.Operator.PLUS) {
             return Operator.ADD;
         } else if (operator == InfixExpression.Operator.MINUS) {
             return Operator.SUBTRACT;

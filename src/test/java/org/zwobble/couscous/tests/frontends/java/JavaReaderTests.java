@@ -229,7 +229,18 @@ public class JavaReaderTests {
                 constructorCall(TypeName.of("java.lang.Object"), emptyList()))),
             readBooleanExpression("new Object() != new Object()"));
     }
-    
+
+    @Test
+    public void canUseOperatorsOnBooleans() {
+        assertEquals(
+            booleanAnd(literal(true), literal(false)),
+            readBooleanExpression("true && false"));
+
+        assertEquals(
+            booleanOr(literal(true), literal(false)),
+            readBooleanExpression("true || false"));
+    }
+
     @Test
     public void canUseOperatorsOnIntegers() {
         assertEquals(

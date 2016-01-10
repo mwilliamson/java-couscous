@@ -1,6 +1,9 @@
 package org.zwobble.couscous.ast;
 
 public enum Operator {
+    BOOLEAN_AND("and", true),
+    BOOLEAN_OR("or", true),
+
     ADD("add", false),
     SUBTRACT("subtract", false),
     MULTIPLY("multiply", false),
