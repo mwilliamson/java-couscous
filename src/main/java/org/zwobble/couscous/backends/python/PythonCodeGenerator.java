@@ -122,28 +122,28 @@ public class PythonCodeGenerator {
         return value.accept(new PrimitiveValueVisitor<PythonExpressionNode>(){
 
             @Override
-            public PythonExpressionNode visit(IntegerValue value) {
-                return pythonIntegerLiteral(value.getValue());
+            public PythonExpressionNode visitInteger(int value) {
+                return pythonIntegerLiteral(value);
             }
 
             @Override
-            public PythonExpressionNode visit(StringValue value) {
-                return pythonStringLiteral(value.getValue());
+            public PythonExpressionNode visitString(String value) {
+                return pythonStringLiteral(value);
             }
 
             @Override
-            public PythonExpressionNode visit(BooleanValue value) {
-                return pythonBooleanLiteral(value.getValue());
+            public PythonExpressionNode visitBoolean(boolean value) {
+                return pythonBooleanLiteral(value);
             }
 
             @Override
-            public PythonExpressionNode visit(UnitValue unitValue) {
+            public PythonExpressionNode visitUnit() {
                 throw new UnsupportedOperationException();
             }
 
             @Override
-            public PythonExpressionNode visit(TypeValue value) {
-                return typeReference(value.getValue());
+            public PythonExpressionNode visitType(TypeName value) {
+                return typeReference(value);
             }
         });
     }

@@ -15,7 +15,7 @@ public class TypeValue implements PrimitiveValue {
 
     @Override
     public <T> T accept(PrimitiveValueVisitor<T> visitor) {
-        return visitor.visit(this);
+        return visitor.visitType(value);
     }
 
     @Override

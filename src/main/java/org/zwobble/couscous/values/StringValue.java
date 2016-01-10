@@ -12,7 +12,7 @@ public final class StringValue implements PrimitiveValue {
     
     @Override
     public <T> T accept(PrimitiveValueVisitor<T> visitor) {
-        return visitor.visit(this);
+        return visitor.visitString(value);
     }
     
     @Override

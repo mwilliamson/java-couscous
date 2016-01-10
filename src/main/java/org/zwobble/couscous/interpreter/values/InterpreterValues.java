@@ -1,6 +1,8 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.values.*;
+import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 public class InterpreterValues {
     public static final UnitInterpreterValue UNIT = UnitInterpreterValue.UNIT;
@@ -18,28 +20,28 @@ public class InterpreterValues {
     public static InterpreterValue value(PrimitiveValue value) {
         return value.accept(new PrimitiveValueVisitor<InterpreterValue>() {
             @Override
-            public InterpreterValue visit(IntegerValue value) {
-                return new IntegerInterpreterValue(value.getValue());
+            public InterpreterValue visitInteger(int value) {
+                return new IntegerInterpreterValue(value);
             }
 
             @Override
-            public InterpreterValue visit(StringValue value) {
-                return StringInterpreterValue.of(value.getValue());
+            public InterpreterValue visitString(String value) {
+                return StringInterpreterValue.of(value);
             }
 
             @Override
-            public InterpreterValue visit(BooleanValue value) {
-                return BooleanInterpreterValue.of(value.getValue());
+            public InterpreterValue visitBoolean(boolean value) {
+                return BooleanInterpreterValue.of(value);
             }
 
             @Override
-            public InterpreterValue visit(UnitValue unitValue) {
+            public InterpreterValue visitUnit() {
                 return UNIT;
             }
 
             @Override
-            public InterpreterValue visit(TypeValue value) {
-                return TypeInterpreterValue.of(value.getValue());
+            public InterpreterValue visitType(TypeName value) {
+                return TypeInterpreterValue.of(value);
             }
         });
     }
