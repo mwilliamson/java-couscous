@@ -105,6 +105,15 @@ public class PythonCodeGenerator {
                         return Stream.empty();
                     }
                 }
+
+                @Override
+                public Stream<TypeName> visit(LiteralNode literal) {
+                    if (literal.getValue() instanceof TypeValue) {
+                        return Stream.of(((TypeValue)literal.getValue()).getValue());
+                    } else {
+                        return Stream.empty();
+                    }
+                }
             }))
             .collect(Collectors.toSet());
     }
@@ -134,8 +143,7 @@ public class PythonCodeGenerator {
 
             @Override
             public PythonExpressionNode visit(TypeValue value) {
-                // TODO:
-                throw new UnsupportedOperationException();
+                return typeReference(value.getValue());
             }
         });
     }
@@ -270,7 +278,7 @@ public class PythonCodeGenerator {
         @Override
         public PythonExpressionNode visit(ConstructorCallNode call) {
             final org.zwobble.couscous.ast.TypeName className = call.getType();
-            final org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode classReference = pythonVariableReference(className.getSimpleName());
+            final org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode classReference = typeReference(className);
             final java.util.List<org.zwobble.couscous.backends.python.ast.PythonExpressionNode> arguments = generateExpressions(call.getArguments());
             return pythonCall(classReference, arguments);
         }
@@ -305,7 +313,7 @@ public class PythonCodeGenerator {
 
             @Override
             public PythonExpressionNode visit(TypeName receiver) {
-                return pythonVariableReference(receiver.getSimpleName());
+                return typeReference(receiver);
             }
         });
     }
@@ -320,6 +328,10 @@ public class PythonCodeGenerator {
 
     private static boolean isInteger(TypeName type) {
         return type.equals(IntegerValue.REF) || type.equals(ObjectValues.BOXED_INT);
+    }
+
+    private static PythonVariableReferenceNode typeReference(TypeName className) {
+        return pythonVariableReference(className.getSimpleName());
     }
 
     public static String toName(MethodSignature signature) {

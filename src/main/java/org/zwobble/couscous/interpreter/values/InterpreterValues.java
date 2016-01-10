@@ -39,8 +39,7 @@ public class InterpreterValues {
 
             @Override
             public InterpreterValue visit(TypeValue value) {
-                // TODO:
-                throw new UnsupportedOperationException();
+                return TypeInterpreterValue.of(value.getValue());
             }
         });
     }

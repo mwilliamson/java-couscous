@@ -1,20 +1,17 @@
 package org.zwobble.couscous.backends.python;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
+import org.zwobble.couscous.Backend;
+import org.zwobble.couscous.ast.ClassNode;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.ClassNode;
-
-import com.google.common.io.Resources;
-
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -24,6 +21,7 @@ public class PythonBackend implements Backend {
         "java.lang.Object",
         "java.lang.Boolean",
         "java.lang.Integer",
+        "java.lang.String",
         "_couscous");
     
     private final Path root;

@@ -3,10 +3,14 @@ package org.zwobble.couscous.values;
 import org.zwobble.couscous.ast.TypeName;
 
 public class TypeValue implements PrimitiveValue {
-    private final TypeName type;
+    private final TypeName value;
 
-    public TypeValue(TypeName type) {
-        this.type = type;
+    public TypeValue(TypeName value) {
+        this.value = value;
+    }
+
+    public TypeName getValue() {
+        return value;
     }
 
     @Override
@@ -22,7 +26,7 @@ public class TypeValue implements PrimitiveValue {
     @Override
     public String toString() {
         return "TypeValue(" +
-            "type=" + type +
+            "value=" + value +
             ')';
     }
 
@@ -33,12 +37,12 @@ public class TypeValue implements PrimitiveValue {
 
         TypeValue typeValue = (TypeValue) o;
 
-        return type.equals(typeValue.type);
+        return value.equals(typeValue.value);
 
     }
 
     @Override
     public int hashCode() {
-        return type.hashCode();
+        return value.hashCode();
     }
 }

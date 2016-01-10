@@ -1,23 +1,28 @@
 package org.zwobble.couscous.tests.backends.python;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.io.CharStreams;
+import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.backends.python.PythonBackend;
+import org.zwobble.couscous.backends.python.PythonCodeGenerator;
+import org.zwobble.couscous.backends.python.PythonSerializer;
+import org.zwobble.couscous.tests.MethodRunner;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValues;
+import org.zwobble.couscous.values.StringValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.backends.python.PythonCodeGenerator;
-import org.zwobble.couscous.backends.python.PythonBackend;
-import org.zwobble.couscous.backends.python.PythonSerializer;
-import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValues;
-import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static java.lang.Integer.parseInt;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
@@ -63,9 +68,20 @@ public class PythonMethodRunner implements MethodRunner {
             return readPrimitive(output);
         }
     }
-    
+
+    private static final Pattern TYPE_REGEX = Pattern.compile("^<class '([^']+)'>$");
+    private static final String TYPE_NAME_PREFIX = "couscous.";
+
     private static PrimitiveValue readPrimitive(String output) {
-        if (output.equals("None")) {
+        Matcher matcher = TYPE_REGEX.matcher(output);
+        if (matcher.matches()) {
+            String name = matcher.group(1);
+            if (name.equals("couscous.java.lang.String.String")) {
+                return value(StringValue.REF);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        } else if (output.equals("None")) {
             return PrimitiveValues.UNIT;
         } else if (output.startsWith("\'")) {
             return value(output.substring(1, output.length() - 1));

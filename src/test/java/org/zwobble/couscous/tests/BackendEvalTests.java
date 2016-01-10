@@ -34,6 +34,7 @@ public abstract class BackendEvalTests {
         assertEquals(value(true), evalExpression(literal(true)));
         assertEquals(value(false), evalExpression(literal(false)));
         assertEquals(value(42), evalExpression(literal(42)));
+        assertEquals(value(StringValue.REF), evalExpression(literal(StringValue.REF)));
     }
     
     @Test
