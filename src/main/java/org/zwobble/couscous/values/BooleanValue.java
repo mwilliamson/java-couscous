@@ -4,7 +4,12 @@ import org.zwobble.couscous.ast.TypeName;
 
 public final class BooleanValue implements PrimitiveValue {
     public static final TypeName REF = TypeName.of("boolean");
+
     private final boolean value;
+
+    public BooleanValue(final boolean value) {
+        this.value = value;
+    }
     
     public boolean getValue() {
         return value;
@@ -18,10 +23,6 @@ public final class BooleanValue implements PrimitiveValue {
     @Override
     public TypeName getType() {
         return REF;
-    }
-    
-    public BooleanValue(final boolean value) {
-        this.value = value;
     }
     
     @java.lang.Override
