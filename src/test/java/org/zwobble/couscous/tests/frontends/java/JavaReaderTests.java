@@ -612,16 +612,8 @@ public class JavaReaderTests {
         return returnStatement.getValue();
     }
 
-    private StatementNode readStatement(String statementSource) {
-        return readStatements(statementSource).get(0);
-    }
-
     private StatementNode readStatement(String returnType, String statementSource) {
         return readStatements(returnType, statementSource).get(0);
-    }
-
-    private List<StatementNode> readStatements(String statementsSource) {
-        return readStatements("Object", statementsSource);
     }
 
     private List<StatementNode> readStatements(String returnType, String statementsSource) {
