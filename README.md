@@ -6,6 +6,8 @@
 
 * Switch statements
 
+* Type names for generics
+
 * Boxing and unboxing for `String`s
 
 * Handle boxing/unboxing when overriding method in supertype with more/less
