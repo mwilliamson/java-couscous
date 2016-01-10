@@ -35,14 +35,6 @@ class JavaTypes {
         return superTypes(declaration.resolveBinding());
     }
 
-    static Set<TypeName> superTypes(LambdaExpression expression) {
-        return superTypesAndSelf(expression.resolveTypeBinding());
-    }
-
-    static Set<TypeName> superTypes(ExpressionMethodReference expression) {
-        return superTypesAndSelf(expression.resolveTypeBinding());
-    }
-
     static Set<TypeName> superTypesAndSelf(ITypeBinding typeBinding) {
         ImmutableSet.Builder<TypeName> superTypes = ImmutableSet.builder();
         superTypes.addAll(superTypes(typeBinding));
