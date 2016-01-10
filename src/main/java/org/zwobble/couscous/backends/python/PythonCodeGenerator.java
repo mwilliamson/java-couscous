@@ -305,7 +305,10 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(CastNode cast) {
-            throw new UnsupportedOperationException();
+            // TODO: implement this properly
+            // Can't test this properly (i.e. in one test, rather than one per backend)
+            // until we have some unified notion of exceptions between backends
+            return generateExpression(cast.getExpression());
         }
     }
 
