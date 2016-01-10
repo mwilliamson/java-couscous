@@ -1,8 +1,9 @@
 package org.zwobble.couscous.backends.python.ast;
 
-import java.util.List;
-import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import com.google.common.collect.ImmutableList;
+import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
+
+import java.util.List;
 
 public final class PythonClassNode implements PythonStatementNode {
     
@@ -30,8 +31,13 @@ public final class PythonClassNode implements PythonStatementNode {
     }
     
     public static PythonClassNode pythonClass(String name, List<? extends PythonStatementNode> body) {
-        return new PythonClassNode(name, new PythonBlock(body));
+        return pythonClass(name, new PythonBlock(body));
     }
+
+    public static PythonClassNode pythonClass(final String name, final PythonBlock body) {
+        return new PythonClassNode(name, body);
+    }
+
     private final String name;
     private final PythonBlock body;
     
@@ -43,10 +49,6 @@ public final class PythonClassNode implements PythonStatementNode {
     private PythonClassNode(final String name, final PythonBlock body) {
         this.name = name;
         this.body = body;
-    }
-    
-    public static PythonClassNode pythonClass(final String name, final PythonBlock body) {
-        return new PythonClassNode(name, body);
     }
     
     public String getName() {

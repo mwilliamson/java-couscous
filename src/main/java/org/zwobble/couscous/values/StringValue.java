@@ -20,7 +20,7 @@ public final class StringValue implements PrimitiveValue {
         return REF;
     }
     
-    public StringValue(final String value) {
+    private StringValue(final String value) {
         this.value = value;
     }
     

@@ -6,7 +6,7 @@ public class PrimitiveValues {
     public static final PrimitiveValue FALSE = new BooleanValue(false);
     
     public static PrimitiveValue value(String value) {
-        return new StringValue(value);
+        return StringValue.of(value);
     }
     
     public static PrimitiveValue value(int value) {
