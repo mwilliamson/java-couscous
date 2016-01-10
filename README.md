@@ -1,7 +1,5 @@
 ## TODO
 
-* Casts
-
 * Switch statements
 
 * Type names for generics
