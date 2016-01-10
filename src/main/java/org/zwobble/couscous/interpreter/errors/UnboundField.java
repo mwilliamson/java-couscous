@@ -1,10 +1,10 @@
-package org.zwobble.couscous.interpreter;
+package org.zwobble.couscous.interpreter.errors;
 
-public final class NoSuchField extends InterpreterException {
+public final class UnboundField extends InterpreterException {
     private static final long serialVersionUID = 1L;
     private final String fieldName;
 
-    public NoSuchField(final String fieldName) {
+    public UnboundField(final String fieldName) {
         this.fieldName = fieldName;
     }
 
@@ -12,15 +12,16 @@ public final class NoSuchField extends InterpreterException {
         return this.fieldName;
     }
 
+    @java.lang.Override
     public java.lang.String toString() {
-        return "NoSuchField(fieldName=" + this.getFieldName() + ")";
+        return "UnboundField(fieldName=" + this.getFieldName() + ")";
     }
 
     @java.lang.Override
     public boolean equals(final java.lang.Object o) {
         if (o == this) return true;
-        if (!(o instanceof NoSuchField)) return false;
-        final NoSuchField other = (NoSuchField)o;
+        if (!(o instanceof UnboundField)) return false;
+        final UnboundField other = (UnboundField)o;
         if (!other.canEqual((java.lang.Object)this)) return false;
         final java.lang.Object this$fieldName = this.getFieldName();
         final java.lang.Object other$fieldName = other.getFieldName();
@@ -29,7 +30,7 @@ public final class NoSuchField extends InterpreterException {
     }
 
     protected boolean canEqual(final java.lang.Object other) {
-        return other instanceof NoSuchField;
+        return other instanceof UnboundField;
     }
 
     @java.lang.Override

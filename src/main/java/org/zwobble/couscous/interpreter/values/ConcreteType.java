@@ -6,6 +6,8 @@ import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
+import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.util.Casts;
 
 import java.util.*;

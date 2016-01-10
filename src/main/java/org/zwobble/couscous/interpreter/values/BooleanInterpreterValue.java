@@ -1,7 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.Operator;
-import org.zwobble.couscous.interpreter.NoSuchField;
+import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;

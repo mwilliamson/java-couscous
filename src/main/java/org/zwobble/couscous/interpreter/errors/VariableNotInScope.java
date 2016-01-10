@@ -1,12 +1,12 @@
-package org.zwobble.couscous.interpreter;
+package org.zwobble.couscous.interpreter.errors;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
 
-public final class UnboundVariable extends InterpreterException {
+public final class VariableNotInScope extends InterpreterException {
     private static final long serialVersionUID = 1L;
     private final Identifier variableId;
     
-    public UnboundVariable(final Identifier variableId) {
+    public VariableNotInScope(final Identifier variableId) {
         this.variableId = variableId;
     }
     
@@ -16,14 +16,14 @@ public final class UnboundVariable extends InterpreterException {
     
     @java.lang.Override
     public java.lang.String toString() {
-        return "UnboundVariable(variableId=" + this.getVariableId() + ")";
+        return "VariableNotInScope(variableId=" + this.getVariableId() + ")";
     }
     
     @java.lang.Override
     public boolean equals(final java.lang.Object o) {
         if (o == this) return true;
-        if (!(o instanceof UnboundVariable)) return false;
-        final UnboundVariable other = (UnboundVariable)o;
+        if (!(o instanceof VariableNotInScope)) return false;
+        final VariableNotInScope other = (VariableNotInScope)o;
         if (!other.canEqual((java.lang.Object)this)) return false;
         final java.lang.Object this$variableId = this.getVariableId();
         final java.lang.Object other$variableId = other.getVariableId();
@@ -32,7 +32,7 @@ public final class UnboundVariable extends InterpreterException {
     }
     
     protected boolean canEqual(final java.lang.Object other) {
-        return other instanceof UnboundVariable;
+        return other instanceof VariableNotInScope;
     }
     
     @java.lang.Override

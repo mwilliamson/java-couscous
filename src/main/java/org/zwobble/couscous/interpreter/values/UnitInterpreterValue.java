@@ -1,7 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
 import java.util.Optional;
-import org.zwobble.couscous.interpreter.NoSuchField;
+import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 

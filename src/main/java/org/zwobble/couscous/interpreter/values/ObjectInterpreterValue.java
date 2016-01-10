@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
-import org.zwobble.couscous.interpreter.NoSuchField;
-import org.zwobble.couscous.interpreter.UnboundField;
+import org.zwobble.couscous.interpreter.errors.NoSuchField;
+import org.zwobble.couscous.interpreter.errors.UnboundField;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 public class ObjectInterpreterValue implements InterpreterValue {

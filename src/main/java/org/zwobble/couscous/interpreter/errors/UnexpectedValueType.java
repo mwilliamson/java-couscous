@@ -1,4 +1,4 @@
-package org.zwobble.couscous.interpreter;
+package org.zwobble.couscous.interpreter.errors;
 
 import org.zwobble.couscous.ast.TypeName;
 

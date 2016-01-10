@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;

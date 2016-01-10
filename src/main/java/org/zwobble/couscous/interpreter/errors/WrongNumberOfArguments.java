@@ -1,4 +1,4 @@
-package org.zwobble.couscous.interpreter;
+package org.zwobble.couscous.interpreter.errors;
 
 public final class WrongNumberOfArguments extends InterpreterException {
     private static final long serialVersionUID = 1L;

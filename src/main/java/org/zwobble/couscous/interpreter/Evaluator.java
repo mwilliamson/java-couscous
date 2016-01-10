@@ -3,6 +3,8 @@ package org.zwobble.couscous.interpreter;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
+import org.zwobble.couscous.interpreter.errors.InvalidCast;
 import org.zwobble.couscous.interpreter.values.*;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;

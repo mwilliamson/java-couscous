@@ -6,6 +6,10 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
+import org.zwobble.couscous.interpreter.errors.UnboundVariable;
+import org.zwobble.couscous.interpreter.errors.UnexpectedValueType;
+import org.zwobble.couscous.interpreter.errors.VariableNotInScope;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendMethodTests;
@@ -14,7 +18,6 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;

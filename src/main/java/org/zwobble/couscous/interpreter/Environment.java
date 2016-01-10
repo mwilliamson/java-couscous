@@ -6,6 +6,8 @@ import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.interpreter.errors.UnboundVariable;
+import org.zwobble.couscous.interpreter.errors.VariableNotInScope;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import static java.util.stream.Collectors.toMap;
