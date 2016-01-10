@@ -1,10 +1,14 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.Collections;
-import java.util.Optional;
+import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.NoSuchField;
+import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
+
+import java.util.Optional;
+
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class BooleanInterpreterValue implements InterpreterValue {
     public static final BooleanInterpreterValue TRUE = new BooleanInterpreterValue(true);
@@ -16,9 +20,19 @@ public final class BooleanInterpreterValue implements InterpreterValue {
 
     private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
         
-        .method("negate", Collections.emptyList(), (environment, arguments) ->
+        .method("negate", list(), (environment, arguments) ->
             of(!arguments.getReceiver().getValue()))
-        
+
+        .method(Operator.BOOLEAN_AND.getMethodName(), list(BooleanValue.REF), (environment, arguments) -> {
+            BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
+            return of(arguments.getReceiver().getValue() && right.getValue());
+        })
+
+        .method(Operator.BOOLEAN_OR.getMethodName(), list(BooleanValue.REF), (environment, arguments) -> {
+            BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
+            return of(arguments.getReceiver().getValue() || right.getValue());
+        })
+
         .build();
 
     private final boolean value;

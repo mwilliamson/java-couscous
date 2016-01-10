@@ -1,22 +1,18 @@
 package org.zwobble.couscous.backends.python;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
-import org.zwobble.couscous.backends.python.ast.PythonCallNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
 import org.zwobble.couscous.values.*;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMap.Builder;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonIs;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
@@ -47,13 +43,19 @@ public class PrimitiveMethods {
 
             .build();
     
-    private static final Map<String, PrimitiveMethodGenerator> BOOLEAN_METHODS =
-        ImmutableMap.<String, PrimitiveMethodGenerator>builder()
-        
-            .put("negate", (receiver, arguments) ->
-                PythonNotNode.pythonNot(receiver))
-            
-            .build();
+    private static final Map<String, PrimitiveMethodGenerator> BOOLEAN_METHODS;
+
+    static {
+        ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
+
+        methods.put("negate", (receiver, arguments) ->
+            PythonNotNode.pythonNot(receiver));
+
+        addOperation(methods, Operator.BOOLEAN_AND, "and");
+        addOperation(methods, Operator.BOOLEAN_OR, "or");
+
+        BOOLEAN_METHODS = methods.build();
+    }
     
     private static final Map<String, PrimitiveMethodGenerator> INT_METHODS;
         
@@ -63,9 +65,9 @@ public class PrimitiveMethods {
         methods.put("toString", (receiver, arguments) ->
             pythonCall(pythonVariableReference("str"), list(receiver)));
         
-        addOperation(methods, Operator.ADD.getMethodName(), "+");
-        addOperation(methods, Operator.SUBTRACT.getMethodName(), "-");
-        addOperation(methods, Operator.MULTIPLY.getMethodName(), "*");
+        addOperation(methods, Operator.ADD, "+");
+        addOperation(methods, Operator.SUBTRACT, "-");
+        addOperation(methods, Operator.MULTIPLY, "*");
 
         methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
             pythonCall(
@@ -76,18 +78,26 @@ public class PrimitiveMethods {
                 internalReference("_mod_round_to_zero"),
                 list(receiver, arguments.get(0))));
 
-        addOperation(methods, Operator.EQUALS.getMethodName(), "==");
-        addOperation(methods, Operator.NOT_EQUALS.getMethodName(), "!=");
-        addOperation(methods, Operator.GREATER_THAN.getMethodName(), ">");
-        addOperation(methods, Operator.GREATER_THAN_OR_EQUAL.getMethodName(), ">=");
-        addOperation(methods, Operator.LESS_THAN.getMethodName(), "<");
-        addOperation(methods, Operator.LESS_THAN_OR_EQUAL.getMethodName(), "<=");
+        addOperation(methods, Operator.EQUALS, "==");
+        addOperation(methods, Operator.NOT_EQUALS, "!=");
+        addOperation(methods, Operator.GREATER_THAN, ">");
+        addOperation(methods, Operator.GREATER_THAN_OR_EQUAL, ">=");
+        addOperation(methods, Operator.LESS_THAN, "<");
+        addOperation(methods, Operator.LESS_THAN_OR_EQUAL, "<=");
         
         INT_METHODS = methods.build();
     }
     
     private static PythonExpressionNode internalReference(String name) {
         return pythonAttributeAccess(pythonVariableReference("_couscous"), name);
+    }
+
+    private static void addOperation(
+        Builder<String, PrimitiveMethodGenerator> methods,
+        Operator operator,
+        String operatorSymbol)
+    {
+        addOperation(methods, operator.getMethodName(), operatorSymbol);
     }
     
     private static void addOperation(

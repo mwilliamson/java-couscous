@@ -31,6 +31,8 @@ public abstract class CompilerTests {
         assertEquals(value(true), evalBooleanExpression("1 == 1"));
         assertEquals(value(false), evalBooleanExpression("1 != 1"));
         assertEquals(value(true), evalBooleanExpression("!false"));
+        assertEquals(value(true), evalBooleanExpression("true || false"));
+        assertEquals(value(false), evalBooleanExpression("true && false"));
     }
 
     @Test
