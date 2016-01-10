@@ -1,10 +1,8 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
-import org.zwobble.couscous.interpreter.values.BooleanInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
 
@@ -14,6 +12,7 @@ import java.util.stream.Stream;
 
 import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
+import static org.zwobble.couscous.interpreter.Evaluator.evalCondition;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
     public static InterpreterValue callMethod(Environment environment, CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
@@ -76,7 +75,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
 
     @Override
     public Optional<InterpreterValue> visit(IfStatementNode ifStatement) {
-        List<StatementNode> body = evalCondition(ifStatement.getCondition())
+        List<StatementNode> body = evalCondition(environment, ifStatement.getCondition())
             ? ifStatement.getTrueBranch()
             : ifStatement.getFalseBranch();
         return exec(body);
@@ -84,18 +83,13 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
 
     @Override
     public Optional<InterpreterValue> visit(WhileNode whileLoop) {
-        while (evalCondition(whileLoop.getCondition())) {
+        while (evalCondition(environment, whileLoop.getCondition())) {
             Optional<InterpreterValue> result = exec(whileLoop.getBody());
             if (result.isPresent()) {
                 return result;
             }
         }
         return Optional.empty();
-    }
-
-    private boolean evalCondition(ExpressionNode conditionExpression) {
-        BooleanInterpreterValue condition = (BooleanInterpreterValue) eval(environment, conditionExpression);
-        return condition.getValue();
     }
 
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {

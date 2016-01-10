@@ -18,6 +18,10 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
         return new Evaluator(environment).eval(expression);
     }
+
+    public static boolean evalCondition(Environment environment, ExpressionNode expression) {
+        return new Evaluator(environment).evalCondition(expression);
+    }
     
     private final Environment environment;
     
@@ -67,14 +71,19 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     
     @Override
     public InterpreterValue visit(TernaryConditionalNode ternaryConditional) {
-        InterpreterValue condition = eval(ternaryConditional.getCondition());
-        if (!(condition instanceof BooleanInterpreterValue)) {
-            throw new ConditionMustBeBoolean(condition);
-        }
-        final org.zwobble.couscous.ast.ExpressionNode branch = ((BooleanInterpreterValue)condition).getValue() ? ternaryConditional.getIfTrue() : ternaryConditional.getIfFalse();
+        boolean condition = evalCondition(ternaryConditional.getCondition());
+        ExpressionNode branch = condition ? ternaryConditional.getIfTrue() : ternaryConditional.getIfFalse();
         return eval(branch);
     }
-    
+
+    private boolean evalCondition(ExpressionNode condition) {
+        InterpreterValue value = eval(condition);
+        if (!(value instanceof BooleanInterpreterValue)) {
+            throw new ConditionMustBeBoolean(value);
+        }
+        return ((BooleanInterpreterValue)value).getValue();
+    }
+
     @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
