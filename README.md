@@ -1,5 +1,13 @@
 ## TODO
 
+* Type literals
+
+* Casts
+
+* Switch statements
+
+* Boolean operations
+
 * Boxing and unboxing for `String`s
 
 * Handle boxing/unboxing when overriding method in supertype with more/less
