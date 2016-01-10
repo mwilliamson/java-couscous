@@ -123,6 +123,11 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         }
     }
 
+    @Override
+    public InterpreterValue visit(CastNode cast) {
+        throw new UnsupportedOperationException();
+    }
+
     private static boolean isIntegerBox(TypeCoercionNode typeCoercion) {
         return typeCoercion.getExpression().getType().equals(IntegerValue.REF) &&
             !typeCoercion.getType().equals(IntegerValue.REF);

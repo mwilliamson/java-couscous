@@ -55,6 +55,11 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
 
     @Override
+    public T visit(CastNode cast) {
+        return defaultValue;
+    }
+
+    @Override
     public T visit(InstanceReceiver receiver) {
         return defaultValue;
     }

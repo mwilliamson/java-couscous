@@ -41,6 +41,7 @@ public class ValueObjectTests {
         return asList(new Object[][] {
             {AnnotationNode.class},
             {AssignmentNode.class},
+            {CastNode.class},
             {ClassNode.class},
             {ConstructorCallNode.class},
             {ConstructorNode.class},

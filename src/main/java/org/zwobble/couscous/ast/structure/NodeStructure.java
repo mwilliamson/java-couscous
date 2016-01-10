@@ -80,6 +80,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(CastNode cast) {
+                return Stream.of(cast.getExpression());
+            }
+
+            @Override
             public Stream<? extends Node> visit(InstanceReceiver receiver) {
                 return Stream.of(receiver.getExpression());
             }

@@ -12,4 +12,5 @@ public interface ExpressionNodeMapper<T> {
     T visit(ConstructorCallNode call);
     T visit(FieldAccessNode fieldAccess);
     T visit(TypeCoercionNode typeCoercion);
+    T visit(CastNode cast);
 }

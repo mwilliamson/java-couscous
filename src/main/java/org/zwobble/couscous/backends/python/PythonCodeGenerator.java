@@ -302,6 +302,11 @@ public class PythonCodeGenerator {
                 return value;
             }
         }
+
+        @Override
+        public PythonExpressionNode visit(CastNode cast) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private static PythonExpressionNode generateReceiver(Receiver receiver) {

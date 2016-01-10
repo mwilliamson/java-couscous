@@ -61,6 +61,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(CastNode cast) {
+                visitor.visit(cast);
+                return null;
+            }
+
+            @Override
             public Void visit(InstanceReceiver receiver) {
                 visitor.visit(receiver);
                 return null;

@@ -19,6 +19,7 @@ import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
@@ -54,6 +55,13 @@ public class JavaReaderTests {
         assertEquals(
             thisReference(TypeName.of("com.example.Example")),
             readExpressionInInstanceMethod("com.example.Example", "this"));
+    }
+
+    @Test
+    public void canReadCasts() {
+        assertEquals(
+            cast(literal(42), ObjectValues.OBJECT),
+            readExpression("Object", "(Object)42"));
     }
     
     @Test

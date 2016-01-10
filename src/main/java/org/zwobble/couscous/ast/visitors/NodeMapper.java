@@ -12,6 +12,7 @@ public interface NodeMapper<T> {
     T visit(ConstructorCallNode call);
     T visit(FieldAccessNode fieldAccess);
     T visit(TypeCoercionNode typeCoercion);
+    T visit(CastNode cast);
 
     T visit(InstanceReceiver receiver);
     T visit(StaticReceiver receiver);

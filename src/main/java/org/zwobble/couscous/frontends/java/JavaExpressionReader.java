@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
@@ -101,6 +102,9 @@ public class JavaExpressionReader {
 
             case ASTNode.ASSIGNMENT:
                 return readAssignment((Assignment)expression);
+
+            case ASTNode.CAST_EXPRESSION:
+                return readCastExpression((CastExpression)expression);
 
             default:
                 throw new RuntimeException("Unsupported expression: " + expression.getClass());
@@ -305,6 +309,10 @@ public class JavaExpressionReader {
             operator.getMethodName(),
             list(right),
             operator.isBoolean() ? BooleanValue.REF : left.getType());
+    }
+
+    private ExpressionNode readCastExpression(CastExpression expression) {
+        return cast(readExpressionWithoutBoxing(expression.getExpression()), typeOf(expression));
     }
 
     private ExpressionNode readUnboxedExpression(Expression expression) {
