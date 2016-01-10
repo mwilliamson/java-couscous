@@ -2,6 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterables.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
@@ -33,12 +34,23 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 public class JavaReader {
     public static List<ClassNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
-        System.out.println(sourcePath);
-        for (Message message : ast.getMessages()) {
-            System.out.println(message.getMessage());
+
+        ImmutableList<IProblem> errors = ImmutableList.copyOf(filter(asList(ast.getProblems()), problem -> problem.isError()));
+        if (!errors.isEmpty()) {
+            throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
         }
         JavaReader reader = new JavaReader();
         return cons(reader.readCompilationUnit(ast), reader.classes.build());
+    }
+
+    private static String describe(List<IProblem> errors) {
+        return String.join("\n\n", transform(errors, JavaReader::describe));
+    }
+
+    private static String describe(IProblem error) {
+        return "File: " + String.copyValueOf(error.getOriginatingFileName()) + "\n" +
+            "Line number: " + error.getSourceLineNumber() + "\n" +
+            error.getMessage();
     }
 
     private final ImmutableList.Builder<ClassNode> classes;

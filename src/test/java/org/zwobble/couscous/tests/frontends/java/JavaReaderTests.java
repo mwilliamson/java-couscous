@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests.frontends.java;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
@@ -13,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
@@ -370,9 +368,9 @@ public class JavaReaderTests {
     
     @Test
     public void initialValueOfLocalVariableDeclarationsAreTypeCoercedIfNecessary() {
-        List<StatementNode> statements = readStatements("Object x = 4;");
+        StatementNode statement = readStatement("void", "Object x = 4;");
         
-        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statement;
         assertEquals(typeCoercion(literal(4), ObjectValues.OBJECT), declaration.getInitialValue());
     }
     
@@ -509,7 +507,7 @@ public class JavaReaderTests {
                     "parseInt",
                     list(literal("42")),
                     IntegerValue.REF)),
-            readStatement("Integer.parseInt(\"42\");"));
+            readStatement("void", "Integer.parseInt(\"42\");"));
     }
     
     @Test
