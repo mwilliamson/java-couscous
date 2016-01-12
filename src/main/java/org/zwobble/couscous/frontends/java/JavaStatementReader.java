@@ -3,16 +3,23 @@ package org.zwobble.couscous.frontends.java;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.ObjectValues;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
+import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Maps.immutableEntry;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
+import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
+import static org.zwobble.couscous.frontends.java.JavaExpressionReader.coerceExpression;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraLists.concat;
 
 class JavaStatementReader {
     private final Scope scope;
@@ -52,6 +59,9 @@ class JavaStatementReader {
             case ASTNode.VARIABLE_DECLARATION_STATEMENT:
                 return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
 
+            case ASTNode.SWITCH_STATEMENT:
+                return readSwitchStatement((SwitchStatement)statement);
+
             default:
                 throw new RuntimeException("Unsupported statement: " + statement.getClass());
         }
@@ -74,10 +84,102 @@ class JavaStatementReader {
     }
 
     private StatementNode readIfStatement(IfStatement statement) {
-        return IfStatementNode.ifStatement(
+        return ifStatement(
             readExpression(BooleanValue.REF, statement.getExpression()),
             readStatement(statement.getThenStatement()),
             readStatement(statement.getElseStatement()));
+    }
+
+    private List<StatementNode> readSwitchStatement(SwitchStatement switchStatement) {
+        ExpressionNode switchValue = readExpressionWithoutBoxing(switchStatement.getExpression());
+        LocalVariableDeclarationNode switchValueAssignment = scope.localVariable(
+            "_couscous_tmp_0",
+            switchValue.getType(),
+            switchValue);
+
+        List<Statement> statements = switchStatement.statements();
+        List<Map.Entry<Optional<ExpressionNode>, List<StatementNode>>> cases = new ArrayList<>();
+
+        for (int statementIndex = 0; statementIndex < statements.size(); statementIndex++) {
+            Statement statement = statements.get(statementIndex);
+            if (statement.getNodeType() == ASTNode.SWITCH_CASE) {
+                cases.add(readSwitchCase(statements, statementIndex));
+            }
+        }
+
+        List<StatementNode> handle = tryFind(cases, currentCase -> !currentCase.getKey().isPresent())
+            .transform(currentCase -> currentCase.getValue())
+            .or(list());
+
+        for (int caseIndex = cases.size(); caseIndex --> 0;) {
+            Map.Entry<Optional<ExpressionNode>, List<StatementNode>> currentCase = cases.get(caseIndex);
+            if (currentCase.getKey().isPresent()) {
+                handle = list(ifStatement(
+                    methodCall(
+                        reference(switchValueAssignment),
+                        "equals",
+                        list(coerceExpression(ObjectValues.OBJECT, currentCase.getKey().get())),
+                        BooleanValue.REF),
+                    currentCase.getValue(), handle));
+            }
+        }
+
+        return cons(
+            switchValueAssignment,
+            handle);
+    }
+
+    private Map.Entry<Optional<ExpressionNode>,List<StatementNode>> readSwitchCase(List<Statement> statements, int statementIndex) {
+        SwitchCase caseStatement = (SwitchCase)statements.get(statementIndex);
+
+        Iterable<Statement> statementsForCase = upTo(
+            filter(
+                skip(statements, statementIndex),
+                statement -> statement.getNodeType() != ASTNode.SWITCH_CASE),
+            JavaStatementReader::isEndOfCase);
+        return immutableEntry(
+            Optional.ofNullable(caseStatement.getExpression()).map(this::readExpressionWithoutBoxing),
+            readStatements(statementsForCase));
+    }
+
+    private static <T> Iterable<T> upTo(Iterable<T> iterable, Predicate<T> predicate) {
+        return () -> new UpToIterator<>(iterable.iterator(), predicate);
+    }
+
+    private static class UpToIterator<T> implements Iterator<T> {
+        private final Iterator<T> iterator;
+        private final Predicate<T> predicate;
+        private boolean finished;
+
+        public UpToIterator(Iterator<T> iterator, Predicate<T> predicate) {
+            this.iterator = iterator;
+            this.predicate = predicate;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !finished && iterator.hasNext();
+        }
+
+        @Override
+        public T next() {
+            if (hasNext()) {
+                T value = iterator.next();
+                finished = predicate.test(value);
+                return value;
+            } else {
+                throw new NoSuchElementException();
+            }
+        }
+    }
+
+    private static boolean isEndOfCase(Statement statement) {
+        // TODO: do this on transformed nodes instead?
+        return statement.getNodeType() == ASTNode.RETURN_STATEMENT;
+    }
+
+    private List<StatementNode> readStatements(Iterable<Statement> statements) {
+        return eagerFlatMap(statements, this::readStatement);
     }
 
     private WhileNode readWhileStatement(WhileStatement statement) {

@@ -56,6 +56,15 @@ public class Scope {
         return LocalVariableDeclarationNode.localVariableDeclaration(declaration, initialValue);
     }
 
+    public LocalVariableDeclarationNode localVariable(
+        String name,
+        TypeName type,
+        ExpressionNode initialValue
+    ) {
+        VariableDeclaration declaration = generateVariable(name, type);
+        return LocalVariableDeclarationNode.localVariableDeclaration(declaration, initialValue);
+    }
+
     public ExpressionNode reference(String key) {
         VariableDeclaration variable = variablesByKey.get(key);
         if (variable == null) {

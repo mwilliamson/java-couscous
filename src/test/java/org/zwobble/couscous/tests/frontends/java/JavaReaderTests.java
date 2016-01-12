@@ -564,6 +564,19 @@ public class JavaReaderTests {
                         expressionStatement(assign(declaration, integerAdd(reference(declaration), literal(1))))))),
             statements);
     }
+
+    @Test
+    public void switchStatementWithoutFallThroughIsReadAsIfElseStatement() {
+        // TODO: deal with default not at the end
+        assertEquals(
+            readStatements(
+                "int",
+                "String _couscous_tmp_0 = \"one\";" +
+                "if (_couscous_tmp_0.equals(\"one\")) { return 0; }" +
+                "else if (_couscous_tmp_0.equals(\"two\")) { return 0; }" +
+                "else { return 1; }"),
+            readStatements("int", "switch (\"one\") { case \"one\": case \"two\": return 0; default: return 1; }"));
+    }
     
     @Test
     public void canDeclareConstructor() {
