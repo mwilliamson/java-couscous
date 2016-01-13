@@ -1,6 +1,5 @@
 package org.zwobble.couscous.frontends.java;
 
-import com.google.common.collect.Lists;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
@@ -23,7 +22,7 @@ import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
 import static org.zwobble.couscous.frontends.java.JavaExpressionReader.coerceExpression;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
-import static org.zwobble.couscous.util.Fold.foldLeft;
+import static org.zwobble.couscous.util.Fold.foldRight;
 import static org.zwobble.couscous.util.Tails.tail;
 import static org.zwobble.couscous.util.Tails.tails;
 import static org.zwobble.couscous.util.UpToAndIncludingIterable.upToAndIncluding;
@@ -117,7 +116,7 @@ class JavaStatementReader {
 
         return cons(
             switchValueAssignment,
-            foldLeft(Lists.reverse(cases), handleDefault, (handle, currentCase) ->
+            foldRight(cases, handleDefault, (handle, currentCase) ->
                 currentCase.getValue()
                     .map(value -> list(ifStatement(
                         methodCall(
