@@ -5,8 +5,10 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.ObjectValues;
 
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.*;
@@ -20,6 +22,7 @@ import static org.zwobble.couscous.frontends.java.JavaExpressionReader.coerceExp
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraLists.concat;
+import static org.zwobble.couscous.util.UpToAndIncludingIterable.upToAndIncluding;
 
 class JavaStatementReader {
     private final Scope scope;
@@ -131,7 +134,7 @@ class JavaStatementReader {
     private Map.Entry<Optional<ExpressionNode>,List<StatementNode>> readSwitchCase(List<Statement> statements, int statementIndex) {
         SwitchCase caseStatement = (SwitchCase)statements.get(statementIndex);
 
-        Iterable<Statement> statementsForCase = upTo(
+        Iterable<Statement> statementsForCase = upToAndIncluding(
             filter(
                 skip(statements, statementIndex),
                 statement -> statement.getNodeType() != ASTNode.SWITCH_CASE),
@@ -139,37 +142,6 @@ class JavaStatementReader {
         return immutableEntry(
             Optional.ofNullable(caseStatement.getExpression()).map(this::readExpressionWithoutBoxing),
             readStatements(statementsForCase));
-    }
-
-    private static <T> Iterable<T> upTo(Iterable<T> iterable, Predicate<T> predicate) {
-        return () -> new UpToIterator<>(iterable.iterator(), predicate);
-    }
-
-    private static class UpToIterator<T> implements Iterator<T> {
-        private final Iterator<T> iterator;
-        private final Predicate<T> predicate;
-        private boolean finished;
-
-        public UpToIterator(Iterator<T> iterator, Predicate<T> predicate) {
-            this.iterator = iterator;
-            this.predicate = predicate;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return !finished && iterator.hasNext();
-        }
-
-        @Override
-        public T next() {
-            if (hasNext()) {
-                T value = iterator.next();
-                finished = predicate.test(value);
-                return value;
-            } else {
-                throw new NoSuchElementException();
-            }
-        }
     }
 
     private static boolean isEndOfCase(Statement statement) {
