@@ -6,7 +6,6 @@ import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.ObjectValues;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -101,14 +100,16 @@ class JavaStatementReader {
         LocalVariableDeclarationNode switchValueAssignment = scope.temporaryVariable(switchValue);
 
         List<Statement> statements = switchStatement.statements();
-        List<SwitchCaseNode> cases = new ArrayList<>();
-
-        for (List<Statement> tail : tails(statements)) {
-            Statement first = tail.get(0);
-            if (first.getNodeType() == ASTNode.SWITCH_CASE) {
-                cases.add(readSwitchCase((SwitchCase) first, tail(tail)));
-            }
-        }
+        List<SwitchCaseNode> cases = eagerFlatMap(
+            tails(statements),
+            tail -> {
+                Statement first = tail.get(0);
+                if (first.getNodeType() == ASTNode.SWITCH_CASE) {
+                    return list(readSwitchCase((SwitchCase) first, tail(tail)));
+                } else {
+                    return list();
+                }
+            });
 
         List<StatementNode> handleDefault = tryFind(cases, currentCase -> currentCase.isDefault())
             .transform(currentCase -> currentCase.getStatements())
