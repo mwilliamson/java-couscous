@@ -95,9 +95,7 @@ class JavaStatementReader {
 
     private List<StatementNode> readSwitchStatement(SwitchStatement switchStatement) {
         ExpressionNode switchValue = readExpressionWithoutBoxing(switchStatement.getExpression());
-        LocalVariableDeclarationNode switchValueAssignment = scope.temporaryVariable(
-            switchValue.getType(),
-            switchValue);
+        LocalVariableDeclarationNode switchValueAssignment = scope.temporaryVariable(switchValue);
 
         List<Statement> statements = switchStatement.statements();
         List<Map.Entry<Optional<ExpressionNode>, List<StatementNode>>> cases = new ArrayList<>();

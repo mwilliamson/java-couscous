@@ -74,6 +74,10 @@ public class Scope {
         return LocalVariableDeclarationNode.localVariableDeclaration(declaration, initialValue);
     }
 
+    public LocalVariableDeclarationNode temporaryVariable(ExpressionNode initialValue) {
+        return temporaryVariable(initialValue.getType(), initialValue);
+    }
+
     public LocalVariableDeclarationNode temporaryVariable(TypeName type, ExpressionNode initialValue) {
         return localVariable("_couscous_tmp_" + temporaryCounter.next(), type, initialValue);
     }
