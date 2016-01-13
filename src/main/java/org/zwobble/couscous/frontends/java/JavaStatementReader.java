@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.tryFind;
 import static com.google.common.collect.Maps.immutableEntry;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
@@ -21,7 +22,8 @@ import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.frontends.java.JavaExpressionReader.coerceExpression;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
-import static org.zwobble.couscous.util.ExtraLists.concat;
+import static org.zwobble.couscous.util.Tails.tail;
+import static org.zwobble.couscous.util.Tails.tails;
 import static org.zwobble.couscous.util.UpToAndIncludingIterable.upToAndIncluding;
 
 class JavaStatementReader {
@@ -100,10 +102,10 @@ class JavaStatementReader {
         List<Statement> statements = switchStatement.statements();
         List<Map.Entry<Optional<ExpressionNode>, List<StatementNode>>> cases = new ArrayList<>();
 
-        for (int statementIndex = 0; statementIndex < statements.size(); statementIndex++) {
-            Statement statement = statements.get(statementIndex);
-            if (statement.getNodeType() == ASTNode.SWITCH_CASE) {
-                cases.add(readSwitchCase(statements, statementIndex));
+        for (List<Statement> tail : tails(statements)) {
+            Statement first = tail.get(0);
+            if (first.getNodeType() == ASTNode.SWITCH_CASE) {
+                cases.add(readSwitchCase((SwitchCase) first, tail(tail)));
             }
         }
 
@@ -129,12 +131,13 @@ class JavaStatementReader {
             handle);
     }
 
-    private Map.Entry<Optional<ExpressionNode>,List<StatementNode>> readSwitchCase(List<Statement> statements, int statementIndex) {
-        SwitchCase caseStatement = (SwitchCase)statements.get(statementIndex);
-
+    private Map.Entry<Optional<ExpressionNode>,List<StatementNode>> readSwitchCase(
+        SwitchCase caseStatement,
+        List<Statement> statements)
+    {
         Iterable<Statement> statementsForCase = upToAndIncluding(
             filter(
-                skip(statements, statementIndex),
+                statements,
                 statement -> statement.getNodeType() != ASTNode.SWITCH_CASE),
             JavaStatementReader::isEndOfCase);
         return immutableEntry(
