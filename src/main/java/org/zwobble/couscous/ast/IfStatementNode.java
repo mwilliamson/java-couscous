@@ -1,14 +1,14 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+
 import java.util.List;
 import java.util.function.Function;
-
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class IfStatementNode implements StatementNode {
-    public static IfStatementNode ifStatement(
+    public static StatementNode ifStatement(
             ExpressionNode condition,
             List<StatementNode> trueBranch,
             List<StatementNode> falseBranch) {
