@@ -99,6 +99,7 @@ class JavaStatementReader {
         ExpressionNode switchValue = readExpressionWithoutBoxing(switchStatement.getExpression());
         LocalVariableDeclarationNode switchValueAssignment = scope.temporaryVariable(switchValue);
 
+        @SuppressWarnings("unchecked")
         List<Statement> statements = switchStatement.statements();
         List<SwitchCaseNode> cases = eagerFlatMap(
             tails(statements),
