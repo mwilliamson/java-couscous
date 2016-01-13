@@ -92,8 +92,7 @@ class JavaStatementReader {
 
     private List<StatementNode> readSwitchStatement(SwitchStatement switchStatement) {
         ExpressionNode switchValue = readExpressionWithoutBoxing(switchStatement.getExpression());
-        LocalVariableDeclarationNode switchValueAssignment = scope.localVariable(
-            "_couscous_tmp_0",
+        LocalVariableDeclarationNode switchValueAssignment = scope.temporaryVariable(
             switchValue.getType(),
             switchValue);
 
