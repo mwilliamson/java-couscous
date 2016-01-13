@@ -2,38 +2,47 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.util.NaturalNumbers;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Scope {
     public static Scope create() {
-        return new Scope(new HashMap<>(), new HashSet<>(), Identifier.TOP);
+        return new Scope(new HashMap<>(), new HashSet<>(), Identifier.TOP, NaturalNumbers.INSTANCE.iterator());
     }
 
     private final Map<String, VariableDeclaration> variablesByKey;
     private final Set<Identifier> identifiers;
     private final Identifier identifier;
+    private final Iterator<Integer> temporaryCounter;
 
-    private Scope(Map<String, VariableDeclaration> variablesByKey, Set<Identifier> identifiers, Identifier identifier) {
+    private Scope(
+        Map<String, VariableDeclaration> variablesByKey,
+        Set<Identifier> identifiers,
+        Identifier identifier,
+        Iterator<Integer> temporaryCounter)
+    {
         this.variablesByKey = variablesByKey;
         this.identifiers = identifiers;
         this.identifier = identifier;
+        this.temporaryCounter = temporaryCounter;
     }
 
     public Scope enterClass(TypeName className) {
-        return new Scope(variablesByKey, identifiers, identifier.extend("class#" + className.getQualifiedName()));
+        return enter("class#" + className.getQualifiedName());
     }
 
     public Scope enterConstructor() {
-        return new Scope(variablesByKey, identifiers, identifier.extend("constructor"));
+        return enter("constructor");
     }
 
     public Scope enterMethod(String name) {
         // TODO: distinguish overloads
-        return new Scope(variablesByKey, identifiers, identifier.extend("method#" + name));
+        return enter("method#" + name);
+    }
+
+    private Scope enter(String name) {
+        return new Scope(variablesByKey, identifiers, identifier.extend(name), temporaryCounter);
     }
 
     public FormalArgumentNode formalArgument(String name, TypeName type) {
@@ -66,7 +75,7 @@ public class Scope {
     }
 
     public LocalVariableDeclarationNode temporaryVariable(TypeName type, ExpressionNode initialValue) {
-        return localVariable("_couscous_tmp_0", type, initialValue);
+        return localVariable("_couscous_tmp_" + temporaryCounter.next(), type, initialValue);
     }
 
     public ExpressionNode reference(String key) {
