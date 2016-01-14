@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.backends.python;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
+import org.hamcrest.Matchers;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
@@ -11,8 +12,6 @@ import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValues;
-import org.zwobble.couscous.values.StringValue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,12 +19,12 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.values.PrimitiveValues.UNIT;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class PythonMethodRunner implements MethodRunner {
@@ -57,7 +56,8 @@ public class PythonMethodRunner implements MethodRunner {
             methodName,
             eagerMap(arguments, argument -> argument.getType())));
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
-            "print(repr(" + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ")))";
+            "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +
+            "print(type(value)); print(value)";
         Process process = new ProcessBuilder("python3.4", "-c", program).directory(directoryPath.toFile()).start();
         int exitCode = process.waitFor();
         String output = readString(process.getInputStream()).trim();
@@ -69,27 +69,27 @@ public class PythonMethodRunner implements MethodRunner {
         }
     }
 
-    private static final Pattern TYPE_REGEX = Pattern.compile("^<class '([^']+)'>$");
+    private static final String PACKAGE_PREFIX = "couscous.";
 
     private static PrimitiveValue readPrimitive(String output) {
-        Matcher matcher = TYPE_REGEX.matcher(output);
-        if (matcher.matches()) {
-            String name = matcher.group(1);
-            if (name.equals("couscous.java.lang.String.String")) {
-                return value(StringValue.REF);
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        } else if (output.equals("None")) {
-            return PrimitiveValues.UNIT;
-        } else if (output.startsWith("\'")) {
-            return value(output.substring(1, output.length() - 1));
-        } else if (output.equals("True")) {
-            return value(true);
-        } else if (output.equals("False")) {
-            return value(false);
-        } else {
-            return value(parseInt(output));
+        String[] lines = output.split("[\\r\\n]+");
+        String type = lines[0];
+        String value = lines[1];
+        switch (type) {
+            case "<class 'int'>":
+                return value(parseInt(value));
+            case "<class 'str'>":
+                return value(value);
+            case "<class 'bool'>":
+                return value(value.equals("True"));
+            case "<class 'NoneType'>":
+                return UNIT;
+            case "<class 'type'>":
+                String typeName = value.substring(value.indexOf("'") + 1, value.lastIndexOf("'"));
+                assertThat(typeName, Matchers.startsWith(PACKAGE_PREFIX));
+                return value(TypeName.of(typeName.substring(PACKAGE_PREFIX.length(), typeName.lastIndexOf("."))));
+            default:
+                throw new RuntimeException("Unhandled type: " + type);
         }
     }
     
