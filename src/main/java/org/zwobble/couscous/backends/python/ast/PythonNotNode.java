@@ -21,4 +21,9 @@ public class PythonNotNode implements PythonExpressionNode {
     public void accept(PythonNodeVisitor visitor) {
         visitor.visit(this);
     }
+
+    @Override
+    public int precedence() {
+        return 40;
+    }
 }

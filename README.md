@@ -17,3 +17,29 @@
 
   This needs doing regardless of changes to boxing/unboxing primitives since
   we currently use raw strings rather than boxing them into Java strings.
+
+## Python precedence
+
+The table below gives precedence from lowest to highest in Python 3.5.
+Some rows have the same precedence for serialisation to improve code
+clarity.
+
+Operator | Precedence (serialisation)
+---------|-----------
+`lambda` | 0
+`if – else` | 10
+`or` | 20
+`and` | 20
+`not x`  | 40
+`in`, `not in`, `is`, `is not`, `<`, `<=`, `>`, `>=`, `!=`, `==` | 50
+`|` | 60
+`^` | 70
+`&` | 80
+`<<`, `>>` | 90
+`+`, `-` | 100
+`*`, `@`, `/`, `//`, `%` | 110
+`+x`, `-x`, `~x` | 120
+`**` | 130
+`await x` | 140
+`x[index]`, `x[index:index]`, `x(arguments...)`, `x.attribute` | 150
+`(expressions...)`, `[expressions...]`, `{key: value...}`, `{expressions...}`` | 160

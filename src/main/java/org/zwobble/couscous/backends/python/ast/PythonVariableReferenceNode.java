@@ -26,4 +26,9 @@ public final class PythonVariableReferenceNode implements PythonExpressionNode {
     public java.lang.String toString() {
         return "PythonVariableReferenceNode(name=" + this.getName() + ")";
     }
+
+    @Override
+    public int precedence() {
+        return Integer.MAX_VALUE;
+    }
 }

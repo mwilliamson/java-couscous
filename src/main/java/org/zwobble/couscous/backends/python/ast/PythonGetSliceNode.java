@@ -1,7 +1,8 @@
 package org.zwobble.couscous.backends.python.ast;
 
-import java.util.List;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
+
+import java.util.List;
 
 public final class PythonGetSliceNode implements PythonExpressionNode {
     private final PythonExpressionNode receiver;
@@ -32,5 +33,10 @@ public final class PythonGetSliceNode implements PythonExpressionNode {
     @java.lang.Override
     public java.lang.String toString() {
         return "PythonGetSliceNode(receiver=" + this.getReceiver() + ", arguments=" + this.getArguments() + ")";
+    }
+
+    @Override
+    public int precedence() {
+        return 150;
     }
 }

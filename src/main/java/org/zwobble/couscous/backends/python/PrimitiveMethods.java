@@ -12,6 +12,7 @@ import org.zwobble.couscous.values.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonIs;
@@ -39,7 +40,7 @@ public class PrimitiveMethods {
                 pythonCall(pythonAttributeAccess(receiver, "lower"), list()))
 
             .put("equals", (receiver, arguments) ->
-                PythonBinaryOperation.pythonEq(receiver, arguments.get(0)))
+                PythonBinaryOperation.pythonEqual(receiver, arguments.get(0)))
 
             .build();
     
@@ -51,8 +52,8 @@ public class PrimitiveMethods {
         methods.put("negate", (receiver, arguments) ->
             PythonNotNode.pythonNot(receiver));
 
-        addOperation(methods, Operator.BOOLEAN_AND, "and");
-        addOperation(methods, Operator.BOOLEAN_OR, "or");
+        addOperation(methods, Operator.BOOLEAN_AND, PythonBinaryOperation::pythonAnd);
+        addOperation(methods, Operator.BOOLEAN_OR, PythonBinaryOperation::pythonOr);
 
         BOOLEAN_METHODS = methods.build();
     }
@@ -65,9 +66,9 @@ public class PrimitiveMethods {
         methods.put("toString", (receiver, arguments) ->
             pythonCall(pythonVariableReference("str"), list(receiver)));
         
-        addOperation(methods, Operator.ADD, "+");
-        addOperation(methods, Operator.SUBTRACT, "-");
-        addOperation(methods, Operator.MULTIPLY, "*");
+        addOperation(methods, Operator.ADD, PythonBinaryOperation::pythonAdd);
+        addOperation(methods, Operator.SUBTRACT, PythonBinaryOperation::pythonSubtract);
+        addOperation(methods, Operator.MULTIPLY, PythonBinaryOperation::pythonMultiply);
 
         methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
             pythonCall(
@@ -78,12 +79,12 @@ public class PrimitiveMethods {
                 internalReference("_mod_round_to_zero"),
                 list(receiver, arguments.get(0))));
 
-        addOperation(methods, Operator.EQUALS, "==");
-        addOperation(methods, Operator.NOT_EQUALS, "!=");
-        addOperation(methods, Operator.GREATER_THAN, ">");
-        addOperation(methods, Operator.GREATER_THAN_OR_EQUAL, ">=");
-        addOperation(methods, Operator.LESS_THAN, "<");
-        addOperation(methods, Operator.LESS_THAN_OR_EQUAL, "<=");
+        addOperation(methods, Operator.EQUALS, PythonBinaryOperation::pythonEqual);
+        addOperation(methods, Operator.NOT_EQUALS, PythonBinaryOperation::pythonNotEqual);
+        addOperation(methods, Operator.GREATER_THAN, PythonBinaryOperation::pythonGreaterThan);
+        addOperation(methods, Operator.GREATER_THAN_OR_EQUAL, PythonBinaryOperation::pythonGreatThanOrEqual);
+        addOperation(methods, Operator.LESS_THAN, PythonBinaryOperation::pythonLessThan);
+        addOperation(methods, Operator.LESS_THAN_OR_EQUAL, PythonBinaryOperation::pythonLessThanOrEqual);
         
         INT_METHODS = methods.build();
     }
@@ -95,20 +96,18 @@ public class PrimitiveMethods {
     private static void addOperation(
         Builder<String, PrimitiveMethodGenerator> methods,
         Operator operator,
-        String operatorSymbol)
+        BiFunction<PythonExpressionNode, PythonExpressionNode, PythonExpressionNode> build)
     {
-        addOperation(methods, operator.getMethodName(), operatorSymbol);
+        addOperation(methods, operator.getMethodName(), build);
     }
     
     private static void addOperation(
-            Builder<String, PrimitiveMethodGenerator> methods,
-            String methodName,
-            String operatorSymbol) {
+        Builder<String, PrimitiveMethodGenerator> methods,
+        String methodName,
+        BiFunction<PythonExpressionNode, PythonExpressionNode, PythonExpressionNode> build)
+    {
         methods.put(methodName, (receiver, arguments) -> 
-            new PythonBinaryOperation(
-                operatorSymbol,
-                receiver,
-                arguments.get(0)));
+            build.apply(receiver, arguments.get(0)));
     }
     
     private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS = 

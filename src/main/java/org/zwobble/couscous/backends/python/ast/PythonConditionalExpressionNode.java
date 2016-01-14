@@ -38,4 +38,9 @@ public final class PythonConditionalExpressionNode implements PythonExpressionNo
     public java.lang.String toString() {
         return "PythonConditionalExpressionNode(condition=" + this.getCondition() + ", trueValue=" + this.getTrueValue() + ", falseValue=" + this.getFalseValue() + ")";
     }
+
+    @Override
+    public int precedence() {
+        return 10;
+    }
 }

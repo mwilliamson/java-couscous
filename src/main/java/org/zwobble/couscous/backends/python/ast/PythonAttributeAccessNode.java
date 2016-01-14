@@ -32,4 +32,9 @@ public final class PythonAttributeAccessNode implements PythonExpressionNode {
     public java.lang.String toString() {
         return "PythonAttributeAccessNode(left=" + this.getLeft() + ", attributeName=" + this.getAttributeName() + ")";
     }
+
+    @Override
+    public int precedence() {
+        return 160;
+    }
 }

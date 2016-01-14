@@ -1,7 +1,8 @@
 package org.zwobble.couscous.backends.python.ast;
 
-import java.util.List;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
+
+import java.util.List;
 
 public final class PythonCallNode implements PythonExpressionNode {
     private final PythonExpressionNode callee;
@@ -32,5 +33,10 @@ public final class PythonCallNode implements PythonExpressionNode {
     @java.lang.Override
     public java.lang.String toString() {
         return "PythonCallNode(callee=" + this.getCallee() + ", arguments=" + this.getArguments() + ")";
+    }
+
+    @Override
+    public int precedence() {
+        return 150;
     }
 }

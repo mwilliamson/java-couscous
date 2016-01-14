@@ -26,4 +26,9 @@ public final class PythonStringLiteralNode implements PythonExpressionNode {
     public java.lang.String toString() {
         return "PythonStringLiteralNode(value=" + this.getValue() + ")";
     }
+
+    @Override
+    public int precedence() {
+        return Integer.MAX_VALUE;
+    }
 }

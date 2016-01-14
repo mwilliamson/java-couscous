@@ -1,11 +1,12 @@
 package org.zwobble.couscous.backends.python;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import org.zwobble.couscous.util.Action;
+
+import java.util.List;
+import java.util.function.Consumer;
+
 import static com.google.common.collect.Iterables.skip;
 
 public class PythonSerializer implements PythonNodeVisitor {
@@ -48,27 +49,27 @@ public class PythonSerializer implements PythonNodeVisitor {
     
     @Override
     public void visit(PythonConditionalExpressionNode conditional) {
-        writeParenthesised(conditional.getTrueValue());
+        writeParenthesised(conditional.getTrueValue(), conditional);
         writer.writeSpace();
         writer.writeKeyword("if");
         writer.writeSpace();
-        writeParenthesised(conditional.getCondition());
+        writeParenthesised(conditional.getCondition(), conditional);
         writer.writeSpace();
         writer.writeKeyword("else");
         writer.writeSpace();
-        writeParenthesised(conditional.getFalseValue());
+        writeParenthesised(conditional.getFalseValue(), conditional);
     }
     
     @Override
     public void visit(PythonAttributeAccessNode attributeAccess) {
-        writeParenthesised(attributeAccess.getLeft());
+        writeParenthesised(attributeAccess.getLeft(), attributeAccess);
         writer.writeSymbol(".");
         writer.writeIdentifier(attributeAccess.getAttributeName());
     }
     
     @Override
     public void visit(PythonCallNode call) {
-        writeParenthesised(call.getCallee());
+        writeParenthesised(call.getCallee(), call);
         writer.writeSymbol("(");
         writeWithSeparator(call.getArguments(), this::write, () -> {
             writer.writeSymbol(",");
@@ -79,7 +80,7 @@ public class PythonSerializer implements PythonNodeVisitor {
     
     @Override
     public void visit(PythonGetSliceNode getSlice) {
-        writeParenthesised(getSlice.getReceiver());
+        writeParenthesised(getSlice.getReceiver(), getSlice);
         writer.writeSymbol("[");
         writeWithSeparator(getSlice.getArguments(), this::write, () -> {
             writer.writeSymbol(":");
@@ -91,16 +92,16 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonNotNode notOperation) {
         writer.writeKeyword("not");
         writer.writeSpace();
-        writeParenthesised(notOperation.getOperand());
+        writeParenthesised(notOperation.getOperand(), notOperation);
     }
 
     @Override
     public void visit(PythonBinaryOperation operation) {
-        writeParenthesised(operation.getLeft());
+        writeParenthesised(operation.getLeft(), operation);
         writer.writeSpace();
         writer.writeKeyword(operation.getOperator());
         writer.writeSpace();
-        writeParenthesised(operation.getRight());
+        writeParenthesised(operation.getRight(), operation);
     }
     
     @Override
@@ -198,10 +199,15 @@ public class PythonSerializer implements PythonNodeVisitor {
         });
     }
 
-    private void writeParenthesised(PythonExpressionNode expression) {
-        writer.writeSymbol("(");
+    private void writeParenthesised(PythonExpressionNode expression, PythonExpressionNode parent) {
+        boolean requiresParens = parent.precedence() >= expression.precedence();
+        if (requiresParens) {
+            writer.writeSymbol("(");
+        }
         write(expression);
-        writer.writeSymbol(")");
+        if (requiresParens) {
+            writer.writeSymbol(")");
+        }
     }
     
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {

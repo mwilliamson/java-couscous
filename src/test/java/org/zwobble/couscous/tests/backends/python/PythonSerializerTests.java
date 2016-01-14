@@ -5,11 +5,11 @@ import org.zwobble.couscous.backends.python.ast.PythonClassNode;
 import org.zwobble.couscous.backends.python.ast.PythonFunctionDefinitionNode;
 import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
+import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonAnd;
 import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonIs;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonCallNode.pythonCall;
@@ -59,35 +59,46 @@ public class PythonSerializerTests {
     }
     
     @Test
-    public void conditionalExpressionIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(1) if (True) else (2)", serialize(pythonConditionalExpression(pythonBooleanLiteral(true), pythonIntegerLiteral(1), pythonIntegerLiteral(2))));
+    public void conditionalExpressionIsSerializedUsingSubExpressions() {
+        assertEquals("1 if True else 2", serialize(pythonConditionalExpression(pythonBooleanLiteral(true), pythonIntegerLiteral(1), pythonIntegerLiteral(2))));
     }
     
     @Test
-    public void attributeAccessIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(x).y", serialize(pythonAttributeAccess(pythonVariableReference("x"), "y")));
+    public void attributeAccessIsSerializedUsingSubExpression() {
+        assertEquals("x.y", serialize(pythonAttributeAccess(pythonVariableReference("x"), "y")));
     }
     
     @Test
-    public void callIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(f)(x, y)", serialize(pythonCall(pythonVariableReference("f"), list(pythonVariableReference("x"), pythonVariableReference("y")))));
+    public void callIsSerializedUsingSubExpression() {
+        assertEquals("f(x, y)", serialize(pythonCall(pythonVariableReference("f"), list(pythonVariableReference("x"), pythonVariableReference("y")))));
     }
     
     @Test
-    public void getSliceIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("(x)[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), list(pythonVariableReference("y"), pythonVariableReference("z")))));
+    public void getSliceIsSerializedUsingSubExpression() {
+        assertEquals("x[y:z]", serialize(pythonGetSlice(pythonVariableReference("x"), list(pythonVariableReference("y"), pythonVariableReference("z")))));
     }
     
     @Test
-    public void notOperationIsSerializedUsingParenthesisedSubExpression() {
-        assertEquals("not (x)", serialize(pythonNot(pythonVariableReference("x"))));
+    public void notOperationIsSerializedUsingSubExpression() {
+        assertEquals("not x", serialize(pythonNot(pythonVariableReference("x"))));
     }
     
     @Test
-    public void binaryOperationIsSerializedUsingParenthesisedSubExpressions() {
+    public void binaryOperationIsSerializedUsingSubExpressions() {
         assertEquals(
-            "(x) is (y)",
+            "x is y",
             serialize(pythonIs(pythonVariableReference("x"), pythonVariableReference("y"))));
+    }
+
+    @Test
+    public void operationsWithSameOrLowerPrecedenceIsParenthesised() {
+        assertEquals(
+            "not (x and y)",
+            serialize(pythonNot(pythonAnd(pythonVariableReference("x"), pythonVariableReference("y")))));
+
+        assertEquals(
+            "not x and y",
+            serialize(pythonAnd(pythonNot(pythonVariableReference("x")), pythonVariableReference("y"))));
     }
     
     @Test

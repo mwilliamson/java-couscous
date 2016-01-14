@@ -26,4 +26,9 @@ public final class PythonBooleanLiteralNode implements PythonExpressionNode {
     public java.lang.String toString() {
         return "PythonBooleanLiteralNode(value=" + this.getValue() + ")";
     }
+
+    @Override
+    public int precedence() {
+        return Integer.MAX_VALUE;
+    }
 }
