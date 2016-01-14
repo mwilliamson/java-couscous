@@ -22,6 +22,10 @@ public class ExtraLists {
         return ImmutableList.of(value1, value2);
     }
 
+    public static <T> List<T> list(T value1, T value2, T value3) {
+        return ImmutableList.of(value1, value2, value3);
+    }
+
     public static <T> List<T> cons(T value, List<T> list) {
         return Stream.concat(Stream.of(value), list.stream()).collect(Collectors.toList());
     }
