@@ -70,7 +70,6 @@ public class PythonMethodRunner implements MethodRunner {
     }
 
     private static final Pattern TYPE_REGEX = Pattern.compile("^<class '([^']+)'>$");
-    private static final String TYPE_NAME_PREFIX = "couscous.";
 
     private static PrimitiveValue readPrimitive(String output) {
         Matcher matcher = TYPE_REGEX.matcher(output);
