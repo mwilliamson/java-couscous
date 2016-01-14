@@ -1,8 +1,6 @@
 package org.zwobble.couscous.tests.backends.python;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.io.CharStreams;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodSignature;
@@ -11,11 +9,10 @@ import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
+import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -24,6 +21,7 @@ import static java.lang.Integer.parseInt;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.UNIT;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
@@ -58,15 +56,8 @@ public class PythonMethodRunner implements MethodRunner {
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
             "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +
             "print(type(value)); print(value)";
-        Process process = new ProcessBuilder("python3.4", "-c", program).directory(directoryPath.toFile()).start();
-        int exitCode = process.waitFor();
-        String output = readString(process.getInputStream()).trim();
-        String stderrOutput = readString(process.getErrorStream());
-        if (exitCode != 0) {
-            throw new RuntimeException("stderr was: " + stderrOutput);
-        } else {
-            return readPrimitive(output);
-        }
+        String output = Processes.run(list("python3.4", "-c", program), directoryPath);
+        return readPrimitive(output);
     }
 
     private static final String PACKAGE_PREFIX = "couscous.";
@@ -91,9 +82,5 @@ public class PythonMethodRunner implements MethodRunner {
             default:
                 throw new RuntimeException("Unhandled type: " + type);
         }
-    }
-    
-    private static String readString(final InputStream stream) throws IOException {
-        return CharStreams.toString(new InputStreamReader(stream, Charsets.UTF_8));
     }
 }
