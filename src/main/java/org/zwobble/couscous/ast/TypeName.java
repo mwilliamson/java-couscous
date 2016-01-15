@@ -2,6 +2,8 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.base.Strings;
 
+import java.util.Optional;
+
 public class TypeName {
     public static TypeName of(String qualifiedName) {
         if (Strings.isNullOrEmpty(qualifiedName)) {
@@ -22,6 +24,15 @@ public class TypeName {
     
     public String getSimpleName() {
         return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
+    }
+
+    public Optional<String> getPackage() {
+        int lastDot = qualifiedName.lastIndexOf(".");
+        if (lastDot == -1) {
+            return Optional.empty();
+        } else {
+            return Optional.of(qualifiedName.substring(0, lastDot));
+        }
     }
 
     @Override

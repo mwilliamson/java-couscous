@@ -71,11 +71,11 @@ public class MethodNode implements CallableNode {
     }
     
     public static MethodNode method(
-            List<AnnotationNode> annotations,
-            boolean isStatic,
-            String name,
-            List<FormalArgumentNode> arguments, 
-            List<StatementNode> body) {
+        List<AnnotationNode> annotations,
+        boolean isStatic,
+        String name,
+        List<FormalArgumentNode> arguments,
+        List<StatementNode> body) {
         return new MethodNode(annotations, isStatic, name, arguments, body);
     }
     
