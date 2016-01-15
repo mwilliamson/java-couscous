@@ -1,20 +1,25 @@
 package org.zwobble.couscous.backends.csharp;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.transform;
-import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpBackend implements Backend {
+    private static final List<String> RUNTIME_FILES = ImmutableList.of(
+        "java/lang/String.cs");
+
     private final Path directoryPath;
     private final String namespace;
 
@@ -31,10 +36,17 @@ public class CsharpBackend implements Backend {
                 transform(
                     classes,
                     classNode -> compileClass(classNode)),
-                list(
-                    "namespace " + namespace + ".java.lang {" +
-                    "    internal class String { }" +
-                    "}")));
+                transform(
+                    RUNTIME_FILES,
+                    runtimeFile -> readRuntimeFile(runtimeFile))));
+    }
+
+    private String readRuntimeFile(String runtimeFile) {
+        try {
+            return Resources.toString(Resources.getResource("csharp/runtime/" + runtimeFile), StandardCharsets.UTF_8);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
     }
 
     private String compileClass(ClassNode classNode) {
