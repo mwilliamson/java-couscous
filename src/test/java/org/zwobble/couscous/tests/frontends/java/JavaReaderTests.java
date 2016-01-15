@@ -394,6 +394,17 @@ public class JavaReaderTests {
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statement;
         assertEquals(typeCoercion(literal(4), ObjectValues.OBJECT), declaration.getInitialValue());
     }
+
+    @Test
+    public void returnTypeOfMethodIsRead() {
+        ClassNode classNode = readClass(
+            "public int identity(int value) {" +
+            "    return value;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        assertEquals(IntegerValue.REF, method.getReturnType());
+    }
     
     @Test
     public void canDeclareAndReferenceArguments() {

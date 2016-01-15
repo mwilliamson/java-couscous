@@ -100,6 +100,7 @@ public class JavaReader {
             false,
             functionalInterfaceMethod.getName(),
             lambda.getFormalArguments(),
+            typeOf(functionalInterfaceMethod.getReturnType()),
             lambda.getBody());
 
         return new AnonymousClass(
@@ -313,6 +314,7 @@ public class JavaReader {
                 Modifier.isStatic(method.getModifiers()),
                 method.getName().getIdentifier(),
                 formalArguments,
+                typeOf(method.getReturnType2()),
                 body);
         }
     }

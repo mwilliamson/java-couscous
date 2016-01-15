@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
 import java.util.function.Function;
@@ -23,6 +24,7 @@ public class MethodNode implements CallableNode {
         private final String name;
         private final ImmutableList.Builder<FormalArgumentNode> arguments =
             ImmutableList.builder();
+        private TypeName returnType = UnitValue.REF;
         private final ImmutableList.Builder<StatementNode> body =
             ImmutableList.builder();
         
@@ -66,6 +68,7 @@ public class MethodNode implements CallableNode {
                 isStatic,
                 name,
                 arguments.build(),
+                returnType,
                 body.build());
         }
     }
@@ -75,26 +78,32 @@ public class MethodNode implements CallableNode {
         boolean isStatic,
         String name,
         List<FormalArgumentNode> arguments,
-        List<StatementNode> body) {
-        return new MethodNode(annotations, isStatic, name, arguments, body);
+        TypeName returnType,
+        List<StatementNode> body)
+    {
+        return new MethodNode(annotations, isStatic, name, arguments, returnType, body);
     }
     
     private final List<AnnotationNode> annotations;
     private final boolean isStatic;
     private final String name;
-    private final List<FormalArgumentNode> arguments; 
+    private final List<FormalArgumentNode> arguments;
+    private final TypeName returnType;
     private final List<StatementNode> body;
     
     private MethodNode(
-            List<AnnotationNode> annotations,
-            boolean isStatic,
-            String name,
-            List<FormalArgumentNode> arguments, 
-            List<StatementNode> body) {
+        List<AnnotationNode> annotations,
+        boolean isStatic,
+        String name,
+        List<FormalArgumentNode> arguments,
+        TypeName returnType,
+        List<StatementNode> body)
+    {
         this.annotations = annotations;
         this.isStatic = isStatic;
         this.name = name;
         this.arguments = arguments;
+        this.returnType = returnType;
         this.body = body;
     }
     
@@ -113,6 +122,10 @@ public class MethodNode implements CallableNode {
     public List<FormalArgumentNode> getArguments() {
         return arguments;
     }
+
+    public TypeName getReturnType() {
+        return returnType;
+    }
     
     public List<StatementNode> getBody() {
         return body;
@@ -125,64 +138,50 @@ public class MethodNode implements CallableNode {
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
-        return new MethodNode(annotations, isStatic, name, arguments, function.apply(body));
+        return new MethodNode(annotations, isStatic, name, arguments, returnType, function.apply(body));
     }
 
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
     }
-    
+
     @Override
     public String toString() {
-        return "MethodNode(annotations=" + annotations + ", isStatic="
-               + isStatic + ", name=" + name + ", arguments=" + arguments
-               + ", body=" + body + ")";
+        return "MethodNode(" +
+            "annotations=" + annotations +
+            ", isStatic=" + isStatic +
+            ", name=" + name +
+            ", arguments=" + arguments +
+            ", returnType=" + returnType +
+            ", body=" + body +
+            ')';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MethodNode that = (MethodNode) o;
+
+        if (isStatic != that.isStatic) return false;
+        if (!annotations.equals(that.annotations)) return false;
+        if (!name.equals(that.name)) return false;
+        if (!arguments.equals(that.arguments)) return false;
+        if (!returnType.equals(that.returnType)) return false;
+        return body.equals(that.body);
+
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                 + ((annotations == null) ? 0 : annotations.hashCode());
-        result = prime * result
-                 + ((arguments == null) ? 0 : arguments.hashCode());
-        result = prime * result + ((body == null) ? 0 : body.hashCode());
-        result = prime * result + (isStatic ? 1231 : 1237);
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        int result = annotations.hashCode();
+        result = 31 * result + (isStatic ? 1 : 0);
+        result = 31 * result + name.hashCode();
+        result = 31 * result + arguments.hashCode();
+        result = 31 * result + returnType.hashCode();
+        result = 31 * result + body.hashCode();
         return result;
-    }
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        MethodNode other = (MethodNode) obj;
-        if (annotations == null) {
-            if (other.annotations != null)
-                return false;
-        } else if (!annotations.equals(other.annotations))
-            return false;
-        if (arguments == null) {
-            if (other.arguments != null)
-                return false;
-        } else if (!arguments.equals(other.arguments))
-            return false;
-        if (body == null) {
-            if (other.body != null)
-                return false;
-        } else if (!body.equals(other.body))
-            return false;
-        if (isStatic != other.isStatic)
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
     }
 }
