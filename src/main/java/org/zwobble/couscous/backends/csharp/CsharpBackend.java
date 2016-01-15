@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.csharp;
 
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpBackend implements Backend {
     private final Path directoryPath;
@@ -25,10 +27,14 @@ public class CsharpBackend implements Backend {
     public void compile(List<ClassNode> classes) throws IOException {
         Files.write(
             directoryPath.resolve("Program.cs"),
-            transform(
-                classes,
-                classNode -> compileClass(classNode)
-        ));
+            Iterables.concat(
+                transform(
+                    classes,
+                    classNode -> compileClass(classNode)),
+                list(
+                    "namespace " + namespace + ".java.lang {" +
+                    "    internal class String { }" +
+                    "}")));
     }
 
     private String compileClass(ClassNode classNode) {
@@ -37,7 +43,7 @@ public class CsharpBackend implements Backend {
                 .map(packageName -> packageName + ".")
                 .orElse("");
         return "namespace " + namespace + " {" +
-            "    public class " + classNode.getSimpleName() + " {" +
+            "    internal class " + classNode.getSimpleName() + " {" +
             String.join("\n", transform(classNode.getMethods(), method -> compileMethod(method))) +
             "    }" +
             "}";
@@ -46,7 +52,7 @@ public class CsharpBackend implements Backend {
     private String compileMethod(MethodNode method) {
         ReturnNode returnNode = (ReturnNode) method.getBody().get(0);
         return
-            "public static string " + method.getName() + "() {" +
+            "public static dynamic " + method.getName() + "() {" +
             "    return " + compileExpression(returnNode.getValue()) + ";" +
             "}";
     }
@@ -79,7 +85,7 @@ public class CsharpBackend implements Backend {
 
                     @Override
                     public String visitType(TypeName value) {
-                        throw new UnsupportedOperationException();
+                        return "typeof(" + namespace + "." + value.getQualifiedName() + ")";
                     }
                 });
             }
