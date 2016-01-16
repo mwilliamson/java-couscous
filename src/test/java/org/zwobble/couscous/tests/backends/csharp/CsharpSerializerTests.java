@@ -3,11 +3,14 @@ package org.zwobble.couscous.tests.backends.csharp;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
+import org.zwobble.couscous.tests.TestIds;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 
 public class CsharpSerializerTests {
     @Test
@@ -35,6 +38,12 @@ public class CsharpSerializerTests {
     public void typeLiteralUsesTypeOfOperator() {
         String output = serialize(literal(TypeName.of("com.example.Example")));
         assertEquals("typeof(Couscous.com.example.Example)", output);
+    }
+
+    @Test
+    public void variableReferenceWritesIdentifier() {
+        String output = serialize(reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))));
+        assertEquals("x", output);
     }
 
     @Test

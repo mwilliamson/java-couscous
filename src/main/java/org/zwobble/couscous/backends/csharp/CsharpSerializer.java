@@ -72,7 +72,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(VariableReferenceNode variableReference) {
-        throw new UnsupportedOperationException();
+        writer.writeIdentifier(variableReference.getReferent().getName());
     }
 
     @Override
