@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
+import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.MethodNode;
+import org.zwobble.couscous.ast.ReturnNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -65,87 +65,7 @@ public class CsharpBackend implements Backend {
         ReturnNode returnNode = (ReturnNode) method.getBody().get(0);
         return
             "public static dynamic " + method.getName() + "() {" +
-            "    return " + compileExpression(returnNode.getValue()) + ";" +
+            "    return " + CsharpSerializer.serialize(returnNode.getValue(), namespace) + ";" +
             "}";
-    }
-
-    private String compileExpression(ExpressionNode value) {
-        return value.accept(new ExpressionNodeMapper<String>() {
-            @Override
-            public String visit(LiteralNode literal) {
-                return literal.getValue().accept(new PrimitiveValueVisitor<String>() {
-                    @Override
-                    public String visitInteger(int value) {
-                        return Integer.toString(value);
-                    }
-
-                    @Override
-                    public String visitString(String value) {
-                        // TODO: escaping
-                        return "\"" + value + "\"";
-                    }
-
-                    @Override
-                    public String visitBoolean(boolean value) {
-                        return value ? "true" : "false";
-                    }
-
-                    @Override
-                    public String visitUnit() {
-                        throw new UnsupportedOperationException();
-                    }
-
-                    @Override
-                    public String visitType(TypeName value) {
-                        return "typeof(" + namespace + "." + value.getQualifiedName() + ")";
-                    }
-                });
-            }
-
-            @Override
-            public String visit(VariableReferenceNode variableReference) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(ThisReferenceNode reference) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(AssignmentNode assignment) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(TernaryConditionalNode ternaryConditional) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(MethodCallNode methodCall) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(ConstructorCallNode call) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(FieldAccessNode fieldAccess) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(TypeCoercionNode typeCoercion) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public String visit(CastNode cast) {
-                throw new UnsupportedOperationException();
-            }
-        });
     }
 }
