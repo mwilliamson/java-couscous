@@ -133,7 +133,9 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(FieldAccessNode fieldAccess) {
-        throw new UnsupportedOperationException();
+        write(fieldAccess.getLeft());
+        writer.writeSymbol(".");
+        writer.writeIdentifier(fieldAccess.getFieldName());
     }
 
     @Override

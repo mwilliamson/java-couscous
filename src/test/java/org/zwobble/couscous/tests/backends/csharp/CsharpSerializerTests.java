@@ -7,6 +7,7 @@ import org.zwobble.couscous.tests.TestIds;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -101,6 +102,15 @@ public class CsharpSerializerTests {
             TypeName.of("X"),
             list(literal(1), literal(2))));
         assertEquals("new Couscous.X(1, 2)", output);
+    }
+
+    @Test
+    public void fieldAccessSeparatesReceiverAndNameWithDot() {
+        String output = serialize(fieldAccess(
+            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            "y",
+            TypeName.of("Y")));
+        assertEquals("x.y", output);
     }
 
     @Test
