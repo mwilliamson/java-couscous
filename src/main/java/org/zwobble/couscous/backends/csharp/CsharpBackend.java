@@ -16,7 +16,8 @@ import static com.google.common.collect.Iterables.transform;
 
 public class CsharpBackend implements Backend {
     private static final List<String> RUNTIME_FILES = ImmutableList.of(
-        "java/lang/String.cs");
+        "java/lang/String.cs",
+        "_couscous.cs");
 
     private final Path directoryPath;
     private final String namespace;

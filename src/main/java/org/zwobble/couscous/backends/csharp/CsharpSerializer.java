@@ -10,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 public class CsharpSerializer implements NodeVisitor {
-    private final static Map<TypeName, String> PRIMITIVES = ImmutableMap.of(
-        IntegerValue.REF, "int",
-        StringValue.REF, "string",
-        BooleanValue.REF, "bool",
-        ObjectValues.CLASS, "System.Type",
-        UnitValue.REF, "void");
+    private final static Map<TypeName, String> PRIMITIVES = ImmutableMap.<TypeName, String>builder()
+        .put(IntegerValue.REF, "int")
+        .put(StringValue.REF, "string")
+        .put(BooleanValue.REF, "bool")
+        .put(ObjectValues.OBJECT, "object")
+        .put(ObjectValues.CLASS, "System.Type")
+        .put(UnitValue.REF, "void")
+        .build();
 
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
