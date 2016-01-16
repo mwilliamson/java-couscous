@@ -160,10 +160,12 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ReturnNode returnNode) {
-        writer.writeKeyword("return");
-        writer.writeSpace();
-        write(returnNode.getValue());
-        writer.writeSymbol(";");
+        writer.writeStatement(() -> {
+            writer.writeKeyword("return");
+            writer.writeSpace();
+            write(returnNode.getValue());
+            writer.writeSymbol(";");
+        });
     }
 
     @Override
@@ -220,9 +222,7 @@ public class CsharpSerializer implements NodeVisitor {
                 () -> writer.writeSymbol(", "));
             writer.writeSymbol(")");
             writer.startBlock();
-            for (StatementNode statement : method.getBody()) {
-                writer.writeStatement(() -> write(statement));
-            }
+            writeAll(method.getBody());
             writer.endBlock();
         });
     }

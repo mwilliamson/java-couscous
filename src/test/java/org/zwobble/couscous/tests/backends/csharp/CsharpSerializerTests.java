@@ -124,7 +124,7 @@ public class CsharpSerializerTests {
     @Test
     public void returnStatementUsesReturnStatement() {
         String output = serialize(returns(literal(true)));
-        assertEquals("return true;", output);
+        assertEquals("return true;\n", output);
     }
 
     @Test
