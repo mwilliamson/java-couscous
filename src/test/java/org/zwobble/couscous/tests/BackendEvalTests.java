@@ -154,6 +154,7 @@ public abstract class BackendEvalTests {
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .staticMethod("main", method -> method
+                .returns(IntegerValue.REF)
                 .statement(returns(staticMethodCall(
                     "java.lang.Integer",
                     "parseInt",
@@ -169,6 +170,7 @@ public abstract class BackendEvalTests {
     public void canCallInstanceMethodWithNoArgumentsOnUserDefinedClass() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
+                .returns(IntegerValue.REF)
                 .statement(returns(literal(42))))
             .build();
         PrimitiveValue result = evalExpression(list(classNode),
@@ -182,6 +184,7 @@ public abstract class BackendEvalTests {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .argument(argument)
+                .returns(IntegerValue.REF)
                 .statement(returns(reference(argument))))
             .build();
         

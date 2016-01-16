@@ -19,6 +19,7 @@ public interface MethodRunner {
     default PrimitiveValue evalExpression(List<ClassNode> classes, ExpressionNode expression) {
         ClassNode programNode = ClassNode.builder("Program")
             .method(MethodNode.staticMethod("run")
+                .returns(expression.getType())
                 .statement(ReturnNode.returns(expression))
                 .build())
             .build();

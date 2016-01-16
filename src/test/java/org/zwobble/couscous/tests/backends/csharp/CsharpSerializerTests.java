@@ -112,13 +112,24 @@ public class CsharpSerializerTests {
     @Test
     public void methodHasDynamicReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing").build());
-        assertEquals("internal static dynamic nothing() {\n}\n", output);
+        assertEquals("internal static void nothing() {\n}\n", output);
     }
 
     @Test
     public void instanceMethodHasNoStaticKeword() {
         String output = serialize(MethodNode.builder("nothing").build());
-        assertEquals("internal dynamic nothing() {\n}\n", output);
+        assertEquals("internal void nothing() {\n}\n", output);
+    }
+
+    @Test
+    public void methodWithReturnType() {
+        MethodNode methodNode = MethodNode.staticMethod("nothing")
+            .returns(TypeName.of("X"))
+            .build();
+
+        String output = serialize(methodNode);
+
+        assertEquals("internal static Couscous.X nothing() {\n}\n", output);
     }
 
     @Test
@@ -130,7 +141,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static dynamic nothing(Couscous.X x, Couscous.Y y) {\n}\n", output);
+        assertEquals("internal static void nothing(Couscous.X x, Couscous.Y y) {\n}\n", output);
     }
 
     @Test
@@ -139,7 +150,7 @@ public class CsharpSerializerTests {
             .statement(returns(literal(true)))
             .build();
         String output = serialize(method);
-        assertEquals("internal static dynamic nothing() {\n    return true;\n}\n", output);
+        assertEquals("internal static void nothing() {\n    return true;\n}\n", output);
     }
 
     @Test

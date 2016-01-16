@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.values.UnitValue;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -21,7 +22,6 @@ public class ClassNodeBuilder {
         this.fields = ImmutableList.builder();
         this.constructor = Optional.empty();
         this.methods = ImmutableList.builder();
-
     }
 
     public ClassNodeBuilder(String name) {
@@ -76,6 +76,7 @@ public class ClassNodeBuilder {
             .isStatic(isStatic)
             .annotations(builder.annotations.build())
             .arguments(builder.arguments.build())
+            .returns(builder.returnType)
             .body(builder.statements.build())
             .build());
     }
@@ -93,6 +94,7 @@ public class ClassNodeBuilder {
         private final Function<MethodBuilder<?>, T> build;
         private final ImmutableList.Builder<AnnotationNode> annotations;
         private final ImmutableList.Builder<FormalArgumentNode> arguments;
+        private TypeName returnType = UnitValue.REF;
         private final ImmutableList.Builder<StatementNode> statements;
 
         public MethodBuilder(Function<MethodBuilder<?>, T> build) {
@@ -113,6 +115,11 @@ public class ClassNodeBuilder {
         
         public MethodBuilder<T> argument(Identifier id, String name, TypeName type) {
             arguments.add(formalArg(var(id, name, type)));
+            return this;
+        }
+
+        public MethodBuilder<T> returns(TypeName returnType) {
+            this.returnType = returnType;
             return this;
         }
         

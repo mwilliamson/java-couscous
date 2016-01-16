@@ -51,6 +51,11 @@ public class MethodNode implements CallableNode {
             this.arguments.addAll(arguments);
             return this;
         }
+
+        public Builder returns(TypeName returnType) {
+            this.returnType = returnType;
+            return this;
+        }
         
         public Builder statement(StatementNode statement) {
             this.body.add(statement);

@@ -13,6 +13,7 @@ import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.StringValue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -97,8 +98,12 @@ public class CsharpMethodRunner implements MethodRunner {
             case "System.Boolean":
                 return value(value.equals("True"));
             case "System.MonoType":
-                assertThat(value, Matchers.startsWith(NAMESPACE_PREFIX));
-                return value(TypeName.of(value.substring(NAMESPACE_PREFIX.length())));
+                if (value.equals("System.String")) {
+                    return value(StringValue.REF);
+                } else {
+                    assertThat(value, Matchers.startsWith(NAMESPACE_PREFIX));
+                    return value(TypeName.of(value.substring(NAMESPACE_PREFIX.length())));
+                }
             default:
                 throw new RuntimeException("Unhandled type: " + type);
         }

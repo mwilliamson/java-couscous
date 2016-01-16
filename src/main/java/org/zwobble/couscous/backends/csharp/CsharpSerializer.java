@@ -4,15 +4,18 @@ import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
+import org.zwobble.couscous.values.*;
 
 import java.util.List;
 import java.util.Map;
 
 public class CsharpSerializer implements NodeVisitor {
     private final static Map<TypeName, String> PRIMITIVES = ImmutableMap.of(
-        IntegerValue.REF, "int");
+        IntegerValue.REF, "int",
+        StringValue.REF, "string",
+        BooleanValue.REF, "bool",
+        ObjectValues.CLASS, "System.Type",
+        UnitValue.REF, "void");
 
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
@@ -202,7 +205,7 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeKeyword("static");
                 writer.writeSpace();
             }
-            writer.writeKeyword("dynamic");
+            writeTypeReference(method.getReturnType());
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
             writer.writeSymbol("(");
