@@ -3,12 +3,6 @@ package org.zwobble.couscous.backends.python;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
-import org.zwobble.couscous.util.Action;
-
-import java.util.List;
-import java.util.function.Consumer;
-
-import static com.google.common.collect.Iterables.skip;
 
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
@@ -75,7 +69,7 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonCallNode call) {
         writeParenthesised(call.getCallee(), call);
         writer.writeSymbol("(");
-        writeWithSeparator(call.getArguments(), this::write, () -> {
+        writer.writeWithSeparator(call.getArguments(), this::write, () -> {
             writer.writeSymbol(",");
             writer.writeSpace();
         });
@@ -86,7 +80,7 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonGetSliceNode getSlice) {
         writeParenthesised(getSlice.getReceiver(), getSlice);
         writer.writeSymbol("[");
-        writeWithSeparator(getSlice.getArguments(), this::write, () -> {
+        writer.writeWithSeparator(getSlice.getArguments(), this::write, () -> {
             writer.writeSymbol(":");
         });
         writer.writeSymbol("]");
@@ -170,7 +164,7 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSpace();
             writer.writeKeyword("import");
             writer.writeSpace();
-            writeWithSeparator(importNode.getAliases(), alias -> {
+            writer.writeWithSeparator(importNode.getAliases(), alias -> {
                 writer.writeIdentifier(alias.getName());
             }, () -> {
                 writer.writeSymbol(",");
@@ -215,22 +209,12 @@ public class PythonSerializer implements PythonNodeVisitor {
     }
     
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {
-        writeWithSeparator(functionDefinition.getArgumentNames(), writer::writeIdentifier, () -> {
+        writer.writeWithSeparator(functionDefinition.getArgumentNames(), writer::writeIdentifier, () -> {
             writer.writeSymbol(",");
             writer.writeSpace();
         });
     }
-    
-    private <T> void writeWithSeparator(List<T> values, Consumer<T> writeValue, Action separator) {
-        if (!values.isEmpty()) {
-            writeValue.accept(values.get(0));
-            for (T value : skip(values, 1)) {
-                separator.run();
-                writeValue.accept(value);
-            }
-        }
-    }
-    
+
     @Override
     public void visit(PythonModuleNode module) {
         for (PythonStatementNode statement : module.getStatements()) {

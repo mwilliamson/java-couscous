@@ -5,6 +5,8 @@ import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
+import java.util.List;
+
 public class CsharpSerializer implements NodeVisitor {
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
@@ -103,8 +105,7 @@ public class CsharpSerializer implements NodeVisitor {
         write(methodCall.getReceiver());
         writer.writeSymbol(".");
         writer.writeIdentifier(methodCall.getMethodName());
-        writer.writeSymbol("(");
-        writer.writeSymbol(")");
+        writeArguments(methodCall.getArguments());
     }
 
     @Override
@@ -112,7 +113,12 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeKeyword("new");
         writer.writeSpace();
         writeTypeReference(call.getType());
+        writeArguments(call.getArguments());
+    }
+
+    private void writeArguments(List<? extends ExpressionNode> arguments) {
         writer.writeSymbol("(");
+        writer.writeWithSeparator(arguments, this::write, () -> writer.writeSymbol(", "));
         writer.writeSymbol(")");
     }
 
@@ -203,6 +209,14 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
             writer.writeSymbol("(");
+            writer.writeWithSeparator(
+                method.getArguments(),
+                argument -> {
+                    writer.writeKeyword("dynamic");
+                    writer.writeSpace();
+                    writer.writeIdentifier(argument.getName());
+                },
+                () -> writer.writeSymbol(", "));
             writer.writeSymbol(")");
             writer.startBlock();
             for (StatementNode statement : method.getBody()) {

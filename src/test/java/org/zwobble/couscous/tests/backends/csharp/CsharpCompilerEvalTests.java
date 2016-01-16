@@ -47,11 +47,6 @@ public class CsharpCompilerEvalTests extends BackendEvalTests {
 
     @Test
     @Ignore
-    public void canCallInstanceMethodWithArgumentsOnUserDefinedClass() {
-    }
-
-    @Test
-    @Ignore
     public void constructorIsExecutedOnConstruction() {
     }
 

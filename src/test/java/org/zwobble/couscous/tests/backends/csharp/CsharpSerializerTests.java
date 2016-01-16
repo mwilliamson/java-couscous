@@ -7,6 +7,7 @@ import org.zwobble.couscous.tests.TestIds;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -66,11 +67,29 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void methodCallWithArguments() {
+        String output = serialize(methodCall(
+            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            "y",
+            list(literal(1), literal(2)),
+            TypeName.of("Y")));
+        assertEquals("x.y(1, 2)", output);
+    }
+
+    @Test
     public void constructorCallWithNoArguments() {
         String output = serialize(constructorCall(
             TypeName.of("X"),
             list()));
         assertEquals("new Couscous.X()", output);
+    }
+
+    @Test
+    public void constructorCallWithArguments() {
+        String output = serialize(constructorCall(
+            TypeName.of("X"),
+            list(literal(1), literal(2))));
+        assertEquals("new Couscous.X(1, 2)", output);
     }
 
     @Test
@@ -89,6 +108,18 @@ public class CsharpSerializerTests {
     public void instanceMethodHasNoStaticKeword() {
         String output = serialize(MethodNode.builder("nothing").build());
         assertEquals("internal dynamic nothing() {\n}\n", output);
+    }
+
+    @Test
+    public void methodWithArguments() {
+        MethodNode methodNode = MethodNode.staticMethod("nothing")
+            .argument(formalArg(var(TestIds.id("x"), "x", TypeName.of("X"))))
+            .argument(formalArg(var(TestIds.id("y"), "y", TypeName.of("Y"))))
+            .build();
+
+        String output = serialize(methodNode);
+
+        assertEquals("internal static dynamic nothing(dynamic x, dynamic y) {\n}\n", output);
     }
 
     @Test
