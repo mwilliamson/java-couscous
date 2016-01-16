@@ -176,8 +176,10 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     @Override
-    public void visit(FormalArgumentNode formalArgumentNode) {
-        throw new UnsupportedOperationException();
+    public void visit(FormalArgumentNode argument) {
+        writer.writeKeyword("dynamic");
+        writer.writeSpace();
+        writer.writeIdentifier(argument.getName());
     }
 
     @Override
@@ -200,11 +202,7 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSymbol("(");
             writer.writeWithSeparator(
                 method.getArguments(),
-                argument -> {
-                    writer.writeKeyword("dynamic");
-                    writer.writeSpace();
-                    writer.writeIdentifier(argument.getName());
-                },
+                this::write,
                 () -> writer.writeSymbol(", "));
             writer.writeSymbol(")");
             writer.startBlock();
