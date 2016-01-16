@@ -12,7 +12,10 @@ import static com.google.common.collect.Iterables.skip;
 
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
-        SourceCodeWriter writer = new SourceCodeWriter();
+        SourceCodeWriter writer = new SourceCodeWriter(
+            (writer2, indentation) -> writer2.writeSymbol(":"),
+            (writer2, indentation) -> {}
+        );
         PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);
         return writer.asString();

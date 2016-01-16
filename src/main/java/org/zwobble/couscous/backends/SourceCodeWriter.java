@@ -15,13 +15,6 @@ public class SourceCodeWriter {
     private final WriterAction blockEnd;
     private int depth = 0;
 
-    public SourceCodeWriter() {
-        this(
-            (writer, indentation) -> writer.writeSymbol(":"),
-            (writer, indentation) -> {}
-        );
-    }
-
     public SourceCodeWriter(WriterAction blockStart, WriterAction blockEnd) {
         this.blockStart = blockStart;
         this.blockEnd = blockEnd;
