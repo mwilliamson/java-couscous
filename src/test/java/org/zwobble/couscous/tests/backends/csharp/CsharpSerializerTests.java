@@ -7,6 +7,7 @@ import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 
 public class CsharpSerializerTests {
     @Test
@@ -34,6 +35,12 @@ public class CsharpSerializerTests {
     public void typeLiteralUsesTypeOfOperator() {
         String output = serialize(literal(TypeName.of("com.example.Example")));
         assertEquals("typeof(Couscous.com.example.Example)", output);
+    }
+
+    @Test
+    public void ternaryConditionalWritesConditionAndBranches() {
+        String output = serialize(ternaryConditional(literal(true), literal(1), literal(2)));
+        assertEquals("true ? 1 : 2", output);
     }
 
     @Test

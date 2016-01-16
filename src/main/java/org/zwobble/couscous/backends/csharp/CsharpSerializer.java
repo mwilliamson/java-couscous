@@ -87,7 +87,15 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(TernaryConditionalNode ternaryConditional) {
-        throw new UnsupportedOperationException();
+        write(ternaryConditional.getCondition());
+        writer.writeSpace();
+        writer.writeSymbol("?");
+        writer.writeSpace();
+        write(ternaryConditional.getIfTrue());
+        writer.writeSpace();
+        writer.writeSymbol(":");
+        writer.writeSpace();
+        write(ternaryConditional.getIfFalse());
     }
 
     @Override

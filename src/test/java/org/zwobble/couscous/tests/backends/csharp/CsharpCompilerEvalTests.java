@@ -27,16 +27,6 @@ public class CsharpCompilerEvalTests extends BackendEvalTests {
 
     @Test
     @Ignore
-    public void whenConditionIsTrueThenValueOfConditionalTernaryIsTrueBranch() {
-    }
-
-    @Test
-    @Ignore
-    public void whenConditionIsFalseThenValueOfConditionalTernaryIsFalseBranch() {
-    }
-
-    @Test
-    @Ignore
     public void canCallMethodWithNoArgumentsOnBuiltin() {
     }
 
