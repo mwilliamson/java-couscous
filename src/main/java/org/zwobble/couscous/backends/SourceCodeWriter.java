@@ -1,13 +1,31 @@
-package org.zwobble.couscous.backends.python;
-
-import org.zwobble.couscous.util.Action;
+package org.zwobble.couscous.backends;
 
 import com.google.common.base.Strings;
+import org.zwobble.couscous.util.Action;
 
-public class PythonWriter {
+public class SourceCodeWriter {
+    public interface WriterAction {
+        void run(SourceCodeWriter writer, int indentation);
+    }
+
     private static final int SPACES_PER_INDENT = 4;
     private final StringBuilder builder = new StringBuilder();
+
+    private final WriterAction blockStart;
+    private final WriterAction blockEnd;
     private int depth = 0;
+
+    public SourceCodeWriter() {
+        this(
+            (writer, indentation) -> writer.writeSymbol(":"),
+            (writer, indentation) -> {}
+        );
+    }
+
+    public SourceCodeWriter(WriterAction blockStart, WriterAction blockEnd) {
+        this.blockStart = blockStart;
+        this.blockEnd = blockEnd;
+    }
     
     public String asString() {
         return builder.toString();
@@ -45,13 +63,14 @@ public class PythonWriter {
     }
 
     public void startBlock() {
+        runAction(blockStart);
         depth++;
-        writeSymbol(":");
         builder.append("\n");
     }
 
     public void endBlock() {
         depth--;
+        runAction(blockEnd);
     }
 
     public void writeStatement(Action action) {
@@ -68,5 +87,9 @@ public class PythonWriter {
         if (builder.charAt(builder.length() - 1) != '\n') {
             builder.append("\n");   
         }
+    }
+
+    private void runAction(WriterAction action) {
+        action.run(this, depth * SPACES_PER_INDENT);
     }
 }

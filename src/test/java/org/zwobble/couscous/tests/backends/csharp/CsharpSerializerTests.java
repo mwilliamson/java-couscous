@@ -47,7 +47,7 @@ public class CsharpSerializerTests {
     @Test
     public void methodHasDynamicReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing").build());
-        assertEquals("internal static dynamic nothing() {\n}", output);
+        assertEquals("internal static dynamic nothing() {\n}\n", output);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class CsharpSerializerTests {
             .statement(returns(literal(true)))
             .build();
         String output = serialize(method);
-        assertEquals("internal static dynamic nothing() {\n    return true;\n}", output);
+        assertEquals("internal static dynamic nothing() {\n    return true;\n}\n", output);
     }
 
     private String serialize(Node node) {

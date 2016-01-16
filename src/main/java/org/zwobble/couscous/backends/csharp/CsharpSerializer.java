@@ -1,21 +1,33 @@
 package org.zwobble.couscous.backends.csharp;
 
+import com.google.common.base.Strings;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
+import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 public class CsharpSerializer implements NodeVisitor {
     public static String serialize(Node node, String namespace) {
-        CsharpWriter writer = new CsharpWriter();
+        SourceCodeWriter writer = new SourceCodeWriter(
+            (writer2, indentation) -> {
+                writer2.writeSpace();
+                writer2.writeSymbol("{");
+            },
+            (writer2, indentation) -> {
+                writer2.writeSymbol(Strings.repeat(" ", indentation));
+                writer2.writeSymbol("}");
+                writer2.writeSymbol("\n");
+            }
+        );
         CsharpSerializer serializer = new CsharpSerializer(writer, namespace);
         serializer.write(node);
         return writer.asString();
     }
 
-    private final CsharpWriter writer;
+    private final SourceCodeWriter writer;
     private final String namespace;
 
-    private CsharpSerializer(CsharpWriter writer, String namespace) {
+    private CsharpSerializer(SourceCodeWriter writer, String namespace) {
         this.writer = writer;
         this.namespace = namespace;
     }
@@ -29,7 +41,7 @@ public class CsharpSerializer implements NodeVisitor {
         literal.getValue().accept(new PrimitiveValueVisitor<Void>() {
             @Override
             public Void visitInteger(int value) {
-                writer.writeIntegerLiteral(value);
+                writer.writeInteger(value);
                 return null;
             }
 
@@ -41,7 +53,7 @@ public class CsharpSerializer implements NodeVisitor {
 
             @Override
             public Void visitBoolean(boolean value) {
-                writer.writeBooleanLiteral(value);
+                writer.writeKeyword(value ? "true" : "false");
                 return null;
             }
 
@@ -165,14 +177,11 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeIdentifier(method.getName());
         writer.writeSymbol("(");
         writer.writeSymbol(")");
-        writer.writeSpace();
-        writer.writeSymbol("{");
+        writer.startBlock();
         for (StatementNode statement : method.getBody()) {
-            writer.writeSymbol("\n    ");
-            write(statement);
+            writer.writeStatement(() -> write(statement));
         }
-        writer.writeSymbol("\n");
-        writer.writeSymbol("}");
+        writer.endBlock();
     }
 
     @Override

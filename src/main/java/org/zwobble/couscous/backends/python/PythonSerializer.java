@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.python;
 
+import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 import org.zwobble.couscous.util.Action;
@@ -11,15 +12,15 @@ import static com.google.common.collect.Iterables.skip;
 
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
-        PythonWriter writer = new PythonWriter();
+        SourceCodeWriter writer = new SourceCodeWriter();
         PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);
         return writer.asString();
     }
     
-    private final PythonWriter writer;
+    private final SourceCodeWriter writer;
     
-    private PythonSerializer(PythonWriter writer) {
+    private PythonSerializer(SourceCodeWriter writer) {
         this.writer = writer;
     }
     
