@@ -5,7 +5,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.MethodNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -49,18 +48,6 @@ public class CsharpBackend implements Backend {
     }
 
     private String compileClass(ClassNode classNode) {
-        String namespace = this.namespace +
-            classNode.getName().getPackage()
-                .map(packageName -> packageName + ".")
-                .orElse("");
-        return "namespace " + namespace + " {" +
-            "    internal class " + classNode.getSimpleName() + " {" +
-            String.join("\n", transform(classNode.getMethods(), method -> compileMethod(method))) +
-            "    }" +
-            "}";
-    }
-
-    private String compileMethod(MethodNode method) {
-        return CsharpSerializer.serialize(method, namespace);
+        return CsharpSerializer.serialize(classNode, namespace);
     }
 }

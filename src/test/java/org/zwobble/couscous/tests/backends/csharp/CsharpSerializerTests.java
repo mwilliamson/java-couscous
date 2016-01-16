@@ -1,9 +1,7 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.Node;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 
 import static org.junit.Assert.assertEquals;
@@ -57,6 +55,16 @@ public class CsharpSerializerTests {
             .build();
         String output = serialize(method);
         assertEquals("internal static dynamic nothing() {\n    return true;\n}\n", output);
+    }
+
+    @Test
+    public void classIsInNamespace() {
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals("namespace Couscous.com.example {\n    internal class Example {\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {

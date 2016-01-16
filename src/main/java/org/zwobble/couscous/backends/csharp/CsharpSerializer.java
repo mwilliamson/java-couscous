@@ -165,20 +165,22 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(MethodNode method) {
-        writer.writeKeyword("internal");
-        writer.writeSpace();
-        writer.writeKeyword("static");
-        writer.writeSpace();
-        writer.writeKeyword("dynamic");
-        writer.writeSpace();
-        writer.writeIdentifier(method.getName());
-        writer.writeSymbol("(");
-        writer.writeSymbol(")");
-        writer.startBlock();
-        for (StatementNode statement : method.getBody()) {
-            writer.writeStatement(() -> write(statement));
-        }
-        writer.endBlock();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("internal");
+            writer.writeSpace();
+            writer.writeKeyword("static");
+            writer.writeSpace();
+            writer.writeKeyword("dynamic");
+            writer.writeSpace();
+            writer.writeIdentifier(method.getName());
+            writer.writeSymbol("(");
+            writer.writeSymbol(")");
+            writer.startBlock();
+            for (StatementNode statement : method.getBody()) {
+                writer.writeStatement(() -> write(statement));
+            }
+            writer.endBlock();
+        });
     }
 
     @Override
@@ -193,6 +195,29 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ClassNode classNode) {
-        throw new UnsupportedOperationException();
+        String namespace = this.namespace +
+            classNode.getName().getPackage()
+                .map(packageName -> "." + packageName)
+                .orElse("");
+        writer.writeKeyword("namespace");
+        writer.writeSpace();
+        writer.writeIdentifier(namespace);
+        writer.startBlock();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("internal");
+            writer.writeSpace();
+            writer.writeKeyword("class");
+            writer.writeSpace();
+            writer.writeIdentifier(classNode.getSimpleName());
+            writer.startBlock();
+
+            for (MethodNode method : classNode.getMethods()) {
+                write(method);
+            }
+
+            writer.endBlock();
+        });
+
+        writer.endBlock();
     }
 }
