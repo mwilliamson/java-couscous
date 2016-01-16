@@ -7,6 +7,7 @@ import org.zwobble.couscous.tests.TestIds;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
@@ -124,6 +125,12 @@ public class CsharpSerializerTests {
     public void returnStatementUsesReturnStatement() {
         String output = serialize(returns(literal(true)));
         assertEquals("return true;", output);
+    }
+
+    @Test
+    public void expressionStatementWritesExpression() {
+        String output = serialize(expressionStatement(literal(true)));
+        assertEquals("true;\n", output);
     }
 
     @Test

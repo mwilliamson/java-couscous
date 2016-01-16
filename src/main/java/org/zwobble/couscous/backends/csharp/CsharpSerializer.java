@@ -168,7 +168,10 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ExpressionStatementNode expressionStatement) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            write(expressionStatement.getExpression());
+            writer.writeSymbol(";");
+        });
     }
 
     @Override
