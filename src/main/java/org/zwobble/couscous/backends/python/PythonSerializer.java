@@ -13,8 +13,8 @@ import static com.google.common.collect.Iterables.skip;
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
         SourceCodeWriter writer = new SourceCodeWriter(
-            (writer2, indentation) -> writer2.writeSymbol(":"),
-            (writer2, indentation) -> {}
+            (writer2) -> writer2.writeSymbol(":"),
+            (writer2) -> {}
         );
         PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);

@@ -1,6 +1,5 @@
 package org.zwobble.couscous.backends.csharp;
 
-import com.google.common.base.Strings;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
@@ -9,14 +8,12 @@ import org.zwobble.couscous.values.PrimitiveValueVisitor;
 public class CsharpSerializer implements NodeVisitor {
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
-            (writer2, indentation) -> {
+            (writer2) -> {
                 writer2.writeSpace();
                 writer2.writeSymbol("{");
             },
-            (writer2, indentation) -> {
-                writer2.writeSymbol(Strings.repeat(" ", indentation));
-                writer2.writeSymbol("}");
-                writer2.writeSymbol("\n");
+            (writer2) -> {
+                writer2.writeStatement(() -> writer2.writeSymbol("}"));
             }
         );
         CsharpSerializer serializer = new CsharpSerializer(writer, namespace);

@@ -5,7 +5,7 @@ import org.zwobble.couscous.util.Action;
 
 public class SourceCodeWriter {
     public interface WriterAction {
-        void run(SourceCodeWriter writer, int indentation);
+        void run(SourceCodeWriter writer);
     }
 
     private static final int SPACES_PER_INDENT = 4;
@@ -83,6 +83,6 @@ public class SourceCodeWriter {
     }
 
     private void runAction(WriterAction action) {
-        action.run(this, depth * SPACES_PER_INDENT);
+        action.run(this);
     }
 }
