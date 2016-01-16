@@ -134,7 +134,7 @@ public class CsharpSerializerTests {
     }
 
     @Test
-    public void methodHasDynamicReturnType() {
+    public void methodCanHaveVoidReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing").build());
         assertEquals("internal static void nothing() {\n}\n", output);
     }
