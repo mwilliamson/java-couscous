@@ -139,23 +139,12 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(InstanceReceiver receiver) {
-        receiver.accept(new Receiver.Mapper<Void>() {
-            @Override
-            public Void visit(ExpressionNode receiver) {
-                write(receiver);
-                return null;
-            }
-
-            @Override
-            public Void visit(TypeName receiver) {
-                throw new UnsupportedOperationException();
-            }
-        });
+        write(receiver.getExpression());
     }
 
     @Override
     public void visit(StaticReceiver receiver) {
-        throw new UnsupportedOperationException();
+        writeTypeReference(receiver.getType());
     }
 
     @Override

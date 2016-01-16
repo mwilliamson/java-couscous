@@ -10,6 +10,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
@@ -54,6 +55,16 @@ public class CsharpSerializerTests {
     public void ternaryConditionalWritesConditionAndBranches() {
         String output = serialize(ternaryConditional(literal(true), literal(1), literal(2)));
         assertEquals("true ? 1 : 2", output);
+    }
+
+    @Test
+    public void staticMethodCallWithNoArgumentsWritesStaticReceiver() {
+        String output = serialize(staticMethodCall(
+            TypeName.of("X"),
+            "y",
+            list(),
+            TypeName.of("Y")));
+        assertEquals("Couscous.X.y()", output);
     }
 
     @Test
