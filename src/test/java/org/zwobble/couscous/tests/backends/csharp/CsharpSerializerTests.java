@@ -6,11 +6,14 @@ import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
 
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpSerializerTests {
     @Test
@@ -53,6 +56,24 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void methodCallWithNoArgumentsWritesReceiver() {
+        String output = serialize(methodCall(
+            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            "y",
+            list(),
+            TypeName.of("Y")));
+        assertEquals("x.y()", output);
+    }
+
+    @Test
+    public void constructorCallWithNoArguments() {
+        String output = serialize(constructorCall(
+            TypeName.of("X"),
+            list()));
+        assertEquals("new Couscous.X()", output);
+    }
+
+    @Test
     public void returnStatementUsesReturnStatement() {
         String output = serialize(returns(literal(true)));
         assertEquals("return true;", output);
@@ -62,6 +83,12 @@ public class CsharpSerializerTests {
     public void methodHasDynamicReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing").build());
         assertEquals("internal static dynamic nothing() {\n}\n", output);
+    }
+
+    @Test
+    public void instanceMethodHasNoStaticKeword() {
+        String output = serialize(MethodNode.builder("nothing").build());
+        assertEquals("internal dynamic nothing() {\n}\n", output);
     }
 
     @Test

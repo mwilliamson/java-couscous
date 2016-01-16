@@ -63,7 +63,7 @@ public class CsharpSerializer implements NodeVisitor {
             public Void visitType(TypeName value) {
                 writer.writeKeyword("typeof");
                 writer.writeSymbol("(");
-                writer.writeIdentifier(namespace + "." + value.getQualifiedName());
+                writeTypeReference(value);
                 writer.writeSymbol(")");
                 return null;
             }
@@ -100,12 +100,20 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(MethodCallNode methodCall) {
-        throw new UnsupportedOperationException();
+        write(methodCall.getReceiver());
+        writer.writeSymbol(".");
+        writer.writeIdentifier(methodCall.getMethodName());
+        writer.writeSymbol("(");
+        writer.writeSymbol(")");
     }
 
     @Override
     public void visit(ConstructorCallNode call) {
-        throw new UnsupportedOperationException();
+        writer.writeKeyword("new");
+        writer.writeSpace();
+        writeTypeReference(call.getType());
+        writer.writeSymbol("(");
+        writer.writeSymbol(")");
     }
 
     @Override
@@ -125,7 +133,18 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(InstanceReceiver receiver) {
-        throw new UnsupportedOperationException();
+        receiver.accept(new Receiver.Mapper<Void>() {
+            @Override
+            public Void visit(ExpressionNode receiver) {
+                write(receiver);
+                return null;
+            }
+
+            @Override
+            public Void visit(TypeName receiver) {
+                throw new UnsupportedOperationException();
+            }
+        });
     }
 
     @Override
@@ -176,8 +195,10 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeStatement(() -> {
             writer.writeKeyword("internal");
             writer.writeSpace();
-            writer.writeKeyword("static");
-            writer.writeSpace();
+            if (method.isStatic()) {
+                writer.writeKeyword("static");
+                writer.writeSpace();
+            }
             writer.writeKeyword("dynamic");
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
@@ -227,5 +248,13 @@ public class CsharpSerializer implements NodeVisitor {
         });
 
         writer.endBlock();
+    }
+
+    private void writeTypeReference(TypeName value) {
+        writer.writeIdentifier(typeReference(value));
+    }
+
+    private String typeReference(TypeName value) {
+        return namespace + "." + value.getQualifiedName();
     }
 }
