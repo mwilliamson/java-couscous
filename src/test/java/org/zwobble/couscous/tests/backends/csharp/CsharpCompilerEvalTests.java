@@ -45,11 +45,6 @@ public class CsharpCompilerEvalTests extends BackendEvalTests {
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
     }
 
-    @Test
-    @Ignore
-    public void constructorIsExecutedOnConstruction() {
-    }
-
     @Override
     protected PrimitiveValue evalExpression(List<ClassNode> classes, ExpressionNode expression) {
         return new CsharpMethodRunner().evalExpression(classes, expression);

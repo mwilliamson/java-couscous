@@ -210,6 +210,7 @@ public abstract class BackendEvalTests {
                     fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
                     reference(argument))))
             .method("main", method -> method
+                .returns(IntegerValue.REF)
                 .statement(returns(
                     fieldAccess(method.thisReference(), "value", IntegerValue.REF))))
             .build();

@@ -219,16 +219,20 @@ public class CsharpSerializer implements NodeVisitor {
             writeTypeReference(method.getReturnType());
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
-            writer.writeSymbol("(");
-            writer.writeWithSeparator(
-                method.getArguments(),
-                this::write,
-                () -> writer.writeSymbol(", "));
-            writer.writeSymbol(")");
+            writeFormalArguments(method.getArguments());
             writer.startBlock();
             writeAll(method.getBody());
             writer.endBlock();
         });
+    }
+
+    private void writeFormalArguments(List<FormalArgumentNode> arguments) {
+        writer.writeSymbol("(");
+        writer.writeWithSeparator(
+            arguments,
+            this::write,
+            () -> writer.writeSymbol(", "));
+        writer.writeSymbol(")");
     }
 
     @Override
@@ -266,11 +270,26 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeIdentifier(classNode.getSimpleName());
             writer.startBlock();
             writeAll(classNode.getFields());
+            writeConstructor(classNode, classNode.getConstructor());
             writeAll(classNode.getMethods());
             writer.endBlock();
         });
 
         writer.endBlock();
+    }
+
+    private void writeConstructor(ClassNode classNode, ConstructorNode constructor) {
+        if (!constructor.equals(ConstructorNode.DEFAULT)) {
+            writer.writeStatement(() -> {
+                writer.writeKeyword("internal");
+                writer.writeSpace();
+                writer.writeIdentifier(classNode.getSimpleName());
+                writeFormalArguments(constructor.getArguments());
+                writer.startBlock();
+                writeAll(constructor.getBody());
+                writer.endBlock();
+            });
+        }
     }
 
     private void writeAll(List<? extends Node> nodes) {

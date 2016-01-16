@@ -198,6 +198,21 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void constructorHasSerializedBody() {
+        ConstructorNode constructor = ConstructorNode.constructor(
+            list(formalArg(var(TestIds.ANY_ID, "x", TypeName.of("X")))),
+            list(expressionStatement(literal(true))));
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .constructor(constructor)
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals(
+            "namespace Couscous.com.example {\n    internal class Example {\n        internal Example(Couscous.X x) {\n            true;\n        }\n    }\n}\n", output);
+    }
+
+    @Test
     public void classWithFields() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .field("x", TypeName.of("X"))
