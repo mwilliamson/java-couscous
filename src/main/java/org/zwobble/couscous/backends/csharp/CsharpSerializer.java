@@ -118,7 +118,10 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ReturnNode returnNode) {
-        throw new UnsupportedOperationException();
+        writer.writeKeyword("return");
+        writer.writeSpace();
+        write(returnNode.getValue());
+        writer.writeSymbol(";");
     }
 
     @Override

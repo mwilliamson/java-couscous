@@ -7,6 +7,7 @@ import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 
 public class CsharpSerializerTests {
     @Test
@@ -34,6 +35,12 @@ public class CsharpSerializerTests {
     public void typeLiteralUsesTypeOfOperator() {
         String output = serialize(literal(TypeName.of("com.example.Example")));
         assertEquals("typeof(Couscous.com.example.Example)", output);
+    }
+
+    @Test
+    public void returnStatementUsesReturnStatement() {
+        String output = serialize(returns(literal(true)));
+        assertEquals("return true;", output);
     }
 
     private String serialize(Node node) {

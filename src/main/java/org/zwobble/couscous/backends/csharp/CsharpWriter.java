@@ -31,4 +31,8 @@ public class CsharpWriter {
     public void writeIdentifier(String identifier) {
         builder.append(identifier);
     }
+
+    public void writeSpace() {
+        builder.append(" ");
+    }
 }

@@ -65,7 +65,7 @@ public class CsharpBackend implements Backend {
         ReturnNode returnNode = (ReturnNode) method.getBody().get(0);
         return
             "public static dynamic " + method.getName() + "() {" +
-            "    return " + CsharpSerializer.serialize(returnNode.getValue(), namespace) + ";" +
+            CsharpSerializer.serialize(returnNode, namespace) +
             "}";
     }
 }
