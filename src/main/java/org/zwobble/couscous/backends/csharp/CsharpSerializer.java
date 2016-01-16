@@ -117,10 +117,32 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(MethodCallNode methodCall) {
-        write(methodCall.getReceiver());
-        writer.writeSymbol(".");
-        writer.writeIdentifier(methodCall.getMethodName());
-        writeArguments(methodCall.getArguments());
+        if (!writePrimitiveMethod(methodCall)) {
+            write(methodCall.getReceiver());
+            writer.writeSymbol(".");
+            writer.writeIdentifier(methodCall.getMethodName());
+            writeArguments(methodCall.getArguments());
+        }
+    }
+
+    private boolean writePrimitiveMethod(MethodCallNode methodCall) {
+        return methodCall.getReceiver().accept(new Receiver.Mapper<Boolean>() {
+            @Override
+            public Boolean visit(ExpressionNode receiver) {
+                return false;
+            }
+
+            @Override
+            public Boolean visit(TypeName receiver) {
+                // TODO: transform AST before serialisation instead of exposing write to CsharpPrimitiveMethods
+                return CsharpPrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
+                    .map(generator -> {
+                        generator.generate(methodCall.getArguments(), writer);
+                        return true;
+                    })
+                    .orElse(false);
+            }
+        });
     }
 
     @Override

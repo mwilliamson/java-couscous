@@ -32,11 +32,6 @@ public class CsharpCompilerEvalTests extends BackendEvalTests {
 
     @Test
     @Ignore
-    public void canCallBuiltinStaticMethod() {
-    }
-
-    @Test
-    @Ignore
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
     }
 
