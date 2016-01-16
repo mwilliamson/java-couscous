@@ -1,13 +1,19 @@
 package org.zwobble.couscous.backends.csharp;
 
+import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 import java.util.List;
+import java.util.Map;
 
 public class CsharpSerializer implements NodeVisitor {
+    private final static Map<TypeName, String> PRIMITIVES = ImmutableMap.of(
+        IntegerValue.REF, "int");
+
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
             (writer2) -> {
@@ -177,7 +183,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(FormalArgumentNode argument) {
-        writer.writeKeyword("dynamic");
+        writeTypeReference(argument.getType());
         writer.writeSpace();
         writer.writeIdentifier(argument.getName());
     }
@@ -252,7 +258,12 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     private void writeTypeReference(TypeName value) {
-        writer.writeIdentifier(typeReference(value));
+        // TODO: process the nodes before serialization
+        if (PRIMITIVES.containsKey(value)) {
+            writer.writeIdentifier(PRIMITIVES.get(value));
+        } else {
+            writer.writeIdentifier(typeReference(value));
+        }
     }
 
     private String typeReference(TypeName value) {

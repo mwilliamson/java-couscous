@@ -130,7 +130,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static dynamic nothing(dynamic x, dynamic y) {\n}\n", output);
+        assertEquals("internal static dynamic nothing(Couscous.X x, Couscous.Y y) {\n}\n", output);
     }
 
     @Test
