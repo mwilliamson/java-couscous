@@ -6,7 +6,6 @@ import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.ReturnNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -62,10 +61,6 @@ public class CsharpBackend implements Backend {
     }
 
     private String compileMethod(MethodNode method) {
-        ReturnNode returnNode = (ReturnNode) method.getBody().get(0);
-        return
-            "public static dynamic " + method.getName() + "() {" +
-            CsharpSerializer.serialize(returnNode, namespace) +
-            "}";
+        return CsharpSerializer.serialize(method, namespace);
     }
 }

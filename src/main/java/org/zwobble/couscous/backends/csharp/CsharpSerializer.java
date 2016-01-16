@@ -155,8 +155,24 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     @Override
-    public void visit(MethodNode methodNode) {
-        throw new UnsupportedOperationException();
+    public void visit(MethodNode method) {
+        writer.writeKeyword("internal");
+        writer.writeSpace();
+        writer.writeKeyword("static");
+        writer.writeSpace();
+        writer.writeKeyword("dynamic");
+        writer.writeSpace();
+        writer.writeIdentifier(method.getName());
+        writer.writeSymbol("(");
+        writer.writeSymbol(")");
+        writer.writeSpace();
+        writer.writeSymbol("{");
+        for (StatementNode statement : method.getBody()) {
+            writer.writeSymbol("\n    ");
+            write(statement);
+        }
+        writer.writeSymbol("\n");
+        writer.writeSymbol("}");
     }
 
     @Override

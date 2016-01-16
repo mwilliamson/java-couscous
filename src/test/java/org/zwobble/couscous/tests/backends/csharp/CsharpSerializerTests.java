@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
+import org.zwobble.couscous.ast.MethodNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
@@ -41,6 +42,21 @@ public class CsharpSerializerTests {
     public void returnStatementUsesReturnStatement() {
         String output = serialize(returns(literal(true)));
         assertEquals("return true;", output);
+    }
+
+    @Test
+    public void methodHasDynamicReturnType() {
+        String output = serialize(MethodNode.staticMethod("nothing").build());
+        assertEquals("internal static dynamic nothing() {\n}", output);
+    }
+
+    @Test
+    public void methodHasSerializedBody() {
+        MethodNode method = MethodNode.staticMethod("nothing")
+            .statement(returns(literal(true)))
+            .build();
+        String output = serialize(method);
+        assertEquals("internal static dynamic nothing() {\n    return true;\n}", output);
     }
 
     private String serialize(Node node) {
