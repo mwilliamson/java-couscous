@@ -88,7 +88,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ThisReferenceNode reference) {
-        throw new UnsupportedOperationException();
+        writer.writeKeyword("this");
     }
 
     @Override
@@ -231,7 +231,14 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(FieldDeclarationNode declaration) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("internal");
+            writer.writeSpace();
+            writeTypeReference(declaration.getType());
+            writer.writeSpace();
+            writer.writeIdentifier(declaration.getName());
+            writer.writeSymbol(";");
+        });
     }
 
     @Override
@@ -251,15 +258,18 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSpace();
             writer.writeIdentifier(classNode.getSimpleName());
             writer.startBlock();
-
-            for (MethodNode method : classNode.getMethods()) {
-                write(method);
-            }
-
+            writeAll(classNode.getFields());
+            writeAll(classNode.getMethods());
             writer.endBlock();
         });
 
         writer.endBlock();
+    }
+
+    private void writeAll(List<? extends Node> nodes) {
+        for (Node method : nodes) {
+            write(method);
+        }
     }
 
     private void writeTypeReference(TypeName value) {

@@ -14,6 +14,7 @@ import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -50,6 +51,12 @@ public class CsharpSerializerTests {
     public void variableReferenceWritesIdentifier() {
         String output = serialize(reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))));
         assertEquals("x", output);
+    }
+
+    @Test
+    public void thisReferenceUsesThisKeyword() {
+        String output = serialize(thisReference(TypeName.of("X")));
+        assertEquals("this", output);
     }
 
     @Test
@@ -171,6 +178,17 @@ public class CsharpSerializerTests {
         String output = serialize(classNode);
 
         assertEquals("namespace Couscous.com.example {\n    internal class Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void classWithFields() {
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .field("x", TypeName.of("X"))
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals("namespace Couscous.com.example {\n    internal class Example {\n        internal Couscous.X x;\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {
