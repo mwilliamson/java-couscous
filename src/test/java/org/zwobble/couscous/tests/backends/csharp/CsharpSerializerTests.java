@@ -4,8 +4,10 @@ import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
+import org.zwobble.couscous.values.BooleanValue;
 
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
@@ -58,6 +60,14 @@ public class CsharpSerializerTests {
     public void thisReferenceUsesThisKeyword() {
         String output = serialize(thisReference(TypeName.of("X")));
         assertEquals("this", output);
+    }
+
+    @Test
+    public void assignmentSeparatesTargetAndValueWithEqualsSign() {
+        String output = serialize(assign(
+            reference(var(TestIds.ANY_ID, "x", BooleanValue.REF)),
+            literal(true)));
+        assertEquals("x = true", output);
     }
 
     @Test

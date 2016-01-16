@@ -93,7 +93,11 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(AssignmentNode assignment) {
-        throw new UnsupportedOperationException();
+        write(assignment.getTarget());
+        writer.writeSpace();
+        writer.writeSymbol("=");
+        writer.writeSpace();
+        write(assignment.getValue());
     }
 
     @Override
