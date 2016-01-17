@@ -1,7 +1,5 @@
 ## TODO
 
-* Switch statements
-
 * Type names for generics
 
 * Boxing and unboxing for `String`s
