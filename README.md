@@ -2,6 +2,8 @@
 
 * Type names for generics
 
+* Type erasure
+
 * Boxing and unboxing for `String`s
 
 * Handle boxing/unboxing when overriding method in supertype with more/less
