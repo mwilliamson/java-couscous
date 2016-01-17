@@ -4,7 +4,6 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
@@ -88,14 +87,6 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new MethodCallNode(
-            receiver.replaceExpressions(replace),
-            methodName,
-            eagerMap(arguments, replace::apply),
-            type);
-    }
-
     public ExpressionNode transform(NodeTransformer transformer) {
         return new MethodCallNode(
             transformer.visit(receiver),

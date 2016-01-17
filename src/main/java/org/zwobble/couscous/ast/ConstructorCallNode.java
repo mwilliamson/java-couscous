@@ -4,9 +4,6 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.List;
-import java.util.function.Function;
-
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ConstructorCallNode implements ExpressionNode {
     public static ConstructorCallNode constructorCall(
@@ -40,10 +37,6 @@ public class ConstructorCallNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new ConstructorCallNode(type, eagerMap(arguments, replace::apply));
-    }
-
     public ExpressionNode transform(NodeTransformer transformer) {
         return new ConstructorCallNode(
             transformer.transform(type),

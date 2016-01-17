@@ -3,8 +3,6 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
-import java.util.function.Function;
-
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 
@@ -47,12 +45,6 @@ public class AssignmentNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new AssignmentNode(
-            (AssignableExpressionNode) replace.apply(target),
-            replace.apply(value));
-    }
-
     public ExpressionNode transform(NodeTransformer transformer) {
         return new AssignmentNode(
             (AssignableExpressionNode) transformer.visit(target),

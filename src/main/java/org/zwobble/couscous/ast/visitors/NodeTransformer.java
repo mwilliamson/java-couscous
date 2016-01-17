@@ -11,6 +11,8 @@ import java.util.Set;
 
 public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, StatementNodeMapper<StatementNode>, NodeMapper<Node> {
     // TODO: tidy up transform vs visit
+    // TODO: don't expose specific statement/expression visit methods
+    // (require passing through visit(ExpressionNode) and visit(StatementNode) for callers
     public TypeName transform(TypeName type) {
         return type;
     }

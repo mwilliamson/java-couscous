@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.function.Function;
 
@@ -64,5 +65,14 @@ public interface ExpressionNode extends Node {
         });
     }
 
-    ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace);
+    ExpressionNode transform(NodeTransformer transformer);
+
+    default ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
+        return transform(new NodeTransformer() {
+            @Override
+            public ExpressionNode visit(ExpressionNode value) {
+                return replace.apply(value);
+            }
+        });
+    }
 }

@@ -3,8 +3,6 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
-import java.util.function.Function;
-
 public class CastNode implements ExpressionNode {
     public static ExpressionNode cast(ExpressionNode expression, TypeName type) {
         return new CastNode(expression, type);
@@ -33,10 +31,6 @@ public class CastNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new CastNode(replace.apply(expression), type);
-    }
-
     public ExpressionNode transform(NodeTransformer transformer) {
         return new CastNode(transformer.visit(expression), transformer.transform(type));
     }

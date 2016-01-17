@@ -3,8 +3,6 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
-import java.util.function.Function;
-
 public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
     public static ThisReferenceNode thisReference(TypeName type) {
         return new ThisReferenceNode(type);
@@ -26,15 +24,11 @@ public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
     }
 
     @Override
-    public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return this;
-    }
-
-    @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
     }
 
+    @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new ThisReferenceNode(transformer.transform(type));
     }
