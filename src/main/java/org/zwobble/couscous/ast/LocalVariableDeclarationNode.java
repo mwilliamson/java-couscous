@@ -4,8 +4,6 @@ import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
-import java.util.function.Function;
-
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
 public class LocalVariableDeclarationNode implements VariableNode, StatementNode {
@@ -55,10 +53,6 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     }
 
     @Override
-    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new LocalVariableDeclarationNode(declaration, replace.apply(initialValue));
-    }
-
     public StatementNode transform(NodeTransformer transformer) {
         return new LocalVariableDeclarationNode(
             transformer.transform(declaration),

@@ -4,9 +4,6 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
-import java.util.function.Function;
-
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class IfStatementNode implements StatementNode {
     public static StatementNode ifStatement(
@@ -47,13 +44,6 @@ public class IfStatementNode implements StatementNode {
     }
 
     @Override
-    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new IfStatementNode(
-            replace.apply(condition),
-            eagerMap(trueBranch, statement -> statement.replaceExpressions(replace)),
-            eagerMap(falseBranch, statement -> statement.replaceExpressions(replace)));
-    }
-
     public StatementNode transform(NodeTransformer transformer) {
         return new IfStatementNode(
             transformer.visit(condition),

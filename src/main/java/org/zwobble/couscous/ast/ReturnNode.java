@@ -3,8 +3,6 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
-import java.util.function.Function;
-
 public class ReturnNode implements StatementNode {
     public static ReturnNode returns(ExpressionNode value) {
         return new ReturnNode(value);
@@ -26,13 +24,7 @@ public class ReturnNode implements StatementNode {
     }
 
     @Override
-    public StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new ReturnNode(replace.apply(value));
-    }
-
     public StatementNode transform(NodeTransformer transformer) {
-        // TODO: remove duplication with replaceExpressions
-        // (can probably implement replaceExpressions with transform)
         return new ReturnNode(transformer.visit(value));
     }
 
