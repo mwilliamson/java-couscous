@@ -17,58 +17,62 @@ public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, St
         return type;
     }
 
-    public ExpressionNode visit(ExpressionNode value) {
+    public final ExpressionNode visit(ExpressionNode value) {
         return value.accept((ExpressionNodeMapper<ExpressionNode>)this);
     }
 
     @Override
     public ExpressionNode visit(LiteralNode literal) {
-        return literal.transform(this);
+        return defaultTransformExpression(literal);
     }
 
     @Override
     public ExpressionNode visit(VariableReferenceNode variableReference) {
-        return variableReference.transform(this);
+        return defaultTransformExpression(variableReference);
     }
 
     @Override
     public ExpressionNode visit(ThisReferenceNode reference) {
-        return reference.transform(this);
+        return defaultTransformExpression(reference);
     }
 
     @Override
     public ExpressionNode visit(AssignmentNode assignment) {
-        return assignment.transform(this);
+        return defaultTransformExpression(assignment);
     }
 
     @Override
     public ExpressionNode visit(TernaryConditionalNode ternaryConditional) {
-        return ternaryConditional.transform(this);
+        return defaultTransformExpression(ternaryConditional);
     }
 
     @Override
     public ExpressionNode visit(MethodCallNode methodCall) {
-        return methodCall.transform(this);
+        return defaultTransformExpression(methodCall);
     }
 
     @Override
     public ExpressionNode visit(ConstructorCallNode call) {
-        return call.transform(this);
+        return defaultTransformExpression(call);
     }
 
     @Override
     public ExpressionNode visit(FieldAccessNode fieldAccess) {
-        return fieldAccess.transform(this);
+        return defaultTransformExpression(fieldAccess);
     }
 
     @Override
     public ExpressionNode visit(TypeCoercionNode typeCoercion) {
-        return typeCoercion.transform(this);
+        return defaultTransformExpression(typeCoercion);
     }
 
     @Override
     public ExpressionNode visit(CastNode cast) {
-        return cast.transform(this);
+        return defaultTransformExpression(cast);
+    }
+
+    protected ExpressionNode defaultTransformExpression(ExpressionNode expression) {
+        return expression.transform(this);
     }
 
     public Receiver visit(Receiver receiver) {
@@ -90,7 +94,7 @@ public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, St
         return VariableDeclaration.var(declaration.getId(), declaration.getName(), transform(declaration.getType()));
     }
 
-    public StatementNode visit(StatementNode statement) {
+    public final StatementNode visit(StatementNode statement) {
         return statement.accept((StatementNodeMapper<StatementNode>)this);
     }
 

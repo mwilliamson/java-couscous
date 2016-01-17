@@ -43,7 +43,7 @@ public interface StatementNode extends Node {
     default StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
         return transform(new NodeTransformer() {
             @Override
-            public ExpressionNode visit(ExpressionNode value) {
+            public ExpressionNode defaultTransformExpression(ExpressionNode value) {
                 return replace.apply(value);
             }
         });
