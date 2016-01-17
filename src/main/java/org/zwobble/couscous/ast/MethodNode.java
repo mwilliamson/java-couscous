@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
@@ -149,6 +150,16 @@ public class MethodNode implements CallableNode {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public MethodNode transform(NodeTransformer transformer) {
+        return new MethodNode(
+            transformer.transformAnnotations(annotations),
+            isStatic,
+            name,
+            transformer.transformFormalArguments(arguments),
+            transformer.transform(returnType),
+            transformer.transformStatements(body));
     }
 
     @Override

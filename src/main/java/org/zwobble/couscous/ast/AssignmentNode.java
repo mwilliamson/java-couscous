@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.function.Function;
 
@@ -50,6 +51,12 @@ public class AssignmentNode implements ExpressionNode {
         return new AssignmentNode(
             (AssignableExpressionNode) replace.apply(target),
             replace.apply(value));
+    }
+
+    public ExpressionNode transform(NodeTransformer transformer) {
+        return new AssignmentNode(
+            (AssignableExpressionNode) transformer.visit(target),
+            transformer.visit(value));
     }
 
     @Override

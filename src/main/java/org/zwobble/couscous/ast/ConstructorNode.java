@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,7 @@ public class ConstructorNode implements CallableNode {
     private final List<FormalArgumentNode> arguments;
     private final List<StatementNode> body;
     
-    public ConstructorNode(
+    private ConstructorNode(
             List<FormalArgumentNode> arguments,
             List<StatementNode> body) {
         this.arguments = arguments;
@@ -35,6 +36,12 @@ public class ConstructorNode implements CallableNode {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public ConstructorNode transform(NodeTransformer transformer) {
+        return new ConstructorNode(
+            transformer.transformFormalArguments(arguments),
+            transformer.transformStatements(body));
     }
 
     @Override

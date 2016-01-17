@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.function.Function;
 
@@ -27,6 +28,10 @@ public class InstanceReceiver implements Receiver {
     @Override
     public <T> T accept(Mapper<T> visitor) {
         return visitor.visit(expression);
+    }
+
+    public Receiver transform(NodeTransformer transformer) {
+        return new InstanceReceiver(transformer.visit(expression));
     }
 
     @Override

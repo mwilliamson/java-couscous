@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.*;
 
 import java.util.function.Function;
@@ -56,6 +57,18 @@ public class LiteralNode implements ExpressionNode {
     @Override
     public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
         return this;
+    }
+
+    public ExpressionNode transform(NodeTransformer transformer) {
+        return new LiteralNode(transformValue(transformer), transformer.transform(type));
+    }
+
+    private PrimitiveValue transformValue(NodeTransformer transformer) {
+        if (value instanceof TypeValue) {
+            return new TypeValue(transformer.transform(((TypeValue)value).getValue()));
+        } else {
+            return value;
+        }
     }
 
     @Override

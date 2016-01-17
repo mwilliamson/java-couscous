@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.function.Function;
 
@@ -34,6 +35,12 @@ public class TypeCoercionNode implements ExpressionNode {
     @Override
     public ExpressionNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
         return new TypeCoercionNode(replace.apply(expression), type);
+    }
+
+    public ExpressionNode transform(NodeTransformer transformer) {
+        return new TypeCoercionNode(
+            transformer.visit(expression),
+            transformer.transform(type));
     }
 
     @Override

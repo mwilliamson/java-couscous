@@ -3,25 +3,24 @@ package org.zwobble.couscous.backends.csharp;
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.values.ObjectValues;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class CsharpPrimitiveMethods {
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INT_METHODS =
         ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
 
-            .put("parseInt", (arguments, writer) -> {
-                writer.writeIdentifier("int");
-                writer.writeSymbol(".");
-                writer.writeIdentifier("Parse");
-                writer.writeSymbol("(");
-                writer.writeIdentifier(CsharpSerializer.serialize(arguments.get(0), ""));
-                writer.writeSymbol(")");
-            })
+            .put("parseInt", arguments -> staticMethodCall(
+                TypeName.of("int"),
+                "Parse",
+                list(arguments.get(0)),
+                TypeName.of("int")))
 
             .build();
 
@@ -37,6 +36,6 @@ public class CsharpPrimitiveMethods {
 
     @FunctionalInterface
     public interface PrimitiveStaticMethodGenerator {
-        void generate(List<ExpressionNode> arguments, SourceCodeWriter writer);
+        ExpressionNode generate(List<ExpressionNode> arguments);
     }
 }

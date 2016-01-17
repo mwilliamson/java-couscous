@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.base.Objects;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
@@ -39,6 +40,12 @@ public class WhileNode implements StatementNode {
         return new WhileNode(
             replace.apply(condition),
             eagerMap(body, statement -> statement.replaceExpressions(replace)));
+    }
+
+    public StatementNode transform(NodeTransformer transformer) {
+        return new WhileNode(
+            transformer.visit(condition),
+            transformer.transformStatements(body));
     }
 
     @Override

@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.function.Function;
 
@@ -52,6 +53,10 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public ExpressionNode transform(NodeTransformer transformer) {
+        return new VariableReferenceNode(transformer.transform(referent));
     }
 
     @Override

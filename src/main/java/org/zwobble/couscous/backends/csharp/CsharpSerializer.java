@@ -1,24 +1,13 @@
 package org.zwobble.couscous.backends.csharp;
 
-import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
-import org.zwobble.couscous.values.*;
+import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 import java.util.List;
-import java.util.Map;
 
 public class CsharpSerializer implements NodeVisitor {
-    private final static Map<TypeName, String> PRIMITIVES = ImmutableMap.<TypeName, String>builder()
-        .put(IntegerValue.REF, "int")
-        .put(StringValue.REF, "string")
-        .put(BooleanValue.REF, "bool")
-        .put(ObjectValues.OBJECT, "object")
-        .put(ObjectValues.CLASS, "System.Type")
-        .put(UnitValue.REF, "void")
-        .build();
-
     public static String serialize(Node node, String namespace) {
         SourceCodeWriter writer = new SourceCodeWriter(
             (writer2) -> {
@@ -29,17 +18,16 @@ public class CsharpSerializer implements NodeVisitor {
                 writer2.writeStatement(() -> writer2.writeSymbol("}"));
             }
         );
-        CsharpSerializer serializer = new CsharpSerializer(writer, namespace);
-        serializer.write(node);
+        CsharpSerializer serializer = new CsharpSerializer(writer);
+
+        serializer.write(CsharpCodeGenerator.generateCode(node, namespace));
         return writer.asString();
     }
 
     private final SourceCodeWriter writer;
-    private final String namespace;
 
-    private CsharpSerializer(SourceCodeWriter writer, String namespace) {
+    private CsharpSerializer(SourceCodeWriter writer) {
         this.writer = writer;
-        this.namespace = namespace;
     }
 
     private void write(Node node) {
@@ -117,32 +105,10 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(MethodCallNode methodCall) {
-        if (!writePrimitiveMethod(methodCall)) {
-            write(methodCall.getReceiver());
-            writer.writeSymbol(".");
-            writer.writeIdentifier(methodCall.getMethodName());
-            writeArguments(methodCall.getArguments());
-        }
-    }
-
-    private boolean writePrimitiveMethod(MethodCallNode methodCall) {
-        return methodCall.getReceiver().accept(new Receiver.Mapper<Boolean>() {
-            @Override
-            public Boolean visit(ExpressionNode receiver) {
-                return false;
-            }
-
-            @Override
-            public Boolean visit(TypeName receiver) {
-                // TODO: transform AST before serialisation instead of exposing write to CsharpPrimitiveMethods
-                return CsharpPrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
-                    .map(generator -> {
-                        generator.generate(methodCall.getArguments(), writer);
-                        return true;
-                    })
-                    .orElse(false);
-            }
-        });
+        write(methodCall.getReceiver());
+        writer.writeSymbol(".");
+        writer.writeIdentifier(methodCall.getMethodName());
+        writeArguments(methodCall.getArguments());
     }
 
     @Override
@@ -278,13 +244,9 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ClassNode classNode) {
-        String namespace = this.namespace +
-            classNode.getName().getPackage()
-                .map(packageName -> "." + packageName)
-                .orElse("");
         writer.writeKeyword("namespace");
         writer.writeSpace();
-        writer.writeIdentifier(namespace);
+        writer.writeIdentifier(classNode.getName().getPackage().get());
         writer.startBlock();
         writer.writeStatement(() -> {
             writer.writeKeyword("internal");
@@ -323,15 +285,10 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     private void writeTypeReference(TypeName value) {
-        // TODO: process the nodes before serialization
-        if (PRIMITIVES.containsKey(value)) {
-            writer.writeIdentifier(PRIMITIVES.get(value));
-        } else {
-            writer.writeIdentifier(typeReference(value));
-        }
+        writer.writeIdentifier(typeReference(value));
     }
 
     private String typeReference(TypeName value) {
-        return namespace + "." + value.getQualifiedName();
+        return value.getQualifiedName();
     }
 }

@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.List;
 import java.util.Set;
@@ -64,6 +65,15 @@ public class ClassNode implements Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public ClassNode transform(NodeTransformer transformer) {
+        return new ClassNode(
+            transformer.transform(name),
+            transformer.transformTypes(superTypes),
+            transformer.transformFields(fields),
+            transformer.visit(constructor),
+            transformer.transformMethods(methods));
     }
 
     @Override

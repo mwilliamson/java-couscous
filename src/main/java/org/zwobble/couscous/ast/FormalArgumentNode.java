@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class FormalArgumentNode implements VariableNode, Node {
     public static FormalArgumentNode formalArg(VariableDeclaration declaration) {
@@ -28,6 +29,10 @@ public class FormalArgumentNode implements VariableNode, Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    public FormalArgumentNode transform(NodeTransformer transformer) {
+        return new FormalArgumentNode(transformer.transform(declaration));
     }
 
     @Override

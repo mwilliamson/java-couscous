@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
@@ -51,6 +52,13 @@ public class IfStatementNode implements StatementNode {
             replace.apply(condition),
             eagerMap(trueBranch, statement -> statement.replaceExpressions(replace)),
             eagerMap(falseBranch, statement -> statement.replaceExpressions(replace)));
+    }
+
+    public StatementNode transform(NodeTransformer transformer) {
+        return new IfStatementNode(
+            transformer.visit(condition),
+            transformer.transformStatements(trueBranch),
+            transformer.transformStatements(falseBranch));
     }
 
     @Override
