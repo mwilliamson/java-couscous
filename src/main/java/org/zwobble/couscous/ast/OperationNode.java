@@ -35,6 +35,7 @@ public class OperationNode implements ExpressionNode {
 
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
+        // TODO: Don't desugar
         return desugar().accept(visitor);
     }
 
