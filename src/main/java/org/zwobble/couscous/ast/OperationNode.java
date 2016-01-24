@@ -28,6 +28,10 @@ public class OperationNode implements ExpressionNode {
             type);
     }
 
+    public List<ExpressionNode> getArguments() {
+        return arguments;
+    }
+
     @Override
     public TypeName getType() {
         return type;
@@ -35,8 +39,7 @@ public class OperationNode implements ExpressionNode {
 
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
-        // TODO: Don't desugar
-        return desugar().accept(visitor);
+        return visitor.visit(this);
     }
 
     @Override

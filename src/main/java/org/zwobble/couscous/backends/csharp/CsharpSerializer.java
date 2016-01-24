@@ -119,6 +119,11 @@ public class CsharpSerializer implements NodeVisitor {
         writeArguments(call.getArguments());
     }
 
+    @Override
+    public void visit(OperationNode operation) {
+        write(operation.desugar());
+    }
+
     private void writeArguments(List<? extends ExpressionNode> arguments) {
         writer.writeSymbol("(");
         writer.writeWithSeparator(arguments, this::write, () -> writer.writeSymbol(", "));

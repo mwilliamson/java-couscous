@@ -49,6 +49,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(OperationNode operation) {
+                visitor.visit(operation);
+                return null;
+            }
+
+            @Override
             public Void visit(FieldAccessNode fieldAccess) {
                 visitor.visit(fieldAccess);
                 return null;

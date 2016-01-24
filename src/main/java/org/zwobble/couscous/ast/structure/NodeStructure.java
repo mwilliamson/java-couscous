@@ -28,6 +28,7 @@ public class NodeStructure {
     }
 
     public static Stream<? extends Node> childNodes(Node node) {
+        // TODO: is this just duplicating the logic already in node.transform?
         return node.accept(new NodeMapper<Stream<? extends Node>>() {
             @Override
             public Stream<Node> visit(LiteralNode literal) {
@@ -67,6 +68,11 @@ public class NodeStructure {
             @Override
             public Stream<? extends ExpressionNode> visit(ConstructorCallNode call) {
                 return call.getArguments().stream();
+            }
+
+            @Override
+            public Stream<? extends Node> visit(OperationNode operation) {
+                return operation.getArguments().stream();
             }
 
             @Override

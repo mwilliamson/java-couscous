@@ -10,6 +10,7 @@ public interface NodeVisitor {
     void visit(TernaryConditionalNode ternaryConditional);
     void visit(MethodCallNode methodCall);
     void visit(ConstructorCallNode call);
+    void visit(OperationNode operation);
     void visit(FieldAccessNode fieldAccess);
     void visit(TypeCoercionNode typeCoercion);
     void visit(CastNode cast);

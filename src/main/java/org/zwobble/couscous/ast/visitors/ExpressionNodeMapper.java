@@ -10,7 +10,9 @@ public interface ExpressionNodeMapper<T> {
     T visit(TernaryConditionalNode ternaryConditional);
     T visit(MethodCallNode methodCall);
     T visit(ConstructorCallNode call);
+    T visit(OperationNode operation);
     T visit(FieldAccessNode fieldAccess);
     T visit(TypeCoercionNode typeCoercion);
     T visit(CastNode cast);
+
 }

@@ -43,7 +43,12 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     public T visit(ConstructorCallNode call) {
         return defaultValue;
     }
-    
+
+    @Override
+    public T visit(OperationNode operation) {
+        return defaultValue;
+    }
+
     @Override
     public T visit(FieldAccessNode fieldAccess) {
         return defaultValue;

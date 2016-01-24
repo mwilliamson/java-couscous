@@ -57,6 +57,11 @@ public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, St
     }
 
     @Override
+    public ExpressionNode visit(OperationNode operationNode) {
+        return defaultTransformExpression(operationNode);
+    }
+
+    @Override
     public ExpressionNode visit(FieldAccessNode fieldAccess) {
         return defaultTransformExpression(fieldAccess);
     }

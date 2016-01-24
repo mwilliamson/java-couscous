@@ -49,6 +49,11 @@ public interface ExpressionNode extends Node {
             }
 
             @Override
+            public T visit(OperationNode operation) {
+                return visitor.visit(operation);
+            }
+
+            @Override
             public T visit(FieldAccessNode fieldAccess) {
                 return visitor.visit(fieldAccess);
             }

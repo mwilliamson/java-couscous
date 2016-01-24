@@ -284,6 +284,11 @@ public class PythonCodeGenerator {
         }
 
         @Override
+        public PythonExpressionNode visit(OperationNode operation) {
+            return generateExpression(operation.desugar());
+        }
+
+        @Override
         public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
             return pythonAttributeAccess(generateExpression(fieldAccess.getLeft()), fieldAccess.getFieldName());
         }

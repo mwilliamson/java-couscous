@@ -113,7 +113,12 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
         return clazz.callConstructor(environment, arguments);
     }
-    
+
+    @Override
+    public InterpreterValue visit(OperationNode operation) {
+        return eval(operation.desugar());
+    }
+
     @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
         InterpreterValue left = eval(fieldAccess.getLeft());
