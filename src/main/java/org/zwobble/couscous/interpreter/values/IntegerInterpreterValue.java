@@ -1,15 +1,14 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
-
 import org.zwobble.couscous.ast.Operator;
-import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
+
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -25,15 +24,6 @@ public final class IntegerInterpreterValue implements InterpreterValue {
             infixReturningInteger((left, right) -> left / right))
         .method(Operator.MOD.getMethodName(), list(IntegerValue.REF),
             infixReturningInteger((left, right) -> left % right))
-        .method(Operator.EQUALS.getMethodName(), list(ObjectValues.OBJECT),
-            (environment, arguments) -> {
-                InterpreterValue right = arguments.getPositionalArguments().get(0);
-                if (right instanceof IntegerInterpreterValue) {
-                    return integerEquals(arguments, ((IntegerInterpreterValue)right));
-                } else {
-                    return BooleanInterpreterValue.of(false);
-                }
-            })
         .method(Operator.EQUALS.getMethodName(), list(IntegerValue.REF),
             (environment, arguments) -> {
                 IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getPositionalArguments().get(0);
