@@ -33,7 +33,7 @@ public class TypeCoercionNode implements ExpressionNode {
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new TypeCoercionNode(
-            transformer.visit(expression),
+            transformer.transformExpression(expression),
             transformer.transform(type));
     }
 

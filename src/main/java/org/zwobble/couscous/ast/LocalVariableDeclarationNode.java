@@ -56,7 +56,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     public StatementNode transform(NodeTransformer transformer) {
         return new LocalVariableDeclarationNode(
             transformer.transform(declaration),
-            transformer.visit(initialValue));
+            transformer.transformExpression(initialValue));
     }
 
     @Override

@@ -72,7 +72,7 @@ public class ClassNode implements Node {
             transformer.transform(name),
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
-            transformer.visit(constructor),
+            transformer.transformConstructor(constructor),
             transformer.transformMethods(methods));
     }
 

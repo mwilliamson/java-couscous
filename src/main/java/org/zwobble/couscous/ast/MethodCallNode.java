@@ -89,7 +89,7 @@ public class MethodCallNode implements ExpressionNode {
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new MethodCallNode(
-            transformer.visit(receiver),
+            transformer.transformReceiver(receiver),
             methodName,
             transformer.transformExpressions(arguments),
             transformer.transform(type));

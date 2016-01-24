@@ -25,7 +25,7 @@ public class ExpressionStatementNode implements StatementNode {
 
     @Override
     public StatementNode transform(NodeTransformer transformer) {
-        return new ExpressionStatementNode(transformer.visit(expression));
+        return new ExpressionStatementNode(transformer.transformExpression(expression));
     }
 
     @Override

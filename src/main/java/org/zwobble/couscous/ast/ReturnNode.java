@@ -25,7 +25,7 @@ public class ReturnNode implements StatementNode {
 
     @Override
     public StatementNode transform(NodeTransformer transformer) {
-        return new ReturnNode(transformer.visit(value));
+        return new ReturnNode(transformer.transformExpression(value));
     }
 
     @Override

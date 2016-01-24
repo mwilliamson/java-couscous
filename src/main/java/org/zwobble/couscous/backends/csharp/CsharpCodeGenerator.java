@@ -8,7 +8,9 @@ import org.zwobble.couscous.values.*;
 import java.util.Map;
 import java.util.Optional;
 
-public class CsharpCodeGenerator extends NodeTransformer {
+import static org.zwobble.couscous.util.Casts.tryCast;
+
+public class CsharpCodeGenerator {
     private final static Map<TypeName, TypeName> PRIMITIVES = ImmutableMap.<TypeName, TypeName>builder()
         .put(IntegerValue.REF, TypeName.of("int"))
         .put(StringValue.REF, TypeName.of("string"))
@@ -29,11 +31,14 @@ public class CsharpCodeGenerator extends NodeTransformer {
     }
 
     private Node generateCode(Node node) {
-        return node.accept(this);
+        return NodeTransformer.builder()
+            .transformType(this::transformType)
+            .transformExpression(this::transformExpression)
+            .build()
+            .transform(node);
     }
 
-    @Override
-    public TypeName transform(TypeName type) {
+    private TypeName transformType(TypeName type) {
         if (PRIMITIVES.containsKey(type)) {
             return PRIMITIVES.get(type);
         } else {
@@ -41,12 +46,12 @@ public class CsharpCodeGenerator extends NodeTransformer {
         }
     }
 
-    @Override
-    public ExpressionNode visit(MethodCallNode call) {
-        return toPrimitiveMethod(call).orElseGet(() -> super.visit(call));
+    private Optional<ExpressionNode> transformExpression(ExpressionNode expression) {
+        return tryCast(MethodCallNode.class, expression)
+            .flatMap(this::transformMethodCall);
     }
 
-    private Optional<ExpressionNode> toPrimitiveMethod(MethodCallNode call) {
+    private Optional<ExpressionNode> transformMethodCall(MethodCallNode call) {
         return call.getReceiver().accept(new Receiver.Mapper<Optional<ExpressionNode>>() {
             @Override
             public Optional<ExpressionNode> visit(ExpressionNode receiver) {
@@ -60,7 +65,6 @@ public class CsharpCodeGenerator extends NodeTransformer {
                     .map(generator -> generator.generate(call.getArguments()));
             }
         });
-
     }
 
     private TypeName addPrefix(TypeName name, String namespace) {

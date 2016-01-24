@@ -7,159 +7,237 @@ import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, StatementNodeMapper<StatementNode>, NodeMapper<Node> {
-    // TODO: tidy up transform vs visit
-    // TODO: don't expose specific statement/expression visit methods
-    // (require passing through visit(ExpressionNode) and visit(StatementNode) for callers
+public class NodeTransformer {
+    public static NodeTransformer replaceExpressions(Map<ExpressionNode, ExpressionNode> replacements) {
+        return builder().
+            transformExpression(expression ->
+                Optional.ofNullable(replacements.get(expression)))
+            .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public Node transform(Node node) {
+        return node.accept(new NodeMapper<Node>() {
+            @Override
+            public Node visit(LiteralNode literal) {
+                return transformExpression(literal);
+            }
+
+            @Override
+            public Node visit(VariableReferenceNode variableReference) {
+                return transformExpression(variableReference);
+            }
+
+            @Override
+            public Node visit(ThisReferenceNode reference) {
+                return transformExpression(reference);
+            }
+
+            @Override
+            public Node visit(AssignmentNode assignment) {
+                return transformExpression(assignment);
+            }
+
+            @Override
+            public Node visit(TernaryConditionalNode ternaryConditional) {
+                return transformExpression(ternaryConditional);
+            }
+
+            @Override
+            public Node visit(MethodCallNode methodCall) {
+                return transformExpression(methodCall);
+            }
+
+            @Override
+            public Node visit(ConstructorCallNode call) {
+                return transformExpression(call);
+            }
+
+            @Override
+            public Node visit(OperationNode operation) {
+                return transformExpression(operation);
+            }
+
+            @Override
+            public Node visit(FieldAccessNode fieldAccess) {
+                return transformExpression(fieldAccess);
+            }
+
+            @Override
+            public Node visit(TypeCoercionNode typeCoercion) {
+                return transformExpression(typeCoercion);
+            }
+
+            @Override
+            public Node visit(CastNode cast) {
+                return transformExpression(cast);
+            }
+
+            @Override
+            public Node visit(InstanceReceiver receiver) {
+                return transformReceiver(receiver);
+            }
+
+            @Override
+            public Node visit(StaticReceiver receiver) {
+                return transformReceiver(receiver);
+            }
+
+            @Override
+            public Node visit(ReturnNode returnNode) {
+                return transformStatement(returnNode);
+            }
+
+            @Override
+            public Node visit(ExpressionStatementNode expressionStatement) {
+                return transformStatement(expressionStatement);
+            }
+
+            @Override
+            public Node visit(LocalVariableDeclarationNode localVariableDeclaration) {
+                return transformStatement(localVariableDeclaration);
+            }
+
+            @Override
+            public Node visit(IfStatementNode ifStatement) {
+                return transformStatement(ifStatement);
+            }
+
+            @Override
+            public Node visit(WhileNode whileLoop) {
+                return transformStatement(whileLoop);
+            }
+
+            @Override
+            public Node visit(FormalArgumentNode formalArgumentNode) {
+                return transformFormalArgument(formalArgumentNode);
+            }
+
+            @Override
+            public Node visit(AnnotationNode annotation) {
+                return transformAnnotation(annotation);
+            }
+
+            @Override
+            public Node visit(MethodNode methodNode) {
+                return transformMethod(methodNode);
+            }
+
+            @Override
+            public Node visit(ConstructorNode constructorNode) {
+                return transformConstructor(constructorNode);
+            }
+
+            @Override
+            public Node visit(FieldDeclarationNode declaration) {
+                return transformField(declaration);
+            }
+
+            @Override
+            public Node visit(ClassNode classNode) {
+                return transformClass(classNode);
+            }
+        });
+    }
+
+    public static class Builder {
+        private Function<ExpressionNode, Optional<ExpressionNode>> transformExpression = expression -> Optional.empty();
+        private Function<TypeName, TypeName> transformType = type -> type;
+
+        public Builder transformExpression(
+            Function<ExpressionNode, Optional<ExpressionNode>> transformExpression)
+        {
+            this.transformExpression = transformExpression;
+            return this;
+        }
+
+        public Builder transformType(
+            Function<TypeName, TypeName> transformType)
+        {
+            this.transformType = transformType;
+            return this;
+        }
+
+        public NodeTransformer build() {
+            return new NodeTransformer(transformExpression, transformType);
+        }
+    }
+
+    private final Function<ExpressionNode, Optional<ExpressionNode>> transformExpression;
+    private final Function<TypeName, TypeName> transformType;
+
+    private NodeTransformer(
+        Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
+        Function<TypeName, TypeName> transformType)
+    {
+        this.transformExpression = transformExpression;
+        this.transformType = transformType;
+    }
+
     public TypeName transform(TypeName type) {
-        return type;
+        return transformType.apply(type);
     }
 
-    public final ExpressionNode visit(ExpressionNode value) {
-        return value.accept((ExpressionNodeMapper<ExpressionNode>)this);
+    public ExpressionNode transformExpression(ExpressionNode expression) {
+        return transformExpression.apply(expression)
+            .orElseGet(() -> expression.transform(this));
     }
 
-    @Override
-    public ExpressionNode visit(LiteralNode literal) {
-        return defaultTransformExpression(literal);
-    }
+    public Receiver transformReceiver(Receiver receiver) {
+        return receiver.accept(new Receiver.Mapper<Receiver>() {
+            @Override
+            public Receiver visit(ExpressionNode receiver) {
+                return new InstanceReceiver(receiver.transform(NodeTransformer.this));
+            }
 
-    @Override
-    public ExpressionNode visit(VariableReferenceNode variableReference) {
-        return defaultTransformExpression(variableReference);
-    }
-
-    @Override
-    public ExpressionNode visit(ThisReferenceNode reference) {
-        return defaultTransformExpression(reference);
-    }
-
-    @Override
-    public ExpressionNode visit(AssignmentNode assignment) {
-        return defaultTransformExpression(assignment);
-    }
-
-    @Override
-    public ExpressionNode visit(TernaryConditionalNode ternaryConditional) {
-        return defaultTransformExpression(ternaryConditional);
-    }
-
-    @Override
-    public ExpressionNode visit(MethodCallNode methodCall) {
-        return defaultTransformExpression(methodCall);
-    }
-
-    @Override
-    public ExpressionNode visit(ConstructorCallNode call) {
-        return defaultTransformExpression(call);
-    }
-
-    @Override
-    public ExpressionNode visit(OperationNode operationNode) {
-        return defaultTransformExpression(operationNode);
-    }
-
-    @Override
-    public ExpressionNode visit(FieldAccessNode fieldAccess) {
-        return defaultTransformExpression(fieldAccess);
-    }
-
-    @Override
-    public ExpressionNode visit(TypeCoercionNode typeCoercion) {
-        return defaultTransformExpression(typeCoercion);
-    }
-
-    @Override
-    public ExpressionNode visit(CastNode cast) {
-        return defaultTransformExpression(cast);
-    }
-
-    protected ExpressionNode defaultTransformExpression(ExpressionNode expression) {
-        return expression.transform(this);
-    }
-
-    public Receiver visit(Receiver receiver) {
-        // TODO: remove cast
-        return (Receiver) receiver.accept(this);
-    }
-
-    @Override
-    public Node visit(InstanceReceiver receiver) {
-        return receiver.transform(this);
-    }
-
-    @Override
-    public Node visit(StaticReceiver receiver) {
-        return receiver.transform(this);
+            @Override
+            public Receiver visit(TypeName receiver) {
+                return new StaticReceiver(transform(receiver));
+            }
+        });
     }
 
     public VariableDeclaration transform(VariableDeclaration declaration) {
         return VariableDeclaration.var(declaration.getId(), declaration.getName(), transform(declaration.getType()));
     }
 
-    public final StatementNode visit(StatementNode statement) {
-        return statement.accept((StatementNodeMapper<StatementNode>)this);
+    public final StatementNode transformStatement(StatementNode statement) {
+        return statement.transform(this);
     }
 
-    @Override
-    public StatementNode visit(ReturnNode returnNode) {
-        return returnNode.transform(this);
-    }
-
-    @Override
-    public StatementNode visit(ExpressionStatementNode expressionStatement) {
-        return expressionStatement.transform(this);
-    }
-
-    @Override
-    public StatementNode visit(LocalVariableDeclarationNode localVariableDeclaration) {
-        return localVariableDeclaration.transform(this);
-    }
-
-    @Override
-    public StatementNode visit(IfStatementNode ifStatement) {
-        return ifStatement.transform(this);
-    }
-
-    @Override
-    public StatementNode visit(WhileNode whileLoop) {
-        return whileLoop.transform(this);
-    }
-
-    @Override
-    public FormalArgumentNode visit(FormalArgumentNode formalArgumentNode) {
+    public FormalArgumentNode transformFormalArgument(FormalArgumentNode formalArgumentNode) {
         return formalArgumentNode.transform(this);
     }
 
-    @Override
-    public AnnotationNode visit(AnnotationNode annotation) {
+    public AnnotationNode transformAnnotation(AnnotationNode annotation) {
         return annotation.transform(this);
     }
 
-    @Override
-    public MethodNode visit(MethodNode method) {
+    public MethodNode transformMethod(MethodNode method) {
         return method.transform(this);
     }
 
-    @Override
-    public ConstructorNode visit(ConstructorNode constructor) {
+    public ConstructorNode transformConstructor(ConstructorNode constructor) {
         return constructor.transform(this);
     }
 
-    @Override
-    public FieldDeclarationNode visit(FieldDeclarationNode field) {
+    public FieldDeclarationNode transformField(FieldDeclarationNode field) {
         return field.transform(this);
     }
 
-    @Override
-    public ClassNode visit(ClassNode classNode) {
+    public ClassNode transformClass(ClassNode classNode) {
         return classNode.transform(this);
     }
 
     public List<AnnotationNode> transformAnnotations(List<AnnotationNode> annotations) {
-        return transformList(annotations, this::visit);
+        return transformList(annotations, this::transformAnnotation);
     }
 
     public Set<TypeName> transformTypes(Set<TypeName> superTypes) {
@@ -167,23 +245,23 @@ public class NodeTransformer implements ExpressionNodeMapper<ExpressionNode>, St
     }
 
     public List<FieldDeclarationNode> transformFields(List<FieldDeclarationNode> fields) {
-        return transformList(fields, this::visit);
+        return transformList(fields, this::transformField);
     }
 
     public List<MethodNode> transformMethods(List<MethodNode> methods) {
-        return transformList(methods, this::visit);
+        return transformList(methods, this::transformMethod);
     }
 
     public List<StatementNode> transformStatements(List<StatementNode> body) {
-        return transformList(body, this::visit);
+        return transformList(body, this::transformStatement);
     }
 
     public List<ExpressionNode> transformExpressions(List<? extends ExpressionNode> expressions) {
-        return transformList(expressions, this::visit);
+        return transformList(expressions, this::transformExpression);
     }
 
     public List<FormalArgumentNode> transformFormalArguments(List<FormalArgumentNode> arguments) {
-        return transformList(arguments, this::visit);
+        return transformList(arguments, this::transformFormalArgument);
     }
 
     private <T> Set<T> transformSet(Set<T> values, Function<T, T> function) {

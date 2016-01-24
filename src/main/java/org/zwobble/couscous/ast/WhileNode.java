@@ -35,7 +35,7 @@ public class WhileNode implements StatementNode {
     @Override
     public StatementNode transform(NodeTransformer transformer) {
         return new WhileNode(
-            transformer.visit(condition),
+            transformer.transformExpression(condition),
             transformer.transformStatements(body));
     }
 

@@ -4,8 +4,6 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
-import java.util.function.Function;
-
 public interface StatementNode extends Node {
     <T> T accept(StatementNodeMapper<T> visitor);
     
@@ -40,12 +38,4 @@ public interface StatementNode extends Node {
     }
 
     StatementNode transform(NodeTransformer transformer);
-    default StatementNode replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return transform(new NodeTransformer() {
-            @Override
-            public ExpressionNode defaultTransformExpression(ExpressionNode value) {
-                return replace.apply(value);
-            }
-        });
-    }
 }

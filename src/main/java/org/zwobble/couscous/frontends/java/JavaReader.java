@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
@@ -117,22 +118,8 @@ public class JavaReader {
         Map<ExpressionNode, ExpressionNode> replacements = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
             freeVariable -> captureAccess(className, freeVariable));
-        Function<ExpressionNode, ExpressionNode> replaceExpression = new CaptureReplacer(replacements);
-        return eagerMap(body, statement -> statement.replaceExpressions(replaceExpression));
-    }
-
-    private class CaptureReplacer implements Function<ExpressionNode, ExpressionNode> {
-        private final Map<ExpressionNode, ExpressionNode> replacements;
-
-        public CaptureReplacer(Map<ExpressionNode, ExpressionNode> replacements) {
-            this.replacements = replacements;
-        }
-
-        @Override
-        public ExpressionNode apply(ExpressionNode expression) {
-            return Optional.ofNullable(replacements.get(expression))
-                .orElseGet(() -> expression.replaceExpressions(this));
-        }
+        NodeTransformer transformer = NodeTransformer.replaceExpressions(replacements);
+        return eagerMap(body, statement -> statement.transform(transformer));
     }
 
     private ConstructorNode buildConstructor(Scope outerScope, TypeName type, List<CapturedVariable> freeVariables) {

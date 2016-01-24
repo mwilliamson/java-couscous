@@ -32,7 +32,7 @@ public class CastNode implements ExpressionNode {
 
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
-        return new CastNode(transformer.visit(expression), transformer.transform(type));
+        return new CastNode(transformer.transformExpression(expression), transformer.transform(type));
     }
 
     @Override

@@ -44,9 +44,9 @@ public class TernaryConditionalNode implements ExpressionNode {
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new TernaryConditionalNode(
-            transformer.visit(condition),
-            transformer.visit(ifTrue),
-            transformer.visit(ifFalse));
+            transformer.transformExpression(condition),
+            transformer.transformExpression(ifTrue),
+            transformer.transformExpression(ifFalse));
     }
 
     @Override

@@ -46,7 +46,7 @@ public class IfStatementNode implements StatementNode {
     @Override
     public StatementNode transform(NodeTransformer transformer) {
         return new IfStatementNode(
-            transformer.visit(condition),
+            transformer.transformExpression(condition),
             transformer.transformStatements(trueBranch),
             transformer.transformStatements(falseBranch));
     }

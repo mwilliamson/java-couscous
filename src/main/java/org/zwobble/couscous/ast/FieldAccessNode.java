@@ -45,7 +45,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new FieldAccessNode(
-            transformer.visit(left),
+            transformer.transformExpression(left),
             fieldName,
             transformer.transform(type));
     }
