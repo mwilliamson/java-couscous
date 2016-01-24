@@ -1,6 +1,5 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
@@ -33,7 +32,7 @@ public class BoxedIntegerInterpreterValue {
                 return of(value);
             })
 
-        .method(Operator.EQUALS.getMethodName(), list(ObjectValues.OBJECT),
+        .method("equals", list(ObjectValues.OBJECT),
             (environment, arguments) -> {
                 InterpreterValue right = arguments.getPositionalArguments().get(0);
                 if (right.getType().getName().equals(ObjectValues.BOXED_INT)) {

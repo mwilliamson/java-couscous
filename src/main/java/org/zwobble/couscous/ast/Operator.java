@@ -1,39 +1,33 @@
 package org.zwobble.couscous.ast;
 
 public enum Operator {
-    BOOLEAN_AND("&&", "and", true),
-    BOOLEAN_OR("||", "or", true),
-    BOOLEAN_NOT("!", "negate", true),
+    BOOLEAN_AND("&&", true),
+    BOOLEAN_OR("||", true),
+    BOOLEAN_NOT("!", true),
 
-    ADD("+", "add", false),
-    SUBTRACT("-", "subtract", false),
-    MULTIPLY("*", "multiply", false),
-    DIVIDE("/", "divide", false),
-    MOD("%", "mod", false),
+    ADD("+", false),
+    SUBTRACT("-", false),
+    MULTIPLY("*", false),
+    DIVIDE("/", false),
+    MOD("%", false),
 
-    EQUALS("==", "equals", true),
-    NOT_EQUALS("!=", "notEquals", true),
-    GREATER_THAN(">", "greaterThan", true),
-    GREATER_THAN_OR_EQUAL(">=", "greaterThanOrEqual", true),
-    LESS_THAN("<", "lessThan", true),
-    LESS_THAN_OR_EQUAL("<=", "lessThanOrEqual", true);
+    EQUALS("==", true),
+    NOT_EQUALS("!=", true),
+    GREATER_THAN(">", true),
+    GREATER_THAN_OR_EQUAL(">=", true),
+    LESS_THAN("<", true),
+    LESS_THAN_OR_EQUAL("<=", true);
 
     private final String symbol;
-    private final String methodName;
     private final boolean isBoolean;
 
-    Operator(String symbol, String methodName, boolean isBoolean) {
+    Operator(String symbol, boolean isBoolean) {
         this.symbol = symbol;
-        this.methodName = methodName;
         this.isBoolean = isBoolean;
     }
 
     public String getSymbol() {
         return symbol;
-    }
-
-    public String getMethodName() {
-        return methodName;
     }
 
     public boolean isBoolean() {

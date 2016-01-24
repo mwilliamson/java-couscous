@@ -23,7 +23,7 @@ public class OperationNode implements ExpressionNode {
     public ExpressionNode desugar() {
         return MethodCallNode.methodCall(
             arguments.get(0),
-            operator.getMethodName(),
+            operator.getSymbol(),
             arguments.subList(1, arguments.size()),
             type);
     }

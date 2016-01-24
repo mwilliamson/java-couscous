@@ -1,5 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
+import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.values.*;
 
@@ -18,7 +19,7 @@ public final class StringInterpreterValue implements InterpreterValue {
             return of(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
         })
 
-        .method("add", list(StringValue.REF), (environment, arguments) -> {
+        .method(Operator.ADD.getSymbol(), list(StringValue.REF), (environment, arguments) -> {
             StringInterpreterValue right = (StringInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().value + right.value);
         })

@@ -20,15 +20,15 @@ public final class BooleanInterpreterValue implements InterpreterValue {
 
     private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
         
-        .method("negate", list(), (environment, arguments) ->
+        .method(Operator.BOOLEAN_NOT.getSymbol(), list(), (environment, arguments) ->
             of(!arguments.getReceiver().getValue()))
 
-        .method(Operator.BOOLEAN_AND.getMethodName(), list(BooleanValue.REF), (environment, arguments) -> {
+        .method(Operator.BOOLEAN_AND.getSymbol(), list(BooleanValue.REF), (environment, arguments) -> {
             BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().getValue() && right.getValue());
         })
 
-        .method(Operator.BOOLEAN_OR.getMethodName(), list(BooleanValue.REF), (environment, arguments) -> {
+        .method(Operator.BOOLEAN_OR.getSymbol(), list(BooleanValue.REF), (environment, arguments) -> {
             BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().getValue() || right.getValue());
         })

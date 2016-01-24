@@ -33,7 +33,7 @@ public class PrimitiveMethods {
             .put("substring", (receiver, arguments) ->
                 pythonGetSlice(receiver, arguments))
 
-            .put("add", (receiver, arguments) ->
+            .put(Operator.ADD.getSymbol(), (receiver, arguments) ->
                 PythonBinaryOperation.pythonAdd(receiver, arguments.get(0)))
 
             .put("toLowerCase", (receiver, arguments) ->
@@ -49,7 +49,7 @@ public class PrimitiveMethods {
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
 
-        methods.put("negate", (receiver, arguments) ->
+        methods.put(Operator.BOOLEAN_NOT.getSymbol(), (receiver, arguments) ->
             PythonNotNode.pythonNot(receiver));
 
         addOperation(methods, Operator.BOOLEAN_AND, PythonBinaryOperation::pythonAnd);
@@ -70,11 +70,11 @@ public class PrimitiveMethods {
         addOperation(methods, Operator.SUBTRACT, PythonBinaryOperation::pythonSubtract);
         addOperation(methods, Operator.MULTIPLY, PythonBinaryOperation::pythonMultiply);
 
-        methods.put(Operator.DIVIDE.getMethodName(), (receiver, arguments) ->
+        methods.put(Operator.DIVIDE.getSymbol(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_div_round_to_zero"),
                 list(receiver, arguments.get(0))));
-        methods.put(Operator.MOD.getMethodName(), (receiver, arguments) ->
+        methods.put(Operator.MOD.getSymbol(), (receiver, arguments) ->
             pythonCall(
                 internalReference("_mod_round_to_zero"),
                 list(receiver, arguments.get(0))));
@@ -98,7 +98,7 @@ public class PrimitiveMethods {
         Operator operator,
         BiFunction<PythonExpressionNode, PythonExpressionNode, PythonExpressionNode> build)
     {
-        addOperation(methods, operator.getMethodName(), build);
+        addOperation(methods, operator.getSymbol(), build);
     }
     
     private static void addOperation(
