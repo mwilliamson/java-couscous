@@ -1,10 +1,10 @@
 package org.zwobble.couscous.ast;
 
-import java.util.function.Function;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public interface Receiver extends Node {
-    Receiver replaceExpressions(Function<ExpressionNode, ExpressionNode> replace);
     <T> T accept(Mapper<T> mapper);
+    Receiver transform(NodeTransformer transformer);
 
     interface Mapper<T> {
         T visit(ExpressionNode receiver);

@@ -3,8 +3,6 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
-import java.util.function.Function;
-
 public class InstanceReceiver implements Receiver {
     public static Receiver instanceReceiver(ExpressionNode expression) {
         return new InstanceReceiver(expression);
@@ -21,15 +19,11 @@ public class InstanceReceiver implements Receiver {
     }
 
     @Override
-    public Receiver replaceExpressions(Function<ExpressionNode, ExpressionNode> replace) {
-        return new InstanceReceiver(replace.apply(expression));
-    }
-
-    @Override
     public <T> T accept(Mapper<T> visitor) {
         return visitor.visit(expression);
     }
 
+    @Override
     public Receiver transform(NodeTransformer transformer) {
         return new InstanceReceiver(transformer.transformExpression(expression));
     }

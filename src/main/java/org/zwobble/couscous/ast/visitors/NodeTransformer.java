@@ -191,17 +191,7 @@ public class NodeTransformer {
     }
 
     public Receiver transformReceiver(Receiver receiver) {
-        return receiver.accept(new Receiver.Mapper<Receiver>() {
-            @Override
-            public Receiver visit(ExpressionNode receiver) {
-                return new InstanceReceiver(receiver.transform(NodeTransformer.this));
-            }
-
-            @Override
-            public Receiver visit(TypeName receiver) {
-                return new StaticReceiver(transform(receiver));
-            }
-        });
+        return receiver.transform(this);
     }
 
     public VariableDeclaration transform(VariableDeclaration declaration) {
