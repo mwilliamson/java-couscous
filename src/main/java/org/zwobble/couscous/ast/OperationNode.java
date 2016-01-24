@@ -28,6 +28,10 @@ public class OperationNode implements ExpressionNode {
             type);
     }
 
+    public Operator getOperator() {
+        return operator;
+    }
+
     public List<ExpressionNode> getArguments() {
         return arguments;
     }

@@ -5,9 +5,6 @@ import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.InternalCouscousValue;
 import org.zwobble.couscous.values.ObjectValues;
 
-import java.util.Collections;
-
-import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -19,7 +16,9 @@ public class Operations {
 
     public static ExpressionNode not(ExpressionNode value) {
         if (value.getType().equals(BooleanValue.REF)) {
-            return methodCall(value, "negate", Collections.emptyList(), BooleanValue.REF);
+            return OperationNode.operation(
+                Operator.BOOLEAN_NOT, list(value),
+                BooleanValue.REF);
         } else {
             throw new IllegalArgumentException("Can only negate booleans");
         }

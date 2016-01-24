@@ -12,11 +12,6 @@ import java.util.List;
 public class CsharpCompilerEvalTests extends BackendEvalTests {
     @Test
     @Ignore
-    public void canEvaluateOperationsOnBooleans() {
-    }
-
-    @Test
-    @Ignore
     public void canEvaluateOperationsOnIntegers() {
     }
 

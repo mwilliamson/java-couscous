@@ -121,7 +121,9 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(OperationNode operation) {
-        write(operation.desugar());
+        // TODO: distinguish operator types (prefix, infix)
+        writer.writeSymbol(operation.getOperator().getSymbol());
+        write(operation.getArguments().get(0));
     }
 
     private void writeArguments(List<? extends ExpressionNode> arguments) {

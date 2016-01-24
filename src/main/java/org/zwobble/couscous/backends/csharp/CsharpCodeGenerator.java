@@ -50,7 +50,8 @@ public class CsharpCodeGenerator extends NodeTransformer {
         return call.getReceiver().accept(new Receiver.Mapper<Optional<ExpressionNode>>() {
             @Override
             public Optional<ExpressionNode> visit(ExpressionNode receiver) {
-                return Optional.empty();
+                return CsharpPrimitiveMethods.getPrimitiveMethod(receiver.getType(), call.getMethodName())
+                    .map(generator -> generator.generate(receiver, call.getArguments()));
             }
 
             @Override

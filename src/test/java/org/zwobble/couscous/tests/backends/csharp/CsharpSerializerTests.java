@@ -15,6 +15,7 @@ import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -120,6 +121,13 @@ public class CsharpSerializerTests {
             TypeName.of("X"),
             list(literal(1), literal(2))));
         assertEquals("new Couscous.X(1, 2)", output);
+    }
+
+    @Test
+    public void prefixExpression() {
+        String output = serialize(not(
+            reference(var(TestIds.ANY_ID, "x", BooleanValue.REF))));
+        assertEquals("!x", output);
     }
 
     @Test
