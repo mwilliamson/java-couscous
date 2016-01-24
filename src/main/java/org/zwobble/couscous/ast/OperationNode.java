@@ -40,7 +40,10 @@ public class OperationNode implements ExpressionNode {
 
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
-        return desugar().transform(transformer);
+        return new OperationNode(
+            operator,
+            transformer.transformExpressions(arguments),
+            transformer.transform(type));
     }
 
     @Override
