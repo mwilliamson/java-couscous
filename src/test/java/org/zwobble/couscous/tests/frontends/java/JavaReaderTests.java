@@ -470,7 +470,7 @@ public class JavaReaderTests {
         assertEquals(
             assign(
                 reference(argument),
-                integerOperation(operator.getMethodName(), reference(argument), literal(2))),
+                integerOperation(operator, reference(argument), literal(2))),
             statement.getExpression());
     }
 

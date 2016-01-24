@@ -55,6 +55,7 @@ public class ValueObjectTests {
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
             {MethodNode.class},
+            {OperationNode.class},
             {ReturnNode.class},
             {StaticReceiver.class},
             {TernaryConditionalNode.class},
@@ -135,6 +136,8 @@ public class ValueObjectTests {
             return list("[list 1]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 1]");
+        } else if (type.equals(Operator.class)) {
+            return Operator.DIVIDE;
         } else if (type.equals(Identifier.class)) {
             return TestIds.id((String)generateFirstInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
@@ -159,6 +162,8 @@ public class ValueObjectTests {
             return list("[list 2]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set 2]");
+        } else if (type.equals(Operator.class)) {
+            return Operator.MULTIPLY;
         } else if (type.equals(Identifier.class)) {
             return TestIds.id((String)generateSecondInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
@@ -183,6 +188,8 @@ public class ValueObjectTests {
             return list("[list]");
         } else if (type.equals(Set.class)) {
             return Collections.singleton("[set]");
+        } else if (type.equals(Operator.class)) {
+            return Operator.ADD;
         } else if (type.equals(Identifier.class)) {
             return TestIds.id((String)generateInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {

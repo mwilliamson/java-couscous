@@ -26,63 +26,63 @@ public class Operations {
     }
 
     public static ExpressionNode booleanAnd(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.BOOLEAN_AND.getMethodName(), left, right);
+        return booleanOperation(Operator.BOOLEAN_AND, left, right);
     }
 
     public static ExpressionNode booleanOr(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.BOOLEAN_OR.getMethodName(), left, right);
+        return booleanOperation(Operator.BOOLEAN_OR, left, right);
     }
 
     public static ExpressionNode integerAdd(ExpressionNode left, ExpressionNode right) {
-        return integerOperation(Operator.ADD.getMethodName(), left, right);
+        return integerOperation(Operator.ADD, left, right);
     }
 
     public static ExpressionNode integerSubtract(ExpressionNode left, ExpressionNode right) {
-        return integerOperation(Operator.SUBTRACT.getMethodName(), left, right);
+        return integerOperation(Operator.SUBTRACT, left, right);
     }
 
     public static ExpressionNode integerMultiply(ExpressionNode left, ExpressionNode right) {
-        return integerOperation(Operator.MULTIPLY.getMethodName(), left, right);
+        return integerOperation(Operator.MULTIPLY, left, right);
     }
 
     public static ExpressionNode integerDivide(ExpressionNode left, ExpressionNode right) {
-        return integerOperation(Operator.DIVIDE.getMethodName(), left, right);
+        return integerOperation(Operator.DIVIDE, left, right);
     }
 
     public static ExpressionNode integerMod(ExpressionNode left, ExpressionNode right) {
-        return integerOperation(Operator.MOD.getMethodName(), left, right);
+        return integerOperation(Operator.MOD, left, right);
     }
 
-    public static MethodCallNode integerOperation(String methodName, ExpressionNode left, ExpressionNode right) {
-        return methodCall(left, methodName, list(right), IntegerValue.REF);
+    public static ExpressionNode integerOperation(Operator operator, ExpressionNode left, ExpressionNode right) {
+        return new OperationNode(operator, list(left, right), IntegerValue.REF);
     }
 
     public static ExpressionNode equal(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.EQUALS.getMethodName(), left, right);
+        return booleanOperation(Operator.EQUALS, left, right);
     }
 
     public static ExpressionNode notEqual(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.NOT_EQUALS.getMethodName(), left, right);
+        return booleanOperation(Operator.NOT_EQUALS, left, right);
     }
 
     public static ExpressionNode greaterThan(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.GREATER_THAN.getMethodName(), left, right);
+        return booleanOperation(Operator.GREATER_THAN, left, right);
     }
 
     public static ExpressionNode greaterThanOrEqual(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.GREATER_THAN_OR_EQUAL.getMethodName(), left, right);
+        return booleanOperation(Operator.GREATER_THAN_OR_EQUAL, left, right);
     }
 
     public static ExpressionNode lessThan(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.LESS_THAN.getMethodName(), left, right);
+        return booleanOperation(Operator.LESS_THAN, left, right);
     }
 
     public static ExpressionNode lessThanOrEqual(ExpressionNode left, ExpressionNode right) {
-        return booleanOperation(Operator.LESS_THAN_OR_EQUAL.getMethodName(), left, right);
+        return booleanOperation(Operator.LESS_THAN_OR_EQUAL, left, right);
     }
 
-    private static ExpressionNode booleanOperation(String methodName, ExpressionNode left, ExpressionNode right) {
-        return methodCall(left, methodName, list(right), BooleanValue.REF);
+    private static ExpressionNode booleanOperation(Operator operator, ExpressionNode left, ExpressionNode right) {
+        return new OperationNode(operator, list(left, right), BooleanValue.REF);
     }
 
     public static ExpressionNode boxInt(ExpressionNode value) {

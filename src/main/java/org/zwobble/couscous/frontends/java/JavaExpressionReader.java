@@ -14,6 +14,7 @@ import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
@@ -270,10 +271,11 @@ public class JavaExpressionReader {
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
                 (AssignableExpressionNode) readExpressionWithoutBoxing(expression.getOperand()),
-                MethodCallNode.methodCall(
-                    readExpression(IntegerValue.REF, expression.getOperand()),
-                    operator.getMethodName(),
-                    list(literal(1)),
+                operation(
+                    operator,
+                    list(
+                        readExpression(IntegerValue.REF, expression.getOperand()),
+                        literal(1)),
                     IntegerValue.REF));
         }
     }
@@ -304,10 +306,9 @@ public class JavaExpressionReader {
     private ExpressionNode readPrimitiveOperation(Operator operator, Expression leftJava, Expression rightJava) {
         ExpressionNode left = readUnboxedExpression(leftJava);
         ExpressionNode right = readUnboxedExpression(rightJava);
-        return MethodCallNode.methodCall(
-            left,
-            operator.getMethodName(),
-            list(right),
+        return operation(
+            operator,
+            list(left, right),
             operator.isBoolean() ? BooleanValue.REF : left.getType());
     }
 
