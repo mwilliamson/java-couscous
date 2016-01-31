@@ -48,7 +48,7 @@ public class CsharpSerializerTests {
     @Test
     public void typeLiteralUsesTypeOfOperator() {
         String output = serialize(literal(TypeName.of("com.example.Example")));
-        assertEquals("typeof(Couscous.com.example.Example)", output);
+        assertEquals("typeof(com.example.Example)", output);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class CsharpSerializerTests {
             "y",
             list(),
             TypeName.of("Y")));
-        assertEquals("Couscous.X.y()", output);
+        assertEquals("X.y()", output);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class CsharpSerializerTests {
         String output = serialize(constructorCall(
             TypeName.of("X"),
             list()));
-        assertEquals("new Couscous.X()", output);
+        assertEquals("new X()", output);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class CsharpSerializerTests {
         String output = serialize(constructorCall(
             TypeName.of("X"),
             list(literal(1), literal(2))));
-        assertEquals("new Couscous.X(1, 2)", output);
+        assertEquals("new X(1, 2)", output);
     }
 
     @Test
@@ -159,13 +159,17 @@ public class CsharpSerializerTests {
 
     @Test
     public void methodCanHaveVoidReturnType() {
-        String output = serialize(MethodNode.staticMethod("nothing").build());
+        String output = serialize(MethodNode.staticMethod("nothing")
+            .returns(TypeName.of("void"))
+            .build());
         assertEquals("internal static void nothing() {\n}\n", output);
     }
 
     @Test
     public void instanceMethodHasNoStaticKeword() {
-        String output = serialize(MethodNode.builder("nothing").build());
+        String output = serialize(MethodNode.builder("nothing")
+            .returns(TypeName.of("void"))
+            .build());
         assertEquals("internal void nothing() {\n}\n", output);
     }
 
@@ -177,7 +181,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static Couscous.X nothing() {\n}\n", output);
+        assertEquals("internal static X nothing() {\n}\n", output);
     }
 
     @Test
@@ -185,16 +189,18 @@ public class CsharpSerializerTests {
         MethodNode methodNode = MethodNode.staticMethod("nothing")
             .argument(formalArg(var(TestIds.id("x"), "x", TypeName.of("X"))))
             .argument(formalArg(var(TestIds.id("y"), "y", TypeName.of("Y"))))
+            .returns(TypeName.of("void"))
             .build();
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static void nothing(Couscous.X x, Couscous.Y y) {\n}\n", output);
+        assertEquals("internal static void nothing(X x, Y y) {\n}\n", output);
     }
 
     @Test
     public void methodHasSerializedBody() {
         MethodNode method = MethodNode.staticMethod("nothing")
+            .returns(TypeName.of("void"))
             .statement(returns(literal(true)))
             .build();
         String output = serialize(method);
@@ -208,7 +214,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(classNode);
 
-        assertEquals("namespace Couscous.com.example {\n    internal class Example {\n    }\n}\n", output);
+        assertEquals("namespace com.example {\n    internal class Example {\n    }\n}\n", output);
     }
 
     @Test
@@ -223,7 +229,7 @@ public class CsharpSerializerTests {
         String output = serialize(classNode);
 
         assertEquals(
-            "namespace Couscous.com.example {\n    internal class Example {\n        internal Example(Couscous.X x) {\n            true;\n        }\n    }\n}\n", output);
+            "namespace com.example {\n    internal class Example {\n        internal Example(X x) {\n            true;\n        }\n    }\n}\n", output);
     }
 
     @Test
@@ -234,10 +240,10 @@ public class CsharpSerializerTests {
 
         String output = serialize(classNode);
 
-        assertEquals("namespace Couscous.com.example {\n    internal class Example {\n        internal Couscous.X x;\n    }\n}\n", output);
+        assertEquals("namespace com.example {\n    internal class Example {\n        internal X x;\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {
-        return CsharpSerializer.serialize(node, "Couscous");
+        return CsharpSerializer.serialize(node);
     }
 }

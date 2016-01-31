@@ -49,6 +49,6 @@ public class CsharpBackend implements Backend {
     }
 
     private String compileClass(ClassNode classNode) {
-        return CsharpSerializer.serialize(classNode, namespace);
+        return CsharpSerializer.serialize(CsharpCodeGenerator.generateCode(classNode, namespace));
     }
 }

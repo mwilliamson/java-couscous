@@ -8,7 +8,7 @@ import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import java.util.List;
 
 public class CsharpSerializer implements NodeVisitor {
-    public static String serialize(Node node, String namespace) {
+    public static String serialize(Node node) {
         SourceCodeWriter writer = new SourceCodeWriter(
             (writer2) -> {
                 writer2.writeSpace();
@@ -20,7 +20,8 @@ public class CsharpSerializer implements NodeVisitor {
         );
         CsharpSerializer serializer = new CsharpSerializer(writer);
 
-        serializer.write(CsharpCodeGenerator.generateCode(node, namespace));
+        serializer.write(node);
+        System.out.println(writer.asString());
         return writer.asString();
     }
 
