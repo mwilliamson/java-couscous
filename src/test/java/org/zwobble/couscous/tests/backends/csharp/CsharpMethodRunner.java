@@ -5,13 +5,16 @@ import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
+import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.util.ExtraLists;
+import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
@@ -22,6 +25,7 @@ import java.util.List;
 
 import static java.lang.Integer.parseInt;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -57,10 +61,17 @@ public class CsharpMethodRunner implements MethodRunner {
         String csharpMethodName = PythonCodeGenerator.toName(new MethodSignature(
             methodName,
             eagerMap(arguments, argument -> argument.getType())));
+        String value = CsharpSerializer.serialize(
+            staticMethodCall(
+                TypeName.of(NAMESPACE + "." + className.getQualifiedName()),
+                csharpMethodName,
+                eagerMap(arguments, LiteralNode::literal),
+                // TODO: pass in return type
+                ObjectValues.OBJECT));
         String program =
             "public class MethodRunnerExample { " +
             "   public static void Main() { " +
-            "       var value = " + NAMESPACE + "." + className.getQualifiedName() + "." + csharpMethodName + "();" +
+            "       var value = " + value + ";" +
             "       System.Console.WriteLine(value.GetType());" +
             "       System.Console.WriteLine(value);" +
             "   }" +

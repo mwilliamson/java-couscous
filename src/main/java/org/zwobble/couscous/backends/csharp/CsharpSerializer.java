@@ -21,7 +21,6 @@ public class CsharpSerializer implements NodeVisitor {
         CsharpSerializer serializer = new CsharpSerializer(writer);
 
         serializer.write(node);
-        System.out.println(writer.asString());
         return writer.asString();
     }
 

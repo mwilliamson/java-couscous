@@ -1,11 +1,7 @@
 package org.zwobble.couscous.tests;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.LocalVariableDeclarationNode;
-import org.zwobble.couscous.ast.MethodNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
@@ -42,6 +38,7 @@ public abstract class BackendMethodTests {
     @Test
     public void canReturnLiteralValue() {
         MethodNode.Builder method = staticMethod("hello")
+            .returns(StringValue.REF)
             .statement(returns(literal("hello, world!")));
         final java.lang.Object result = runMethod(method);
         assertEquals(value("hello, world!"), result);
@@ -52,6 +49,7 @@ public abstract class BackendMethodTests {
         FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
+            .returns(StringValue.REF)
             .statement(returns(reference(arg)));
         final java.lang.Object result = runMethod(method, value("hello, world!"));
         assertEquals(value("hello, world!"), result);
@@ -62,6 +60,7 @@ public abstract class BackendMethodTests {
         FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
         MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
+            .returns(StringValue.REF)
             .statement(expressionStatement(assign(
                 reference(arg),
                 literal("[updated value]"))))
@@ -74,6 +73,7 @@ public abstract class BackendMethodTests {
     public void canDeclareVariable() {
         LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         MethodNode.Builder method = staticMethod("hello")
+            .returns(StringValue.REF)
             .statement(localVariableDeclaration)
             .statement(returns(reference(localVariableDeclaration)));
         final java.lang.Object result = runMethod(method);

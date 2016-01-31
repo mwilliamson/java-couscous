@@ -150,6 +150,7 @@ public class NodeTransformer {
     public static class Builder {
         private Function<ExpressionNode, Optional<ExpressionNode>> transformExpression = expression -> Optional.empty();
         private Function<TypeName, TypeName> transformType = type -> type;
+        private Function<MethodSignature, String> transformMethodName = MethodSignature::getName;
 
         public Builder transformExpression(
             Function<ExpressionNode, Optional<ExpressionNode>> transformExpression)
@@ -165,24 +166,36 @@ public class NodeTransformer {
             return this;
         }
 
+        public Builder transformMethodName(Function<MethodSignature, String> transformMethodName) {
+            this.transformMethodName = transformMethodName;
+            return this;
+        }
+
         public NodeTransformer build() {
-            return new NodeTransformer(transformExpression, transformType);
+            return new NodeTransformer(transformExpression, transformType, transformMethodName);
         }
     }
 
     private final Function<ExpressionNode, Optional<ExpressionNode>> transformExpression;
     private final Function<TypeName, TypeName> transformType;
+    private final Function<MethodSignature, String> transformMethodName;
 
     private NodeTransformer(
         Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
-        Function<TypeName, TypeName> transformType)
+        Function<TypeName, TypeName> transformType,
+        Function<MethodSignature, String> transformMethodName)
     {
         this.transformExpression = transformExpression;
         this.transformType = transformType;
+        this.transformMethodName = transformMethodName;
     }
 
     public TypeName transform(TypeName type) {
         return transformType.apply(type);
+    }
+
+    public String transformMethodName(MethodSignature signature) {
+        return transformMethodName.apply(signature);
     }
 
     public ExpressionNode transformExpression(ExpressionNode expression) {

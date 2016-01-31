@@ -156,7 +156,7 @@ public class MethodNode implements CallableNode {
         return new MethodNode(
             transformer.transformAnnotations(annotations),
             isStatic,
-            name,
+            transformer.transformMethodName(signature()),
             transformer.transformFormalArguments(arguments),
             transformer.transform(returnType),
             transformer.transformStatements(body));
