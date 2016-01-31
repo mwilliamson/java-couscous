@@ -121,9 +121,21 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(OperationNode operation) {
-        // TODO: distinguish operator types (prefix, infix)
-        writer.writeSymbol(operation.getOperator().getSymbol());
-        write(operation.getArguments().get(0));
+        switch (operation.getOperatorType()) {
+            case PREFIX:
+                writer.writeSymbol(operation.getOperator().getSymbol());
+                write(operation.getArguments().get(0));
+                return;
+            case INFIX:
+                write(operation.getArguments().get(0));
+                writer.writeSpace();
+                writer.writeSymbol(operation.getOperator().getSymbol());
+                writer.writeSpace();
+                write(operation.getArguments().get(1));
+                return;
+            default:
+                throw new RuntimeException("Unhandled operator type: " + operation.getOperatorType());
+        }
     }
 
     private void writeArguments(List<? extends ExpressionNode> arguments) {

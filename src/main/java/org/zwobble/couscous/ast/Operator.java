@@ -1,29 +1,31 @@
 package org.zwobble.couscous.ast;
 
 public enum Operator {
-    BOOLEAN_AND("&&", true),
-    BOOLEAN_OR("||", true),
-    BOOLEAN_NOT("!", true),
+    BOOLEAN_AND("&&", true, OperatorType.INFIX),
+    BOOLEAN_OR("||", true, OperatorType.INFIX),
+    BOOLEAN_NOT("!", true, OperatorType.PREFIX),
 
-    ADD("+", false),
-    SUBTRACT("-", false),
-    MULTIPLY("*", false),
-    DIVIDE("/", false),
-    MOD("%", false),
+    ADD("+", false, OperatorType.INFIX),
+    SUBTRACT("-", false, OperatorType.INFIX),
+    MULTIPLY("*", false, OperatorType.INFIX),
+    DIVIDE("/", false, OperatorType.INFIX),
+    MOD("%", false, OperatorType.INFIX),
 
-    EQUALS("==", true),
-    NOT_EQUALS("!=", true),
-    GREATER_THAN(">", true),
-    GREATER_THAN_OR_EQUAL(">=", true),
-    LESS_THAN("<", true),
-    LESS_THAN_OR_EQUAL("<=", true);
+    EQUALS("==", true, OperatorType.INFIX),
+    NOT_EQUALS("!=", true, OperatorType.INFIX),
+    GREATER_THAN(">", true, OperatorType.INFIX),
+    GREATER_THAN_OR_EQUAL(">=", true, OperatorType.INFIX),
+    LESS_THAN("<", true, OperatorType.INFIX),
+    LESS_THAN_OR_EQUAL("<=", true, OperatorType.INFIX);
 
     private final String symbol;
     private final boolean isBoolean;
+    private final OperatorType type;
 
-    Operator(String symbol, boolean isBoolean) {
+    Operator(String symbol, boolean isBoolean, OperatorType type) {
         this.symbol = symbol;
         this.isBoolean = isBoolean;
+        this.type = type;
     }
 
     public String getSymbol() {
@@ -32,5 +34,9 @@ public enum Operator {
 
     public boolean isBoolean() {
         return isBoolean;
+    }
+
+    public OperatorType getType() {
+        return type;
     }
 }

@@ -131,6 +131,12 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void infixOperation() {
+        String output = serialize(Operations.integerAdd(literal(1), literal(2)));
+        assertEquals("1 + 2", output);
+    }
+
+    @Test
     public void fieldAccessSeparatesReceiverAndNameWithDot() {
         String output = serialize(fieldAccess(
             reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),

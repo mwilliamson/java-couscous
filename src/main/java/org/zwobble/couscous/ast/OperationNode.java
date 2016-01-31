@@ -32,6 +32,10 @@ public class OperationNode implements ExpressionNode {
         return operator;
     }
 
+    public OperatorType getOperatorType() {
+        return operator.getType();
+    }
+
     public List<ExpressionNode> getArguments() {
         return arguments;
     }
