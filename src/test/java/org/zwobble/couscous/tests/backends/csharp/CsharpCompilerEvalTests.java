@@ -12,11 +12,6 @@ import java.util.List;
 public class CsharpCompilerEvalTests extends BackendEvalTests {
     @Test
     @Ignore
-    public void canCallMethodWithArgumentsOnBuiltin() {
-    }
-
-    @Test
-    @Ignore
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
     }
 

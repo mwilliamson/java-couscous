@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.Operations.integerSubtract;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpPrimitiveMethods {
@@ -29,6 +31,17 @@ public class CsharpPrimitiveMethods {
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
         methods.put("length", (receiver, arguments) -> fieldAccess(receiver, "Length", IntegerValue.REF));
+        methods.put("substring", (receiver, arguments) -> {
+            ExpressionNode startIndex = arguments.get(0);
+            ExpressionNode endIndex = arguments.get(1);
+            ExpressionNode length = integerSubtract(endIndex, startIndex);
+            // TODO: handle length going beyond end-of-string
+            return methodCall(
+                receiver,
+                "Substring",
+                list(startIndex, length),
+                StringValue.REF);
+        });
         STRING_METHODS = methods.build();
     }
 
