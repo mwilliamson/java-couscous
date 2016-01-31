@@ -3,14 +3,16 @@ package org.zwobble.couscous.backends.csharp;
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
+import org.zwobble.couscous.values.StringValue;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -22,9 +24,18 @@ public class CsharpPrimitiveMethods {
         BOOLEAN_METHODS = methods.build();
     }
 
+    private static final Map<String, PrimitiveMethodGenerator> STRING_METHODS;
+
+    static {
+        ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
+        methods.put("length", (receiver, arguments) -> fieldAccess(receiver, "Length", IntegerValue.REF));
+        STRING_METHODS = methods.build();
+    }
+
     private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS =
         ImmutableMap.<TypeName, Map<String, PrimitiveMethodGenerator>>builder()
             .put(BooleanValue.REF, BOOLEAN_METHODS)
+            .put(StringValue.REF, STRING_METHODS)
             .build();
 
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INT_METHODS =
