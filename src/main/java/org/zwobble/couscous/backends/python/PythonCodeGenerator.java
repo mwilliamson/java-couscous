@@ -263,13 +263,13 @@ public class PythonCodeGenerator {
             return methodCall.getReceiver().accept(new Receiver.Mapper<Optional<PythonExpressionNode>>() {
                 @Override
                 public Optional<PythonExpressionNode> visit(ExpressionNode receiver) {
-                    return PrimitiveMethods.getPrimitiveMethod(receiver.getType(), methodCall.getMethodName())
+                    return PythonPrimitiveMethods.getPrimitiveMethod(receiver.getType(), methodCall.getMethodName())
                         .map(generator -> generator.generate(pythonReceiver, pythonArguments));
                 }
 
                 @Override
                 public Optional<PythonExpressionNode> visit(TypeName receiver) {
-                    return PrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
+                    return PythonPrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
                         .map(generator -> generator.generate(pythonArguments));
                 }
             });

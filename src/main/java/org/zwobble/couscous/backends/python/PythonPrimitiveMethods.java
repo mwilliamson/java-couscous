@@ -21,7 +21,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonGetSliceNode.python
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
-public class PrimitiveMethods {
+public class PythonPrimitiveMethods {
     private static final Map<String, PrimitiveMethodGenerator> STRING_METHODS =
         ImmutableMap.<String, PrimitiveMethodGenerator>builder()
         
