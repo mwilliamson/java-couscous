@@ -23,16 +23,6 @@ public class CsharpCompilerMethodTests extends BackendMethodTests {
 
     @Ignore
     @Test
-    public void whenConditionIsTrueIfStatementExecutesTrueBranch() {
-    }
-
-    @Ignore
-    @Test
-    public void whenConditionIsFalseIfStatementExecutesTrueBranch() {
-    }
-
-    @Ignore
-    @Test
     public void whileLoopIsExecutedWhileConditionIsTrue() {
     }
 

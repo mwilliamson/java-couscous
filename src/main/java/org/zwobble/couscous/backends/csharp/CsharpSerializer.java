@@ -15,7 +15,8 @@ public class CsharpSerializer implements NodeVisitor {
                 writer2.writeSymbol("{");
             },
             (writer2) -> {
-                writer2.writeStatement(() -> writer2.writeSymbol("}"));
+                writer2.writeIndentation();
+                writer2.writeSymbol("}");
             }
         );
         CsharpSerializer serializer = new CsharpSerializer(writer);
@@ -196,7 +197,24 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(IfStatementNode ifStatement) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("if");
+            writer.writeSpace();
+            writer.writeSymbol("(");
+            write(ifStatement.getCondition());
+            writer.writeSymbol(")");
+
+            writer.startBlock();
+            writeAll(ifStatement.getTrueBranch());
+            writer.endBlock();
+
+            writer.writeSpace();
+            writer.writeKeyword("else");
+
+            writer.startBlock();
+            writeAll(ifStatement.getFalseBranch());
+            writer.endBlock();
+        });
     }
 
     @Override
@@ -263,24 +281,26 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ClassNode classNode) {
-        writer.writeKeyword("namespace");
-        writer.writeSpace();
-        writer.writeIdentifier(classNode.getName().getPackage().get());
-        writer.startBlock();
         writer.writeStatement(() -> {
-            writer.writeKeyword("internal");
+            writer.writeKeyword("namespace");
             writer.writeSpace();
-            writer.writeKeyword("class");
-            writer.writeSpace();
-            writer.writeIdentifier(classNode.getSimpleName());
+            writer.writeIdentifier(classNode.getName().getPackage().get());
             writer.startBlock();
-            writeAll(classNode.getFields());
-            writeConstructor(classNode, classNode.getConstructor());
-            writeAll(classNode.getMethods());
+            writer.writeStatement(() -> {
+                writer.writeKeyword("internal");
+                writer.writeSpace();
+                writer.writeKeyword("class");
+                writer.writeSpace();
+                writer.writeIdentifier(classNode.getSimpleName());
+                writer.startBlock();
+                writeAll(classNode.getFields());
+                writeConstructor(classNode, classNode.getConstructor());
+                writeAll(classNode.getMethods());
+                writer.endBlock();
+            });
+
             writer.endBlock();
         });
-
-        writer.endBlock();
     }
 
     private void writeConstructor(ClassNode classNode, ConstructorNode constructor) {

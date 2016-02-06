@@ -96,6 +96,7 @@ public abstract class BackendMethodTests {
     @Test
     public void whenConditionIsTrueIfStatementExecutesTrueBranch() {
         MethodNode.Builder method = staticMethod("hello")
+            .returns(StringValue.REF)
             .statement(ifStatement(
                 literal(true),
                 list(returns(literal("[true]"))),
@@ -106,6 +107,7 @@ public abstract class BackendMethodTests {
     @Test
     public void whenConditionIsFalseIfStatementExecutesTrueBranch() {
         MethodNode.Builder method = staticMethod("hello")
+            .returns(StringValue.REF)
             .statement(ifStatement(
                 literal(false),
                 list(returns(literal("[true]"))),

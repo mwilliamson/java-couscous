@@ -78,6 +78,10 @@ public class SourceCodeWriter {
     }
 
     private void startStatement() {
+        writeIndentation();
+    }
+
+    public void writeIndentation() {
         builder.append(Strings.repeat(" ", depth * SPACES_PER_INDENT));
     }
 

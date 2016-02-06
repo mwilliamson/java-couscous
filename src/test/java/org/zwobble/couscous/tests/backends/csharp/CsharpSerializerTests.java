@@ -12,6 +12,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
@@ -155,6 +156,15 @@ public class CsharpSerializerTests {
     public void expressionStatementWritesExpression() {
         String output = serialize(expressionStatement(literal(true)));
         assertEquals("true;\n", output);
+    }
+
+    @Test
+    public void ifElseStatementPrintsBothBranches() {
+        String output = serialize(ifStatement(
+            literal(true),
+            list(returns(literal(1))),
+            list(returns(literal(2)))));
+        assertEquals("if (true) {\n    return 1;\n} else {\n    return 2;\n}\n", output);
     }
 
     @Test
