@@ -11,16 +11,6 @@ public class CsharpCompilerMethodTests extends BackendMethodTests {
     public void methodWithNoStatementsReturnsUnit() {
     }
 
-    @Ignore
-    @Test
-    public void whileLoopIsExecutedWhileConditionIsTrue() {
-    }
-
-    @Ignore
-    @Test
-    public void returnWillExitWhileLoopEarly() {
-    }
-
     @Override
     protected MethodRunner buildMethodRunner() {
         return new CsharpMethodRunner();

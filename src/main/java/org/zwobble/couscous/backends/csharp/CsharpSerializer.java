@@ -228,7 +228,17 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(WhileNode whileLoop) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("while");
+            writer.writeSpace();
+            writer.writeSymbol("(");
+            write(whileLoop.getCondition());
+            writer.writeSymbol(")");
+
+            writer.startBlock();
+            writeAll(whileLoop.getBody());
+            writer.endBlock();
+        });
     }
 
     @Override

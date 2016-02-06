@@ -23,6 +23,7 @@ import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpSerializerTests {
@@ -176,6 +177,14 @@ public class CsharpSerializerTests {
             list(returns(literal(1))),
             list(returns(literal(2)))));
         assertEquals("if (true) {\n    return 1;\n} else {\n    return 2;\n}\n", output);
+    }
+
+    @Test
+    public void whileLoopPrintsConditionAndBody() {
+        String output = serialize(whileLoop(
+            literal(true),
+            list(returns(literal(1)))));
+        assertEquals("while (true) {\n    return 1;\n}\n", output);
     }
 
     @Test

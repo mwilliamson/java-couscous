@@ -121,6 +121,7 @@ public abstract class BackendMethodTests {
         LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
         LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
         MethodNode.Builder method = staticMethod("hello")
+            .returns(IntegerValue.REF)
             .statement(x)
             .statement(y)
             .statement(whileLoop(
@@ -135,6 +136,7 @@ public abstract class BackendMethodTests {
         LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
         LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
         MethodNode.Builder method = staticMethod("hello")
+            .returns(IntegerValue.REF)
             .statement(x)
             .statement(y)
             .statement(whileLoop(
