@@ -155,7 +155,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(TypeCoercionNode typeCoercion) {
-        throw new UnsupportedOperationException();
+        write(typeCoercion.getExpression());
     }
 
     @Override

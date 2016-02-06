@@ -53,7 +53,7 @@ public class CsharpMethodRunner implements MethodRunner {
         }
     }
 
-    private static PrimitiveValue runFunction(
+    public static PrimitiveValue runFunction(
         Path directoryPath,
         TypeName className,
         String methodName,
