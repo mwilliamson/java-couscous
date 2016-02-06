@@ -213,16 +213,12 @@ public class CsharpSerializer implements NodeVisitor {
             write(ifStatement.getCondition());
             writer.writeSymbol(")");
 
-            writer.startBlock();
-            writeAll(ifStatement.getTrueBranch());
-            writer.endBlock();
+            writeBlock(ifStatement.getTrueBranch());
 
             writer.writeSpace();
             writer.writeKeyword("else");
 
-            writer.startBlock();
-            writeAll(ifStatement.getFalseBranch());
-            writer.endBlock();
+            writeBlock(ifStatement.getFalseBranch());
         });
     }
 
@@ -235,9 +231,7 @@ public class CsharpSerializer implements NodeVisitor {
             write(whileLoop.getCondition());
             writer.writeSymbol(")");
 
-            writer.startBlock();
-            writeAll(whileLoop.getBody());
-            writer.endBlock();
+            writeBlock(whileLoop.getBody());
         });
     }
 
@@ -266,9 +260,7 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
             writeFormalArguments(method.getArguments());
-            writer.startBlock();
-            writeAll(method.getBody());
-            writer.endBlock();
+            writeBlock(method.getBody());
         });
     }
 
@@ -329,16 +321,20 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeSpace();
                 writer.writeIdentifier(classNode.getSimpleName());
                 writeFormalArguments(constructor.getArguments());
-                writer.startBlock();
-                writeAll(constructor.getBody());
-                writer.endBlock();
+                writeBlock(constructor.getBody());
             });
         }
     }
 
+    private void writeBlock(List<StatementNode> body) {
+        writer.startBlock();
+        writeAll(body);
+        writer.endBlock();
+    }
+
     private void writeAll(List<? extends Node> nodes) {
-        for (Node method : nodes) {
-            write(method);
+        for (Node node : nodes) {
+            write(node);
         }
     }
 
