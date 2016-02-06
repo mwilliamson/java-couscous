@@ -84,6 +84,7 @@ public abstract class BackendMethodTests {
     public void canDeclareVariableAndThenAssignValues() {
         LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
         MethodNode.Builder method = staticMethod("hello")
+            .returns(StringValue.REF)
             .statement(localVariableDeclaration)
             .statement(expressionStatement(assign(
                 reference(localVariableDeclaration),

@@ -13,11 +13,6 @@ public class CsharpCompilerMethodTests extends BackendMethodTests {
 
     @Ignore
     @Test
-    public void canDeclareVariableAndThenAssignValues() {
-    }
-
-    @Ignore
-    @Test
     public void whileLoopIsExecutedWhileConditionIsTrue() {
     }
 
