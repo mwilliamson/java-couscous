@@ -124,10 +124,18 @@ public class PythonPrimitiveMethods {
             .put("same", arguments -> pythonIs(arguments.get(0), arguments.get(1)))
             
             .build();
+
+    private static final Map<String, PrimitiveStaticMethodGenerator> BOXED_INT_STATIC_METHODS =
+        ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
+
+            .put("parseInt", arguments -> pythonCall(pythonVariableReference("int"), arguments))
+
+            .build();
     
     private static final Map<TypeName, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS = 
         ImmutableMap.<TypeName, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(InternalCouscousValue.REF, INTERNAL_METHODS)
+            .put(ObjectValues.BOXED_INT, BOXED_INT_STATIC_METHODS)
             .build();
 
     public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(TypeName type, String methodName) {

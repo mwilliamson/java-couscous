@@ -1,9 +1,5 @@
 class Integer(object):
     @staticmethod
-    def parseInt__java_lang_String__int(value):
-        return int(value)
-
-    @staticmethod
     def valueOf__int__java_lang_Integer(value):
         return value
     
