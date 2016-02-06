@@ -5,6 +5,7 @@ import org.hamcrest.Matchers;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonSerializer;
@@ -50,9 +51,10 @@ public class PythonMethodRunner implements MethodRunner {
             throws IOException, InterruptedException {
         
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
-        String pythonMethodName = PythonCodeGenerator.toName(new MethodSignature(
+        MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType())));
+            eagerMap(arguments, argument -> argument.getType()));
+        String pythonMethodName = Names.toUniqueName(signature);
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
             "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +
             "print(type(value)); print(value)";

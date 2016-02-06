@@ -1,6 +1,5 @@
 package org.zwobble.couscous.backends.python;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -10,6 +9,7 @@ import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.values.*;
 
@@ -161,7 +161,7 @@ public class PythonCodeGenerator {
             method.isStatic() ? Collections.<String>emptyList() : list("self"),
             explicitArgumentNames);
         List<PythonStatementNode> pythonBody = generateStatements(method.getBody());
-        return pythonFunctionDefinition(toName(method.signature()), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
+        return pythonFunctionDefinition(Names.toUniqueName(method.signature()), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
 
     private static List<PythonStatementNode> generateStatements(List<StatementNode> statements) {
@@ -252,7 +252,7 @@ public class PythonCodeGenerator {
             List<PythonExpressionNode> arguments = generateExpressions(methodCall.getArguments());
 
             return getPrimitiveMethod(methodCall, receiver, arguments)
-                .orElseGet(() -> pythonCall(pythonAttributeAccess(receiver, toName(methodCall.signature())), arguments));
+                .orElseGet(() -> pythonCall(pythonAttributeAccess(receiver, Names.toUniqueName(methodCall.signature())), arguments));
         }
 
         private Optional<PythonExpressionNode> getPrimitiveMethod(
@@ -345,11 +345,5 @@ public class PythonCodeGenerator {
 
     private static PythonVariableReferenceNode typeReference(TypeName className) {
         return pythonVariableReference(className.getSimpleName());
-    }
-
-    public static String toName(MethodSignature signature) {
-        return Joiner.on("__").join(Iterables.concat(
-            list(signature.getName()),
-            transform(signature.getArguments(), argument -> argument.getQualifiedName().replace('.', '_'))));
     }
 }

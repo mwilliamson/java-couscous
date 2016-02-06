@@ -3,7 +3,7 @@ package org.zwobble.couscous.backends.csharp;
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.backends.python.PythonCodeGenerator;
+import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.values.*;
 
 import java.util.Map;
@@ -49,7 +49,7 @@ public class CsharpCodeGenerator {
     }
 
     private String transformMethodName(MethodSignature signature) {
-        return PythonCodeGenerator.toName(signature);
+        return Names.toUniqueName(signature);
     }
 
     private Optional<ExpressionNode> transformExpression(ExpressionNode expression) {

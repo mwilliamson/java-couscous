@@ -9,9 +9,9 @@ import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
-import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.util.ExtraLists;
@@ -61,9 +61,10 @@ public class CsharpMethodRunner implements MethodRunner {
         boolean isVoid)
         throws IOException, InterruptedException
     {
-        String csharpMethodName = PythonCodeGenerator.toName(new MethodSignature(
+        MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType())));
+            eagerMap(arguments, argument -> argument.getType()));
+        String csharpMethodName = Names.toUniqueName(signature);
         String value = CsharpSerializer.serialize(
             staticMethodCall(
                 TypeName.of(NAMESPACE + "." + className.getQualifiedName()),
