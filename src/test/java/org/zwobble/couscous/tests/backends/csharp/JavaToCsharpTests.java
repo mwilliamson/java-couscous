@@ -55,11 +55,6 @@ public class JavaToCsharpTests extends CompilerTests {
 
     @Test
     @Ignore
-    public void stringToLowerCase() throws Exception {
-    }
-
-    @Test
-    @Ignore
     public void stringEquals() throws Exception {
     }
 

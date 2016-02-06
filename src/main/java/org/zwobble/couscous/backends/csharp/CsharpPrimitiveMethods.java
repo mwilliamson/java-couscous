@@ -42,6 +42,11 @@ public class CsharpPrimitiveMethods {
                 list(startIndex, length),
                 StringValue.REF);
         });
+        methods.put("toLowerCase", (receiver, arguments) -> methodCall(
+            receiver,
+            "ToLower",
+            list(),
+            StringValue.REF));
         STRING_METHODS = methods.build();
     }
 
