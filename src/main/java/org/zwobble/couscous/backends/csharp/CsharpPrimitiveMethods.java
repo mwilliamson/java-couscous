@@ -26,6 +26,18 @@ public class CsharpPrimitiveMethods {
         BOOLEAN_METHODS = methods.build();
     }
 
+    private static final Map<String, PrimitiveMethodGenerator> BOXED_INT_METHODS;
+
+    static {
+        ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
+        methods.put("toString", ((receiver, arguments) -> methodCall(
+            receiver,
+            "ToString",
+            list(),
+            StringValue.REF)));
+        BOXED_INT_METHODS = methods.build();
+    }
+
     private static final Map<String, PrimitiveMethodGenerator> STRING_METHODS;
 
     static {
@@ -59,6 +71,7 @@ public class CsharpPrimitiveMethods {
         ImmutableMap.<TypeName, Map<String, PrimitiveMethodGenerator>>builder()
             .put(BooleanValue.REF, BOOLEAN_METHODS)
             .put(StringValue.REF, STRING_METHODS)
+            .put(ObjectValues.BOXED_INT, BOXED_INT_METHODS)
             .build();
 
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INT_METHODS =

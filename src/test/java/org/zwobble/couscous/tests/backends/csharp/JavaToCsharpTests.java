@@ -48,11 +48,6 @@ public class JavaToCsharpTests extends CompilerTests {
     public void lambdasWithThisCapture() throws Exception {
     }
 
-    @Test
-    @Ignore
-    public void staticMethodOverloads() throws Exception {
-    }
-
     protected PrimitiveValue execProgram(
         Path directory,
         TypeName type,
