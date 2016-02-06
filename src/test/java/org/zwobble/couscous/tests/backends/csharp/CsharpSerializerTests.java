@@ -14,6 +14,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.Operations.not;
@@ -156,6 +157,16 @@ public class CsharpSerializerTests {
     public void expressionStatementWritesExpression() {
         String output = serialize(expressionStatement(literal(true)));
         assertEquals("true;\n", output);
+    }
+
+    @Test
+    public void localVariableDeclarationCanDeclareVariable() {
+        String output = serialize(localVariableDeclaration(
+            TestIds.ANY_ID,
+            "x",
+            TypeName.of("string"),
+            literal("[value]")));
+        assertEquals("string x = \"[value]\";\n", output);
     }
 
     @Test

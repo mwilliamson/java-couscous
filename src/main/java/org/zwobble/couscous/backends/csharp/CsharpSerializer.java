@@ -192,7 +192,16 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(LocalVariableDeclarationNode localVariableDeclaration) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writeTypeReference(localVariableDeclaration.getType());
+            writer.writeSpace();
+            writer.writeIdentifier(localVariableDeclaration.getName());
+            writer.writeSpace();
+            writer.writeSymbol("=");
+            writer.writeSpace();
+            write(localVariableDeclaration.getInitialValue());
+            writer.writeSymbol(";");
+        });
     }
 
     @Override
