@@ -61,7 +61,6 @@ public class CsharpMethodRunner implements MethodRunner {
         boolean isVoid)
         throws IOException, InterruptedException
     {
-        // TODO: use arguments
         String csharpMethodName = PythonCodeGenerator.toName(new MethodSignature(
             methodName,
             eagerMap(arguments, argument -> argument.getType())));
