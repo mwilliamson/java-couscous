@@ -1,6 +1,6 @@
 namespace Couscous.java.lang {
     internal class Object {
-        internal virtual bool equals__java_lang_Object(Object other) {
+        internal virtual bool equals__java_lang_Object__boolean(Object other) {
             return System.Object.ReferenceEquals(this, other);
         }
 

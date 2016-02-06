@@ -21,6 +21,10 @@ public class MethodSignature {
         return arguments;
     }
 
+    public TypeName getReturnType() {
+        return returnType;
+    }
+
     @Override
     public String toString() {
         return "MethodSignature(" +
