@@ -47,6 +47,11 @@ public class CsharpPrimitiveMethods {
             "ToLower",
             list(),
             StringValue.REF));
+        methods.put("equals", (receiver, arguments) -> methodCall(
+            receiver,
+            "Equals",
+            arguments,
+            StringValue.REF));
         STRING_METHODS = methods.build();
     }
 

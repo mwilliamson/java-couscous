@@ -53,11 +53,6 @@ public class JavaToCsharpTests extends CompilerTests {
     public void staticMethodOverloads() throws Exception {
     }
 
-    @Test
-    @Ignore
-    public void stringEquals() throws Exception {
-    }
-
     protected PrimitiveValue execProgram(
         Path directory,
         TypeName type,
