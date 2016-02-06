@@ -1,6 +1,7 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
@@ -14,9 +15,7 @@ import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.util.ExtraLists;
-import org.zwobble.couscous.values.ObjectValues;
-import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +40,11 @@ public class CsharpMethodRunner implements MethodRunner {
             Backend compiler = new CsharpBackend(directoryPath, NAMESPACE);
             try {
                 compiler.compile(classNodes);
-                return runFunction(directoryPath, className, methodName, arguments);
+                ClassNode classNode = Iterables.find(classNodes, c -> c.getName().equals(className));
+                boolean isVoid = Iterables.find(classNode.getMethods(), method -> method.getName().equals(methodName))
+                    .getReturnType()
+                    .equals(UnitValue.REF);
+                return runFunction(directoryPath, className, methodName, arguments, isVoid);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
@@ -50,11 +53,12 @@ public class CsharpMethodRunner implements MethodRunner {
         }
     }
 
-    public static PrimitiveValue runFunction(
+    private static PrimitiveValue runFunction(
         Path directoryPath,
         TypeName className,
         String methodName,
-        List<PrimitiveValue> arguments)
+        List<PrimitiveValue> arguments,
+        boolean isVoid)
         throws IOException, InterruptedException
     {
         // TODO: use arguments
@@ -68,12 +72,17 @@ public class CsharpMethodRunner implements MethodRunner {
                 eagerMap(arguments, LiteralNode::literal),
                 // TODO: pass in return type
                 ObjectValues.OBJECT));
+
+        String body = isVoid
+            ? value + ";"
+            : "var value = " + value + ";" +
+                "       System.Console.WriteLine(value.GetType());" +
+                "       System.Console.WriteLine(value);";
+
         String program =
             "public class MethodRunnerExample { " +
             "   public static void Main() { " +
-            "       var value = " + value + ";" +
-            "       System.Console.WriteLine(value.GetType());" +
-            "       System.Console.WriteLine(value);" +
+            "       " + body +
             "   }" +
             "}";
         Files.write(directoryPath.resolve("MethodRunnerExample.cs"), list(program));
@@ -83,7 +92,11 @@ public class CsharpMethodRunner implements MethodRunner {
                 findCsharpFiles(directoryPath)),
             directoryPath);
         String output = Processes.run(list("mono", "MethodRunnerExample.exe"), directoryPath);
-        return readPrimitive(output);
+        if (isVoid) {
+            return PrimitiveValues.UNIT;
+        } else {
+            return readPrimitive(output);
+        }
     }
 
     private static List<String> findCsharpFiles(Path directoryPath) throws IOException {

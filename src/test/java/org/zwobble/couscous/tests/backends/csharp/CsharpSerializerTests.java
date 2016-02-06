@@ -155,6 +155,12 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void noValueIsSpecifiedWhenReturningUnit() {
+        String output = serialize(returns(LiteralNode.UNIT));
+        assertEquals("return;\n", output);
+    }
+
+    @Test
     public void expressionStatementWritesExpression() {
         String output = serialize(expressionStatement(literal(true)));
         assertEquals("true;\n", output);

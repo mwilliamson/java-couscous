@@ -7,6 +7,8 @@ import org.zwobble.couscous.values.*;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class LiteralNode implements ExpressionNode {
+    public static final ExpressionNode UNIT = literal(PrimitiveValues.UNIT);
+
     public static LiteralNode literal(PrimitiveValue value) {
         return new LiteralNode(value, value.getType());
     }
