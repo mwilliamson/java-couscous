@@ -1,14 +1,13 @@
 package org.zwobble.couscous.interpreter;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.Optional;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
@@ -19,7 +18,7 @@ public class Interpreter {
         this.project = project;
     }
     
-    public InterpreterValue run(TypeName className, String methodName, List<InterpreterValue> arguments) {
+    public InterpreterValue run(TypeName className, String methodName, List<InterpreterValue> arguments, TypeName returnType) {
         final Environment environment = new Environment(
             project,
             Optional.empty(),
@@ -28,7 +27,8 @@ public class Interpreter {
         ConcreteType clazz = environment.findClass(className);
         MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType().getName()));
+            eagerMap(arguments, argument -> argument.getType().getName()),
+            returnType);
         return clazz.callStaticMethod(environment, signature, arguments);
     }
 }

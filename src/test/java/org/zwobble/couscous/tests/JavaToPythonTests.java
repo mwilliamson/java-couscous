@@ -1,7 +1,5 @@
 package org.zwobble.couscous.tests;
 
-import com.google.common.collect.ImmutableList;
-import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonBackend;
@@ -10,7 +8,6 @@ import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -23,7 +20,8 @@ public class JavaToPythonTests extends CompilerTests {
             Path directory,
             TypeName type,
             String methodName,
-            List<PrimitiveValue> arguments) throws IOException, InterruptedException {
+            List<PrimitiveValue> arguments,
+            TypeName returnType) throws IOException, InterruptedException {
 
         Path directoryPath = Files.createTempDirectory(null);
         try {
@@ -31,7 +29,7 @@ public class JavaToPythonTests extends CompilerTests {
                 new JavaFrontend(),
                 new PythonBackend(directoryPath, "couscous"));
             compiler.compileDirectory(list(directory), directory);
-            return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments);
+            return PythonMethodRunner.runFunction(directoryPath, type, methodName, arguments, returnType);
         } finally {
             deleteRecursively(directoryPath.toFile());
         }

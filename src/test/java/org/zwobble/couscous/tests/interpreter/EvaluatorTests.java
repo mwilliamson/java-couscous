@@ -66,7 +66,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     "size",
                     list(),
                     IntegerValue.REF)));
-        assertEquals(new MethodSignature("size", list()), exception.getSignature());
+        assertEquals(new MethodSignature("size", list(), IntegerValue.REF), exception.getSignature());
     }
     
     @Test
@@ -78,7 +78,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     "substring",
                     list(literal(1)),
                     StringValue.REF)));
-        assertEquals(new MethodSignature("substring", list(IntegerValue.REF)), exception.getSignature());
+        assertEquals(new MethodSignature("substring", list(IntegerValue.REF), StringValue.REF), exception.getSignature());
     }
     
     @Test
@@ -91,7 +91,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     list(literal(0), literal("")),
                     StringValue.REF)));
         assertEquals(
-            new MethodSignature("substring", list(IntegerValue.REF, StringValue.REF)),
+            new MethodSignature("substring", list(IntegerValue.REF, StringValue.REF), StringValue.REF),
             exception.getSignature());
     }
     

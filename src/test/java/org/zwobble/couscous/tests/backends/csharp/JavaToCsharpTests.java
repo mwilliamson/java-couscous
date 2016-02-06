@@ -47,7 +47,8 @@ public class JavaToCsharpTests extends CompilerTests {
         Path directory,
         TypeName type,
         String methodName,
-        List<PrimitiveValue> arguments) throws IOException, InterruptedException
+        List<PrimitiveValue> arguments,
+        TypeName returnType) throws IOException, InterruptedException
     {
         Path directoryPath = Files.createTempDirectory(null);
         try {
@@ -55,7 +56,7 @@ public class JavaToCsharpTests extends CompilerTests {
                 new JavaFrontend(),
                 new CsharpBackend(directoryPath, "Couscous"));
             compiler.compileDirectory(list(directory), directory);
-            return CsharpMethodRunner.runFunction(directoryPath, type, methodName, arguments, false);
+            return CsharpMethodRunner.runFunction(directoryPath, type, methodName, arguments, returnType);
         } finally {
             deleteRecursively(directoryPath.toFile());
         }

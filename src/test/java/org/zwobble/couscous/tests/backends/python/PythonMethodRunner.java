@@ -28,13 +28,13 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class PythonMethodRunner implements MethodRunner {
     @Override
-    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments) {
+    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             PythonBackend compiler = new PythonBackend(directoryPath, "couscous");
             try {
                 compiler.compile(classNodes);
-                return runFunction(directoryPath, className, methodName, arguments);
+                return runFunction(directoryPath, className, methodName, arguments, returnType);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
@@ -47,13 +47,15 @@ public class PythonMethodRunner implements MethodRunner {
             Path directoryPath,
             TypeName className,
             String methodName,
-            List<PrimitiveValue> arguments)
+            List<PrimitiveValue> arguments,
+            TypeName returnType)
             throws IOException, InterruptedException {
         
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
         MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType()));
+            eagerMap(arguments, argument -> argument.getType()),
+            returnType);
         String pythonMethodName = Names.toUniqueName(signature);
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
             "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +

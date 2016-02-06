@@ -54,8 +54,13 @@ public class ConcreteType {
             return this;
         }
 
-        public Builder<T> method(String name, List<TypeName> argumentsTypes, BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method) {
-            methods.put(new MethodSignature(name, argumentsTypes), toMethodValue(argumentsTypes, method));
+        public Builder<T> method(
+            String name,
+            List<TypeName> argumentsTypes,
+            TypeName returnType,
+            BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method)
+        {
+            methods.put(new MethodSignature(name, argumentsTypes, returnType), toMethodValue(argumentsTypes, method));
             return this;
         }
 
@@ -68,8 +73,13 @@ public class ConcreteType {
                         .orElseThrow(() -> new RuntimeException("receiver is of wrong type")));
         }
 
-        public Builder<T> staticMethod(String name, List<TypeName> argumentsTypes, BiFunction<Environment, PositionalArguments, InterpreterValue> method) {
-            staticMethods.put(new MethodSignature(name, argumentsTypes), new StaticMethodValue(argumentsTypes, method));
+        public Builder<T> staticMethod(
+            String name,
+            List<TypeName> argumentsTypes,
+            TypeName returnType,
+            BiFunction<Environment, PositionalArguments, InterpreterValue> method)
+        {
+            staticMethods.put(new MethodSignature(name, argumentsTypes, returnType), new StaticMethodValue(argumentsTypes, method));
             return this;
         }
         

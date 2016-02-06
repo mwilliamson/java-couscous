@@ -1,7 +1,6 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
@@ -15,7 +14,10 @@ import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
 import org.zwobble.couscous.util.ExtraLists;
-import org.zwobble.couscous.values.*;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValues;
+import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.UnitValue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -34,17 +36,13 @@ public class CsharpMethodRunner implements MethodRunner {
     private static final String NAMESPACE = "Couscous";
 
     @Override
-    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments) {
+    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             Backend compiler = new CsharpBackend(directoryPath, NAMESPACE);
             try {
                 compiler.compile(classNodes);
-                ClassNode classNode = Iterables.find(classNodes, c -> c.getName().equals(className));
-                boolean isVoid = Iterables.find(classNode.getMethods(), method -> method.getName().equals(methodName))
-                    .getReturnType()
-                    .equals(UnitValue.REF);
-                return runFunction(directoryPath, className, methodName, arguments, isVoid);
+                return runFunction(directoryPath, className, methodName, arguments, returnType);
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
@@ -58,21 +56,22 @@ public class CsharpMethodRunner implements MethodRunner {
         TypeName className,
         String methodName,
         List<PrimitiveValue> arguments,
-        boolean isVoid)
+        TypeName returnType)
         throws IOException, InterruptedException
     {
         MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType()));
+            eagerMap(arguments, argument -> argument.getType()),
+            returnType);
         String csharpMethodName = Names.toUniqueName(signature);
         String value = CsharpSerializer.serialize(
             staticMethodCall(
                 TypeName.of(NAMESPACE + "." + className.getQualifiedName()),
                 csharpMethodName,
                 eagerMap(arguments, LiteralNode::literal),
-                // TODO: pass in return type
-                ObjectValues.OBJECT));
+                returnType));
 
+        boolean isVoid = returnType.equals(UnitValue.REF);
         String body = isVoid
             ? value + ";"
             : "var value = " + value + ";" +

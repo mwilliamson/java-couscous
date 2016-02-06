@@ -78,7 +78,10 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public MethodSignature signature() {
-        return new MethodSignature(methodName, eagerMap(arguments, argument -> argument.getType()));
+        return new MethodSignature(
+            methodName,
+            eagerMap(arguments, argument -> argument.getType()),
+            type);
     }
     
     @Override

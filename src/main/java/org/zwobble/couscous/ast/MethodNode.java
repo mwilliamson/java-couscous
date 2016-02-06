@@ -140,7 +140,8 @@ public class MethodNode implements CallableNode {
     public MethodSignature signature() {
         return new MethodSignature(
             name,
-            eagerMap(arguments, argument -> argument.getType()));
+            eagerMap(arguments, argument -> argument.getType()),
+            returnType);
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {

@@ -1,15 +1,16 @@
 package org.zwobble.couscous.ast;
 
 import java.util.List;
-import java.util.Objects;
 
 public class MethodSignature {
-    private String name;
-    private List<TypeName> arguments;
+    private final String name;
+    private final List<TypeName> arguments;
+    private final TypeName returnType;
 
-    public MethodSignature(String name, List<TypeName> arguments) {
+    public MethodSignature(String name, List<TypeName> arguments, TypeName returnType) {
         this.name = name;
         this.arguments = arguments;
+        this.returnType = returnType;
     }
 
     public String getName() {
@@ -25,6 +26,7 @@ public class MethodSignature {
         return "MethodSignature(" +
             "name='" + name + '\'' +
             ", arguments=" + arguments +
+            ", returnType=" + returnType +
             ')';
     }
 
@@ -32,13 +34,20 @@ public class MethodSignature {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         MethodSignature that = (MethodSignature) o;
-        return Objects.equals(name, that.name) &&
-            Objects.equals(arguments, that.arguments);
+
+        if (!name.equals(that.name)) return false;
+        if (!arguments.equals(that.arguments)) return false;
+        return returnType.equals(that.returnType);
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, arguments);
+        int result = name.hashCode();
+        result = 31 * result + arguments.hashCode();
+        result = 31 * result + returnType.hashCode();
+        return result;
     }
 }

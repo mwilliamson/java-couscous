@@ -1,11 +1,10 @@
 package org.zwobble.couscous.tests.interpreter;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.Interpreter;
+import org.zwobble.couscous.interpreter.JavaProject;
+import org.zwobble.couscous.interpreter.Project;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.UnboundVariable;
 import org.zwobble.couscous.interpreter.errors.UnexpectedValueType;
@@ -17,6 +16,10 @@ import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.values.UnitValue;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
@@ -41,7 +44,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> runMethod(method, value("hello, world!")));
         
-        assertEquals(new MethodSignature("hello", list(StringValue.REF)), exception.getSignature());
+        assertEquals(new MethodSignature("hello", list(StringValue.REF), UnitValue.REF), exception.getSignature());
     }
     
     @Test
@@ -102,10 +105,11 @@ public class InterpreterMethodTests extends BackendMethodTests {
         return new MethodRunner() {
             @Override
             public PrimitiveValue runMethod(
-                    List<ClassNode> classNodes,
-                    TypeName className,
-                    String methodName,
-                    List<PrimitiveValue> arguments) {
+                List<ClassNode> classNodes,
+                TypeName className,
+                String methodName,
+                List<PrimitiveValue> arguments,
+                TypeName returnType) {
                 
                 Project project = JavaProject.of(classNodes);
                 Interpreter interpreter = new Interpreter(project);
@@ -113,7 +117,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
                     .map(InterpreterValues::value)
                     .collect(Collectors.toList());
                 
-                return interpreter.run(className, methodName, argumentValues)
+                return interpreter.run(className, methodName, argumentValues, returnType)
                     .toPrimitiveValue().get();
             }
         };

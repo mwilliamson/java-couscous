@@ -12,8 +12,6 @@ import org.zwobble.couscous.values.IntegerValue;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
         return new Evaluator(environment).eval(expression);
@@ -87,9 +85,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
-        MethodSignature signature = new MethodSignature(
-            methodCall.getMethodName(),
-            eagerMap(methodCall.getArguments(), argument -> argument.getType()));
+        MethodSignature signature = methodCall.signature();
 
         return methodCall.getReceiver().accept(new Receiver.Mapper<InterpreterValue>() {
             @Override

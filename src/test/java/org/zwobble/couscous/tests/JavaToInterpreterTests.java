@@ -24,7 +24,8 @@ public class JavaToInterpreterTests extends CompilerTests {
         Path directory,
         TypeName type,
         String methodName,
-        List<PrimitiveValue> arguments
+        List<PrimitiveValue> arguments,
+        TypeName returnType
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
         List<ClassNode> classNodes = frontend.readSourceDirectory(list(directory), directory);
@@ -33,7 +34,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         Interpreter interpreter = new Interpreter(project);
         List<InterpreterValue> argumentValues = ImmutableList.copyOf(transform(arguments, InterpreterValues::value));
 
-        return interpreter.run(type, methodName, argumentValues)
+        return interpreter.run(type, methodName, argumentValues, returnType)
             .toPrimitiveValue().get();
     }
 }

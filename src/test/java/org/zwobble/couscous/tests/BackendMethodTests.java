@@ -153,7 +153,7 @@ public abstract class BackendMethodTests {
         String className = "com.example.Program";
         ClassNode classNode = ClassNode.builder(className).method(method).build();
         MethodRunner runner = buildMethodRunner();
-        return runner.runMethod(list(classNode), classNode.getName(), method.getName(), asList(arguments));
+        return runner.runMethod(list(classNode), classNode.getName(), method.getName(), asList(arguments), method.getReturnType());
     }
     
     protected abstract MethodRunner buildMethodRunner();

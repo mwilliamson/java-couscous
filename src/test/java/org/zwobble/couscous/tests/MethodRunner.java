@@ -14,7 +14,14 @@ public interface MethodRunner {
         List<ClassNode> classNodes,
         TypeName className,
         String methodName,
-        List<PrimitiveValue> arguments);
+        List<PrimitiveValue> arguments, TypeName returnType);
+
+
+    default PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments) {
+        ClassNode classNode = Iterables.find(classNodes, c -> c.getName().equals(className));
+        MethodNode method = Iterables.find(classNode.getMethods(), m -> m.getName().equals(methodName));
+        return runMethod(classNodes, className, methodName, arguments, method.getReturnType());
+    }
 
     default PrimitiveValue evalExpression(List<ClassNode> classes, ExpressionNode expression) {
         ClassNode programNode = ClassNode.builder("Program")
@@ -29,6 +36,7 @@ public interface MethodRunner {
                 list(programNode))),
             programNode.getName(),
             "run",
-            list());
+            list(),
+            expression.getType());
     }
 }
