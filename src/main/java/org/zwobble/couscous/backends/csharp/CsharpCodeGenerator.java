@@ -16,7 +16,6 @@ public class CsharpCodeGenerator {
         .put(IntegerValue.REF, TypeName.of("int"))
         .put(StringValue.REF, TypeName.of("string"))
         .put(BooleanValue.REF, TypeName.of("bool"))
-        .put(ObjectValues.OBJECT, TypeName.of("object"))
         .put(ObjectValues.CLASS, TypeName.of("System.Type"))
         .put(UnitValue.REF, TypeName.of("void"))
         .build();

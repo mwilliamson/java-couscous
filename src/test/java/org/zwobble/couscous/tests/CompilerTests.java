@@ -20,7 +20,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 public abstract class CompilerTests {
     @Test
     public void canEvaluateLiterals() {
-        assertEquals(value("hello"), evalObjectExpression("\"hello\""));
+        assertEquals(value("hello"), evalExpression("String", "\"hello\""));
         assertEquals(value(42), evalIntExpression("42"));
     }
 
@@ -44,6 +44,7 @@ public abstract class CompilerTests {
     @Test
     public void integersCanBeAssignedToObjectVariable() {
         assertEquals(value(false), exec("boolean", "Object x = 1; return x.equals(new Object());"));
+        assertEquals(value(true), exec("boolean", "Object x = 1; return x.equals(1);"));
     }
 
     @Test
