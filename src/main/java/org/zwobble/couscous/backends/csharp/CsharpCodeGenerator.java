@@ -22,6 +22,7 @@ public class CsharpCodeGenerator {
         .build();
 
     private final String namespace;
+    private final NodeTransformer nodeTransformer;
 
     public static Node generateCode(Node node, String namespace) {
         return new CsharpCodeGenerator(namespace).generateCode(node);
@@ -29,15 +30,15 @@ public class CsharpCodeGenerator {
 
     private CsharpCodeGenerator(String namespace) {
         this.namespace = namespace;
-    }
-
-    private Node generateCode(Node node) {
-        return NodeTransformer.builder()
+        nodeTransformer = NodeTransformer.builder()
             .transformType(this::transformType)
             .transformExpression(this::transformExpression)
             .transformMethodName(this::transformMethodName)
-            .build()
-            .transform(node);
+            .build();
+    }
+
+    private Node generateCode(Node node) {
+        return nodeTransformer.transform(node);
     }
 
     private TypeName transformType(TypeName type) {
@@ -62,13 +63,15 @@ public class CsharpCodeGenerator {
             @Override
             public Optional<ExpressionNode> visit(ExpressionNode receiver) {
                 return CsharpPrimitiveMethods.getPrimitiveMethod(receiver.getType(), call.getMethodName())
-                    .map(generator -> generator.generate(receiver, call.getArguments()));
+                    .map(generator -> generator.generate(
+                        nodeTransformer.transformExpression(receiver),
+                        nodeTransformer.transformExpressions(call.getArguments())));
             }
 
             @Override
             public Optional<ExpressionNode> visit(TypeName receiver) {
                 return CsharpPrimitiveMethods.getPrimitiveStaticMethod(receiver, call.getMethodName())
-                    .map(generator -> generator.generate(call.getArguments()));
+                    .map(generator -> generator.generate(nodeTransformer.transformExpressions(call.getArguments())));
             }
         });
     }
