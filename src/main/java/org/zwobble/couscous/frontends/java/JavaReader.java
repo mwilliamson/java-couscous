@@ -288,8 +288,10 @@ public class JavaReader {
         Scope scope = outerScope.enterMethod(method.getName().getIdentifier());
 
         List<FormalArgumentNode> formalArguments = readFormalArguments(scope, method);
-        List<StatementNode> body = readBody(scope, method);
         List<AnnotationNode> annotations = readAnnotations(method);
+        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
+            .map(JavaTypes::typeOf);
+        List<StatementNode> body = readBody(scope, method, returnType);
 
         if (method.isConstructor()) {
             return constructor(
@@ -301,7 +303,7 @@ public class JavaReader {
                 Modifier.isStatic(method.getModifiers()),
                 method.getName().getIdentifier(),
                 formalArguments,
-                typeOf(method.getReturnType2()),
+                returnType.get(),
                 body);
         }
     }
@@ -320,12 +322,9 @@ public class JavaReader {
         return eagerMap(parameters, parameter -> JavaVariableDeclarationReader.read(scope, parameter));
     }
 
-    private List<StatementNode> readBody(Scope scope, MethodDeclaration method) {
+    private List<StatementNode> readBody(Scope scope, MethodDeclaration method, Optional<TypeName> returnType) {
         @SuppressWarnings("unchecked")
         List<Statement> statements = method.getBody().statements();
-        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
-            .map(Type::resolveBinding)
-            .map(JavaTypes::typeOf);
         return readStatements(scope, statements, returnType);
     }
 
