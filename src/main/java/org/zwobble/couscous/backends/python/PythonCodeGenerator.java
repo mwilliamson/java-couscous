@@ -56,10 +56,14 @@ public class PythonCodeGenerator {
             classNode.getSimpleName(),
             ImmutableList.copyOf(Iterables.concat(list(constructor), pythonMethods)));
 
+        List<PythonStatementNode> staticConstructor =
+            generateStatements(classNode.getStaticConstructor());
+
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             singletonIterator(pythonClass),
             imports,
-            singletonIterator(internalsImport))));
+            singletonIterator(internalsImport),
+            staticConstructor.iterator())));
     }
 
     private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
