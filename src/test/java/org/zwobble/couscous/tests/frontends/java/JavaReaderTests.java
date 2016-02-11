@@ -667,6 +667,23 @@ public class JavaReaderTests {
                 literal("Flaws"))),
             staticConstructor);
     }
+
+    @Test
+    public void staticFieldInitialiserIsTreatedAsAssignmentInStaticConstructor() {
+        ClassNode classNode = readClass(
+            "private static final String name = \"Flaws\";");
+
+        List<StatementNode> staticConstructor = classNode.getStaticConstructor();
+
+        assertEquals(
+            list(assignStatement(
+                fieldAccess(
+                    TypeName.of("com.example.Example"),
+                    "name",
+                    StringValue.REF),
+                literal("Flaws"))),
+            staticConstructor);
+    }
     
     @Test
     public void canDeclareStaticMethodWithAnnotation() {

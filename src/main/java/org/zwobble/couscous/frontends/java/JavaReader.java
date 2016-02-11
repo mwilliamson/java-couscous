@@ -65,7 +65,7 @@ public class JavaReader {
         TypeName name = generateClassName(ast);
         Scope scope = Scope.create().enterClass(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        TypeDeclarationBody body = readTypeDeclarationBody(scope, type.bodyDeclarations());
+        TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
         return ClassNode.declareClass(
             name,
             superTypes(type),
@@ -146,7 +146,7 @@ public class JavaReader {
     GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
         TypeName className = generateAnonymousName(declaration);
         Scope scope = outerScope.enterClass(className);
-        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, declaration.bodyDeclarations());
+        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations());
         AnonymousClass anonymousClass = new AnonymousClass(
             superTypes(declaration),
             bodyDeclarations.getFields(),
@@ -263,7 +263,7 @@ public class JavaReader {
         }
     }
 
-    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, List<Object> bodyDeclarations) {
+    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, TypeName type, List<Object> bodyDeclarations) {
         ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
         ConstructorNode constructor = ConstructorNode.DEFAULT;
 
@@ -275,15 +275,45 @@ public class JavaReader {
             }
         }
         // TODO: handle instance initializers
-        List<Initializer> initializers = ofType(bodyDeclarations, Initializer.class);
-        List<StatementNode> staticConstructor = eagerFlatMap(
-            initializers,
-            initializer -> readStatement(scope, initializer.getBody()));
+        List<StatementNode> staticConstructor = readStaticConstructor(scope, type, bodyDeclarations);
         return new TypeDeclarationBody(
             readFields(ofType(bodyDeclarations, FieldDeclaration.class)),
             staticConstructor,
             constructor,
             methods.build());
+    }
+
+    private List<StatementNode> readStaticConstructor(Scope scope, TypeName type, List<Object> bodyDeclarations) {
+        return eagerFlatMap(
+            bodyDeclarations,
+            declaration -> readStaticConstructorStatements(scope, type, declaration));
+    }
+
+    private Iterable<StatementNode> readStaticConstructorStatements(Scope scope, TypeName type, Object declaration) {
+        if (declaration instanceof Initializer) {
+            return readStatement(scope, ((Initializer) declaration).getBody());
+        } else if (declaration instanceof FieldDeclaration) {
+            FieldDeclaration field = (FieldDeclaration) declaration;
+            if (Modifier.isStatic(field.getModifiers())) {
+                // TODO: remove duplication with readField
+                @SuppressWarnings("unchecked")
+                List<VariableDeclarationFragment> fragments = field.fragments();
+                TypeName fieldType = typeOf(field.getType());
+                return eagerFlatMap(fragments, fragment -> {
+                    if (fragment.getInitializer() == null) {
+                        return list();
+                    } else {
+                        ExpressionNode value = readExpression(scope, fieldType, fragment.getInitializer());
+                        String name = fragment.getName().getIdentifier();
+                        return list(assignStatement(fieldAccess(type, name, fieldType), value));
+                    }
+                });
+            } else {
+                return list();
+            }
+        } else {
+            return list();
+        }
     }
 
     private List<FieldDeclarationNode> readFields(List<FieldDeclaration> fields) {
