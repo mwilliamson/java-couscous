@@ -88,18 +88,20 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
         MethodSignature signature = methodCall.signature();
 
-        return methodCall.getReceiver().accept(new Receiver.Mapper<InterpreterValue>() {
+        return evalReceiver(methodCall.getReceiver())
+            .callMethod(environment, signature, arguments);
+    }
+
+    private ReceiverValue evalReceiver(Receiver receiver) {
+        return receiver.accept(new Receiver.Mapper<ReceiverValue>() {
             @Override
-            public InterpreterValue visit(ExpressionNode receiverExpression) {
-                InterpreterValue receiver = eval(receiverExpression);
-                ConcreteType type = receiver.getType();
-                return type.callMethod(environment, receiver, signature, arguments);
+            public ReceiverValue visit(ExpressionNode receiver) {
+                return new InstanceReceiverValue(eval(receiver));
             }
 
             @Override
-            public InterpreterValue visit(TypeName receiver) {
-                ConcreteType clazz = environment.findClass(receiver);
-                return clazz.callStaticMethod(environment, signature, arguments);
+            public ReceiverValue visit(TypeName receiver) {
+                return new StaticReceiverValue(environment.findClass(receiver));
             }
         });
     }
