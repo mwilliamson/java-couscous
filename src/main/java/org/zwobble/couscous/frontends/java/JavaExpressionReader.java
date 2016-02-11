@@ -144,11 +144,18 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readVariableBinding(IVariableBinding binding) {
-        TypeName type = typeOf(binding);
         if (binding.getDeclaringClass() == null) {
             return scope.reference(binding.getKey());
         } else {
-            return FieldAccessNode.fieldAccess(ThisReferenceNode.thisReference(typeOf(binding.getDeclaringClass())), binding.getName(), type);
+            boolean isStatic = Modifier.isStatic(binding.getModifiers());
+            TypeName classType = typeOf(binding.getDeclaringClass());
+            Receiver receiver = isStatic
+                ? new StaticReceiver(classType)
+                : new InstanceReceiver(ThisReferenceNode.thisReference(classType));
+            return FieldAccessNode.fieldAccess(
+                receiver,
+                binding.getName(),
+                typeOf(binding));
         }
     }
 
@@ -157,7 +164,16 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readFieldAccess(FieldAccess expression) {
-        return FieldAccessNode.fieldAccess(readExpressionWithoutBoxing(expression.getExpression()), expression.getName().getIdentifier(), typeOf(expression));
+        IVariableBinding fieldBinding = expression.resolveFieldBinding();
+        boolean isStatic = Modifier.isStatic(fieldBinding.getModifiers());
+        Receiver receiver = isStatic
+            ? new StaticReceiver(typeOf(fieldBinding.getDeclaringClass()))
+            : new InstanceReceiver(readExpressionWithoutBoxing(expression.getExpression()));
+
+        return FieldAccessNode.fieldAccess(
+            receiver,
+            expression.getName().getIdentifier(),
+            typeOf(expression));
     }
 
     private ExpressionNode readMethodInvocation(MethodInvocation expression) {

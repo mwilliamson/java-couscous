@@ -70,7 +70,7 @@ public class JavaReader {
             name,
             superTypes(type),
             body.getFields(),
-            list(),
+            body.getStaticConstructor(),
             body.getConstructor(),
             body.getMethods());
     }
@@ -231,17 +231,27 @@ public class JavaReader {
 
     private static class TypeDeclarationBody {
         private final List<FieldDeclarationNode> fields;
+        private final List<StatementNode> staticConstructor;
         private final ConstructorNode constructor;
         private final List<MethodNode> methods;
 
-        public TypeDeclarationBody(List<FieldDeclarationNode> fields, ConstructorNode constructor, List<MethodNode> methods) {
+        public TypeDeclarationBody(
+            List<FieldDeclarationNode> fields,
+            List<StatementNode> staticConstructor, ConstructorNode constructor,
+            List<MethodNode> methods)
+        {
             this.fields = fields;
+            this.staticConstructor = staticConstructor;
             this.constructor = constructor;
             this.methods = methods;
         }
 
         public List<FieldDeclarationNode> getFields() {
             return fields;
+        }
+
+        public List<StatementNode> getStaticConstructor() {
+            return staticConstructor;
         }
 
         public ConstructorNode getConstructor() {
@@ -264,8 +274,14 @@ public class JavaReader {
                 methods.add((MethodNode) callable);
             }
         }
+        // TODO: handle instance initializers
+        List<Initializer> initializers = ofType(bodyDeclarations, Initializer.class);
+        List<StatementNode> staticConstructor = eagerFlatMap(
+            initializers,
+            initializer -> readStatement(scope, initializer.getBody()));
         return new TypeDeclarationBody(
             readFields(ofType(bodyDeclarations, FieldDeclaration.class)),
+            staticConstructor,
             constructor,
             methods.build());
     }
@@ -328,6 +344,11 @@ public class JavaReader {
         @SuppressWarnings("unchecked")
         List<Statement> statements = method.getBody().statements();
         return readStatements(scope, statements, returnType);
+    }
+
+    List<StatementNode> readStatement(Scope scope, Statement statement) {
+        JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), Optional.empty());
+        return statementReader.readStatement(statement);
     }
 
     List<StatementNode> readStatements(Scope scope, List<Statement> body, Optional<TypeName> returnType) {

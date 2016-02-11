@@ -99,6 +99,32 @@ public class JavaReaderTests {
                 StringValue.REF),
             returnNode.getValue());
     }
+
+    @Test
+    public void canReadExplicitStaticFieldReference() {
+        canReadStaticFieldReference("this.name");
+    }
+
+    @Test
+    public void canReadImplicitStaticFieldReference() {
+        canReadStaticFieldReference("name");
+    }
+
+    private void canReadStaticFieldReference(String expression) {
+        ClassNode classNode = readClass(
+            "private static String name;" +
+            "public String getName() {" +
+            "    return " + expression + ";" +
+            "}");
+
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        assertEquals(
+            fieldAccess(
+                TypeName.of("com.example.Example"),
+                "name",
+                StringValue.REF),
+            returnNode.getValue());
+    }
     
     @Test
     public void canReadInstanceMethodCalls() {
@@ -609,6 +635,26 @@ public class JavaReaderTests {
                     StringValue.REF),
                 literal("Flaws"))),
             constructor.getBody());
+    }
+
+    @Test
+    public void canDeclareStaticConstructor() {
+        ClassNode classNode = readClass(
+            "private static final String name;" +
+            "static {" +
+            "    name = \"Flaws\";" +
+            "}");
+
+        List<StatementNode> staticConstructor = classNode.getStaticConstructor();
+
+        assertEquals(
+            list(assignStatement(
+                fieldAccess(
+                    TypeName.of("com.example.Example"),
+                    "name",
+                    StringValue.REF),
+                literal("Flaws"))),
+            staticConstructor);
     }
     
     @Test
