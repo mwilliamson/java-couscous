@@ -70,6 +70,7 @@ public class JavaReader {
             name,
             superTypes(type),
             body.getFields(),
+            list(),
             body.getConstructor(),
             body.getMethods());
     }
@@ -190,6 +191,7 @@ public class JavaReader {
             className,
             anonymousClass.getSuperTypes(),
             fields,
+            list(),
             buildConstructor(scope, className, capturedVariables),
             eagerMap(anonymousClass.getMethods(), method ->
                 method.mapBody(body -> replaceCaptureReferences(className, body, capturedVariables))));

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 public class ClassNode implements Node {
+    public static ClassNodeBuilder builder(TypeName name) {
+        return new ClassNodeBuilder(name);
+    }
     public static ClassNodeBuilder builder(String name) {
         return new ClassNodeBuilder(name);
     }
@@ -14,26 +17,31 @@ public class ClassNode implements Node {
             TypeName name,
             Set<TypeName> superTypes,
             List<FieldDeclarationNode> fields,
+            List<StatementNode> staticConstructor,
             ConstructorNode constructor,
             List<MethodNode> methods) {
-        return new ClassNode(name, superTypes, fields, constructor, methods);
+        return new ClassNode(name, superTypes, fields, staticConstructor, constructor, methods);
     }
     
     private final TypeName name;
     private final Set<TypeName> superTypes;
     private final List<FieldDeclarationNode> fields;
+    private final List<StatementNode> staticConstructor;
     private final ConstructorNode constructor;
     private final List<MethodNode> methods;
     
     private ClassNode(
-            TypeName name,
-            Set<TypeName> superTypes,
-            List<FieldDeclarationNode> fields,
-            ConstructorNode constructor,
-            List<MethodNode> methodNodes) {
+        TypeName name,
+        Set<TypeName> superTypes,
+        List<FieldDeclarationNode> fields,
+        List<StatementNode> staticConstructor,
+        ConstructorNode constructor,
+        List<MethodNode> methodNodes)
+    {
         this.name = name;
         this.superTypes = superTypes;
         this.fields = fields;
+        this.staticConstructor = staticConstructor;
         this.constructor = constructor;
         methods = methodNodes;
     }
@@ -49,7 +57,11 @@ public class ClassNode implements Node {
     public List<FieldDeclarationNode> getFields() {
         return fields;
     }
-    
+
+    public List<StatementNode> getStaticConstructor() {
+        return staticConstructor;
+    }
+
     public ConstructorNode getConstructor() {
         return constructor;
     }
@@ -72,19 +84,8 @@ public class ClassNode implements Node {
             transformer.transform(name),
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
-            transformer.transformConstructor(constructor),
+            staticConstructor, transformer.transformConstructor(constructor),
             transformer.transformMethods(methods));
-    }
-
-    @Override
-    public String toString() {
-        return "ClassNode(" +
-            "name=" + name +
-            ", superTypes=" + superTypes +
-            ", fields=" + fields +
-            ", constructor=" + constructor +
-            ", methods=" + methods +
-            ')';
     }
 
     @Override
@@ -94,22 +95,35 @@ public class ClassNode implements Node {
 
         ClassNode classNode = (ClassNode) o;
 
-        if (name != null ? !name.equals(classNode.name) : classNode.name != null) return false;
-        if (superTypes != null ? !superTypes.equals(classNode.superTypes) : classNode.superTypes != null) return false;
-        if (fields != null ? !fields.equals(classNode.fields) : classNode.fields != null) return false;
-        if (constructor != null ? !constructor.equals(classNode.constructor) : classNode.constructor != null)
-            return false;
-        return methods != null ? methods.equals(classNode.methods) : classNode.methods == null;
+        if (!name.equals(classNode.name)) return false;
+        if (!superTypes.equals(classNode.superTypes)) return false;
+        if (!fields.equals(classNode.fields)) return false;
+        if (!staticConstructor.equals(classNode.staticConstructor)) return false;
+        if (!constructor.equals(classNode.constructor)) return false;
+        return methods.equals(classNode.methods);
 
     }
 
     @Override
     public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + (superTypes != null ? superTypes.hashCode() : 0);
-        result = 31 * result + (fields != null ? fields.hashCode() : 0);
-        result = 31 * result + (constructor != null ? constructor.hashCode() : 0);
-        result = 31 * result + (methods != null ? methods.hashCode() : 0);
+        int result = name.hashCode();
+        result = 31 * result + superTypes.hashCode();
+        result = 31 * result + fields.hashCode();
+        result = 31 * result + staticConstructor.hashCode();
+        result = 31 * result + constructor.hashCode();
+        result = 31 * result + methods.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ClassNode(" +
+            "name=" + name +
+            ", superTypes=" + superTypes +
+            ", fields=" + fields +
+            ", staticConstructor=" + staticConstructor +
+            ", constructor=" + constructor +
+            ", methods=" + methods +
+            ')';
     }
 }

@@ -225,6 +225,24 @@ public abstract class BackendEvalTests {
         
         assertEquals(value(42), result);
     }
+
+    @Test
+    public void staticConstructorIsExecutedOnReference() {
+        TypeName type = TypeName.of("com.example.Example");
+        ClassNode classNode = ClassNode.builder(type)
+            .staticField("value", IntegerValue.REF)
+            .staticConstructor(list(
+                assignStatement(
+                    fieldAccess(type, "value", IntegerValue.REF),
+                    literal(42))))
+            .build();
+
+        PrimitiveValue result = evalExpression(
+            list(classNode),
+            fieldAccess(type, "value", IntegerValue.REF));
+
+        assertEquals(value(42), result);
+    }
     
     private PrimitiveValue evalExpression(ExpressionNode expression) {
         return evalExpression(list(), expression);

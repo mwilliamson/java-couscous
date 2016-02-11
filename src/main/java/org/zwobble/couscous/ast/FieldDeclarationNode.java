@@ -5,17 +5,31 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class FieldDeclarationNode implements Node {
     public static FieldDeclarationNode field(String name, TypeName type) {
-        return new FieldDeclarationNode(name, type);
+        return field(false, name, type);
     }
-    
+
+    public static FieldDeclarationNode staticField(String name, TypeName type) {
+        return field(true, name, type);
+    }
+
+    public static FieldDeclarationNode field(boolean isStatic, String name, TypeName type) {
+        return new FieldDeclarationNode(isStatic, name, type);
+    }
+
+    private final boolean isStatic;
     private final String name;
     private final TypeName type;
     
-    private FieldDeclarationNode(String name, TypeName type) {
+    private FieldDeclarationNode(boolean isStatic, String name, TypeName type) {
+        this.isStatic = isStatic;
         this.name = name;
         this.type = type;
     }
-    
+
+    public boolean isStatic() {
+        return isStatic;
+    }
+
     public String getName() {
         return name;
     }
@@ -31,43 +45,37 @@ public class FieldDeclarationNode implements Node {
 
     public FieldDeclarationNode transform(NodeTransformer transformer) {
         return new FieldDeclarationNode(
-            name,
+            isStatic, name,
             transformer.transform(type));
     }
 
     @Override
     public String toString() {
-        return "FieldDeclarationNode(name=" + name + ", type=" + type + ")";
+        return "FieldDeclarationNode(" +
+            "isStatic=" + isStatic +
+            ", name=" + name +
+            ", type=" + type +
+            ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldDeclarationNode that = (FieldDeclarationNode) o;
+
+        if (isStatic != that.isStatic) return false;
+        if (!name.equals(that.name)) return false;
+        return type.equals(that.type);
+
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        int result = (isStatic ? 1 : 0);
+        result = 31 * result + name.hashCode();
+        result = 31 * result + type.hashCode();
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        FieldDeclarationNode other = (FieldDeclarationNode) obj;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!type.equals(other.type))
-            return false;
-        return true;
     }
 }

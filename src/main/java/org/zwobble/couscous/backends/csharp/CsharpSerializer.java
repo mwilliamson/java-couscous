@@ -8,6 +8,8 @@ import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class CsharpSerializer implements NodeVisitor {
     public static String serialize(Node node) {
         SourceCodeWriter writer = new SourceCodeWriter(
@@ -286,6 +288,10 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeStatement(() -> {
             writer.writeKeyword("internal");
             writer.writeSpace();
+            if (declaration.isStatic()) {
+                writer.writeKeyword("static");
+                writer.writeSpace();
+            }
             writeTypeReference(declaration.getType());
             writer.writeSpace();
             writer.writeIdentifier(declaration.getName());
@@ -308,6 +314,7 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeIdentifier(classNode.getSimpleName());
                 writer.startBlock();
                 writeAll(classNode.getFields());
+                writeStaticConstructor(classNode);
                 writeConstructor(classNode, classNode.getConstructor());
                 writeAll(classNode.getMethods());
                 writer.endBlock();
@@ -315,6 +322,18 @@ public class CsharpSerializer implements NodeVisitor {
 
             writer.endBlock();
         });
+    }
+
+    private void writeStaticConstructor(ClassNode classNode) {
+        if (!classNode.getStaticConstructor().isEmpty()) {
+            writer.writeStatement(() -> {
+                writer.writeKeyword("static");
+                writer.writeSpace();
+                writer.writeIdentifier(classNode.getSimpleName());
+                writeFormalArguments(list());
+                writeBlock(classNode.getStaticConstructor());
+            });
+        }
     }
 
     private void writeConstructor(ClassNode classNode, ConstructorNode constructor) {

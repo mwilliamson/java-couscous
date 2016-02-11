@@ -149,6 +149,15 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void staticFieldAccessSeparatesReceiverAndNameWithDot() {
+        String output = serialize(fieldAccess(
+            TypeName.of("X"),
+            "y",
+            TypeName.of("Y")));
+        assertEquals("X.y", output);
+    }
+
+    @Test
     public void returnStatementUsesReturnStatement() {
         String output = serialize(returns(literal(true)));
         assertEquals("return true;\n", output);
@@ -254,6 +263,18 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void staticConstructorHasSerializedBody() {
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .staticConstructor(list(expressionStatement(literal(true))))
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals(
+            "namespace com.example {\n    internal class Example {\n        static Example() {\n            true;\n        }\n    }\n}\n", output);
+    }
+
+    @Test
     public void constructorHasSerializedBody() {
         ConstructorNode constructor = ConstructorNode.constructor(
             list(formalArg(var(TestIds.ANY_ID, "x", TypeName.of("X")))),
@@ -271,12 +292,13 @@ public class CsharpSerializerTests {
     @Test
     public void classWithFields() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
-            .field("x", TypeName.of("X"))
+            .staticField("x", TypeName.of("X"))
+            .field("y", TypeName.of("Y"))
             .build();
 
         String output = serialize(classNode);
 
-        assertEquals("namespace com.example {\n    internal class Example {\n        internal X x;\n    }\n}\n", output);
+        assertEquals("namespace com.example {\n    internal class Example {\n        internal static X x;\n        internal Y y;\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {

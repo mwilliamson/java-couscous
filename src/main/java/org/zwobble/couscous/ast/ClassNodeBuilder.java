@@ -4,28 +4,36 @@ import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.values.UnitValue;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Collections.emptySet;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClassNodeBuilder {
     private final TypeName name;
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
+    private List<StatementNode> staticConstructor;
     private Optional<ConstructorNode> constructor;
     private final ImmutableList.Builder<MethodNode> methods;
 
     public ClassNodeBuilder(TypeName name) {
         this.name = name;
         this.fields = ImmutableList.builder();
+        staticConstructor = list();
         this.constructor = Optional.empty();
         this.methods = ImmutableList.builder();
     }
 
     public ClassNodeBuilder(String name) {
         this(TypeName.of(name));
+    }
+
+    public ClassNodeBuilder staticField(String name, TypeName type) {
+        return field(FieldDeclarationNode.staticField(name, type));
     }
 
     public ClassNodeBuilder field(String name, TypeName type) {
@@ -44,6 +52,11 @@ public class ClassNodeBuilder {
     
     public ClassNodeBuilder constructor(Function<MethodBuilder<ConstructorNode>, MethodBuilder<ConstructorNode>> build) {
         return constructor(build.apply(constructorBuilder()).build());
+    }
+
+    public ClassNodeBuilder staticConstructor(List<StatementNode> body) {
+        this.staticConstructor = body;
+        return this;
     }
 
     private MethodBuilder<ConstructorNode> constructorBuilder() {
@@ -86,6 +99,7 @@ public class ClassNodeBuilder {
             name,
             emptySet(),
             fields.build(),
+            staticConstructor,
             constructor.orElse(ConstructorNode.DEFAULT),
             methods.build());
     }
