@@ -24,6 +24,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
+import static org.zwobble.couscous.ast.FieldDeclarationNode.staticField;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
@@ -71,6 +72,16 @@ public class JavaReaderTests {
         
         assertEquals(
             list(field("name", TypeName.of("java.lang.String"))),
+            classNode.getFields());
+    }
+
+    @Test
+    public void canReadStaticFieldDeclarations() {
+        ClassNode classNode = readClass(
+            "private static String name;");
+
+        assertEquals(
+            list(staticField("name", TypeName.of("java.lang.String"))),
             classNode.getFields());
     }
     

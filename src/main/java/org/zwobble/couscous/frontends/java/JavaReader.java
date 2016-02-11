@@ -295,7 +295,7 @@ public class JavaReader {
         List<VariableDeclarationFragment> fragments = field.fragments();
         TypeName type = typeOf(field.getType());
         return eagerMap(fragments, fragment ->
-            field(fragment.getName().getIdentifier(), type));
+            field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
     }
 
     private List<CallableNode> readMethods(Scope scope, List<MethodDeclaration> methods) {
