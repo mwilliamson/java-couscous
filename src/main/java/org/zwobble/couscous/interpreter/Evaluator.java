@@ -55,7 +55,8 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         assignment.getTarget().accept(new AssignableExpressionNodeVisitor(){
             @Override
             public void visit(FieldAccessNode fieldAccess) {
-                InterpreterValue left = eval(fieldAccess.getLeft());
+                // TODO: handle static receiver
+                InterpreterValue left = eval(((InstanceReceiver)fieldAccess.getLeft()).getExpression());
                 left.setField(fieldAccess.getFieldName(), value);
             }
             
@@ -117,7 +118,8 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
 
     @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
-        InterpreterValue left = eval(fieldAccess.getLeft());
+        // TODO: handle static receiver
+        InterpreterValue left = eval(((InstanceReceiver)fieldAccess.getLeft()).getExpression());
         return left.getField(fieldAccess.getFieldName());
     }
 

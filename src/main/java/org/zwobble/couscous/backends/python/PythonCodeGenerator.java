@@ -290,7 +290,7 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
-            return pythonAttributeAccess(generateExpression(fieldAccess.getLeft()), fieldAccess.getFieldName());
+            return pythonAttributeAccess(generateReceiver(fieldAccess.getLeft()), fieldAccess.getFieldName());
         }
 
         @Override

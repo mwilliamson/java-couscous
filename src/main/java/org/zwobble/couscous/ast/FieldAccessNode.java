@@ -4,28 +4,49 @@ import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
+import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
+import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
+
 public class FieldAccessNode implements AssignableExpressionNode {
     public static FieldAccessNode fieldAccess(
             ExpressionNode left,
             String fieldName,
-            TypeName type) {
+            TypeName type)
+    {
+        return fieldAccess(instanceReceiver(left), fieldName, type);
+    }
+
+    public static FieldAccessNode fieldAccess(
+        TypeName left,
+        String fieldName,
+        TypeName type)
+    {
+        return fieldAccess(staticReceiver(left), fieldName, type);
+    }
+
+    public static FieldAccessNode fieldAccess(
+        Receiver left,
+        String fieldName,
+        TypeName type)
+    {
         return new FieldAccessNode(left, fieldName, type);
     }
     
-    private final ExpressionNode left;
+    private final Receiver left;
     private final String fieldName;
     private final TypeName type;
     
     public FieldAccessNode(
-            ExpressionNode left,
-            String fieldName,
-            TypeName type) {
+        Receiver left,
+        String fieldName,
+        TypeName type)
+    {
         this.left = left;
         this.fieldName = fieldName;
         this.type = type;
     }
     
-    public ExpressionNode getLeft() {
+    public Receiver getLeft() {
         return left;
     }
     
@@ -45,7 +66,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new FieldAccessNode(
-            transformer.transformExpression(left),
+            transformer.transformReceiver(left),
             fieldName,
             transformer.transform(type));
     }
