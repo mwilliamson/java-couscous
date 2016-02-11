@@ -16,14 +16,9 @@ import static org.zwobble.couscous.interpreter.Evaluator.evalCondition;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
     public static InterpreterValue callMethod(Environment environment, CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
-        final org.zwobble.couscous.interpreter.Environment innerEnvironment = buildEnvironment(environment, method, thisValue, arguments);
-        for (final org.zwobble.couscous.ast.StatementNode statement : method.getBody()) {
-            final java.util.Optional<org.zwobble.couscous.interpreter.values.InterpreterValue> result = exec(innerEnvironment, statement);
-            if (result.isPresent()) {
-                return result.get();
-            }
-        }
-        return UnitInterpreterValue.UNIT;
+        Environment innerEnvironment = buildEnvironment(environment, method, thisValue, arguments);
+        return exec(innerEnvironment, method.getBody())
+            .orElse(UnitInterpreterValue.UNIT);
     }
 
     private static Environment buildEnvironment(final Environment environment, final CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
@@ -44,6 +39,16 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
                     return Stream.of(localVariableDeclaration);
                 }
             }));
+    }
+
+    public static Optional<InterpreterValue> exec(Environment environment, Iterable<StatementNode> statements) {
+        for (StatementNode statement : statements) {
+            Optional<InterpreterValue> result = exec(environment, statement);
+            if (result.isPresent()) {
+                return result;
+            }
+        }
+        return Optional.empty();
     }
 
     public static Optional<InterpreterValue> exec(Environment environment, StatementNode statement) {

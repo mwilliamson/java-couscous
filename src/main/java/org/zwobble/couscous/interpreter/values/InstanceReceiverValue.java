@@ -17,4 +17,14 @@ public class InstanceReceiverValue implements ReceiverValue {
         ConcreteType type = value.getType();
         return type.callMethod(environment, value, signature, arguments);
     }
+
+    @Override
+    public InterpreterValue getField(String fieldName) {
+        return value.getField(fieldName);
+    }
+
+    @Override
+    public void setField(String fieldName, InterpreterValue value) {
+        this.value.setField(fieldName, value);
+    }
 }

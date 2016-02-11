@@ -1,20 +1,16 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import org.zwobble.couscous.interpreter.InterpreterTypes;
-import org.zwobble.couscous.interpreter.errors.NoSuchField;
-import org.zwobble.couscous.interpreter.errors.UnboundField;
 import org.zwobble.couscous.values.PrimitiveValue;
+
+import java.util.Optional;
 
 public class ObjectInterpreterValue implements InterpreterValue {
     private final ConcreteType type;
-    private final Map<String, InterpreterValue> fields;
+    private final InterpreterFields fields;
     
     public ObjectInterpreterValue(ConcreteType type) {
         this.type = type;
-        this.fields = new HashMap<>();
+        this.fields = new InterpreterFields(type);
     }
     
     @Override
@@ -29,19 +25,11 @@ public class ObjectInterpreterValue implements InterpreterValue {
     
     @Override
     public InterpreterValue getField(String fieldName) {
-        type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
-        if (fields.containsKey(fieldName)) {
-            return fields.get(fieldName);
-        } else {
-            throw new UnboundField(fieldName);
-        }
+        return fields.getField(fieldName);
     }
     
     @Override
     public void setField(String fieldName, InterpreterValue value) {
-        FieldValue field = type.getField(fieldName)
-            .orElseThrow(() -> new NoSuchField(fieldName));
-        InterpreterTypes.checkIsInstance(field.getType(), value);
-        fields.put(fieldName, value);
+        fields.setField(fieldName, value);
     }
 }

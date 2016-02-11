@@ -1,10 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
@@ -18,7 +15,6 @@ import static java.util.stream.Collectors.toMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ConcreteType {
-    
     public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {
         return new Builder<>(interpreterValueType, reference);
     }
@@ -30,7 +26,7 @@ public class ConcreteType {
     public static ConcreteType.Builder<ObjectInterpreterValue> classBuilder(String name) {
         return builder(ObjectInterpreterValue.class, name);
     }
-    
+
     public static class Builder<T> {
         private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
         private MethodValue constructor = new MethodValue(list(), (environment, arguments) -> InterpreterValues.UNIT);
@@ -88,6 +84,7 @@ public class ConcreteType {
                 name,
                 Collections.emptySet(),
                 fields.build(),
+                list(),
                 constructor,
                 methods.build(),
                 staticMethods.build());
@@ -115,7 +112,14 @@ public class ConcreteType {
                     return Executor.callMethod(environment, method, Optional.empty(), arguments);
                 });
             }));
-        return new ConcreteType(classNode.getName(), classNode.getSuperTypes(), fields, constructor, methods, staticMethods);
+        return new ConcreteType(
+            classNode.getName(),
+            classNode.getSuperTypes(),
+            fields,
+            classNode.getStaticConstructor(),
+            constructor,
+            methods,
+            staticMethods);
     }
 
     private static List<TypeName> getArgumentTypes(List<FormalArgumentNode> arguments) {
@@ -124,6 +128,7 @@ public class ConcreteType {
     private final TypeName name;
     private final Set<TypeName> superTypes;
     private final Map<String, FieldValue> fields;
+    private final List<StatementNode> staticConstructor;
     private final MethodValue constructor;
     private final Map<MethodSignature, MethodValue> methods;
     private final Map<MethodSignature, StaticMethodValue> staticMethods;
@@ -132,13 +137,14 @@ public class ConcreteType {
         TypeName name,
         Set<TypeName> superTypes,
         Map<String, FieldValue> fields,
-        MethodValue constructor,
+        List<StatementNode> staticConstructor, MethodValue constructor,
         Map<MethodSignature, MethodValue> methods,
         Map<MethodSignature, StaticMethodValue> staticMethods)
     {
         this.name = name;
         this.superTypes = superTypes;
         this.fields = fields;
+        this.staticConstructor = staticConstructor;
         this.constructor = constructor;
         this.methods = methods;
         this.staticMethods = staticMethods;
@@ -155,7 +161,11 @@ public class ConcreteType {
     public Optional<FieldValue> getField(String fieldName) {
         return Optional.ofNullable(fields.get(fieldName));
     }
-    
+
+    public List<StatementNode> getStaticConstructor() {
+        return staticConstructor;
+    }
+
     public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, MethodSignature signature, List<InterpreterValue> arguments) {
         MethodValue method = findMethod(methods, signature, arguments);
         return method.apply(environment, MethodCallArguments.of(receiver, new PositionalArguments(arguments)));

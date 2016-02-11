@@ -1,13 +1,15 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.interpreter.JavaProject;
+import org.zwobble.couscous.interpreter.MapBackedProject;
+import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.errors.*;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
@@ -39,11 +41,6 @@ import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class EvaluatorTests extends BackendEvalTests {
-    @Ignore
-    @Test
-    public void staticConstructorIsExecutedOnReference() {
-    }
-
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
         FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));

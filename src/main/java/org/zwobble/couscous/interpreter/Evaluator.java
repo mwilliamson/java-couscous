@@ -55,8 +55,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         assignment.getTarget().accept(new AssignableExpressionNodeVisitor(){
             @Override
             public void visit(FieldAccessNode fieldAccess) {
-                // TODO: handle static receiver
-                InterpreterValue left = eval(((InstanceReceiver)fieldAccess.getLeft()).getExpression());
+                ReceiverValue left = evalReceiver(fieldAccess.getLeft());
                 left.setField(fieldAccess.getFieldName(), value);
             }
             
@@ -91,24 +90,10 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return evalReceiver(methodCall.getReceiver())
             .callMethod(environment, signature, arguments);
     }
-
-    private ReceiverValue evalReceiver(Receiver receiver) {
-        return receiver.accept(new Receiver.Mapper<ReceiverValue>() {
-            @Override
-            public ReceiverValue visit(ExpressionNode receiver) {
-                return new InstanceReceiverValue(eval(receiver));
-            }
-
-            @Override
-            public ReceiverValue visit(TypeName receiver) {
-                return new StaticReceiverValue(environment.findClass(receiver));
-            }
-        });
-    }
     
     @Override
     public InterpreterValue visit(ConstructorCallNode call) {
-        ConcreteType clazz = environment.findClass(call.getType());
+        StaticReceiverValue clazz = environment.findClass(call.getType());
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
         return clazz.callConstructor(environment, arguments);
     }
@@ -120,8 +105,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
 
     @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
-        // TODO: handle static receiver
-        InterpreterValue left = eval(((InstanceReceiver)fieldAccess.getLeft()).getExpression());
+        ReceiverValue left = evalReceiver(fieldAccess.getLeft());
         return left.getField(fieldAccess.getFieldName());
     }
 
@@ -172,5 +156,19 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return arguments.stream()
             .map(argument -> eval(argument))
             .collect(Collectors.toList());
+    }
+
+    private ReceiverValue evalReceiver(Receiver receiver) {
+        return receiver.accept(new Receiver.Mapper<ReceiverValue>() {
+            @Override
+            public ReceiverValue visit(ExpressionNode receiver) {
+                return new InstanceReceiverValue(eval(receiver));
+            }
+
+            @Override
+            public ReceiverValue visit(TypeName receiver) {
+                return environment.findClass(receiver);
+            }
+        });
     }
 }

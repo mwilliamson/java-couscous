@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface ReceiverValue {
     InterpreterValue callMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments);
+    InterpreterValue getField(String fieldName);
+    void setField(String fieldName, InterpreterValue value);
 }

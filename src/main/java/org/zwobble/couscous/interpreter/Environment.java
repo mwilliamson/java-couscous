@@ -1,24 +1,29 @@
 package org.zwobble.couscous.interpreter;
 
-import java.util.Map;
-import java.util.Optional;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.interpreter.errors.UnboundVariable;
 import org.zwobble.couscous.interpreter.errors.VariableNotInScope;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
+import org.zwobble.couscous.interpreter.values.StaticReceiverValue;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 import static java.util.stream.Collectors.toMap;
 
 public class Environment {
-    private final Project project;
+    private final Map<TypeName, StaticReceiverValue> types;
     private final Optional<InterpreterValue> thisValue;
     private final Map<Identifier, VariableEntry> stackFrame;
-    
+    private final Project project;
+
     public Environment(Project project, Optional<InterpreterValue> thisValue, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
         this.project = project;
+        this.types = new HashMap<>();
         this.thisValue = thisValue;
         this.stackFrame = stackFrame.entrySet().stream()
             .collect(toMap(
@@ -46,8 +51,13 @@ public class Environment {
         put(variable.getDeclaration().getId(), value);
     }
     
-    public ConcreteType findClass(TypeName className) {
-        return project.findClass(className);
+    public StaticReceiverValue findClass(TypeName className) {
+        if (!types.containsKey(className)) {
+            StaticReceiverValue value = new StaticReceiverValue(project.findClass(className));
+            types.put(className, value);
+            value.callStaticConstructor(this);
+        }
+        return types.get(className);
     }
     
     public Environment withStackFrame(Optional<InterpreterValue> thisValue, Map<VariableDeclaration, Optional<InterpreterValue>> stackFrame) {
