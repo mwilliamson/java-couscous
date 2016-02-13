@@ -6,6 +6,8 @@ import org.zwobble.couscous.util.ExtraLists;
 
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class TypeDeclarationBody {
     public static Builder builder() {
         return new Builder();
@@ -29,8 +31,8 @@ public class TypeDeclarationBody {
             (isStatic ? staticConstructor : instanceInitializers).addAll(statements);
         }
 
-        public void addInitializer(StatementNode statement) {
-            staticConstructor.add(statement);
+        public void addInitializer(boolean isStatic, StatementNode statement) {
+            addInitializer(isStatic, list(statement));
         }
 
         public void constructor(ConstructorNode constructor) {

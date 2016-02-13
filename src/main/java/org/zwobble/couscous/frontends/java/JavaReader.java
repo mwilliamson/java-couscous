@@ -28,6 +28,8 @@ import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
+import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
+import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
@@ -239,7 +241,6 @@ public class JavaReader {
                 .ifPresent(method -> readMethod(body, scope, method));
 
             Casts.tryCast(Initializer.class, declaration)
-                // TODO: handle instance initializer
                 .ifPresent(initializer -> body.addInitializer(
                     Modifier.isStatic(initializer.getModifiers()),
                     readStatement(scope, initializer.getBody())));
@@ -256,11 +257,16 @@ public class JavaReader {
         TypeName type = typeOf(field.getType());
         fragments.forEach(fragment -> {
             builder.field(field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
-            // TODO: handle instance initializer
             if (fragment.getInitializer() != null) {
                 ExpressionNode value = readExpression(scope, type, fragment.getInitializer());
                 String name = fragment.getName().getIdentifier();
-                builder.addInitializer(assignStatement(fieldAccess(declaringType, name, type), value));
+                boolean isStatic = Modifier.isStatic(field.getModifiers());
+                Receiver receiver = isStatic
+                    ? staticReceiver(declaringType)
+                    : instanceReceiver(thisReference(declaringType));
+
+                StatementNode assignment = assignStatement(fieldAccess(receiver, name, type), value);
+                builder.addInitializer(isStatic,assignment);
             }
         });
 

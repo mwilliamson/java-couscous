@@ -1,7 +1,5 @@
 ## TODO
 
-* Field initialisers
-
 * Type names for generics
 
 * Type erasure
