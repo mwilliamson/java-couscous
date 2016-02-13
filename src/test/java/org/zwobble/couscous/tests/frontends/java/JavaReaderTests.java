@@ -637,6 +637,16 @@ public class JavaReaderTests {
                 "else { return 1; }"),
             readStatements("int", "switch (\"one\") { case \"one\": case \"two\": return 0; default: return 1; }"));
     }
+
+    @Test
+    public void switchStatementWithoutDefaultIsReadAsIfStatementWithoutElseStatement() {
+        assertEquals(
+            readStatements(
+                "int",
+                "String _couscous_tmp_0 = \"one\";" +
+                "if (_couscous_tmp_0.equals(\"one\")) { return 0; } return 1;"),
+            readStatements("int", "switch (\"one\") { case \"one\": return 0; } return 1;"));
+    }
     
     @Test
     public void canDeclareConstructor() {
