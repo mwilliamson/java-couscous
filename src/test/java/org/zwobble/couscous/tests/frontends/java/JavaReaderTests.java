@@ -590,6 +590,18 @@ public class JavaReaderTests {
     }
 
     @Test
+    public void canReadIfStatementsWithoutElse() {
+        assertEquals(
+            list(
+                ifStatement(
+                    literal(true),
+                    list(returns(literal(1))),
+                    list()),
+                returns(literal(2))),
+            readStatements("int", "if (true) { return 1; } return 2;"));
+    }
+
+    @Test
     public void canReadWhileLoops() {
         assertEquals(
             whileLoop(

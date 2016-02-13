@@ -89,10 +89,13 @@ class JavaStatementReader {
     }
 
     private StatementNode readIfStatement(IfStatement statement) {
+        List<StatementNode> falseBranch = statement.getElseStatement() == null
+            ? list()
+            : readStatement(statement.getElseStatement());
         return ifStatement(
             readExpression(BooleanValue.REF, statement.getExpression()),
             readStatement(statement.getThenStatement()),
-            readStatement(statement.getElseStatement()));
+            falseBranch);
     }
 
     private List<StatementNode> readSwitchStatement(SwitchStatement switchStatement) {
