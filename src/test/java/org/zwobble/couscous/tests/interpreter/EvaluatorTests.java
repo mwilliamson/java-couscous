@@ -135,7 +135,7 @@ public class EvaluatorTests extends BackendEvalTests {
     }
     
     @Test
-    public void cannotGetValueOfUnbounddField() {
+    public void cannotGetValueOfUnboundField() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .field("value", IntegerValue.REF)
             .build();
