@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast.sugar;
 
 import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.util.ExtraLists;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class TypeDeclarationBody {
     public static class Builder {
         private final ImmutableList.Builder<FieldDeclarationNode> fields = ImmutableList.builder();
         private final ImmutableList.Builder<StatementNode> staticConstructor = ImmutableList.builder();
+        private final ImmutableList.Builder<StatementNode> instanceInitializers = ImmutableList.builder();
         private ConstructorNode constructor = ConstructorNode.DEFAULT;
         private final ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
 
@@ -23,11 +25,11 @@ public class TypeDeclarationBody {
             fields.add(field);
         }
 
-        public void addStaticInitializer(List<StatementNode> statements) {
-            staticConstructor.addAll(statements);
+        public void addInitializer(boolean isStatic, List<StatementNode> statements) {
+            (isStatic ? staticConstructor : instanceInitializers).addAll(statements);
         }
 
-        public void addStaticInitializer(StatementNode statement) {
+        public void addInitializer(StatementNode statement) {
             staticConstructor.add(statement);
         }
 
@@ -43,7 +45,9 @@ public class TypeDeclarationBody {
             return new TypeDeclarationBody(
                 fields.build(),
                 staticConstructor.build(),
-                constructor,
+                ConstructorNode.constructor(
+                    constructor.getArguments(),
+                    ExtraLists.concat(instanceInitializers.build(), constructor.getBody())),
                 methods.build());
         }
     }

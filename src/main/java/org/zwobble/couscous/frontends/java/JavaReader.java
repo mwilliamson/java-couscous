@@ -240,7 +240,9 @@ public class JavaReader {
 
             Casts.tryCast(Initializer.class, declaration)
                 // TODO: handle instance initializer
-                .ifPresent(initializer -> body.addStaticInitializer(readStatement(scope, initializer.getBody())));
+                .ifPresent(initializer -> body.addInitializer(
+                    Modifier.isStatic(initializer.getModifiers()),
+                    readStatement(scope, initializer.getBody())));
 
             Casts.tryCast(FieldDeclaration.class, declaration)
                 .ifPresent(field -> readField(body, scope, type, field));
@@ -258,7 +260,7 @@ public class JavaReader {
             if (fragment.getInitializer() != null) {
                 ExpressionNode value = readExpression(scope, type, fragment.getInitializer());
                 String name = fragment.getName().getIdentifier();
-                builder.addStaticInitializer(assignStatement(fieldAccess(declaringType, name, type), value));
+                builder.addInitializer(assignStatement(fieldAccess(declaringType, name, type), value));
             }
         });
 

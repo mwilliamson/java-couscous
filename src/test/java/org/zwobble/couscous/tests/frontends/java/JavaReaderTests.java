@@ -649,7 +649,36 @@ public class JavaReaderTests {
     }
 
     @Test
-    public void canDeclareStaticConstructor() {
+    public void instanceInitializerIsPrependedToConstructor() {
+        ClassNode classNode = readClass(
+            "private final String name;" +
+            "private final int year;" +
+            "public Example() {" +
+            "    this.name = \"Flaws\";" +
+            "}" +
+            "{ year = 2013; }");
+
+        ConstructorNode constructor = classNode.getConstructor();
+
+        assertEquals(
+            list(
+                assignStatement(
+                    fieldAccess(
+                        thisReference(TypeName.of("com.example.Example")),
+                        "year",
+                        IntegerValue.REF),
+                    literal(2013)),
+                assignStatement(
+                    fieldAccess(
+                        thisReference(TypeName.of("com.example.Example")),
+                        "name",
+                        StringValue.REF),
+                    literal("Flaws"))),
+            constructor.getBody());
+    }
+
+    @Test
+    public void canDeclareStaticInitializer() {
         ClassNode classNode = readClass(
             "private static final String name;" +
             "static {" +
