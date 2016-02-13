@@ -10,7 +10,7 @@ public class ObjectInterpreterValue implements InterpreterValue {
     
     public ObjectInterpreterValue(ConcreteType type) {
         this.type = type;
-        this.fields = new InterpreterFields(type);
+        this.fields = InterpreterFields.forInstanceOf(type);
     }
     
     @Override

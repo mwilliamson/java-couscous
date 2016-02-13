@@ -3,12 +3,18 @@ package org.zwobble.couscous.interpreter.values;
 import org.zwobble.couscous.ast.TypeName;
 
 public final class FieldValue {
+    private final boolean isStatic;
     private final String name;
     private final TypeName type;
 
-    public FieldValue(final String name, final TypeName type) {
+    public FieldValue(final boolean isStatic, final String name, final TypeName type) {
+        this.isStatic = isStatic;
         this.name = name;
         this.type = type;
+    }
+
+    public boolean isStatic() {
+        return isStatic;
     }
 
     public String getName() {
@@ -19,33 +25,33 @@ public final class FieldValue {
         return this.type;
     }
 
-    @java.lang.Override
-    public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof FieldValue)) return false;
-        final FieldValue other = (FieldValue)o;
-        final java.lang.Object this$name = this.getName();
-        final java.lang.Object other$name = other.getName();
-        if (this$name == null ? other$name != null : !this$name.equals(other$name)) return false;
-        final java.lang.Object this$type = this.getType();
-        final java.lang.Object other$type = other.getType();
-        if (this$type == null ? other$type != null : !this$type.equals(other$type)) return false;
-        return true;
+    @Override
+    public String toString() {
+        return "FieldValue(" +
+            "isStatic=" + isStatic +
+            ", name='" + name + '\'' +
+            ", type=" + type +
+            ')';
     }
 
-    @java.lang.Override
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FieldValue that = (FieldValue) o;
+
+        if (isStatic != that.isStatic) return false;
+        if (!name.equals(that.name)) return false;
+        return type.equals(that.type);
+
+    }
+
+    @Override
     public int hashCode() {
-        final int PRIME = 59;
-        int result = 1;
-        final java.lang.Object $name = this.getName();
-        result = result * PRIME + ($name == null ? 43 : $name.hashCode());
-        final java.lang.Object $type = this.getType();
-        result = result * PRIME + ($type == null ? 43 : $type.hashCode());
+        int result = (isStatic ? 1 : 0);
+        result = 31 * result + name.hashCode();
+        result = 31 * result + type.hashCode();
         return result;
-    }
-
-    @java.lang.Override
-    public java.lang.String toString() {
-        return "FieldValue(name=" + this.getName() + ", type=" + this.getType() + ")";
     }
 }

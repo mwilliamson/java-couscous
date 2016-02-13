@@ -2,10 +2,7 @@ package org.zwobble.couscous.tests.interpreter;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.MapBackedProject;
@@ -169,6 +166,27 @@ public class EvaluatorTests extends BackendEvalTests {
                     classNode.getName(),
                     list())));
         
+        assertEquals(new NoSuchField("value"), exception);
+    }
+
+    @Test
+    public void cannotSetValueOfInstanceFieldAsThoughItIsAStaticField() {
+        TypeName type = TypeName.of("com.example.Example");
+        ClassNode classNode = ClassNode.builder(type)
+            .field("value", IntegerValue.REF)
+            .constructor(constructor -> constructor
+                .statement(assignStatement(
+                    fieldAccess(type, "value", IntegerValue.REF),
+                    literal(42))))
+            .build();
+
+        NoSuchField exception = assertThrows(NoSuchField.class,
+            () -> evalExpression(
+                list(classNode),
+                constructorCall(
+                    classNode.getName(),
+                    list())));
+
         assertEquals(new NoSuchField("value"), exception);
     }
     

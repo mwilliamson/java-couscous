@@ -12,7 +12,7 @@ public class StaticReceiverValue implements ReceiverValue {
 
     public StaticReceiverValue(ConcreteType type) {
         this.type = type;
-        this.fields = new InterpreterFields(type);
+        this.fields = InterpreterFields.forClass(type);
     }
 
     @Override

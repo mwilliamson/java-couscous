@@ -41,7 +41,7 @@ public class ConcreteType {
         }
 
         public Builder<T> field(String name, TypeName type) {
-            fields.put(name, new FieldValue(name, type));
+            fields.put(name, new FieldValue(false, name, type));
             return this;
         }
 
@@ -92,7 +92,10 @@ public class ConcreteType {
     }
     
     public static ConcreteType fromNode(ClassNode classNode) {
-        Map<String, FieldValue> fields = classNode.getFields().stream().collect(toMap(field -> field.getName(), field -> new FieldValue(field.getName(), field.getType())));
+        Map<String, FieldValue> fields = classNode.getFields().stream()
+            .collect(toMap(
+                field -> field.getName(),
+                field -> new FieldValue(field.isStatic(), field.getName(), field.getType())));
         MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
         Map<MethodSignature, MethodValue> methods = classNode.getMethods()
             .stream()
@@ -158,8 +161,9 @@ public class ConcreteType {
         return superTypes;
     }
 
-    public Optional<FieldValue> getField(String fieldName) {
-        return Optional.ofNullable(fields.get(fieldName));
+    public Optional<FieldValue> getField(boolean isStatic, String fieldName) {
+        return Optional.ofNullable(fields.get(fieldName))
+            .filter(field -> field.isStatic() == isStatic);
     }
 
     public List<StatementNode> getStaticConstructor() {

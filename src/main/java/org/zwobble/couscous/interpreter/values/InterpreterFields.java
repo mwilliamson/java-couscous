@@ -8,18 +8,26 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InterpreterFields {
-    // TODO: distinguish static and non-static fields
+    public static InterpreterFields forClass(ConcreteType type) {
+        return new InterpreterFields(true, type);
+    }
 
+    public static InterpreterFields forInstanceOf(ConcreteType type) {
+        return new InterpreterFields(false, type);
+    }
+
+    private final boolean isStatic;
     private final ConcreteType type;
     private final Map<String, InterpreterValue> fields;
 
-    public InterpreterFields(ConcreteType type) {
+    private InterpreterFields(boolean isStatic, ConcreteType type) {
+        this.isStatic = isStatic;
         this.type = type;
         this.fields = new HashMap<>();
     }
 
     public InterpreterValue getField(String fieldName) {
-        type.getField(fieldName).orElseThrow(() -> new NoSuchField(fieldName));
+        getFieldDefinition(fieldName);
         if (fields.containsKey(fieldName)) {
             return fields.get(fieldName);
         } else {
@@ -28,9 +36,13 @@ public class InterpreterFields {
     }
 
     public void setField(String fieldName, InterpreterValue value) {
-        FieldValue field = type.getField(fieldName)
-            .orElseThrow(() -> new NoSuchField(fieldName));
+        FieldValue field = getFieldDefinition(fieldName);
         InterpreterTypes.checkIsInstance(field.getType(), value);
         fields.put(fieldName, value);
+    }
+
+    private FieldValue getFieldDefinition(String fieldName) {
+        return type.getField(isStatic, fieldName)
+            .orElseThrow(() -> new NoSuchField(fieldName));
     }
 }
