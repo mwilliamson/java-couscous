@@ -1,5 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
+import org.zwobble.couscous.ast.FieldDeclarationNode;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.errors.UnboundField;
@@ -36,12 +37,12 @@ public class InterpreterFields {
     }
 
     public void setField(String fieldName, InterpreterValue value) {
-        FieldValue field = getFieldDefinition(fieldName);
+        FieldDeclarationNode field = getFieldDefinition(fieldName);
         InterpreterTypes.checkIsInstance(field.getType(), value);
         fields.put(fieldName, value);
     }
 
-    private FieldValue getFieldDefinition(String fieldName) {
+    private FieldDeclarationNode getFieldDefinition(String fieldName) {
         return type.getField(isStatic, fieldName)
             .orElseThrow(() -> new NoSuchField(fieldName));
     }

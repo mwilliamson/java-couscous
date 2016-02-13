@@ -28,7 +28,7 @@ public class ConcreteType {
     }
 
     public static class Builder<T> {
-        private final ImmutableMap.Builder<String, FieldValue> fields = ImmutableMap.builder();
+        private final ImmutableMap.Builder<String, FieldDeclarationNode> fields = ImmutableMap.builder();
         private MethodValue constructor = new MethodValue(list(), (environment, arguments) -> InterpreterValues.UNIT);
         private final ImmutableMap.Builder<MethodSignature, MethodValue> methods = ImmutableMap.builder();
         private final ImmutableMap.Builder<MethodSignature, StaticMethodValue> staticMethods = ImmutableMap.builder();
@@ -41,7 +41,7 @@ public class ConcreteType {
         }
 
         public Builder<T> field(String name, TypeName type) {
-            fields.put(name, new FieldValue(false, name, type));
+            fields.put(name, FieldDeclarationNode.field(name, type));
             return this;
         }
 
@@ -92,10 +92,10 @@ public class ConcreteType {
     }
     
     public static ConcreteType fromNode(ClassNode classNode) {
-        Map<String, FieldValue> fields = classNode.getFields().stream()
+        Map<String, FieldDeclarationNode> fields = classNode.getFields().stream()
             .collect(toMap(
                 field -> field.getName(),
-                field -> new FieldValue(field.isStatic(), field.getName(), field.getType())));
+                field -> field));
         MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
         Map<MethodSignature, MethodValue> methods = classNode.getMethods()
             .stream()
@@ -130,7 +130,7 @@ public class ConcreteType {
     }
     private final TypeName name;
     private final Set<TypeName> superTypes;
-    private final Map<String, FieldValue> fields;
+    private final Map<String, FieldDeclarationNode> fields;
     private final List<StatementNode> staticConstructor;
     private final MethodValue constructor;
     private final Map<MethodSignature, MethodValue> methods;
@@ -139,7 +139,7 @@ public class ConcreteType {
     private ConcreteType(
         TypeName name,
         Set<TypeName> superTypes,
-        Map<String, FieldValue> fields,
+        Map<String, FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor, MethodValue constructor,
         Map<MethodSignature, MethodValue> methods,
         Map<MethodSignature, StaticMethodValue> staticMethods)
@@ -161,7 +161,7 @@ public class ConcreteType {
         return superTypes;
     }
 
-    public Optional<FieldValue> getField(boolean isStatic, String fieldName) {
+    public Optional<FieldDeclarationNode> getField(boolean isStatic, String fieldName) {
         return Optional.ofNullable(fields.get(fieldName))
             .filter(field -> field.isStatic() == isStatic);
     }
