@@ -7,7 +7,9 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
+import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.Casts;
 import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
@@ -229,110 +231,40 @@ public class JavaReader {
         return ((AbstractTypeDeclaration)node).resolveBinding();
     }
 
-    private static class TypeDeclarationBody {
-        private final List<FieldDeclarationNode> fields;
-        private final List<StatementNode> staticConstructor;
-        private final ConstructorNode constructor;
-        private final List<MethodNode> methods;
-
-        public TypeDeclarationBody(
-            List<FieldDeclarationNode> fields,
-            List<StatementNode> staticConstructor, ConstructorNode constructor,
-            List<MethodNode> methods)
-        {
-            this.fields = fields;
-            this.staticConstructor = staticConstructor;
-            this.constructor = constructor;
-            this.methods = methods;
-        }
-
-        public List<FieldDeclarationNode> getFields() {
-            return fields;
-        }
-
-        public List<StatementNode> getStaticConstructor() {
-            return staticConstructor;
-        }
-
-        public ConstructorNode getConstructor() {
-            return constructor;
-        }
-
-        public List<MethodNode> getMethods() {
-            return methods;
-        }
-    }
-
     private TypeDeclarationBody readTypeDeclarationBody(Scope scope, TypeName type, List<Object> bodyDeclarations) {
-        ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
-        ConstructorNode constructor = ConstructorNode.DEFAULT;
+        TypeDeclarationBody.Builder body = TypeDeclarationBody.builder();
 
-        for (CallableNode callable : readMethods(scope, ofType(bodyDeclarations, MethodDeclaration.class))) {
-            if (callable instanceof ConstructorNode) {
-                constructor = (ConstructorNode) callable;
-            } else {
-                methods.add((MethodNode) callable);
-            }
+        for (Object declaration : bodyDeclarations) {
+            Casts.tryCast(MethodDeclaration.class, declaration)
+                .ifPresent(method -> readMethod(body, scope, method));
+
+            Casts.tryCast(Initializer.class, declaration)
+                // TODO: handle instance initializer
+                .ifPresent(initializer -> body.addStaticInitializer(readStatement(scope, initializer.getBody())));
+
+            Casts.tryCast(FieldDeclaration.class, declaration)
+                .ifPresent(field -> readField(body, scope, type, field));
         }
-        // TODO: handle instance initializers
-        List<StatementNode> staticConstructor = readStaticConstructor(scope, type, bodyDeclarations);
-        return new TypeDeclarationBody(
-            readFields(ofType(bodyDeclarations, FieldDeclaration.class)),
-            staticConstructor,
-            constructor,
-            methods.build());
+        return body.build();
     }
 
-    private List<StatementNode> readStaticConstructor(Scope scope, TypeName type, List<Object> bodyDeclarations) {
-        return eagerFlatMap(
-            bodyDeclarations,
-            declaration -> readStaticConstructorStatements(scope, type, declaration));
-    }
-
-    private Iterable<StatementNode> readStaticConstructorStatements(Scope scope, TypeName type, Object declaration) {
-        if (declaration instanceof Initializer) {
-            return readStatement(scope, ((Initializer) declaration).getBody());
-        } else if (declaration instanceof FieldDeclaration) {
-            FieldDeclaration field = (FieldDeclaration) declaration;
-            if (Modifier.isStatic(field.getModifiers())) {
-                // TODO: remove duplication with readField
-                @SuppressWarnings("unchecked")
-                List<VariableDeclarationFragment> fragments = field.fragments();
-                TypeName fieldType = typeOf(field.getType());
-                return eagerFlatMap(fragments, fragment -> {
-                    if (fragment.getInitializer() == null) {
-                        return list();
-                    } else {
-                        ExpressionNode value = readExpression(scope, fieldType, fragment.getInitializer());
-                        String name = fragment.getName().getIdentifier();
-                        return list(assignStatement(fieldAccess(type, name, fieldType), value));
-                    }
-                });
-            } else {
-                return list();
-            }
-        } else {
-            return list();
-        }
-    }
-
-    private List<FieldDeclarationNode> readFields(List<FieldDeclaration> fields) {
-        return eagerFlatMap(fields, this::readField);
-    }
-
-    private List<FieldDeclarationNode> readField(FieldDeclaration field) {
+    private void readField(TypeDeclarationBody.Builder builder, Scope scope, TypeName declaringType, FieldDeclaration field) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = field.fragments();
         TypeName type = typeOf(field.getType());
-        return eagerMap(fragments, fragment ->
-            field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
+        fragments.forEach(fragment -> {
+            builder.field(field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
+            // TODO: handle instance initializer
+            if (fragment.getInitializer() != null) {
+                ExpressionNode value = readExpression(scope, type, fragment.getInitializer());
+                String name = fragment.getName().getIdentifier();
+                builder.addStaticInitializer(assignStatement(fieldAccess(declaringType, name, type), value));
+            }
+        });
+
     }
 
-    private List<CallableNode> readMethods(Scope scope, List<MethodDeclaration> methods) {
-        return eagerMap(methods, method -> readMethod(scope, method));
-    }
-
-    private CallableNode readMethod(Scope outerScope, MethodDeclaration method) {
+    private void readMethod(TypeDeclarationBody.Builder builder, Scope outerScope, MethodDeclaration method) {
         Scope scope = outerScope.enterMethod(method.getName().getIdentifier());
 
         List<FormalArgumentNode> formalArguments = readFormalArguments(scope, method);
@@ -342,17 +274,17 @@ public class JavaReader {
         List<StatementNode> body = readBody(scope, method, returnType);
 
         if (method.isConstructor()) {
-            return constructor(
+            builder.constructor(constructor(
                 formalArguments,
-                body);
+                body));
         } else {
-            return MethodNode.method(
+            builder.addMethod(MethodNode.method(
                 annotations,
                 Modifier.isStatic(method.getModifiers()),
                 method.getName().getIdentifier(),
                 formalArguments,
                 returnType.get(),
-                body);
+                body));
         }
     }
 
