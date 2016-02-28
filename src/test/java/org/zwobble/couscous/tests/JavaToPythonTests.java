@@ -1,5 +1,7 @@
 package org.zwobble.couscous.tests;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.backends.python.PythonBackend;
@@ -16,6 +18,12 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToPythonTests extends CompilerTests {
+    @Test
+    @Ignore("WIP")
+    public void canImplementUserDefinedInterface() {
+
+    }
+
     protected PrimitiveValue execProgram(
             Path directory,
             TypeName type,

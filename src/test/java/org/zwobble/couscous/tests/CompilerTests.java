@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.BooleanValue;
@@ -88,7 +87,6 @@ public abstract class CompilerTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void canImplementUserDefinedInterface() throws Exception {
         assertEquals(
             value(42),
