@@ -256,7 +256,7 @@ public class CsharpSerializer implements NodeVisitor {
     @Override
     public void visit(MethodNode method) {
         writer.writeStatement(() -> {
-            writer.writeKeyword("internal");
+            writer.writeKeyword("public");
             writer.writeSpace();
             if (method.isStatic()) {
                 writer.writeKeyword("static");

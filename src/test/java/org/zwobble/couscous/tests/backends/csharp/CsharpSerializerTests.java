@@ -210,7 +210,7 @@ public class CsharpSerializerTests {
         String output = serialize(MethodNode.staticMethod("nothing")
             .returns(TypeName.of("void"))
             .build());
-        assertEquals("internal static void nothing() {\n}\n", output);
+        assertEquals("public static void nothing() {\n}\n", output);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class CsharpSerializerTests {
         String output = serialize(MethodNode.builder("nothing")
             .returns(TypeName.of("void"))
             .build());
-        assertEquals("internal void nothing() {\n}\n", output);
+        assertEquals("public void nothing() {\n}\n", output);
     }
 
     @Test
@@ -229,7 +229,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static X nothing() {\n}\n", output);
+        assertEquals("public static X nothing() {\n}\n", output);
     }
 
     @Test
@@ -242,7 +242,7 @@ public class CsharpSerializerTests {
 
         String output = serialize(methodNode);
 
-        assertEquals("internal static void nothing(X x, Y y) {\n}\n", output);
+        assertEquals("public static void nothing(X x, Y y) {\n}\n", output);
     }
 
     @Test
@@ -252,7 +252,7 @@ public class CsharpSerializerTests {
             .statement(returns(literal(true)))
             .build();
         String output = serialize(method);
-        assertEquals("internal static void nothing() {\n    return true;\n}\n", output);
+        assertEquals("public static void nothing() {\n    return true;\n}\n", output);
     }
 
     @Test
