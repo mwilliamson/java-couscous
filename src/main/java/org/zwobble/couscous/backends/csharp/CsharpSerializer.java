@@ -326,7 +326,25 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(InterfaceNode interfaceNode) {
-        throw new UnsupportedOperationException();
+        // TODO: factor out duplication with visit(ClassNode)
+        writer.writeStatement(() -> {
+            writer.writeKeyword("namespace");
+            writer.writeSpace();
+            writer.writeIdentifier(interfaceNode.getName().getPackage().get());
+            writer.startBlock();
+            writer.writeStatement(() -> {
+                writer.writeKeyword("internal");
+                writer.writeSpace();
+                writer.writeKeyword("interface");
+                writer.writeSpace();
+                writer.writeIdentifier(interfaceNode.getName().getSimpleName());
+                writer.startBlock();
+                writeAll(interfaceNode.getMethods());
+                writer.endBlock();
+            });
+
+            writer.endBlock();
+        });
     }
 
     private void writeStaticConstructor(ClassNode classNode) {

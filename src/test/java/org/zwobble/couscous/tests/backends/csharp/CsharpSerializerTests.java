@@ -13,6 +13,7 @@ import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStateme
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
+import static org.zwobble.couscous.ast.InterfaceNode.declareInterface;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -25,6 +26,7 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class CsharpSerializerTests {
     @Test
@@ -299,6 +301,15 @@ public class CsharpSerializerTests {
         String output = serialize(classNode);
 
         assertEquals("namespace com.example {\n    internal class Example {\n        internal static X x;\n        internal Y y;\n    }\n}\n", output);
+    }
+
+    @Test
+    public void interfaceIsInNamespace() {
+        Node node = declareInterface(TypeName.of("com.example.Example"), set(), list());
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal interface Example {\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {
