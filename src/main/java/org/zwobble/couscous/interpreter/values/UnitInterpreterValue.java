@@ -1,19 +1,22 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.Optional;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
+import java.util.Optional;
+
 public class UnitInterpreterValue implements InterpreterValue {
-    private static final ConcreteType TYPE = ConcreteType.builder(UnitInterpreterValue.class, "Unit").build();
+    private static final InterpreterType TYPE = IntrinsicInterpreterType.builder(UnitInterpreterValue.class, "Unit").build();
     public static final UnitInterpreterValue UNIT = new UnitInterpreterValue();
     
     private UnitInterpreterValue() {
     }
     
     @Override
-    public ConcreteType getType() {
+    public InterpreterType getType() {
         return TYPE;
     }
     

@@ -1,12 +1,14 @@
 package org.zwobble.couscous.interpreter.values;
 
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.ObjectValues;
 
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class InternalCouscousInterpreterValue {
-    public static final ConcreteType TYPE = ConcreteType.classBuilder("_couscous")
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.classBuilder("_couscous")
         .staticMethod("same", list(ObjectValues.OBJECT, ObjectValues.OBJECT), BooleanValue.REF,
             (environment, arguments) ->
                 BooleanInterpreterValue.of(arguments.get(0) == arguments.get(1)))

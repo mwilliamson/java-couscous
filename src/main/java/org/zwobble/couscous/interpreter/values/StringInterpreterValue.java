@@ -2,6 +2,8 @@ package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.*;
 
 import java.util.Optional;
@@ -9,7 +11,7 @@ import java.util.Optional;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class StringInterpreterValue implements InterpreterValue {
-    public static final ConcreteType TYPE = ConcreteType.builder(StringInterpreterValue.class, StringValue.REF)
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(StringInterpreterValue.class, StringValue.REF)
         .method("length", list(), IntegerValue.REF, (environment, arguments) ->
             new IntegerInterpreterValue(arguments.getReceiver().value.length()))
 
@@ -49,7 +51,7 @@ public final class StringInterpreterValue implements InterpreterValue {
     }
 
     @Override
-    public ConcreteType getType() {
+    public InterpreterType getType() {
         return TYPE;
     }
     

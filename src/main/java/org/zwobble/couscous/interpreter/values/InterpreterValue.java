@@ -1,11 +1,12 @@
 package org.zwobble.couscous.interpreter.values;
 
-import java.util.Optional;
-
+import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.values.PrimitiveValue;
 
+import java.util.Optional;
+
 public interface InterpreterValue {
-    ConcreteType getType();
+    InterpreterType getType();
     Optional<PrimitiveValue> toPrimitiveValue();
     InterpreterValue getField(String fieldName);
     void setField(String fieldName, InterpreterValue value);

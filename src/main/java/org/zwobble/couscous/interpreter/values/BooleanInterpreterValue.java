@@ -2,6 +2,8 @@ package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
@@ -18,7 +20,7 @@ public final class BooleanInterpreterValue implements InterpreterValue {
         return value ? TRUE : FALSE;
     }
 
-    private static final ConcreteType TYPE = ConcreteType.builder(BooleanInterpreterValue.class, "boolean")
+    private static final InterpreterType TYPE = IntrinsicInterpreterType.builder(BooleanInterpreterValue.class, "boolean")
         
         .method(Operator.BOOLEAN_NOT.getSymbol(), list(), BooleanValue.REF, (environment, arguments) ->
             of(!arguments.getReceiver().getValue()))
@@ -46,7 +48,7 @@ public final class BooleanInterpreterValue implements InterpreterValue {
     }
     
     @Override
-    public ConcreteType getType() {
+    public InterpreterType getType() {
         return TYPE;
     }
     

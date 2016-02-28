@@ -1,17 +1,17 @@
 package org.zwobble.couscous.interpreter;
 
-import java.util.List;
-
-import org.zwobble.couscous.ast.ClassNode;
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
+import org.zwobble.couscous.interpreter.types.UserDefinedInterpreterType;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
 
-import com.google.common.collect.Iterables;
+import java.util.List;
 
 public class JavaProject {
-    private static final ConcreteType OBJECT_TYPE = ConcreteType.classBuilder("java.lang.Object")
+    private static final InterpreterType OBJECT_TYPE = IntrinsicInterpreterType.classBuilder("java.lang.Object")
         .build();
     
     public static MapBackedProject.Builder builder() {
@@ -22,7 +22,7 @@ public class JavaProject {
     }
 
     public static Project of(List<TypeNode> classNodes) {
-        Iterable<ConcreteType> concreteTypes = Iterables.transform(classNodes, ConcreteType::fromNode);
+        Iterable<InterpreterType> concreteTypes = Iterables.transform(classNodes, UserDefinedInterpreterType::new);
         return builder()
                 .addClasses(concreteTypes)
                 .build();

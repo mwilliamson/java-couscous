@@ -1,5 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
@@ -18,7 +20,7 @@ public class BoxedIntegerInterpreterValue {
         return obj;
     }
 
-    public static final ConcreteType TYPE = ConcreteType.classBuilder("java.lang.Integer")
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.classBuilder("java.lang.Integer")
         .field("value", IntegerValue.REF)
 
         .staticMethod("parseInt", list(StringValue.REF), IntegerValue.REF,

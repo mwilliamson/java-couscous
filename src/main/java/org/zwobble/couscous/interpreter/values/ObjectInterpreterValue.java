@@ -1,20 +1,21 @@
 package org.zwobble.couscous.interpreter.values;
 
+import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.util.Optional;
 
 public class ObjectInterpreterValue implements InterpreterValue {
-    private final ConcreteType type;
+    private final InterpreterType type;
     private final InterpreterFields fields;
     
-    public ObjectInterpreterValue(ConcreteType type) {
+    public ObjectInterpreterValue(InterpreterType type) {
         this.type = type;
         this.fields = InterpreterFields.forInstanceOf(type);
     }
     
     @Override
-    public ConcreteType getType() {
+    public InterpreterType getType() {
         return type;
     }
     

@@ -29,10 +29,10 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     public static InterpreterValue callConstructor(
         Environment environment,
         ConstructorNode constructor,
-        Optional<InterpreterValue> thisValue,
+        InterpreterValue thisValue,
         PositionalArguments actualArguments)
     {
-        return callMethod(environment, constructor.getArguments(), constructor.getBody(), thisValue, actualArguments);
+        return callMethod(environment, constructor.getArguments(), constructor.getBody(), Optional.of(thisValue), actualArguments);
     }
 
     private static InterpreterValue callMethod(

@@ -2,6 +2,7 @@ package org.zwobble.couscous.util;
 
 import com.google.common.collect.ImmutableMap;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -30,5 +31,9 @@ public class ExtraMaps {
         }
 
         return builder.build();
+    }
+
+    public static <T, K> Map<K, T> toMapWithKeys(Iterable<T> iterable, Function<T, K> function) {
+        return toMap(iterable, value -> new AbstractMap.SimpleImmutableEntry<K, T>(function.apply(value), value));
     }
 }

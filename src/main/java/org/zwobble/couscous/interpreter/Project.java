@@ -1,8 +1,8 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.interpreter.values.ConcreteType;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
 
 public interface Project {
-    ConcreteType findClass(TypeName name);
+    InterpreterType findClass(TypeName name);
 }

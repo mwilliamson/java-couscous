@@ -3,6 +3,8 @@ package org.zwobble.couscous.interpreter.values;
 import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
+import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -14,7 +16,7 @@ import java.util.function.BiFunction;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
-    public static final ConcreteType TYPE = ConcreteType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
         .method(Operator.ADD.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
             infixReturningInteger((left, right) -> left + right))
         .method(Operator.SUBTRACT.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
@@ -71,7 +73,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
     private final int value;
     
     @Override
-    public ConcreteType getType() {
+    public InterpreterType getType() {
         return TYPE;
     }
     

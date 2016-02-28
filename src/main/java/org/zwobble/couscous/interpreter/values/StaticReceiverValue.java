@@ -3,14 +3,15 @@ package org.zwobble.couscous.interpreter.values;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
+import org.zwobble.couscous.interpreter.types.InterpreterType;
 
 import java.util.List;
 
 public class StaticReceiverValue implements ReceiverValue {
-    private final ConcreteType type;
+    private final InterpreterType type;
     private final InterpreterFields fields;
 
-    public StaticReceiverValue(ConcreteType type) {
+    public StaticReceiverValue(InterpreterType type) {
         this.type = type;
         this.fields = InterpreterFields.forClass(type);
     }
