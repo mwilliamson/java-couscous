@@ -1,12 +1,10 @@
 package com.example;
 
-import java.util.function.Supplier;
-
 public class AnonymousClass {
     public static int value() {
-        Supplier<Integer> supplier = new Supplier<Integer>() {
+        IntSupplier supplier = new IntSupplier() {
             @Override
-            public Integer get() {
+            public int get() {
                 return 42;
             }
         };
