@@ -310,7 +310,7 @@ public class JavaReaderTests {
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
-        assertEquals(set(ObjectValues.OBJECT), classNode.getSuperTypes());
+        assertEquals(set(), classNode.getSuperTypes());
     }
 
     @Test
@@ -322,7 +322,7 @@ public class JavaReaderTests {
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
-        assertThat(classNode.getSuperTypes(), contains(ObjectValues.OBJECT, TypeName.of("java.util.function.IntSupplier")));
+        assertThat(classNode.getSuperTypes(), contains(TypeName.of("java.util.function.IntSupplier")));
     }
 
     @Test
