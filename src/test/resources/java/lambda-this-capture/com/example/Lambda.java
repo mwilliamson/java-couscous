@@ -14,7 +14,7 @@ public class Lambda {
     }
     
     private int run() {
-        Function<Integer, Integer> function = value -> value * factor;
+        IntFunction function = value -> value * factor;
         return function.apply(21);
     }
 }
