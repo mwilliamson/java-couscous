@@ -20,11 +20,6 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 public class JavaToCsharpTests extends CompilerTests {
     @Test
     @Ignore
-    public void lambdasWithCapture() throws Exception {
-    }
-
-    @Test
-    @Ignore
     public void lambdasWithThisCapture() throws Exception {
     }
 
