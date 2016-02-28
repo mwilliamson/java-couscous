@@ -37,7 +37,7 @@ import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class JavaReader {
-    public static List<ClassNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
+    public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
 
         ImmutableList<IProblem> errors = ImmutableList.copyOf(filter(asList(ast.getProblems()), problem -> problem.isError()));
@@ -58,7 +58,7 @@ public class JavaReader {
             error.getMessage();
     }
 
-    private final ImmutableList.Builder<ClassNode> classes;
+    private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
 
     private JavaReader() {

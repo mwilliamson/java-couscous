@@ -38,22 +38,24 @@ import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhi
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonCodeGenerator {
-    public static PythonModuleNode generateCode(ClassNode classNode) {
-        Iterator<PythonImportNode> imports = generateImports(classNode).iterator();
+    public static PythonModuleNode generateCode(TypeNode typeNode) {
+        ClassNode classNode = (ClassNode) typeNode;
+
+        Iterator<PythonImportNode> imports = generateImports(typeNode).iterator();
 
         PythonImportNode internalsImport = pythonImport(
-            importPathToRoot(classNode),
+            importPathToRoot(typeNode),
             list(pythonImportAlias("_couscous")));
 
         PythonFunctionDefinitionNode constructor =
             generateConstructor(classNode.getConstructor());
 
         Iterable<PythonFunctionDefinitionNode> pythonMethods = transform(
-            classNode.getMethods(),
+            typeNode.getMethods(),
             PythonCodeGenerator::generateFunction);
 
         PythonClassNode pythonClass = pythonClass(
-            classNode.getSimpleName(),
+            typeNode.getName().getSimpleName(),
             ImmutableList.copyOf(Iterables.concat(list(constructor), pythonMethods)));
 
         List<PythonStatementNode> staticConstructor =
@@ -66,18 +68,18 @@ public class PythonCodeGenerator {
             staticConstructor.iterator())));
     }
 
-    private static Stream<PythonImportNode> generateImports(ClassNode classNode) {
+    private static Stream<PythonImportNode> generateImports(TypeNode classNode) {
         Set<TypeName> classes = findReferencedClasses(classNode);
         return classes.stream()
             .filter(name -> !name.equals(InternalCouscousValue.REF))
             .map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), list(pythonImportAlias(name.getSimpleName()))));
     }
 
-    private static String importPathToRoot(ClassNode classNode) {
+    private static String importPathToRoot(TypeNode classNode) {
         return Strings.repeat(".", packageDepth(classNode) + 1);
     }
 
-    private static int packageDepth(ClassNode classNode) {
+    private static int packageDepth(TypeNode classNode) {
         int depth = 0;
         final java.lang.String qualifiedName = classNode.getName().getQualifiedName();
         for (int index = 0; index < qualifiedName.length(); index++) {
@@ -88,7 +90,7 @@ public class PythonCodeGenerator {
         return depth;
     }
 
-    private static Set<TypeName> findReferencedClasses(ClassNode classNode) {
+    private static Set<TypeName> findReferencedClasses(TypeNode classNode) {
         return NodeStructure.descendantNodes(classNode)
             .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<TypeName>>(Stream.empty()) {
                 @Override

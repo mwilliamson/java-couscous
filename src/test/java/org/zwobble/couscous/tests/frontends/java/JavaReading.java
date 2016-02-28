@@ -1,9 +1,6 @@
 package org.zwobble.couscous.tests.frontends.java;
 
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.ReturnNode;
-import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.frontends.java.JavaReader;
 
 import java.nio.file.Files;
@@ -51,17 +48,17 @@ public class JavaReading {
     }
 
     static ClassNode readClass(String classBody) {
-        List<ClassNode> classes = readClasses(classBody);
+        List<TypeNode> classes = readTypes(classBody);
         assertThat(classes, hasSize(1));
-        return classes.get(0);
+        return (ClassNode)classes.get(0);
     }
 
-    static List<ClassNode> readClasses(String classBody) {
+    static List<TypeNode> readTypes(String classBody) {
         String javaClass = generateClassSource(classBody);
         return readSource("com/example/Example.java", javaClass);
     }
 
-    private static List<ClassNode> readSource(String path, String contents) {
+    static List<TypeNode> readSource(String path, String contents) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             try {

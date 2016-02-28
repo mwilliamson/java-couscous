@@ -1,11 +1,11 @@
 package org.zwobble.couscous;
 
+import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.frontends.java.JavaFrontend;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.frontends.java.JavaFrontend;
 
 public class CouscousCompiler {
     private final JavaFrontend frontend;
@@ -17,7 +17,7 @@ public class CouscousCompiler {
     }
 
     public void compileDirectory(List<Path> sourcePaths, Path path) throws IOException {
-        List<ClassNode> classes = frontend.readSourceDirectory(sourcePaths, path);
+        List<TypeNode> classes = frontend.readSourceDirectory(sourcePaths, path);
         backend.compile(classes);
     }
 

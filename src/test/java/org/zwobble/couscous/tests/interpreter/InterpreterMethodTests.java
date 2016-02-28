@@ -105,7 +105,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         return new MethodRunner() {
             @Override
             public PrimitiveValue runMethod(
-                List<ClassNode> classNodes,
+                List<TypeNode> classNodes,
                 TypeName className,
                 String methodName,
                 List<PrimitiveValue> arguments,

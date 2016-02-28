@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests;
 import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.JavaProject;
@@ -28,7 +29,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         TypeName returnType
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
-        List<ClassNode> classNodes = frontend.readSourceDirectory(list(directory), directory);
+        List<TypeNode> classNodes = frontend.readSourceDirectory(list(directory), directory);
 
         Project project = JavaProject.of(classNodes);
         Interpreter interpreter = new Interpreter(project);

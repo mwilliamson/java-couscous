@@ -3,7 +3,7 @@ package org.zwobble.couscous.backends.python;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,8 +33,8 @@ public class PythonBackend implements Backend {
     }
     
     @Override
-    public void compile(List<ClassNode> classes) throws IOException {
-        for (ClassNode classNode : classes) {
+    public void compile(List<TypeNode> classes) throws IOException {
+        for (TypeNode classNode : classes) {
             compileClass(classNode);
         }
         for (String runtimeFile :  RUNTIME_FILES) {
@@ -53,7 +53,7 @@ public class PythonBackend implements Backend {
         return moduleName.replace(".", File.separator) + ".py";
     }
     
-    private void compileClass(ClassNode classNode) throws IOException {
+    private void compileClass(TypeNode classNode) throws IOException {
         writeModule(
             classNode.getName().getQualifiedName(),
             serialize(generateCode(classNode)));

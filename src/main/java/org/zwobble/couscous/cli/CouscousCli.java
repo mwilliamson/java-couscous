@@ -3,6 +3,7 @@ package org.zwobble.couscous.cli;
 import org.apache.commons.cli.*;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 
@@ -25,7 +26,7 @@ public class CouscousCli {
         CommandLine arguments = parseArguments(rawArguments);
 
         JavaFrontend frontend = new JavaFrontend();
-        List<ClassNode> classNodes = eagerFlatMap(
+        List<TypeNode> classNodes = eagerFlatMap(
             arguments.getArgList(),
             path -> {
                 try {

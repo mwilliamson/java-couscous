@@ -2,9 +2,9 @@ package org.zwobble.couscous.tests.backends.python;
 
 import com.google.common.base.Joiner;
 import org.hamcrest.Matchers;
-import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
@@ -28,7 +28,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class PythonMethodRunner implements MethodRunner {
     @Override
-    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
+    public PrimitiveValue runMethod(List<TypeNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             PythonBackend compiler = new PythonBackend(directoryPath, "couscous");

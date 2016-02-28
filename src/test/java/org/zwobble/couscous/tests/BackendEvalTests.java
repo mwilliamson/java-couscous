@@ -249,6 +249,6 @@ public abstract class BackendEvalTests {
     }
     
     protected abstract PrimitiveValue evalExpression(
-        List<ClassNode> classes,
+        List<TypeNode> classes,
         ExpressionNode expression);
 }

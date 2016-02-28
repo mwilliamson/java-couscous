@@ -91,13 +91,21 @@ public class ConcreteType {
         }
     }
     
-    public static ConcreteType fromNode(ClassNode classNode) {
+    public static ConcreteType fromNode(TypeNode typeNode) {
+        ClassNode classNode = (ClassNode)typeNode;
         Map<String, FieldDeclarationNode> fields = classNode.getFields().stream()
             .collect(toMap(
                 field -> field.getName(),
                 field -> field));
-        MethodValue constructor = new MethodValue(getArgumentTypes(classNode.getConstructor().getArguments()), (environment, arguments) -> Executor.callMethod(environment, classNode.getConstructor(), Optional.of(arguments.getReceiver()), arguments.getPositionalArguments()));
-        Map<MethodSignature, MethodValue> methods = classNode.getMethods()
+        MethodValue constructor = new MethodValue(
+            getArgumentTypes(classNode.getConstructor().getArguments()),
+            (environment, arguments) -> Executor.callMethod(
+                environment,
+                classNode.getConstructor(),
+                Optional.of(arguments.getReceiver()),
+                arguments.getPositionalArguments()));
+
+        Map<MethodSignature, MethodValue> methods = typeNode.getMethods()
             .stream()
             .filter(method -> !method.isStatic())
             .collect(toMap(method -> method.signature(), method -> {
@@ -106,7 +114,7 @@ public class ConcreteType {
                     return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
                 });
             }));
-        Map<MethodSignature, StaticMethodValue> staticMethods = classNode.getMethods()
+        Map<MethodSignature, StaticMethodValue> staticMethods = typeNode.getMethods()
             .stream()
             .filter(method -> method.isStatic())
             .collect(toMap(method -> method.signature(), method -> {
@@ -116,8 +124,8 @@ public class ConcreteType {
                 });
             }));
         return new ConcreteType(
-            classNode.getName(),
-            classNode.getSuperTypes(),
+            typeNode.getName(),
+            typeNode.getSuperTypes(),
             fields,
             classNode.getStaticConstructor(),
             constructor,

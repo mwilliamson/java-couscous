@@ -6,7 +6,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import java.util.List;
 import java.util.Set;
 
-public class ClassNode implements Node {
+public class ClassNode implements TypeNode {
     public static ClassNodeBuilder builder(TypeName name) {
         return new ClassNodeBuilder(name);
     }
@@ -45,11 +45,13 @@ public class ClassNode implements Node {
         this.constructor = constructor;
         methods = methodNodes;
     }
-    
+
+    @Override
     public TypeName getName() {
         return name;
     }
 
+    @Override
     public Set<TypeName> getSuperTypes() {
         return superTypes;
     }
@@ -65,7 +67,8 @@ public class ClassNode implements Node {
     public ConstructorNode getConstructor() {
         return constructor;
     }
-    
+
+    @Override
     public List<MethodNode> getMethods() {
         return methods;
     }

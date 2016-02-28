@@ -11,12 +11,12 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 
 public interface MethodRunner {
     PrimitiveValue runMethod(
-        List<ClassNode> classNodes,
+        List<TypeNode> classNodes,
         TypeName className,
         String methodName,
         List<PrimitiveValue> arguments, TypeName returnType);
 
-    default PrimitiveValue evalExpression(List<ClassNode> classes, ExpressionNode expression) {
+    default PrimitiveValue evalExpression(List<TypeNode> classes, ExpressionNode expression) {
         ClassNode programNode = ClassNode.builder("Program")
             .method(MethodNode.staticMethod("run")
                 .returns(expression.getType())

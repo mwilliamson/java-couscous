@@ -4,10 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.LiteralNode;
-import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
@@ -36,7 +33,7 @@ public class CsharpMethodRunner implements MethodRunner {
     private static final String NAMESPACE = "Couscous";
 
     @Override
-    public PrimitiveValue runMethod(List<ClassNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
+    public PrimitiveValue runMethod(List<TypeNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             Backend compiler = new CsharpBackend(directoryPath, NAMESPACE);

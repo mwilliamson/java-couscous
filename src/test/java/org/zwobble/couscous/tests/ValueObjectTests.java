@@ -51,6 +51,7 @@ public class ValueObjectTests {
             {FormalArgumentNode.class},
             {IfStatementNode.class},
             {InstanceReceiver.class},
+            {InterfaceNode.class},
             {LiteralNode.class},
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},

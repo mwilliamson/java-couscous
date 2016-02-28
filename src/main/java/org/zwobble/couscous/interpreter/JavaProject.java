@@ -3,6 +3,7 @@ package org.zwobble.couscous.interpreter;
 import java.util.List;
 
 import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.ConcreteType;
 import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
@@ -20,7 +21,7 @@ public class JavaProject {
             .addClass(BoxedIntegerInterpreterValue.TYPE);
     }
 
-    public static Project of(List<ClassNode> classNodes) {
+    public static Project of(List<TypeNode> classNodes) {
         Iterable<ConcreteType> concreteTypes = Iterables.transform(classNodes, ConcreteType::fromNode);
         return builder()
                 .addClasses(concreteTypes)

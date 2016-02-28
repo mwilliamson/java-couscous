@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.ClassNode;
+import org.zwobble.couscous.ast.TypeNode;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +30,7 @@ public class CsharpBackend implements Backend {
     }
 
     @Override
-    public void compile(List<ClassNode> classes) throws IOException {
+    public void compile(List<TypeNode> classes) throws IOException {
         Files.write(
             directoryPath.resolve("Program.cs"),
             Iterables.concat(
@@ -50,7 +50,7 @@ public class CsharpBackend implements Backend {
         }
     }
 
-    private String compileClass(ClassNode classNode) {
+    private String compileClass(TypeNode classNode) {
         return CsharpSerializer.serialize(CsharpCodeGenerator.generateCode(classNode, namespace));
     }
 }

@@ -236,7 +236,7 @@ public class EvaluatorTests extends BackendEvalTests {
 
     @Override
     protected PrimitiveValue evalExpression(
-            List<ClassNode> classes,
+            List<TypeNode> classes,
             ExpressionNode expression) {
         
         Environment environment = new Environment(
