@@ -149,6 +149,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(InterfaceNode interfaceNode) {
+                return interfaceNode.getMethods().stream();
+            }
+
+            @Override
             public Stream<Node> visit(MethodNode methodNode) {
                 return concatStreams(
                     methodNode.getAnnotations().stream(),

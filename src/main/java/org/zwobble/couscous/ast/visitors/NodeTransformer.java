@@ -144,6 +144,11 @@ public class NodeTransformer {
             public Node visit(ClassNode classNode) {
                 return transformClass(classNode);
             }
+
+            @Override
+            public Node visit(InterfaceNode interfaceNode) {
+                return transformInterface(interfaceNode);
+            }
         });
     }
 
@@ -237,6 +242,10 @@ public class NodeTransformer {
 
     public ClassNode transformClass(ClassNode classNode) {
         return classNode.transform(this);
+    }
+
+    private Node transformInterface(InterfaceNode interfaceNode) {
+        return interfaceNode.transform(this);
     }
 
     public List<AnnotationNode> transformAnnotations(List<AnnotationNode> annotations) {

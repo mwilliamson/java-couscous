@@ -30,4 +30,5 @@ public interface NodeVisitor {
     void visit(ConstructorNode constructorNode);
     void visit(FieldDeclarationNode declaration);
     void visit(ClassNode classNode);
+    void visit(InterfaceNode interfaceNode);
 }

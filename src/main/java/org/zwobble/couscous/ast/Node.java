@@ -149,6 +149,12 @@ public interface Node {
                 visitor.visit(classNode);
                 return null;
             }
+
+            @Override
+            public Void visit(InterfaceNode interfaceNode) {
+                visitor.visit(interfaceNode);
+                return null;
+            }
         });
     }
     <T> T accept(NodeMapper<T> visitor);

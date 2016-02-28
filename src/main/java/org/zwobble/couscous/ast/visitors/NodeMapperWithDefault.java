@@ -118,7 +118,12 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     public T visit(ClassNode classNode) {
         return defaultValue;
     }
-    
+
+    @Override
+    public T visit(InterfaceNode interfaceNode) {
+        return defaultValue;
+    }
+
     @Override
     public T visit(MethodNode methodNode) {
         return defaultValue;

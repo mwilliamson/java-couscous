@@ -324,6 +324,11 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
+    @Override
+    public void visit(InterfaceNode interfaceNode) {
+        throw new UnsupportedOperationException();
+    }
+
     private void writeStaticConstructor(ClassNode classNode) {
         if (!classNode.getStaticConstructor().isEmpty()) {
             writer.writeStatement(() -> {
