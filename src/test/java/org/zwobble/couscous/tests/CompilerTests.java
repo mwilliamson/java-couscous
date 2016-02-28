@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.TypeName;
 import org.zwobble.couscous.values.BooleanValue;
@@ -83,6 +84,19 @@ public abstract class CompilerTests {
                 TypeName.of("com.example.ForFactorial"),
                 "factorial",
                 list(value(6)),
+                IntegerValue.REF));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void canImplementUserDefinedInterface() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "implement-user-interface",
+                TypeName.of("com.example.ConstantIntSupplier"),
+                "value",
+                list(),
                 IntegerValue.REF));
     }
 
