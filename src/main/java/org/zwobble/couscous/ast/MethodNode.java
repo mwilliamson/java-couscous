@@ -144,6 +144,10 @@ public class MethodNode implements Node {
         return body;
     }
 
+    public boolean isAbstract() {
+        return !body.isPresent();
+    }
+
     public MethodSignature signature() {
         return new MethodSignature(
             name,

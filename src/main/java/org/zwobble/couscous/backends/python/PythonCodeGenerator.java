@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
@@ -35,31 +36,33 @@ import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonRe
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(TypeNode typeNode) {
-        ClassNode classNode = (ClassNode) typeNode;
-
         Iterator<PythonImportNode> imports = generateImports(typeNode).iterator();
 
         PythonImportNode internalsImport = pythonImport(
             importPathToRoot(typeNode),
             list(pythonImportAlias("_couscous")));
 
-        PythonFunctionDefinitionNode constructor =
-            generateConstructor(classNode.getConstructor());
+        Optional<ClassNode> classNode = tryCast(ClassNode.class, typeNode);
+        List<? extends PythonStatementNode> constructor = classNode
+            .map(node -> list(generateConstructor(node.getConstructor())))
+            .orElse(list());
+
+        List<PythonStatementNode> staticConstructor = classNode
+            .map(node -> generateStatements(node.getStaticConstructor()))
+            .orElse(list());
 
         Iterable<PythonFunctionDefinitionNode> pythonMethods = transform(
-            typeNode.getMethods(),
+            filter(typeNode.getMethods(), method -> !method.isAbstract()),
             PythonCodeGenerator::generateFunction);
 
         PythonClassNode pythonClass = pythonClass(
             typeNode.getName().getSimpleName(),
-            ImmutableList.copyOf(Iterables.concat(list(constructor), pythonMethods)));
-
-        List<PythonStatementNode> staticConstructor =
-            generateStatements(classNode.getStaticConstructor());
+            ImmutableList.copyOf(Iterables.concat(constructor, pythonMethods)));
 
         return pythonModule(ImmutableList.copyOf(Iterators.concat(
             singletonIterator(pythonClass),
