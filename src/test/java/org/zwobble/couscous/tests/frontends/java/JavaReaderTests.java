@@ -828,15 +828,18 @@ public class JavaReaderTests {
 
     private List<ClassNode> readClasses(String classBody) {
         String javaClass = generateClassSource(classBody);
+        return readSource("com/example/Example.java", javaClass);
+    }
+
+    private List<ClassNode> readSource(String path, String contents) {
         try {
-
             Path directoryPath = Files.createTempDirectory(null);
-            Path sourcePath = directoryPath.resolve("com/example/Example.java");
             try {
-                Files.createDirectories(directoryPath.resolve("com/example"));
-                Files.write(sourcePath, list(javaClass));
+                Path sourcePath = directoryPath.resolve(path);
+                Files.createDirectories(sourcePath.getParent());
+                Files.write(sourcePath, list(contents));
 
-                return JavaReader.readClassFromFile(list(directoryPath), sourcePath);
+                return JavaReader.readClassFromFile(list(directoryPath), directoryPath.resolve(path));
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }
