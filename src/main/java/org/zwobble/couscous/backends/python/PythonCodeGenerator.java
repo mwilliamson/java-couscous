@@ -166,7 +166,7 @@ public class PythonCodeGenerator {
         Iterable<String> argumentNames = Iterables.concat(
             method.isStatic() ? Collections.<String>emptyList() : list("self"),
             explicitArgumentNames);
-        List<PythonStatementNode> pythonBody = generateStatements(method.getBody());
+        List<PythonStatementNode> pythonBody = generateStatements(method.getBody().get());
         return pythonFunctionDefinition(Names.toUniqueName(method.signature()), ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
 

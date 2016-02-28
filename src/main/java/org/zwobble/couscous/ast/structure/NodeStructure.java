@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast.structure;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -158,7 +159,7 @@ public class NodeStructure {
                 return concatStreams(
                     methodNode.getAnnotations().stream(),
                     methodNode.getArguments().stream(),
-                    methodNode.getBody().stream());
+                    methodNode.getBody().map(Collection::stream).orElse(Stream.empty()));
             }
 
             @Override

@@ -15,18 +15,50 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.Evaluator.evalCondition;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
-    public static InterpreterValue callMethod(Environment environment, CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
-        Environment innerEnvironment = buildEnvironment(environment, method, thisValue, arguments);
-        return exec(innerEnvironment, method.getBody())
+    public static InterpreterValue callMethod(
+        Environment environment,
+        MethodNode method,
+        Optional<InterpreterValue> thisValue,
+        PositionalArguments actualArguments)
+    {
+        List<StatementNode> body = method.getBody().orElseThrow(() -> new RuntimeException("Cannot call abstract method"));
+        return callMethod(environment, method.getArguments(), body, thisValue, actualArguments);
+    }
+
+    public static InterpreterValue callConstructor(
+        Environment environment,
+        ConstructorNode constructor,
+        Optional<InterpreterValue> thisValue,
+        PositionalArguments actualArguments)
+    {
+        return callMethod(environment, constructor.getArguments(), constructor.getBody(), thisValue, actualArguments);
+    }
+
+    private static InterpreterValue callMethod(
+        Environment environment,
+        List<FormalArgumentNode> formalArguments,
+        List<StatementNode> statements,
+        Optional<InterpreterValue> thisValue,
+        PositionalArguments actualArguments)
+    {
+        Environment innerEnvironment = buildEnvironment(environment, formalArguments, statements, thisValue, actualArguments);
+        return exec(innerEnvironment, statements)
             .orElse(UnitInterpreterValue.UNIT);
     }
 
-    private static Environment buildEnvironment(final Environment environment, final CallableNode method, Optional<InterpreterValue> thisValue, PositionalArguments arguments) {
+    private static Environment buildEnvironment(
+        Environment environment,
+        List<FormalArgumentNode> formalArguments,
+        List<StatementNode> statements,
+        Optional<InterpreterValue> thisValue,
+        PositionalArguments arguments)
+    {
+        // TODO use map with multiple iterables
         final org.zwobble.couscous.interpreter.StackFrameBuilder stackFrame = new StackFrameBuilder();
-        for (int index = 0; index < method.getArguments().size(); index++) {
-            stackFrame.declare(method.getArguments().get(index), arguments.get(index));
+        for (int index = 0; index < formalArguments.size(); index++) {
+            stackFrame.declare(formalArguments.get(index), arguments.get(index));
         }
-        findDeclarations(method.getBody()).forEach(declaration -> stackFrame.declare(declaration));
+        findDeclarations(statements).forEach(declaration -> stackFrame.declare(declaration));
         return environment.withStackFrame(thisValue, stackFrame.build());
     }
 

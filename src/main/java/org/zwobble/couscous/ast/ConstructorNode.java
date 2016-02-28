@@ -6,7 +6,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import java.util.Collections;
 import java.util.List;
 
-public class ConstructorNode implements CallableNode {
+public class ConstructorNode implements Node {
     public static final ConstructorNode DEFAULT = constructor(Collections.emptyList(), Collections.emptyList());
 
     public static ConstructorNode constructor(

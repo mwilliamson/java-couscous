@@ -99,7 +99,7 @@ public class ConcreteType {
                 field -> field));
         MethodValue constructor = new MethodValue(
             getArgumentTypes(classNode.getConstructor().getArguments()),
-            (environment, arguments) -> Executor.callMethod(
+            (environment, arguments) -> Executor.callConstructor(
                 environment,
                 classNode.getConstructor(),
                 Optional.of(arguments.getReceiver()),

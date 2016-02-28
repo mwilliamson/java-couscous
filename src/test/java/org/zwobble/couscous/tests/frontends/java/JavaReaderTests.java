@@ -78,7 +78,7 @@ public class JavaReaderTests {
         assertEquals(TypeName.of("int"), argument.getType());
         assertEquals(1, method.getArguments().size());
         
-        ReturnNode returnNode = (ReturnNode)method.getBody().get(0);
+        ReturnNode returnNode = (ReturnNode)method.getBody().get().get(0);
         assertEquals(reference(argument), returnNode.getValue());
     }
     
@@ -297,7 +297,7 @@ public class JavaReaderTests {
         MethodNode method = classNode.getMethods().get(0);
         assertEquals(
             list(returns(boxInt(literal(1)))),
-            method.getBody());
+            method.getBody().get());
     }
 
     @Test

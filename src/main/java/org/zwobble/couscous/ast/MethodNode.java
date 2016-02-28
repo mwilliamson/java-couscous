@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
-public class MethodNode implements CallableNode {
+public class MethodNode implements Node {
     public static Builder staticMethod(String name) {
         return builder(name).isStatic(true);
     }
@@ -140,8 +140,8 @@ public class MethodNode implements CallableNode {
         return returnType;
     }
     
-    public List<StatementNode> getBody() {
-        return body.get();
+    public Optional<List<StatementNode>> getBody() {
+        return body;
     }
 
     public MethodSignature signature() {

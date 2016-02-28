@@ -90,7 +90,7 @@ public class ExpressionReadingTests {
                 "    return " + expression + ";" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
                 thisReference(TypeName.of("com.example.Example")),
@@ -116,7 +116,7 @@ public class ExpressionReadingTests {
                 "    return " + expression + ";" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
                 TypeName.of("com.example.Example"),
@@ -145,7 +145,7 @@ public class ExpressionReadingTests {
             "public String loop() {" +
                 "    return loop();" +
                 "}");
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
 
         assertEquals(
             methodCall(
@@ -173,7 +173,7 @@ public class ExpressionReadingTests {
             "public static String loop() {" +
                 "    return loop();" +
                 "}");
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
 
         assertEquals(
             staticMethodCall(
@@ -319,7 +319,7 @@ public class ExpressionReadingTests {
                 "    return name = \"blah\";" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 fieldAccess(
@@ -338,7 +338,7 @@ public class ExpressionReadingTests {
                 "    return value = 4;" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 fieldAccess(
@@ -366,7 +366,7 @@ public class ExpressionReadingTests {
         MethodNode method = classNode.getMethods().get(0);
         FormalArgumentNode argument = method.getArguments().get(0);
         ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get(0);
+            classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 reference(argument),
@@ -392,7 +392,7 @@ public class ExpressionReadingTests {
         MethodNode method = classNode.getMethods().get(0);
         FormalArgumentNode argument = method.getArguments().get(0);
         ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get(0);
+            classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 reference(argument),
@@ -411,7 +411,7 @@ public class ExpressionReadingTests {
         FormalArgumentNode left = method.getArguments().get(0);
         FormalArgumentNode right = method.getArguments().get(1);
         ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get(0);
+            classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 reference(left),
@@ -430,7 +430,7 @@ public class ExpressionReadingTests {
         FormalArgumentNode left = method.getArguments().get(0);
         FormalArgumentNode right = method.getArguments().get(1);
         ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get(0);
+            classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 reference(left),
@@ -448,7 +448,7 @@ public class ExpressionReadingTests {
         MethodNode method = classNode.getMethods().get(0);
         FormalArgumentNode argument = method.getArguments().get(0);
         ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get(0);
+            classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             assign(
                 reference(argument),

@@ -265,7 +265,7 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
             writeFormalArguments(method.getArguments());
-            writeBlock(method.getBody());
+            writeBlock(method.getBody().get());
         });
     }
 

@@ -20,7 +20,7 @@ public class JavaReading {
                 "}";
 
         ClassNode classNode = readClass(javaClass);
-        ReturnNode returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get(0);
+        ReturnNode returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         return returnStatement.getValue();
     }
 
@@ -44,7 +44,7 @@ public class JavaReading {
     static List<StatementNode> readStatements(String returnType, String statementsSource) {
         String javaClass = generateMethodSource(returnType, statementsSource);
         ClassNode classNode = readClass(javaClass);
-        return classNode.getMethods().get(0).getBody();
+        return classNode.getMethods().get(0).getBody().get();
     }
 
     static ClassNode readClass(String classBody) {
