@@ -138,7 +138,6 @@ public class JavaReaderTests {
 
     @Test
     public void switchStatementWithoutFallThroughIsReadAsIfElseStatement() {
-        // TODO: deal with default not at the end
         assertEquals(
             readStatements(
                 "int",
