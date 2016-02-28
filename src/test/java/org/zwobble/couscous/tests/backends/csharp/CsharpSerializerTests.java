@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
 import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.values.IntegerValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
@@ -310,6 +311,16 @@ public class CsharpSerializerTests {
         String output = serialize(node);
 
         assertEquals("namespace com.example {\n    internal interface Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void interfaceWithMethod() {
+        MethodNode method = MethodNode.builder("get").isAbstract().returns(IntegerValue.REF).build();
+        Node node = declareInterface(TypeName.of("com.example.Example"), set(), list(method));
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal interface Example {\n        int get();\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {

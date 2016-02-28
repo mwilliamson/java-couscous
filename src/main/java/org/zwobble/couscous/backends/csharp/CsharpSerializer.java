@@ -313,7 +313,15 @@ public class CsharpSerializer implements NodeVisitor {
     @Override
     public void visit(InterfaceNode interfaceNode) {
         writeType(interfaceNode, "interface", () -> {
-            writeAll(interfaceNode.getMethods());
+            interfaceNode.getMethods().forEach(method -> {
+                writer.writeStatement(() -> {
+                    writeTypeReference(method.getReturnType());
+                    writer.writeSpace();
+                    writer.writeIdentifier(method.getName());
+                    writeFormalArguments(method.getArguments());
+                    writer.writeSymbol(";");
+                });
+            });
         });
     }
 
