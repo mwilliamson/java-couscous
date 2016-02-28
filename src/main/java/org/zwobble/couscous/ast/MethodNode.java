@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
@@ -22,6 +23,7 @@ public class MethodNode implements CallableNode {
         private final ImmutableList.Builder<AnnotationNode> annotations =
             ImmutableList.builder();
         private boolean isStatic = false;
+        private boolean isAbstract = false;
         private final String name;
         private final ImmutableList.Builder<FormalArgumentNode> arguments =
             ImmutableList.builder();
@@ -40,6 +42,11 @@ public class MethodNode implements CallableNode {
         
         public Builder isStatic(boolean isStatic) {
             this.isStatic = isStatic;
+            return this;
+        }
+
+        public Builder isAbstract() {
+            this.isAbstract = true;
             return this;
         }
         
@@ -75,7 +82,7 @@ public class MethodNode implements CallableNode {
                 name,
                 arguments.build(),
                 returnType,
-                body.build());
+                isAbstract ? Optional.empty() : Optional.of(body.build()));
         }
     }
     
@@ -85,7 +92,7 @@ public class MethodNode implements CallableNode {
         String name,
         List<FormalArgumentNode> arguments,
         TypeName returnType,
-        List<StatementNode> body)
+        Optional<List<StatementNode>> body)
     {
         return new MethodNode(annotations, isStatic, name, arguments, returnType, body);
     }
@@ -95,7 +102,7 @@ public class MethodNode implements CallableNode {
     private final String name;
     private final List<FormalArgumentNode> arguments;
     private final TypeName returnType;
-    private final List<StatementNode> body;
+    private final Optional<List<StatementNode>> body;
     
     private MethodNode(
         List<AnnotationNode> annotations,
@@ -103,7 +110,7 @@ public class MethodNode implements CallableNode {
         String name,
         List<FormalArgumentNode> arguments,
         TypeName returnType,
-        List<StatementNode> body)
+        Optional<List<StatementNode>> body)
     {
         this.annotations = annotations;
         this.isStatic = isStatic;
@@ -134,7 +141,7 @@ public class MethodNode implements CallableNode {
     }
     
     public List<StatementNode> getBody() {
-        return body;
+        return body.get();
     }
 
     public MethodSignature signature() {
@@ -145,7 +152,7 @@ public class MethodNode implements CallableNode {
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
-        return new MethodNode(annotations, isStatic, name, arguments, returnType, function.apply(body));
+        return new MethodNode(annotations, isStatic, name, arguments, returnType, body.map(function));
     }
 
     @Override
@@ -160,7 +167,7 @@ public class MethodNode implements CallableNode {
             transformer.transformMethodName(signature()),
             transformer.transformFormalArguments(arguments),
             transformer.transform(returnType),
-            transformer.transformStatements(body));
+            body.map(transformer::transformStatements));
     }
 
     @Override

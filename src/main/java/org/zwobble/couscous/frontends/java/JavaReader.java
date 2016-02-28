@@ -114,7 +114,7 @@ public class JavaReader {
             functionalInterfaceMethod.getName(),
             lambda.getFormalArguments(),
             typeOf(functionalInterfaceMethod.getReturnType()),
-            lambda.getBody());
+            Optional.of(lambda.getBody()));
 
         return new AnonymousClass(
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
@@ -286,12 +286,12 @@ public class JavaReader {
         List<AnnotationNode> annotations = readAnnotations(method);
         Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
             .map(JavaTypes::typeOf);
-        List<StatementNode> body = readBody(scope, method, returnType);
+        Optional<List<StatementNode>> body = readBody(scope, method, returnType);
 
         if (method.isConstructor()) {
             builder.constructor(constructor(
                 formalArguments,
-                body));
+                body.get()));
         } else {
             builder.addMethod(MethodNode.method(
                 annotations,
@@ -317,10 +317,14 @@ public class JavaReader {
         return eagerMap(parameters, parameter -> JavaVariableDeclarationReader.read(scope, parameter));
     }
 
-    private List<StatementNode> readBody(Scope scope, MethodDeclaration method, Optional<TypeName> returnType) {
-        @SuppressWarnings("unchecked")
-        List<Statement> statements = method.getBody().statements();
-        return readStatements(scope, statements, returnType);
+    private Optional<List<StatementNode>> readBody(Scope scope, MethodDeclaration method, Optional<TypeName> returnType) {
+        if (method.getBody() == null) {
+            return Optional.empty();
+        } else {
+            @SuppressWarnings("unchecked")
+            List<Statement> statements = method.getBody().statements();
+            return Optional.of(readStatements(scope, statements, returnType));
+        }
     }
 
     List<StatementNode> readStatement(Scope scope, Statement statement) {

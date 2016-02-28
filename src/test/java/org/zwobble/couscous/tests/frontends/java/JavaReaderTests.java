@@ -311,4 +311,21 @@ public class JavaReaderTests {
         assertEquals(list(), classNode.getMethods());
         assertEquals(set(ObjectValues.OBJECT), classNode.getSuperTypes());
     }
+
+    @Test
+    public void canReadInterfaceWithMethod() {
+        String source = "package com.example;" +
+            "public interface Example {" +
+            "int get();" +
+            "}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        InterfaceNode classNode = (InterfaceNode) classes.get(0);
+
+        MethodNode expectedMethod = MethodNode.builder("get")
+            .isAbstract()
+            .returns(IntegerValue.REF)
+            .build();
+        assertEquals(list(expectedMethod), classNode.getMethods());
+    }
 }

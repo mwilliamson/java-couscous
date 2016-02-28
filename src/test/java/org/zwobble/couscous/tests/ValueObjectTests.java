@@ -16,6 +16,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -133,6 +134,8 @@ public class ValueObjectTests {
             return "[string 1]";
         } else if (type.equals(boolean.class)) {
             return true;
+        } else if (type.equals(Optional.class)) {
+            return Optional.of("[optional 1]");
         } else if (type.equals(List.class)) {
             return list("[list 1]");
         } else if (type.equals(Set.class)) {
@@ -159,6 +162,8 @@ public class ValueObjectTests {
             return "[string 2]";
         } else if (type.equals(boolean.class)) {
             return false;
+        } else if (type.equals(Optional.class)) {
+            return Optional.of("[optional 2]");
         } else if (type.equals(List.class)) {
             return list("[list 2]");
         } else if (type.equals(Set.class)) {
@@ -185,6 +190,8 @@ public class ValueObjectTests {
             return "[string]";
         } else if (type.equals(boolean.class)) {
             return true;
+        } else if (type.equals(Optional.class)) {
+            return Optional.of("[optional]");
         } else if (type.equals(List.class)) {
             return list("[list]");
         } else if (type.equals(Set.class)) {
