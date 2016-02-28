@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -65,18 +66,24 @@ public class JavaReader {
         classes = ImmutableList.builder();
     }
 
-    private ClassNode readCompilationUnit(CompilationUnit ast) {
+    private TypeNode readCompilationUnit(CompilationUnit ast) {
         TypeName name = generateClassName(ast);
         Scope scope = Scope.create().enterClass(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
-        return ClassNode.declareClass(
-            name,
-            superTypes(type),
-            body.getFields(),
-            body.getStaticConstructor(),
-            body.getConstructor(),
-            body.getMethods());
+        Set<TypeName> superTypes = superTypes(type);
+        if (type.isInterface()) {
+            // TODO: throw exception if other parts of body are declared
+            return InterfaceNode.declareInterface(name, superTypes, body.getMethods());
+        } else {
+            return ClassNode.declareClass(
+                name,
+                superTypes,
+                body.getFields(),
+                body.getStaticConstructor(),
+                body.getConstructor(),
+                body.getMethods());
+        }
     }
 
     GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {

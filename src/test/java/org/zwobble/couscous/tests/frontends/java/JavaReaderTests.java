@@ -8,7 +8,9 @@ import org.zwobble.couscous.values.StringValue;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
@@ -27,6 +29,7 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
 import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class JavaReaderTests {
     @Test
@@ -295,5 +298,17 @@ public class JavaReaderTests {
         assertEquals(
             list(returns(boxInt(literal(1)))),
             method.getBody());
+    }
+
+    @Test
+    public void canReadEmptyInterface() {
+        String source = "package com.example;" +
+            "public interface Example {}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        InterfaceNode classNode = (InterfaceNode) classes.get(0);
+        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(list(), classNode.getMethods());
+        assertEquals(set(ObjectValues.OBJECT), classNode.getSuperTypes());
     }
 }
