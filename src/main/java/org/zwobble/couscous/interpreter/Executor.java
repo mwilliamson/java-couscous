@@ -54,7 +54,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         PositionalArguments arguments)
     {
         // TODO use map with multiple iterables
-        final org.zwobble.couscous.interpreter.StackFrameBuilder stackFrame = new StackFrameBuilder();
+        StackFrameBuilder stackFrame = new StackFrameBuilder();
         for (int index = 0; index < formalArguments.size(); index++) {
             stackFrame.declare(formalArguments.get(index), arguments.get(index));
         }
