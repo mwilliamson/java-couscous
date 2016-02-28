@@ -44,10 +44,10 @@ class JavaTypes {
 
     private static Set<TypeName> superTypes(ITypeBinding typeBinding) {
         ImmutableSet.Builder<TypeName> superTypes = ImmutableSet.builder();
+        superTypes.add(superClass(typeBinding));
         superTypes.addAll(transform(
             asList(typeBinding.getInterfaces()),
             JavaTypes::typeOf));
-        superTypes.add(superClass(typeBinding));
         return superTypes.build();
     }
 

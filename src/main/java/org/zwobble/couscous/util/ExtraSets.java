@@ -14,4 +14,8 @@ public class ExtraSets {
     public static <T> Set<T> set(T value1) {
         return ImmutableSet.of(value1);
     }
+
+    public static <T> Set<T> set(T value1, T value2) {
+        return ImmutableSet.of(value1, value2);
+    }
 }

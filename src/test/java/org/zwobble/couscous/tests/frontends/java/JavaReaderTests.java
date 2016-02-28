@@ -8,6 +8,7 @@ import org.zwobble.couscous.values.StringValue;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -310,6 +311,18 @@ public class JavaReaderTests {
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
         assertEquals(set(ObjectValues.OBJECT), classNode.getSuperTypes());
+    }
+
+    @Test
+    public void canReadInterfaceWithSuperTypes() {
+        String source = "package com.example;" +
+            "public interface Example extends java.util.function.IntSupplier {}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        InterfaceNode classNode = (InterfaceNode) classes.get(0);
+        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(list(), classNode.getMethods());
+        assertThat(classNode.getSuperTypes(), contains(ObjectValues.OBJECT, TypeName.of("java.util.function.IntSupplier")));
     }
 
     @Test
