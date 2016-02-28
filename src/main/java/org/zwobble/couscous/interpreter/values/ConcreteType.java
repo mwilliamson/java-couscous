@@ -2,17 +2,22 @@ package org.zwobble.couscous.interpreter.values;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.interpreter.*;
+import org.zwobble.couscous.interpreter.Environment;
+import org.zwobble.couscous.interpreter.Executor;
+import org.zwobble.couscous.interpreter.InterpreterTypes;
+import org.zwobble.couscous.interpreter.PositionalArguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
-import org.zwobble.couscous.util.Casts;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraMaps.map;
+import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class ConcreteType {
     public static <T> ConcreteType.Builder<T> builder(Class<T> interpreterValueType, TypeName reference) {
@@ -64,7 +69,7 @@ public class ConcreteType {
             return new MethodValue(
                 argumentsTypes,
                 (environment, arguments) ->
-                    Casts.tryCast(interpreterValueType, arguments.getReceiver())
+                    tryCast(interpreterValueType, arguments.getReceiver())
                         .map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments())))
                         .orElseThrow(() -> new RuntimeException("receiver is of wrong type")));
         }
@@ -92,7 +97,20 @@ public class ConcreteType {
     }
     
     public static ConcreteType fromNode(TypeNode typeNode) {
-        ClassNode classNode = (ClassNode)typeNode;
+        return tryCast(ClassNode.class, typeNode)
+            .map(ConcreteType::fromNode)
+            // TODO: tidy this up -- type hierarchy instead of one ConcreteType?
+            .orElseGet(() -> new ConcreteType(
+                typeNode.getName(),
+                set(),
+                map(),
+                list(),
+                null,
+                map(),
+                map()));
+    }
+
+    private static ConcreteType fromNode(ClassNode classNode) {
         Map<String, FieldDeclarationNode> fields = classNode.getFields().stream()
             .collect(toMap(
                 field -> field.getName(),
@@ -105,7 +123,7 @@ public class ConcreteType {
                 Optional.of(arguments.getReceiver()),
                 arguments.getPositionalArguments()));
 
-        Map<MethodSignature, MethodValue> methods = typeNode.getMethods()
+        Map<MethodSignature, MethodValue> methods = classNode.getMethods()
             .stream()
             .filter(method -> !method.isStatic())
             .collect(toMap(method -> method.signature(), method -> {
@@ -114,7 +132,7 @@ public class ConcreteType {
                     return Executor.callMethod(environment, method, Optional.of(arguments.getReceiver()), arguments.getPositionalArguments());
                 });
             }));
-        Map<MethodSignature, StaticMethodValue> staticMethods = typeNode.getMethods()
+        Map<MethodSignature, StaticMethodValue> staticMethods = classNode.getMethods()
             .stream()
             .filter(method -> method.isStatic())
             .collect(toMap(method -> method.signature(), method -> {
@@ -124,8 +142,8 @@ public class ConcreteType {
                 });
             }));
         return new ConcreteType(
-            typeNode.getName(),
-            typeNode.getSuperTypes(),
+            classNode.getName(),
+            classNode.getSuperTypes(),
             fields,
             classNode.getStaticConstructor(),
             constructor,
@@ -148,7 +166,8 @@ public class ConcreteType {
         TypeName name,
         Set<TypeName> superTypes,
         Map<String, FieldDeclarationNode> fields,
-        List<StatementNode> staticConstructor, MethodValue constructor,
+        List<StatementNode> staticConstructor,
+        MethodValue constructor,
         Map<MethodSignature, MethodValue> methods,
         Map<MethodSignature, StaticMethodValue> staticMethods)
     {
