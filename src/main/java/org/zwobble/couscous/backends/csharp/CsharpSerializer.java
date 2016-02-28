@@ -3,6 +3,7 @@ package org.zwobble.couscous.backends.csharp;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
+import org.zwobble.couscous.util.Action;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 import org.zwobble.couscous.values.UnitValue;
 
@@ -301,45 +302,35 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ClassNode classNode) {
-        writer.writeStatement(() -> {
-            writer.writeKeyword("namespace");
-            writer.writeSpace();
-            writer.writeIdentifier(classNode.getName().getPackage().get());
-            writer.startBlock();
-            writer.writeStatement(() -> {
-                writer.writeKeyword("internal");
-                writer.writeSpace();
-                writer.writeKeyword("class");
-                writer.writeSpace();
-                writer.writeIdentifier(classNode.getSimpleName());
-                writer.startBlock();
-                writeAll(classNode.getFields());
-                writeStaticConstructor(classNode);
-                writeConstructor(classNode, classNode.getConstructor());
-                writeAll(classNode.getMethods());
-                writer.endBlock();
-            });
-
-            writer.endBlock();
+        writeType(classNode, "class", () -> {
+            writeAll(classNode.getFields());
+            writeStaticConstructor(classNode);
+            writeConstructor(classNode, classNode.getConstructor());
+            writeAll(classNode.getMethods());
         });
     }
 
     @Override
     public void visit(InterfaceNode interfaceNode) {
-        // TODO: factor out duplication with visit(ClassNode)
+        writeType(interfaceNode, "interface", () -> {
+            writeAll(interfaceNode.getMethods());
+        });
+    }
+
+    private void writeType(TypeNode node, String keyword, Action writeBody) {
         writer.writeStatement(() -> {
             writer.writeKeyword("namespace");
             writer.writeSpace();
-            writer.writeIdentifier(interfaceNode.getName().getPackage().get());
+            writer.writeIdentifier(node.getName().getPackage().get());
             writer.startBlock();
             writer.writeStatement(() -> {
                 writer.writeKeyword("internal");
                 writer.writeSpace();
-                writer.writeKeyword("interface");
+                writer.writeKeyword(keyword);
                 writer.writeSpace();
-                writer.writeIdentifier(interfaceNode.getName().getSimpleName());
+                writer.writeIdentifier(node.getName().getSimpleName());
                 writer.startBlock();
-                writeAll(interfaceNode.getMethods());
+                writeBody.run();
                 writer.endBlock();
             });
 
