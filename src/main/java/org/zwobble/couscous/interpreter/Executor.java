@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.Evaluator.evalCondition;
+import static org.zwobble.couscous.util.ExtraIterables.forEach;
 
 public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
     public static InterpreterValue callMethod(
@@ -53,11 +54,8 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         Optional<InterpreterValue> thisValue,
         PositionalArguments arguments)
     {
-        // TODO use map with multiple iterables
         StackFrameBuilder stackFrame = new StackFrameBuilder();
-        for (int index = 0; index < formalArguments.size(); index++) {
-            stackFrame.declare(formalArguments.get(index), arguments.get(index));
-        }
+        forEach(formalArguments, arguments, stackFrame::declare);
         findDeclarations(statements).forEach(declaration -> stackFrame.declare(declaration));
         return environment.withStackFrame(thisValue, stackFrame.build());
     }
