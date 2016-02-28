@@ -337,6 +337,7 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeKeyword(keyword);
                 writer.writeSpace();
                 writer.writeIdentifier(node.getName().getSimpleName());
+                writeSuperTypes(node);
                 writer.startBlock();
                 writeBody.run();
                 writer.endBlock();
@@ -344,6 +345,21 @@ public class CsharpSerializer implements NodeVisitor {
 
             writer.endBlock();
         });
+    }
+
+    private void writeSuperTypes(TypeNode node) {
+        if (!node.getSuperTypes().isEmpty()) {
+            writer.writeSpace();
+            writer.writeSymbol(":");
+            writer.writeSpace();
+            writer.writeWithSeparator(
+                node.getSuperTypes(),
+                this::writeTypeReference,
+                () -> {
+                    writer.writeSymbol(",");
+                    writer.writeSpace();
+                });
+        }
     }
 
     private void writeStaticConstructor(ClassNode classNode) {

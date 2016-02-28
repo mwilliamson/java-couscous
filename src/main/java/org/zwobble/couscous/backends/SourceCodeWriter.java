@@ -3,10 +3,8 @@ package org.zwobble.couscous.backends;
 import com.google.common.base.Strings;
 import org.zwobble.couscous.util.Action;
 
-import java.util.List;
+import java.util.Iterator;
 import java.util.function.Consumer;
-
-import static com.google.common.collect.Iterables.skip;
 
 public class SourceCodeWriter {
     public interface WriterAction {
@@ -95,12 +93,13 @@ public class SourceCodeWriter {
         action.run(this);
     }
 
-    public <T> void writeWithSeparator(List<T> values, Consumer<T> writeValue, Action separator) {
-        if (!values.isEmpty()) {
-            writeValue.accept(values.get(0));
-            for (T value : skip(values, 1)) {
+    public <T> void writeWithSeparator(Iterable<T> values, Consumer<T> writeValue, Action separator) {
+        Iterator<T> iterator = values.iterator();
+        if (iterator.hasNext()) {
+            writeValue.accept(iterator.next());
+            while(iterator.hasNext()) {
                 separator.run();
-                writeValue.accept(value);
+                writeValue.accept(iterator.next());
             }
         }
     }

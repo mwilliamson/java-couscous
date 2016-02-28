@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.values.UnitValue;
 
@@ -8,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static java.util.Collections.emptySet;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClassNodeBuilder {
     private final TypeName name;
+    private final ImmutableSet.Builder<TypeName> superTypes;
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
     private List<StatementNode> staticConstructor;
     private Optional<ConstructorNode> constructor;
@@ -22,6 +23,7 @@ public class ClassNodeBuilder {
 
     public ClassNodeBuilder(TypeName name) {
         this.name = name;
+        this.superTypes = ImmutableSet.builder();
         this.fields = ImmutableList.builder();
         staticConstructor = list();
         this.constructor = Optional.empty();
@@ -30,6 +32,11 @@ public class ClassNodeBuilder {
 
     public ClassNodeBuilder(String name) {
         this(TypeName.of(name));
+    }
+
+    public ClassNodeBuilder addSuperType(String type) {
+        this.superTypes.add(TypeName.of(type));
+        return this;
     }
 
     public ClassNodeBuilder staticField(String name, TypeName type) {
@@ -97,7 +104,7 @@ public class ClassNodeBuilder {
     public ClassNode build() {
         return ClassNode.declareClass(
             name,
-            emptySet(),
+            superTypes.build(),
             fields.build(),
             staticConstructor,
             constructor.orElse(ConstructorNode.DEFAULT),

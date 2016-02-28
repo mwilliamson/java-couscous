@@ -266,6 +266,17 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void classWithSuperTypes() {
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .addSuperType("com.example.Base")
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals("namespace com.example {\n    internal class Example : com.example.Base {\n    }\n}\n", output);
+    }
+
+    @Test
     public void staticConstructorHasSerializedBody() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .staticConstructor(list(expressionStatement(literal(true))))
@@ -311,6 +322,15 @@ public class CsharpSerializerTests {
         String output = serialize(node);
 
         assertEquals("namespace com.example {\n    internal interface Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void interfaceWithSuperTypes() {
+        Node node = declareInterface(TypeName.of("com.example.Example"), set(TypeName.of("com.example.Base")), list());
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal interface Example : com.example.Base {\n    }\n}\n", output);
     }
 
     @Test
