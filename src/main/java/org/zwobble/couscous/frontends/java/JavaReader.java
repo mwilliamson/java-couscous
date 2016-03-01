@@ -68,6 +68,10 @@ public class JavaReader {
 
     private TypeNode readCompilationUnit(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
+        return readTypeDeclaration(type);
+    }
+
+    private TypeNode readTypeDeclaration(TypeDeclaration type) {
         TypeName name = typeOf(type.resolveBinding());
         Scope scope = Scope.create().enterClass(name);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
@@ -254,6 +258,9 @@ public class JavaReader {
 
             Casts.tryCast(FieldDeclaration.class, declaration)
                 .ifPresent(field -> readField(body, scope, type, field));
+
+            Casts.tryCast(TypeDeclaration.class, declaration)
+                .ifPresent(typeDeclaration -> classes.add(readTypeDeclaration(typeDeclaration)));
         }
         return body.build();
     }

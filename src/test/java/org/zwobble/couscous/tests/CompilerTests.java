@@ -87,6 +87,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void staticNestedClasses() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "static-nested-class",
+                TypeName.of("com.example.StaticNestedClass"),
+                "value",
+                list(),
+                IntegerValue.REF));
+    }
+
+    @Test
     public void canImplementUserDefinedInterface() throws Exception {
         assertEquals(
             value(42),
