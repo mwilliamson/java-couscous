@@ -61,6 +61,7 @@ public class JavaReader {
 
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
+    private final Scope topScope = Scope.create();
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -73,7 +74,7 @@ public class JavaReader {
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
         TypeName name = typeOf(type.resolveBinding());
-        Scope scope = Scope.create().enterClass(name);
+        Scope scope = topScope.enterClass(name);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
         Set<TypeName> superTypes = superTypes(type);
         if (type.isInterface()) {
