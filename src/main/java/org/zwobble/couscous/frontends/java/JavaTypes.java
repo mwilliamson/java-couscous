@@ -25,7 +25,12 @@ class JavaTypes {
     }
 
     static TypeName typeOf(ITypeBinding typeBinding) {
-        return TypeName.of(typeBinding.getErasure().getQualifiedName());
+        ITypeBinding outerClass = typeBinding.getDeclaringClass();
+        if (outerClass == null) {
+            return TypeName.of(typeBinding.getErasure().getQualifiedName());
+        } else {
+            return TypeName.of(typeOf(outerClass).getQualifiedName() + "__" + typeBinding.getName());
+        }
     }
 
     static Set<TypeName> superTypes(TypeDeclaration declaration) {
