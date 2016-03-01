@@ -9,15 +9,11 @@ import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.util.Casts;
 import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
@@ -35,7 +31,9 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraMaps.lookup;
 
 public class JavaReader {
     public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
@@ -46,7 +44,7 @@ public class JavaReader {
             throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
         }
         JavaReader reader = new JavaReader();
-        return cons(reader.readCompilationUnit(ast), reader.classes.build());
+        return reader.readCompilationUnit(ast);
     }
 
     private static String describe(List<IProblem> errors) {
@@ -62,14 +60,23 @@ public class JavaReader {
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
+    private final Map<TypeName, TypeName> nestedClasses = new HashMap<>();
 
     private JavaReader() {
         classes = ImmutableList.builder();
     }
 
-    private TypeNode readCompilationUnit(CompilationUnit ast) {
+    private List<TypeNode> readCompilationUnit(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        return readTypeDeclaration(type);
+        List<TypeNode> classes = cons(readTypeDeclaration(type), this.classes.build());
+        NodeTransformer transformer = NodeTransformer.builder()
+            .transformExpression(expression ->
+                tryCast(ConstructorCallNode.class, expression)
+                    .flatMap(call -> lookup(nestedClasses, call.getType()).map(outerType ->
+                        // TODO: handle existing arguments
+                        new ConstructorCallNode(call.getType(), list(thisReference(outerType))))))
+            .build();
+        return eagerMap(classes, classNode -> classNode.transform(transformer));
     }
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
@@ -188,30 +195,45 @@ public class JavaReader {
 
     private GeneratedClosure classWithCapture(
         Scope scope,
-        TypeName className,
-        AnonymousClass anonymousClass
+        ClassNode classNode
     ) {
         List<ReferenceNode> freeVariables = findFreeVariables(ExtraLists.concat(
-            anonymousClass.getFields(),
-            anonymousClass.getMethods()));
+            classNode.getFields(),
+            classNode.getMethods()));
         List<CapturedVariable> capturedVariables = ImmutableList.copyOf(transform(
             freeVariables,
             freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
         Iterable<FieldDeclarationNode> captureFields = transform(capturedVariables, capture -> capture.field);
 
         List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(
-            anonymousClass.getFields(),
+            classNode.getFields(),
             captureFields));
 
-        ClassNode classNode = ClassNode.declareClass(
+        ClassNode generatedClass = ClassNode.declareClass(
+            classNode.getName(),
+            classNode.getSuperTypes(),
+            fields,
+            // TODO: handle static constructor (or codify that this is a case that never needs handling)
+            list(),
+            // TODO: handle existing constructor
+            buildConstructor(scope, classNode.getName(), capturedVariables),
+            eagerMap(classNode.getMethods(), method ->
+                method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))));
+        return new GeneratedClosure(generatedClass, freeVariables);
+    }
+
+    private GeneratedClosure classWithCapture(
+        Scope scope,
+        TypeName className,
+        AnonymousClass anonymousClass
+    ) {
+        return classWithCapture(scope, ClassNode.declareClass(
             className,
             anonymousClass.getSuperTypes(),
-            fields,
+            anonymousClass.getFields(),
             list(),
-            buildConstructor(scope, className, capturedVariables),
-            eagerMap(anonymousClass.getMethods(), method ->
-                method.mapBody(body -> replaceCaptureReferences(className, body, capturedVariables))));
-        return new GeneratedClosure(classNode, freeVariables);
+            ConstructorNode.DEFAULT,
+            anonymousClass.getMethods()));
     }
 
     private FieldDeclarationNode fieldForCapture(ReferenceNode freeVariable) {
@@ -249,21 +271,35 @@ public class JavaReader {
         TypeDeclarationBody.Builder body = TypeDeclarationBody.builder();
 
         for (Object declaration : bodyDeclarations) {
-            Casts.tryCast(MethodDeclaration.class, declaration)
+            tryCast(MethodDeclaration.class, declaration)
                 .ifPresent(method -> readMethod(body, scope, method));
 
-            Casts.tryCast(Initializer.class, declaration)
+            tryCast(Initializer.class, declaration)
                 .ifPresent(initializer -> body.addInitializer(
                     Modifier.isStatic(initializer.getModifiers()),
                     readStatement(scope, initializer.getBody())));
 
-            Casts.tryCast(FieldDeclaration.class, declaration)
+            tryCast(FieldDeclaration.class, declaration)
                 .ifPresent(field -> readField(body, scope, type, field));
 
-            Casts.tryCast(TypeDeclaration.class, declaration)
-                .ifPresent(typeDeclaration -> classes.add(readTypeDeclaration(typeDeclaration)));
+            tryCast(TypeDeclaration.class, declaration)
+                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(type, typeDeclaration)));
         }
         return body.build();
+    }
+
+    private TypeNode readNestedTypeDeclaration(TypeName outerType, TypeDeclaration typeDeclaration) {
+        TypeNode typeNode = readTypeDeclaration(typeDeclaration);
+        // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
+        Scope scope = topScope.enterClass(typeNode.getName());
+        return tryCast(ClassNode.class, typeNode)
+            .filter(node -> !Modifier.isStatic(typeDeclaration.getModifiers()))
+            .<TypeNode>map(node -> {
+                GeneratedClosure closure = classWithCapture(scope, node);
+                nestedClasses.put(node.getName(), outerType);
+                return closure.getClassNode();
+            })
+            .orElse(typeNode);
     }
 
     private void readField(TypeDeclarationBody.Builder builder, Scope scope, TypeName declaringType, FieldDeclaration field) {

@@ -99,6 +99,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void innerClasses() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "inner-class",
+                TypeName.of("com.example.InnerClass"),
+                "run",
+                list(),
+                IntegerValue.REF));
+    }
+
+    @Test
     public void canImplementUserDefinedInterface() throws Exception {
         assertEquals(
             value(42),

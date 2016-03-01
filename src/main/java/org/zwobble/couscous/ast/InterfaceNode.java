@@ -49,6 +49,7 @@ public class InterfaceNode implements TypeNode {
         return visitor.visit(this);
     }
 
+    @Override
     public InterfaceNode transform(NodeTransformer transformer) {
         return new InterfaceNode(
             transformer.transform(name),

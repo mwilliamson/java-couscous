@@ -13,6 +13,7 @@ public class ClassNode implements TypeNode {
     public static ClassNodeBuilder builder(String name) {
         return new ClassNodeBuilder(name);
     }
+
     public static ClassNode declareClass(
             TypeName name,
             Set<TypeName> superTypes,
@@ -82,6 +83,7 @@ public class ClassNode implements TypeNode {
         return visitor.visit(this);
     }
 
+    @Override
     public ClassNode transform(NodeTransformer transformer) {
         return new ClassNode(
             transformer.transform(name),
