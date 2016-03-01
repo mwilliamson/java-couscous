@@ -36,6 +36,7 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.lookup;
 
 public class JavaReader {
+    // TODO: de-dupe captures (multiple reference nodes may reference the same free variable)
     public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
 
@@ -73,8 +74,7 @@ public class JavaReader {
             .transformExpression(expression ->
                 tryCast(ConstructorCallNode.class, expression)
                     .flatMap(call -> lookup(nestedClasses, call.getType()).map(captures ->
-                        // TODO: handle existing arguments
-                        new ConstructorCallNode(call.getType(), captures))))
+                        new ConstructorCallNode(call.getType(), ExtraLists.concat(captures, call.getArguments())))))
             .build();
         return eagerMap(classes, classNode -> classNode.transform(transformer));
     }
@@ -146,7 +146,12 @@ public class JavaReader {
         return eagerMap(body, statement -> statement.transform(transformer));
     }
 
-    private ConstructorNode buildConstructor(Scope outerScope, TypeName type, List<CapturedVariable> freeVariables) {
+    private ConstructorNode buildConstructor(
+        Scope outerScope,
+        TypeName type,
+        List<CapturedVariable> freeVariables,
+        ConstructorNode existing)
+    {
         Scope scope = outerScope.enterConstructor();
 
         ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
@@ -158,7 +163,10 @@ public class JavaReader {
             body.add(assignStatement(captureAccess(type, variable), reference(argument)));
         }
 
-        return constructor(arguments.build(), body.build());
+        arguments.addAll(existing.getArguments());
+        body.addAll(existing.getBody());
+
+        return new ConstructorNode(arguments.build(), body.build());
     }
 
     private FieldAccessNode captureAccess(TypeName type, CapturedVariable freeVariable) {
@@ -197,9 +205,12 @@ public class JavaReader {
         Scope scope,
         ClassNode classNode
     ) {
-        List<ReferenceNode> freeVariables = findFreeVariables(ExtraLists.concat(
-            classNode.getFields(),
-            classNode.getMethods()));
+        List<ReferenceNode> freeVariables = eagerFilter(
+            findFreeVariables(ExtraLists.concat(
+                classNode.getFields(),
+                classNode.getMethods())),
+            // TODO: check this references work correctly in anonymous classes
+            variable -> !isThisReference(classNode.getName(), variable));
         List<CapturedVariable> capturedVariables = ImmutableList.copyOf(transform(
             freeVariables,
             freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
@@ -215,11 +226,16 @@ public class JavaReader {
             fields,
             // TODO: handle static constructor (or codify that this is a case that never needs handling)
             list(),
-            // TODO: handle existing constructor
-            buildConstructor(scope, classNode.getName(), capturedVariables),
+            buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
             eagerMap(classNode.getMethods(), method ->
                 method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))));
         return new GeneratedClosure(generatedClass, freeVariables);
+    }
+
+    private boolean isThisReference(TypeName name, ReferenceNode reference) {
+        return tryCast(ThisReferenceNode.class, reference)
+            .map(node -> node.getType().equals(name))
+            .orElse(false);
     }
 
     private GeneratedClosure classWithCapture(

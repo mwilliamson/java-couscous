@@ -111,6 +111,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void innerClassesWithConstructorArguments() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "inner-class-with-constructor-args",
+                TypeName.of("com.example.InnerClass"),
+                "run",
+                list(),
+                IntegerValue.REF));
+    }
+
+    @Test
     public void canImplementUserDefinedInterface() throws Exception {
         assertEquals(
             value(42),

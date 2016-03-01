@@ -18,7 +18,7 @@ public class ConstructorNode implements Node {
     private final List<FormalArgumentNode> arguments;
     private final List<StatementNode> body;
     
-    private ConstructorNode(
+    public ConstructorNode(
             List<FormalArgumentNode> arguments,
             List<StatementNode> body) {
         this.arguments = arguments;
