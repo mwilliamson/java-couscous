@@ -67,9 +67,9 @@ public class JavaReader {
     }
 
     private TypeNode readCompilationUnit(CompilationUnit ast) {
-        TypeName name = generateClassName(ast);
-        Scope scope = Scope.create().enterClass(name);
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
+        TypeName name = typeOf(type.resolveBinding());
+        Scope scope = Scope.create().enterClass(name);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
         Set<TypeName> superTypes = superTypes(type);
         if (type.isInterface()) {
@@ -343,13 +343,6 @@ public class JavaReader {
 
     ExpressionNode readExpressionWithoutBoxing(Scope scope, Expression body) {
         return expressionReader(scope).readExpressionWithoutBoxing(body);
-    }
-
-    private TypeName generateClassName(CompilationUnit ast) {
-        TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        String packageName = ast.getPackage().getName().getFullyQualifiedName();
-        String className = type.getName().getFullyQualifiedName();
-        return TypeName.of(packageName + "." + className);
     }
 
     private JavaExpressionReader expressionReader(Scope scope) {
