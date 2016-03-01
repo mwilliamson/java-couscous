@@ -60,7 +60,7 @@ public class JavaReader {
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
-    private final Map<TypeName, TypeName> nestedClasses = new HashMap<>();
+    private final Map<TypeName, List<ReferenceNode>> nestedClasses = new HashMap<>();
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -72,9 +72,9 @@ public class JavaReader {
         NodeTransformer transformer = NodeTransformer.builder()
             .transformExpression(expression ->
                 tryCast(ConstructorCallNode.class, expression)
-                    .flatMap(call -> lookup(nestedClasses, call.getType()).map(outerType ->
+                    .flatMap(call -> lookup(nestedClasses, call.getType()).map(captures ->
                         // TODO: handle existing arguments
-                        new ConstructorCallNode(call.getType(), list(thisReference(outerType))))))
+                        new ConstructorCallNode(call.getType(), captures))))
             .build();
         return eagerMap(classes, classNode -> classNode.transform(transformer));
     }
@@ -296,7 +296,7 @@ public class JavaReader {
             .filter(node -> !Modifier.isStatic(typeDeclaration.getModifiers()))
             .<TypeNode>map(node -> {
                 GeneratedClosure closure = classWithCapture(scope, node);
-                nestedClasses.put(node.getName(), outerType);
+                nestedClasses.put(node.getName(), closure.getCaptures());
                 return closure.getClassNode();
             })
             .orElse(typeNode);
