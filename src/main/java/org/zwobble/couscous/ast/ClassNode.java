@@ -31,7 +31,7 @@ public class ClassNode implements TypeNode {
     private final ConstructorNode constructor;
     private final List<MethodNode> methods;
     
-    private ClassNode(
+    public ClassNode(
         TypeName name,
         Set<TypeName> superTypes,
         List<FieldDeclarationNode> fields,

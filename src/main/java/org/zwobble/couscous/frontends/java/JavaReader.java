@@ -220,11 +220,14 @@ public class JavaReader {
             classNode.getFields(),
             captureFields));
 
-        ClassNode generatedClass = ClassNode.declareClass(
+        if (!classNode.getStaticConstructor().isEmpty()) {
+            throw new RuntimeException("Class has unexpected static constructor");
+        }
+
+        ClassNode generatedClass = new ClassNode(
             classNode.getName(),
             classNode.getSuperTypes(),
             fields,
-            // TODO: handle static constructor (or codify that this is a case that never needs handling)
             list(),
             buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
             eagerMap(classNode.getMethods(), method ->
