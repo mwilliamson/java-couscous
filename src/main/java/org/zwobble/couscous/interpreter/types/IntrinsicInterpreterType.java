@@ -147,18 +147,18 @@ public class IntrinsicInterpreterType implements InterpreterType {
         return method.apply(environment, new PositionalArguments(arguments));
     }
 
-    @Override
-    public InterpreterValue callConstructor(Environment environment, List<InterpreterValue> arguments) {
-        ObjectInterpreterValue object = new ObjectInterpreterValue(this);
-        constructor.apply(environment, MethodCallArguments.of(object, new PositionalArguments(arguments)));
-        return object;
-    }
-
     private static <T extends Callable> T findMethod(Map<MethodSignature, T> methods, MethodSignature signature) {
         if (!methods.containsKey(signature)) {
             throw new NoSuchMethod(signature);
         }
         return methods.get(signature);
+    }
+
+    @Override
+    public InterpreterValue callConstructor(Environment environment, List<InterpreterValue> arguments) {
+        ObjectInterpreterValue object = new ObjectInterpreterValue(this);
+        constructor.apply(environment, MethodCallArguments.of(object, new PositionalArguments(arguments)));
+        return object;
     }
 
     @Override

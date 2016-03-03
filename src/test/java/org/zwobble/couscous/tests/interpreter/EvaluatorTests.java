@@ -94,7 +94,25 @@ public class EvaluatorTests extends BackendEvalTests {
             new MethodSignature("substring", list(IntegerValue.REF, StringValue.REF), StringValue.REF),
             exception.getSignature());
     }
-    
+
+    @Test
+    public void errorIfConstructorArgumentIsWrongType() {
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .constructor(constructor -> constructor
+                .argument(argument))
+            .build();
+
+        UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
+            () -> evalExpression(
+                list(classNode),
+                constructorCall(
+                    classNode.getName(),
+                    list(literal("")))));
+
+        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+    }
+
     @Test
     public void cannotGetValueOfUndeclaredField() {
         ClassNode classNode = ClassNode.builder("com.example.Example")

@@ -3,8 +3,10 @@ package org.zwobble.couscous.interpreter.types;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
+import org.zwobble.couscous.interpreter.InterpreterTypes;
 import org.zwobble.couscous.interpreter.PositionalArguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
+import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.ObjectInterpreterValue;
 
@@ -15,6 +17,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.filter;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraMaps.map;
 import static org.zwobble.couscous.util.ExtraMaps.toMapWithKeys;
@@ -27,7 +30,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
     public UserDefinedInterpreterType(TypeNode type) {
         this.type = type;
         this.fields = tryCast(ClassNode.class, type)
-            .map(classNode -> toMapWithKeys(classNode.getFields(), field -> field.getName()))
+            .map(classNode -> toMapWithKeys(classNode.getFields(), FieldDeclarationNode::getName))
             .orElse(map());
         this.methods = toMapWithKeys(
             filter(type.getMethods(), method -> !method.isAbstract()),
@@ -62,6 +65,10 @@ public class UserDefinedInterpreterType implements InterpreterType {
             // TODO: add test for this case
             .orElseThrow(() -> new RuntimeException("Cannot instantiate non-class types"))
             .getConstructor();
+        List<TypeName> formalArgumentTypes = eagerMap(
+            constructor.getArguments(),
+            FormalArgumentNode::getType);
+        checkMethodArguments(formalArgumentTypes, arguments);
         InterpreterValue object = new ObjectInterpreterValue(this);
         Executor.callConstructor(
             environment,
@@ -69,6 +76,16 @@ public class UserDefinedInterpreterType implements InterpreterType {
             object,
             new PositionalArguments(arguments));
         return object;
+    }
+
+    private static void checkMethodArguments(final List<TypeName> argumentTypes, List<InterpreterValue> arguments) {
+        if (argumentTypes.size() != arguments.size()) {
+            throw new WrongNumberOfArguments(argumentTypes.size(), arguments.size());
+        }
+        for (int index = 0; index < arguments.size(); index++) {
+            TypeName formalArgumentType = argumentTypes.get(index);
+            InterpreterTypes.checkIsInstance(formalArgumentType, arguments.get(index));
+        }
     }
 
     @Override
