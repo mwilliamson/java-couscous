@@ -195,6 +195,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void genericInterfaces() throws Exception {
+        assertEquals(
+            value("Hello"),
+            execTestProgram(
+                "generic-interface",
+                TypeName.of("com.example.GenericInterface"),
+                "value",
+                list(),
+                StringValue.REF));
+    }
+
+    @Test
     public void staticMethodOverloads() throws Exception {
         assertEquals(
             value(42),
