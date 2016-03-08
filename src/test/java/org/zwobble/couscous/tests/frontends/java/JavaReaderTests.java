@@ -323,7 +323,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         ClassNode classNode = (ClassNode) classes.get(0);
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(TypeName.of("T"))), classNode.getTypeParameters());
     }
 
     @Test
@@ -334,7 +334,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(TypeName.of("T"))), classNode.getTypeParameters());
     }
 
     @Test

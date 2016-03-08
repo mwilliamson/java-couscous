@@ -220,6 +220,10 @@ public class NodeTransformer {
         return statement.transform(this);
     }
 
+    public FormalTypeParameterNode transformFormalTypeParameter(FormalTypeParameterNode typeParameter) {
+        return typeParameter.transform(this);
+    }
+
     public FormalArgumentNode transformFormalArgument(FormalArgumentNode formalArgumentNode) {
         return formalArgumentNode.transform(this);
     }
@@ -270,6 +274,10 @@ public class NodeTransformer {
 
     public List<ExpressionNode> transformExpressions(List<? extends ExpressionNode> expressions) {
         return transformList(expressions, this::transformExpression);
+    }
+
+    public List<FormalTypeParameterNode> transformFormalTypeParameters(List<FormalTypeParameterNode> typeParameters) {
+        return transformList(typeParameters, this::transformFormalTypeParameter);
     }
 
     public List<FormalArgumentNode> transformFormalArguments(List<FormalArgumentNode> arguments) {

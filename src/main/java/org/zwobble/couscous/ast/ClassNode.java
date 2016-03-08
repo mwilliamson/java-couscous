@@ -97,8 +97,7 @@ public class ClassNode implements TypeNode {
     public ClassNode transform(NodeTransformer transformer) {
         return new ClassNode(
             transformer.transform(name),
-            // TODO: transform
-            typeParameters,
+            transformer.transformFormalTypeParameters(typeParameters),
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
             // TODO: transform
