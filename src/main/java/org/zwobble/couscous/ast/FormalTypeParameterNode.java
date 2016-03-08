@@ -14,6 +14,10 @@ public class FormalTypeParameterNode implements Node {
         this.name = name;
     }
 
+    public TypeName getName() {
+        return name;
+    }
+
     public FormalTypeParameterNode transform(NodeTransformer transformer) {
         return new FormalTypeParameterNode(transformer.transform(name));
     }

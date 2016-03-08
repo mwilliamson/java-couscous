@@ -264,6 +264,18 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void classWithTypeParameters() {
+        ClassNode classNode = ClassNode.builder("com.example.Example")
+            .addTypeParameter("T")
+            .addTypeParameter("U")
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals("namespace com.example {\n    internal class Example<T, U> {\n    }\n}\n", output);
+    }
+
+    @Test
     public void classWithSuperTypes() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .addSuperType("com.example.Base")
@@ -320,6 +332,18 @@ public class CsharpSerializerTests {
         String output = serialize(node);
 
         assertEquals("namespace com.example {\n    internal interface Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void interfaceWithTypeParameters() {
+        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+            .addTypeParameter("T")
+            .addTypeParameter("U")
+            .buildInterface();
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal interface Example<T, U> {\n    }\n}\n", output);
     }
 
     @Test

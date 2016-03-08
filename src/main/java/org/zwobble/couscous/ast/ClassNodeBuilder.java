@@ -10,12 +10,14 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClassNodeBuilder {
     private final TypeName name;
     private final ImmutableSet.Builder<TypeName> superTypes;
+    private final ImmutableList.Builder<FormalTypeParameterNode> typeParameters;
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
     private List<StatementNode> staticConstructor;
     private Optional<ConstructorNode> constructor;
@@ -23,6 +25,7 @@ public class ClassNodeBuilder {
 
     public ClassNodeBuilder(TypeName name) {
         this.name = name;
+        this.typeParameters = ImmutableList.builder();
         this.superTypes = ImmutableSet.builder();
         this.fields = ImmutableList.builder();
         staticConstructor = list();
@@ -32,6 +35,11 @@ public class ClassNodeBuilder {
 
     public ClassNodeBuilder(String name) {
         this(TypeName.of(name));
+    }
+
+    public ClassNodeBuilder addTypeParameter(String name) {
+        this.typeParameters.add(formalTypeParameter(TypeName.of(name)));
+        return this;
     }
 
     public ClassNodeBuilder addSuperType(String type) {
@@ -104,7 +112,7 @@ public class ClassNodeBuilder {
     public ClassNode build() {
         return ClassNode.declareClass(
             name,
-            list(),
+            typeParameters.build(),
             superTypes.build(),
             fields.build(),
             staticConstructor,
@@ -115,7 +123,7 @@ public class ClassNodeBuilder {
     public InterfaceNode buildInterface() {
         return InterfaceNode.declareInterface(
             name,
-            list(),
+            typeParameters.build(),
             superTypes.build(),
             methods.build());
     }
