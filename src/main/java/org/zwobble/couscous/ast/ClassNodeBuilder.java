@@ -38,7 +38,7 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder addTypeParameter(String name) {
-        this.typeParameters.add(formalTypeParameter(TypeName.of(name)));
+        this.typeParameters.add(formalTypeParameter(name));
         return this;
     }
 

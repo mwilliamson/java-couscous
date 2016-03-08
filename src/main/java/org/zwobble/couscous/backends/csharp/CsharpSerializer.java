@@ -353,7 +353,7 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSymbol("<");
             writer.writeWithSeparator(
                 node.getTypeParameters(),
-                parameter -> writeTypeReference(parameter.getName()),
+                parameter -> writer.writeIdentifier(parameter.getName()),
                 () -> {
                     writer.writeSymbol(",");
                     writer.writeSpace();

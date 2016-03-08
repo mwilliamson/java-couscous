@@ -4,22 +4,22 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class FormalTypeParameterNode implements Node {
-    public static FormalTypeParameterNode formalTypeParameter(TypeName name) {
+    public static FormalTypeParameterNode formalTypeParameter(String name) {
         return new FormalTypeParameterNode(name);
     }
 
-    private final TypeName name;
+    private final String name;
 
-    public FormalTypeParameterNode(TypeName name) {
+    public FormalTypeParameterNode(String name) {
         this.name = name;
     }
 
-    public TypeName getName() {
+    public String getName() {
         return name;
     }
 
     public FormalTypeParameterNode transform(NodeTransformer transformer) {
-        return new FormalTypeParameterNode(transformer.transform(name));
+        return this;
     }
 
     @Override

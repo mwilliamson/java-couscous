@@ -104,7 +104,7 @@ public class JavaReader {
     private List<FormalTypeParameterNode> readTypeParameters(TypeDeclaration typeDeclaration) {
         return eagerMap(
             asList(typeDeclaration.resolveBinding().getTypeParameters()),
-            parameter -> formalTypeParameter(TypeName.of(parameter.getName())));
+            parameter -> formalTypeParameter(parameter.getName()));
     }
 
     GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
