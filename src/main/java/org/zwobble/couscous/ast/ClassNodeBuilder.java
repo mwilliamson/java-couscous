@@ -104,10 +104,19 @@ public class ClassNodeBuilder {
     public ClassNode build() {
         return ClassNode.declareClass(
             name,
+            list(),
             superTypes.build(),
             fields.build(),
             staticConstructor,
             constructor.orElse(ConstructorNode.DEFAULT),
+            methods.build());
+    }
+
+    public InterfaceNode buildInterface() {
+        return InterfaceNode.declareInterface(
+            name,
+            list(),
+            superTypes.build(),
             methods.build());
     }
 

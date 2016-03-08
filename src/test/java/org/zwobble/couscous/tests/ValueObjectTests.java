@@ -50,6 +50,7 @@ public class ValueObjectTests {
             {FieldAccessNode.class},
             {FieldDeclarationNode.class},
             {FormalArgumentNode.class},
+            {FormalTypeParameterNode.class},
             {IfStatementNode.class},
             {InstanceReceiver.class},
             {InterfaceNode.class},

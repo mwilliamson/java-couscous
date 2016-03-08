@@ -14,7 +14,6 @@ import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStateme
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
-import static org.zwobble.couscous.ast.InterfaceNode.declareInterface;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -27,7 +26,6 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.util.ExtraLists.list;
-import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class CsharpSerializerTests {
     @Test
@@ -317,7 +315,7 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceIsInNamespace() {
-        Node node = declareInterface(TypeName.of("com.example.Example"), set(), list());
+        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example")).buildInterface();
 
         String output = serialize(node);
 
@@ -326,7 +324,9 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceWithSuperTypes() {
-        Node node = declareInterface(TypeName.of("com.example.Example"), set(TypeName.of("com.example.Base")), list());
+        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+            .addSuperType("com.example.Base")
+            .buildInterface();
 
         String output = serialize(node);
 
@@ -336,7 +336,9 @@ public class CsharpSerializerTests {
     @Test
     public void interfaceWithMethod() {
         MethodNode method = MethodNode.builder("get").isAbstract().returns(IntegerValue.REF).build();
-        Node node = declareInterface(TypeName.of("com.example.Example"), set(), list(method));
+        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+            .method(method)
+            .buildInterface();
 
         String output = serialize(node);
 

@@ -15,16 +15,19 @@ public class ClassNode implements TypeNode {
     }
 
     public static ClassNode declareClass(
-            TypeName name,
-            Set<TypeName> superTypes,
-            List<FieldDeclarationNode> fields,
-            List<StatementNode> staticConstructor,
-            ConstructorNode constructor,
-            List<MethodNode> methods) {
-        return new ClassNode(name, superTypes, fields, staticConstructor, constructor, methods);
+        TypeName name,
+        List<FormalTypeParameterNode> typeParameters,
+        Set<TypeName> superTypes,
+        List<FieldDeclarationNode> fields,
+        List<StatementNode> staticConstructor,
+        ConstructorNode constructor,
+        List<MethodNode> methods)
+    {
+        return new ClassNode(name, typeParameters, superTypes, fields, staticConstructor, constructor, methods);
     }
     
     private final TypeName name;
+    private final List<FormalTypeParameterNode> typeParameters;
     private final Set<TypeName> superTypes;
     private final List<FieldDeclarationNode> fields;
     private final List<StatementNode> staticConstructor;
@@ -33,6 +36,7 @@ public class ClassNode implements TypeNode {
     
     public ClassNode(
         TypeName name,
+        List<FormalTypeParameterNode> typeParameters,
         Set<TypeName> superTypes,
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
@@ -40,6 +44,7 @@ public class ClassNode implements TypeNode {
         List<MethodNode> methodNodes)
     {
         this.name = name;
+        this.typeParameters = typeParameters;
         this.superTypes = superTypes;
         this.fields = fields;
         this.staticConstructor = staticConstructor;
@@ -50,6 +55,11 @@ public class ClassNode implements TypeNode {
     @Override
     public TypeName getName() {
         return name;
+    }
+
+    @Override
+    public List<FormalTypeParameterNode> getTypeParameters() {
+        return typeParameters;
     }
 
     @Override
@@ -87,10 +97,27 @@ public class ClassNode implements TypeNode {
     public ClassNode transform(NodeTransformer transformer) {
         return new ClassNode(
             transformer.transform(name),
+            // TODO: transform
+            typeParameters,
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
-            staticConstructor, transformer.transformConstructor(constructor),
+            // TODO: transform
+            staticConstructor,
+            transformer.transformConstructor(constructor),
             transformer.transformMethods(methods));
+    }
+
+    @Override
+    public String toString() {
+        return "ClassNode(" +
+            "name=" + name +
+            ", typeParameters=" + typeParameters +
+            ", superTypes=" + superTypes +
+            ", fields=" + fields +
+            ", staticConstructor=" + staticConstructor +
+            ", constructor=" + constructor +
+            ", methods=" + methods +
+            ')';
     }
 
     @Override
@@ -101,6 +128,7 @@ public class ClassNode implements TypeNode {
         ClassNode classNode = (ClassNode) o;
 
         if (!name.equals(classNode.name)) return false;
+        if (!typeParameters.equals(classNode.typeParameters)) return false;
         if (!superTypes.equals(classNode.superTypes)) return false;
         if (!fields.equals(classNode.fields)) return false;
         if (!staticConstructor.equals(classNode.staticConstructor)) return false;
@@ -112,23 +140,12 @@ public class ClassNode implements TypeNode {
     @Override
     public int hashCode() {
         int result = name.hashCode();
+        result = 31 * result + typeParameters.hashCode();
         result = 31 * result + superTypes.hashCode();
         result = 31 * result + fields.hashCode();
         result = 31 * result + staticConstructor.hashCode();
         result = 31 * result + constructor.hashCode();
         result = 31 * result + methods.hashCode();
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "ClassNode(" +
-            "name=" + name +
-            ", superTypes=" + superTypes +
-            ", fields=" + fields +
-            ", staticConstructor=" + staticConstructor +
-            ", constructor=" + constructor +
-            ", methods=" + methods +
-            ')';
     }
 }

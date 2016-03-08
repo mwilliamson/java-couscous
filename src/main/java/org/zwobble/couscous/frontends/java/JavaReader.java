@@ -25,6 +25,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
+import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -82,20 +83,28 @@ public class JavaReader {
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
         TypeName name = typeOf(type.resolveBinding());
         Scope scope = topScope.enterClass(name);
+        List<FormalTypeParameterNode> typeParameters = readTypeParameters(type);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
         Set<TypeName> superTypes = superTypes(type);
         if (type.isInterface()) {
             // TODO: throw exception if other parts of body are declared
-            return InterfaceNode.declareInterface(name, superTypes, body.getMethods());
+            return InterfaceNode.declareInterface(name, typeParameters, superTypes, body.getMethods());
         } else {
             return ClassNode.declareClass(
                 name,
+                typeParameters,
                 superTypes,
                 body.getFields(),
                 body.getStaticConstructor(),
                 body.getConstructor(),
                 body.getMethods());
         }
+    }
+
+    private List<FormalTypeParameterNode> readTypeParameters(TypeDeclaration typeDeclaration) {
+        return eagerMap(
+            asList(typeDeclaration.resolveBinding().getTypeParameters()),
+            parameter -> formalTypeParameter(parameter.getName()));
     }
 
     GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
@@ -226,6 +235,7 @@ public class JavaReader {
 
         ClassNode generatedClass = new ClassNode(
             classNode.getName(),
+            classNode.getTypeParameters(),
             classNode.getSuperTypes(),
             fields,
             list(),
@@ -248,6 +258,7 @@ public class JavaReader {
     ) {
         return classWithCapture(scope, ClassNode.declareClass(
             className,
+            list(),
             anonymousClass.getSuperTypes(),
             anonymousClass.getFields(),
             list(),

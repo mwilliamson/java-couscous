@@ -9,22 +9,26 @@ import java.util.Set;
 public class InterfaceNode implements TypeNode {
     public static InterfaceNode declareInterface(
         TypeName name,
+        List<FormalTypeParameterNode> typeParameters,
         Set<TypeName> superTypes,
         List<MethodNode> methods)
     {
-        return new InterfaceNode(name, superTypes, methods);
+        return new InterfaceNode(name, typeParameters, superTypes, methods);
     }
 
     private final TypeName name;
+    private final List<FormalTypeParameterNode> typeParameters;
     private final Set<TypeName> superTypes;
     private final List<MethodNode> methods;
 
     private InterfaceNode(
         TypeName name,
+        List<FormalTypeParameterNode> typeParameters,
         Set<TypeName> superTypes,
         List<MethodNode> methodNodes)
     {
         this.name = name;
+        this.typeParameters = typeParameters;
         this.superTypes = superTypes;
         methods = methodNodes;
     }
@@ -32,6 +36,11 @@ public class InterfaceNode implements TypeNode {
     @Override
     public TypeName getName() {
         return name;
+    }
+
+    @Override
+    public List<FormalTypeParameterNode> getTypeParameters() {
+        return typeParameters;
     }
 
     @Override
@@ -50,20 +59,23 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
-    public InterfaceNode transform(NodeTransformer transformer) {
-        return new InterfaceNode(
-            transformer.transform(name),
-            transformer.transformTypes(superTypes),
-            transformer.transformMethods(methods));
-    }
-
-    @Override
     public String toString() {
         return "InterfaceNode(" +
             "name=" + name +
+            ", typeParameters=" + typeParameters +
             ", superTypes=" + superTypes +
             ", methods=" + methods +
             ')';
+    }
+
+    @Override
+    public InterfaceNode transform(NodeTransformer transformer) {
+        return new InterfaceNode(
+            transformer.transform(name),
+            // TODO: transform
+            typeParameters,
+            transformer.transformTypes(superTypes),
+            transformer.transformMethods(methods));
     }
 
     @Override
@@ -74,6 +86,7 @@ public class InterfaceNode implements TypeNode {
         InterfaceNode that = (InterfaceNode) o;
 
         if (!name.equals(that.name)) return false;
+        if (!typeParameters.equals(that.typeParameters)) return false;
         if (!superTypes.equals(that.superTypes)) return false;
         return methods.equals(that.methods);
 
@@ -82,6 +95,7 @@ public class InterfaceNode implements TypeNode {
     @Override
     public int hashCode() {
         int result = name.hashCode();
+        result = 31 * result + typeParameters.hashCode();
         result = 31 * result + superTypes.hashCode();
         result = 31 * result + methods.hashCode();
         return result;

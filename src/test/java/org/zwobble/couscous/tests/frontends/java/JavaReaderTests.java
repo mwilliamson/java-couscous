@@ -17,6 +17,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
@@ -311,6 +312,29 @@ public class JavaReaderTests {
         assertEquals(TypeName.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
         assertEquals(set(), classNode.getSuperTypes());
+        assertEquals(list(), classNode.getTypeParameters());
+    }
+
+    @Test
+    public void canReadClassWithGenericTypeParameters() {
+        String source = "package com.example;" +
+            "public class Example<T> {}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        ClassNode classNode = (ClassNode) classes.get(0);
+        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
+    }
+
+    @Test
+    public void canReadInterfaceWithGenericTypeParameters() {
+        String source = "package com.example;" +
+            "public interface Example<T> {}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        InterfaceNode classNode = (InterfaceNode) classes.get(0);
+        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
     }
 
     @Test
