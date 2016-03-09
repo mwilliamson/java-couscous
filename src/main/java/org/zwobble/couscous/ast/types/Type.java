@@ -5,5 +5,8 @@ public interface Type {
 
     interface Visitor<T> {
         T visit(ScalarType type);
+        T visit(TypeParameter parameter);
+        T visit(ParameterizedType type);
+        T visit(BoundTypeParameter type);
     }
 }

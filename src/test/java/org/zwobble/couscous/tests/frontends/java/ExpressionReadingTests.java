@@ -38,7 +38,7 @@ public class ExpressionReadingTests {
         assertEquals(literal(false), readBooleanExpression("false"));
         assertEquals(literal(42), readIntExpression("42"));
         assertEquals(literal('h'), readIntExpression("'h'"));
-        assertEquals(literal(StringValue.REF), readExpression("Class<?>", "String.class"));
+        assertEquals(literal(StringValue.REF), readExpression("Class<String>", "String.class"));
     }
 
     @Test

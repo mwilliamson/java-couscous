@@ -2,8 +2,7 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.values.*;
@@ -13,6 +12,7 @@ import java.util.Optional;
 
 import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class CsharpCodeGenerator {
     private final static Map<ScalarType, ScalarType> PRIMITIVES = ImmutableMap.<ScalarType, ScalarType>builder()
@@ -44,11 +44,39 @@ public class CsharpCodeGenerator {
     }
 
     private Type transformType(Type type) {
-        if (PRIMITIVES.containsKey(type)) {
-            return PRIMITIVES.get(type);
-        } else {
-            return addPrefix(type, namespace);
-        }
+        return type.accept(new Type.Visitor<Type>() {
+            @Override
+            public Type visit(ScalarType type) {
+                if (PRIMITIVES.containsKey(type)) {
+                    return PRIMITIVES.get(type);
+                } else {
+                    return addPrefix(type, namespace);
+                }
+            }
+
+            @Override
+            public TypeParameter visit(TypeParameter parameter) {
+                return parameter;
+            }
+
+            @Override
+            public Type visit(ParameterizedType type) {
+                if (type.getRawType().equals(ObjectValues.CLASS)) {
+                    return ScalarType.of("System.Type");
+                } else {
+                    return new ParameterizedType(
+                        (ScalarType) transformType(type.getRawType()),
+                        eagerMap(type.getParameters(), parameter -> transformType(parameter)));
+                }
+            }
+
+            @Override
+            public Type visit(BoundTypeParameter type) {
+                return new BoundTypeParameter(
+                    visit(type.getParameter()),
+                    transformType(type.getValue()));
+            }
+        });
     }
 
     private String transformMethodName(MethodSignature signature) {
@@ -81,8 +109,27 @@ public class CsharpCodeGenerator {
     private Type addPrefix(Type type, String namespace) {
         return type.accept(new Type.Visitor<Type>() {
             @Override
-            public Type visit(ScalarType type) {
+            public ScalarType visit(ScalarType type) {
                 return ScalarType.of(namespace + "." + type.getQualifiedName());
+            }
+
+            @Override
+            public TypeParameter visit(TypeParameter parameter) {
+                return parameter;
+            }
+
+            @Override
+            public Type visit(ParameterizedType type) {
+                return new ParameterizedType(
+                    visit(type.getRawType()),
+                    eagerMap(type.getParameters(), parameter -> addPrefix(parameter, namespace)));
+            }
+
+            @Override
+            public Type visit(BoundTypeParameter type) {
+                return new BoundTypeParameter(
+                    visit(type.getParameter()),
+                    addPrefix(type.getValue(), namespace));
             }
         });
     }

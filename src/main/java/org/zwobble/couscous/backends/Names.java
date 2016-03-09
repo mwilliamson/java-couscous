@@ -3,10 +3,9 @@ package org.zwobble.couscous.backends;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.*;
 
 import static com.google.common.collect.Iterables.transform;
-import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Names {
@@ -18,6 +17,26 @@ public class Names {
     }
 
     private static String typeToString(Type argument) {
-        return erasure(argument).getQualifiedName().replace('.', '_');
+        return argument.accept(new Type.Visitor<String>() {
+            @Override
+            public String visit(ScalarType type) {
+                return type.getQualifiedName().replace('.', '_');
+            }
+
+            @Override
+            public String visit(TypeParameter parameter) {
+                return parameter.getName();
+            }
+
+            @Override
+            public String visit(ParameterizedType type) {
+                return typeToString(type.getRawType());
+            }
+
+            @Override
+            public String visit(BoundTypeParameter type) {
+                return typeToString(type.getParameter());
+            }
+        });
     }
 }

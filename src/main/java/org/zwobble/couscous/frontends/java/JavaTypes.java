@@ -2,16 +2,20 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
+import org.zwobble.couscous.ast.types.ParameterizedType;
 import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.Types;
+import org.zwobble.couscous.ast.types.TypeParameter;
 import org.zwobble.couscous.values.ObjectValues;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.ast.types.Types.erasure;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 class JavaTypes {
     static Type typeOf(Expression expression) {
@@ -29,9 +33,19 @@ class JavaTypes {
     static Type typeOf(ITypeBinding typeBinding) {
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
         if (outerClass == null) {
-            return ScalarType.of(typeBinding.getErasure().getQualifiedName());
+            ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());
+            if (typeBinding.isParameterizedType()) {
+                List<Type> typeParameters = eagerMap(
+                    asList(typeBinding.getTypeArguments()),
+                    JavaTypes::typeOf);
+                return new ParameterizedType(rawType, typeParameters);
+            } else {
+                return rawType;
+            }
+        } else if (typeBinding.isTypeVariable()) {
+            return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
         } else {
-            return ScalarType.of(Types.erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getName());
+            return ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getName());
         }
     }
 

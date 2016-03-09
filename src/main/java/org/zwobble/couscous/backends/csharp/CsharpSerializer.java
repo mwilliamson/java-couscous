@@ -1,8 +1,7 @@
 package org.zwobble.couscous.backends.csharp;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.util.Action;
@@ -420,6 +419,34 @@ public class CsharpSerializer implements NodeVisitor {
             @Override
             public Void visit(ScalarType type) {
                 writer.writeIdentifier(typeReference(type));
+                return null;
+            }
+
+            @Override
+            public Void visit(TypeParameter parameter) {
+                writer.writeIdentifier(parameter.getName());
+                return null;
+            }
+
+            @Override
+            public Void visit(ParameterizedType type) {
+                writer.writeIdentifier(typeReference(type.getRawType()));
+                writer.writeSymbol("<");
+                writer.writeWithSeparator(
+                    type.getParameters(),
+                    parameter -> writeTypeReference(parameter),
+                    () -> {
+                        writer.writeSymbol(",");
+                        writer.writeSpace();
+                    }
+                );
+                writer.writeSymbol(">");
+                return null;
+            }
+
+            @Override
+            public Void visit(BoundTypeParameter type) {
+                writeTypeReference(type.getValue());
                 return null;
             }
         });

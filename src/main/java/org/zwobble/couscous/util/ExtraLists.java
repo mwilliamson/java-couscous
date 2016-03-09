@@ -1,8 +1,11 @@
 package org.zwobble.couscous.util;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -26,16 +29,16 @@ public class ExtraLists {
         return ImmutableList.of(value1, value2, value3);
     }
 
-    public static <T> List<T> cons(T value, List<T> list) {
-        return Stream.concat(Stream.of(value), list.stream()).collect(Collectors.toList());
+    public static <T> List<T> cons(T value, Iterable<T> list) {
+        return concat(list(value), list);
     }
 
     public static <T> List<T> append(List<T> list, T value) {
         return Stream.concat(list.stream(), Stream.of(value)).collect(Collectors.toList());
     }
 
-    public static <T> List<T> concat(List<? extends T> first, List<? extends T> second) {
-        return Stream.concat(first.stream(), second.stream()).collect(Collectors.toList());
+    public static <T> List<T> concat(Iterable<? extends T> first, Iterable<? extends T> second) {
+        return ImmutableList.copyOf(Iterables.concat(first, second));
     }
 
     public static <T> List<T> concat(List<? extends T> first, List<? extends T> second, List<? extends T> third) {
@@ -80,6 +83,24 @@ public class ExtraLists {
         return StreamSupport.stream(iterable.spliterator(), false)
             .map(function)
             .collect(Collectors.toList());
+    }
+
+    public static <T1, T2, R> List<R> eagerMap(
+        Iterable<T1> iterable1,
+        Iterable<T2> iterable2,
+        BiFunction<T1, T2, R> function)
+    {
+        // TODO: error handling when iterables are different lengths
+        Iterator<T1> iterator1 = iterable1.iterator();
+        Iterator<T2> iterator2 = iterable2.iterator();
+
+        ImmutableList.Builder<R> result = ImmutableList.builder();
+
+        while (iterator1.hasNext()) {
+            result.add(function.apply(iterator1.next(), iterator2.next()));
+        }
+
+        return result.build();
     }
 
     public static <T, R> List<R> eagerFlatMap(

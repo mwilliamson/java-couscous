@@ -184,7 +184,8 @@ public class JavaExpressionReader {
         List<ExpressionNode> arguments = readArguments(
             expression.resolveMethodBinding(),
             expression.arguments());
-        final Type type = typeOf(expression);
+        MethodSignature signature = JavaReader.signature(expression.resolveMethodBinding());
+        final Type type = signature.getReturnType();
 
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         Type receiverType = typeOf(methodBinding.getDeclaringClass());

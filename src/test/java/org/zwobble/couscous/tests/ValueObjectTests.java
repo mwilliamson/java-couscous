@@ -7,8 +7,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -44,6 +43,7 @@ public class ValueObjectTests {
         return asList(new Object[][] {
             {AnnotationNode.class},
             {AssignmentNode.class},
+            {BoundTypeParameter.class},
             {CastNode.class},
             {ClassNode.class},
             {ConstructorCallNode.class},
@@ -61,12 +61,14 @@ public class ValueObjectTests {
             {MethodCallNode.class},
             {MethodNode.class},
             {OperationNode.class},
+            {ParameterizedType.class},
             {ReturnNode.class},
             {ScalarType.class},
             {StaticReceiver.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
             {TypeCoercionNode.class},
+            {TypeParameter.class},
             {ScalarType.class},
             {VariableDeclaration.class},
             {VariableReferenceNode.class},

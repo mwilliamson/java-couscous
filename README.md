@@ -1,5 +1,7 @@
 ## TODO
 
+* Do this references work for anonymous classes?
+
 * Type names for generics
 
 * Type erasure

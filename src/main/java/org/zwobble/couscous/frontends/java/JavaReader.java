@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
@@ -8,8 +9,10 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
+import org.zwobble.couscous.ast.types.BoundTypeParameter;
 import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.TypeParameter;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.*;
@@ -29,8 +33,10 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
@@ -128,10 +134,14 @@ public class JavaReader {
         ScalarType name = generateAnonymousName(expression);
         Scope scope = outerScope.enterClass(name);
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        return generateClosure(scope, name, toAnonymousClass(functionalInterfaceMethod, lambda.apply(scope)));
+        return generateClosure(scope, name, toAnonymousClass(scope, name, functionalInterfaceMethod, lambda.apply(scope)));
     }
 
-    private AnonymousClass toAnonymousClass(IMethodBinding functionalInterfaceMethod, Lambda lambda) {
+    private AnonymousClass toAnonymousClass(Scope scope, ScalarType name, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
+        // TODO: does this need type coercion adding? Since the body is straight from the lambda, but the type signature is from the interface method
+        // TODO: can generate override methods by using a placeholder this reference for, well, this references.
+        // They can be replaced once the anonymous class is turned into a real class.
+        // Or perhaps we should just do the conversion directly? Since we (in practice) already know the real class name.
         MethodNode method = MethodNode.method(
             emptyList(),
             false,
@@ -140,10 +150,12 @@ public class JavaReader {
             typeOf(functionalInterfaceMethod.getReturnType()),
             Optional.of(lambda.getBody()));
 
+        Iterable<MethodNode> overrides = generateOverrideMethods(name, functionalInterfaceMethod, scope, method);
+
         return new AnonymousClass(
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             list(),
-            list(method));
+            ExtraLists.cons(method, overrides));
     }
 
     private List<StatementNode> replaceCaptureReferences(
@@ -305,7 +317,7 @@ public class JavaReader {
 
         for (Object declaration : bodyDeclarations) {
             tryCast(MethodDeclaration.class, declaration)
-                .ifPresent(method -> readMethod(body, scope, method));
+                .ifPresent(method -> readMethod(body, scope, type, method));
 
             tryCast(Initializer.class, declaration)
                 .ifPresent(initializer -> body.addInitializer(
@@ -356,8 +368,9 @@ public class JavaReader {
 
     }
 
-    private void readMethod(TypeDeclarationBody.Builder builder, Scope outerScope, MethodDeclaration method) {
-        Scope scope = outerScope.enterMethod(method.getName().getIdentifier());
+    private void readMethod(TypeDeclarationBody.Builder builder, Scope outerScope, ScalarType type, MethodDeclaration method) {
+        String methodName = method.getName().getIdentifier();
+        Scope scope = outerScope.enterMethod(methodName);
 
         List<FormalArgumentNode> formalArguments = readFormalArguments(scope, method);
         List<AnnotationNode> annotations = readAnnotations(method);
@@ -370,15 +383,88 @@ public class JavaReader {
                 formalArguments,
                 body.get()));
         } else {
-            builder.addMethod(MethodNode.method(
+            boolean isStatic = Modifier.isStatic(method.getModifiers());
+            MethodNode methodNode = MethodNode.method(
                 annotations,
-                Modifier.isStatic(method.getModifiers()),
-                method.getName().getIdentifier(),
+                isStatic,
+                methodName,
                 formalArguments,
                 returnType.get(),
-                body));
+                body);
+            builder.addMethod(methodNode);
+
+            Iterable<MethodNode> overrideMethods = generateOverrideMethods(type, method.resolveBinding(), scope, methodNode);
+
+            for (MethodNode overrideMethod : overrideMethods) {
+                builder.addMethod(overrideMethod);
+            }
         }
     }
+
+    private Iterable<MethodNode> generateOverrideMethods(ScalarType type, IMethodBinding method, Scope scope, MethodNode methodNode) {
+        return transform(
+            filter(
+                overrides(method),
+                override -> !override.equals(methodNode.signature())),
+            override -> {
+                List<FormalArgumentNode> arguments = eagerMap(override.getArguments(), argument -> scope.formalArgument("arg", argument));
+                return MethodNode.method(
+                    methodNode.getAnnotations(),
+                    methodNode.isStatic(),
+                    methodNode.getName(),
+                    arguments,
+                    override.getReturnType(),
+                    Optional.of(list(
+                        returns(typeCoercion(
+                            MethodCallNode.methodCall(
+                                thisReference(type),
+                                methodNode.getName(),
+                                eagerMap(arguments, argument -> reference(argument)),
+                                methodNode.getReturnType()),
+                            override.getReturnType()))
+                    )));
+            });
+    }
+
+    private Iterable<MethodSignature> overrides(IMethodBinding methodBinding) {
+        ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+
+        // TODO: remove duplication with JavaTypes
+        // TODO: consider superclass
+        return ExtraLists.concat(list(declaringClass), asList(declaringClass.getInterfaces()))
+            .stream()
+            .flatMap(type -> asList(type.getDeclaredMethods()).stream().filter(superMethod -> methodBinding.overrides(superMethod)))
+            .map(JavaReader::signature)
+            .collect(Collectors.toList());
+    }
+
+    // TODO: move this elsewhere
+    static MethodSignature signature(IMethodBinding method) {
+        ITypeBinding declaringClass = method.getDeclaringClass();
+        ITypeBinding erasedDeclaringClass = declaringClass.getErasure();
+
+        List<Type> argumentTypes = eagerMap(asList(method.getParameterTypes()), JavaTypes::typeOf);
+        Type returnType = typeOf(method.getReturnType());
+
+        if (declaringClass.isEqualTo(erasedDeclaringClass)) {
+            return new MethodSignature(method.getName(), argumentTypes, returnType);
+        } else {
+            IMethodBinding[] erasedMethods = erasedDeclaringClass.getDeclaredMethods();
+            IMethodBinding erasedMethod = Iterables.getOnlyElement(Iterables.filter(
+                asList(erasedMethods),
+                m -> m.isSubsignature(method)));
+            return new MethodSignature(
+                method.getName(),
+                eagerMap(
+                    argumentTypes,
+                    asList(erasedMethod.getParameterTypes()),
+                    (argumentType, erasedParameterType) -> new BoundTypeParameter((TypeParameter) typeOf(erasedParameterType), argumentType)),
+                new BoundTypeParameter(
+                    (TypeParameter) typeOf(erasedMethod.getReturnType()),
+                    returnType));
+        }
+    }
+
 
     private List<AnnotationNode> readAnnotations(MethodDeclaration method) {
         return eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation);
