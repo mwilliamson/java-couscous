@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -42,8 +43,8 @@ public abstract class BackendEvalTests {
         assertEquals(
             value(false),
             evalExpression(same(
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()),
-                constructorCall(TypeName.of("java.lang.Object"), Collections.emptyList()))));
+                constructorCall(ScalarType.of("java.lang.Object"), Collections.emptyList()),
+                constructorCall(ScalarType.of("java.lang.Object"), Collections.emptyList()))));
     }
     
     @Test
@@ -228,7 +229,7 @@ public abstract class BackendEvalTests {
 
     @Test
     public void staticConstructorIsExecutedOnReference() {
-        TypeName type = TypeName.of("com.example.Example");
+        ScalarType type = ScalarType.of("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
             .staticField("value", IntegerValue.REF)
             .staticConstructor(list(

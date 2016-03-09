@@ -1,10 +1,12 @@
 package org.zwobble.couscous.interpreter;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 
 import java.util.Map;
+
+import static org.zwobble.couscous.ast.types.Types.erasure;
 
 public class MapBackedProject implements Project {
     public static Builder builder() {
@@ -12,14 +14,14 @@ public class MapBackedProject implements Project {
     }
     
     public static class Builder {
-        private final ImmutableMap.Builder<TypeName, InterpreterType> classes;
+        private final ImmutableMap.Builder<ScalarType, InterpreterType> classes;
         
         private Builder() {
             classes = ImmutableMap.builder();
         }
         
         public Builder addClass(InterpreterType clazz) {
-            classes.put(clazz.getName(), clazz);
+            classes.put(erasure(clazz.getType()), clazz);
             return this;
         }
         
@@ -35,14 +37,14 @@ public class MapBackedProject implements Project {
         }
     }
 
-    private Map<TypeName, InterpreterType> classes;
+    private Map<ScalarType, InterpreterType> classes;
     
-    public MapBackedProject(Map<TypeName, InterpreterType> classes) {
+    public MapBackedProject(Map<ScalarType, InterpreterType> classes) {
         this.classes = classes;
     }
     
     @Override
-    public InterpreterType findClass(TypeName name) {
+    public InterpreterType findClass(ScalarType name) {
         if (classes.containsKey(name)) {
             return classes.get(name);
         } else {

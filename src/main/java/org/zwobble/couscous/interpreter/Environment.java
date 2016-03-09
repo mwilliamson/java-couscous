@@ -1,9 +1,10 @@
 package org.zwobble.couscous.interpreter;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.interpreter.errors.UnboundVariable;
 import org.zwobble.couscous.interpreter.errors.VariableNotInScope;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import static java.util.stream.Collectors.toMap;
 
 public class Environment {
-    private final Map<TypeName, StaticReceiverValue> types;
+    private final Map<ScalarType, StaticReceiverValue> types;
     private final Optional<InterpreterValue> thisValue;
     private final Map<Identifier, VariableEntry> stackFrame;
     private final Project project;
@@ -51,7 +52,7 @@ public class Environment {
         put(variable.getDeclaration().getId(), value);
     }
     
-    public StaticReceiverValue findClass(TypeName className) {
+    public StaticReceiverValue findClass(ScalarType className) {
         if (!types.containsKey(className)) {
             StaticReceiverValue value = new StaticReceiverValue(project.findClass(className));
             types.put(className, value);
@@ -71,24 +72,24 @@ public class Environment {
     }
     
     private void checkVariableType(Identifier variableId, InterpreterValue value) {
-        TypeName variableType = stackFrame.get(variableId).getType();
+        Type variableType = stackFrame.get(variableId).getType();
         InterpreterTypes.checkIsInstance(variableType, value);
     }
     
     private static class VariableEntry {
-        private final TypeName type;
+        private final Type type;
         private Optional<InterpreterValue> value;
         
-        private VariableEntry(final TypeName type, final Optional<InterpreterValue> value) {
+        private VariableEntry(final Type type, final Optional<InterpreterValue> value) {
             this.type = type;
             this.value = value;
         }
         
-        public static VariableEntry of(final TypeName type, final Optional<InterpreterValue> value) {
+        public static VariableEntry of(final Type type, final Optional<InterpreterValue> value) {
             return new VariableEntry(type, value);
         }
         
-        public TypeName getType() {
+        public Type getType() {
             return this.type;
         }
         

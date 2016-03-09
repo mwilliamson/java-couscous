@@ -2,6 +2,8 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.util.NaturalNumbers;
 
 import java.util.*;
@@ -28,7 +30,7 @@ public class Scope {
         this.temporaryCounter = temporaryCounter;
     }
 
-    public Scope enterClass(TypeName className) {
+    public Scope enterClass(ScalarType className) {
         return enter("class#" + className.getQualifiedName());
     }
 
@@ -45,12 +47,12 @@ public class Scope {
         return new Scope(variablesByKey, identifiers, identifier.extend(name), temporaryCounter);
     }
 
-    public FormalArgumentNode formalArgument(String name, TypeName type) {
+    public FormalArgumentNode formalArgument(String name, Type type) {
         VariableDeclaration declaration = generateVariable(name, type);
         return FormalArgumentNode.formalArg(declaration);
     }
 
-    public FormalArgumentNode formalArgument(String key, String name, TypeName type) {
+    public FormalArgumentNode formalArgument(String key, String name, Type type) {
         VariableDeclaration declaration = generateVariable(key, name, type);
         return FormalArgumentNode.formalArg(declaration);
     }
@@ -58,7 +60,7 @@ public class Scope {
     public LocalVariableDeclarationNode localVariable(
         String key,
         String name,
-        TypeName type,
+        Type type,
         ExpressionNode initialValue
     ) {
         VariableDeclaration declaration = generateVariable(key, name, type);
@@ -67,7 +69,7 @@ public class Scope {
 
     public LocalVariableDeclarationNode localVariable(
         String name,
-        TypeName type,
+        Type type,
         ExpressionNode initialValue
     ) {
         VariableDeclaration declaration = generateVariable(name, type);
@@ -78,7 +80,7 @@ public class Scope {
         return temporaryVariable(initialValue.getType(), initialValue);
     }
 
-    public LocalVariableDeclarationNode temporaryVariable(TypeName type, ExpressionNode initialValue) {
+    public LocalVariableDeclarationNode temporaryVariable(Type type, ExpressionNode initialValue) {
         return localVariable("_couscous_tmp_" + temporaryCounter.next(), type, initialValue);
     }
 
@@ -90,7 +92,7 @@ public class Scope {
         return VariableReferenceNode.reference(variable);
     }
 
-    private VariableDeclaration generateVariable(String key, String name, TypeName type) {
+    private VariableDeclaration generateVariable(String key, String name, Type type) {
         if (variablesByKey.containsKey(key)) {
             throw new IllegalArgumentException(key + " is already mapped");
         }
@@ -99,7 +101,7 @@ public class Scope {
         return variable;
     }
 
-    public VariableDeclaration generateVariable(String name, TypeName type) {
+    public VariableDeclaration generateVariable(String name, Type type) {
         Identifier identifier = generateIdentifier(name);
         return VariableDeclaration.var(identifier, name, type);
     }

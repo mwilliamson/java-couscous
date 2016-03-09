@@ -3,6 +3,7 @@ package org.zwobble.couscous.frontends.java;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.ObjectValues;
 
@@ -29,12 +30,12 @@ import static org.zwobble.couscous.util.UpToAndIncludingIterable.upToAndIncludin
 class JavaStatementReader {
     private final Scope scope;
     private final JavaExpressionReader expressionReader;
-    private final Optional<TypeName> returnType;
+    private final Optional<Type> returnType;
 
     JavaStatementReader(
         Scope scope,
         JavaExpressionReader expressionReader,
-        Optional<TypeName> returnType
+        Optional<org.zwobble.couscous.ast.types.Type> returnType
     ) {
         this.scope = scope;
         this.expressionReader = expressionReader;
@@ -183,13 +184,13 @@ class JavaStatementReader {
     private List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = statement.fragments();
-        TypeName type = typeOf(statement.getType());
+        Type type = typeOf(statement.getType());
         return readDeclarationFragments(fragments, type);
     }
 
     private List<StatementNode> readDeclarationFragments(
         List<VariableDeclarationFragment> fragments,
-        TypeName type
+        Type type
     ) {
         return eagerMap(fragments, fragment -> scope.localVariable(
             fragment.resolveBinding().getKey(),
@@ -202,7 +203,7 @@ class JavaStatementReader {
         return expressionReader.readExpressionWithoutBoxing(expression);
     }
 
-    private ExpressionNode readExpression(TypeName targetType, Expression expression) {
+    private ExpressionNode readExpression(Type targetType, Expression expression) {
         return expressionReader.readExpression(targetType, expression);
     }
 }

@@ -1,9 +1,9 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 public class UnitValue implements PrimitiveValue {
-    public static final TypeName REF = TypeName.of("org.zwobble.couscous.runtime.Unit");
+    public static final ScalarType REF = ScalarType.of("org.zwobble.couscous.runtime.Unit");
     
     static final UnitValue UNIT = new UnitValue();
     
@@ -16,7 +16,7 @@ public class UnitValue implements PrimitiveValue {
     }
 
     @Override
-    public TypeName getType() {
+    public ScalarType getType() {
         return REF;
     }
 }

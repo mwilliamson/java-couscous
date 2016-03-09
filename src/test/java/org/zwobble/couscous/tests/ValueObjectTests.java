@@ -7,6 +7,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
@@ -60,11 +62,12 @@ public class ValueObjectTests {
             {MethodNode.class},
             {OperationNode.class},
             {ReturnNode.class},
+            {ScalarType.class},
             {StaticReceiver.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
             {TypeCoercionNode.class},
-            {TypeName.class},
+            {ScalarType.class},
             {VariableDeclaration.class},
             {VariableReferenceNode.class},
             {WhileNode.class}
@@ -153,6 +156,8 @@ public class ValueObjectTests {
             return generateFirstInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateFirstInstance(VariableReferenceNode.class);
+        } else if (type.equals(Type.class)) {
+            return generateFirstInstance(ScalarType.class);
         } else {
             return generateValue(type, ValueObjectTests::generateFirstInstance).instance;         
         }
@@ -181,6 +186,8 @@ public class ValueObjectTests {
             return generateSecondInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateSecondInstance(VariableReferenceNode.class);
+        } else if (type.equals(Type.class)) {
+            return generateSecondInstance(ScalarType.class);
         } else {
             return generateValue(type, ValueObjectTests::generateSecondInstance).instance;           
         }
@@ -209,6 +216,8 @@ public class ValueObjectTests {
             return generateInstance(InstanceReceiver.class);
         } else if (type.equals(AssignableExpressionNode.class)) {
             return generateInstance(VariableReferenceNode.class);
+        } else if (type.equals(Type.class)) {
+            return generateInstance(ScalarType.class);
         } else {
             return generateValue(type, ValueObjectTests::generateInstance).instance;
         }

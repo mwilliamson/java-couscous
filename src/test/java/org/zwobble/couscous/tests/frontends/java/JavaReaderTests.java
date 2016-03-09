@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
 import org.zwobble.couscous.values.StringValue;
@@ -77,7 +78,7 @@ public class JavaReaderTests {
         MethodNode method = classNode.getMethods().get(0);
         FormalArgumentNode argument = method.getArguments().get(0);
         assertEquals("value", argument.getName());
-        assertEquals(TypeName.of("int"), argument.getType());
+        assertEquals(ScalarType.of("int"), argument.getType());
         assertEquals(1, method.getArguments().size());
         
         ReturnNode returnNode = (ReturnNode)method.getBody().get().get(0);
@@ -89,7 +90,7 @@ public class JavaReaderTests {
         assertEquals(
             expressionStatement(
                 staticMethodCall(
-                    TypeName.of("java.lang.Integer"),
+                    ScalarType.of("java.lang.Integer"),
                     "parseInt",
                     list(literal("42")),
                     IntegerValue.REF)),
@@ -179,7 +180,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    thisReference(TypeName.of("com.example.Example")),
+                    thisReference(ScalarType.of("com.example.Example")),
                     "name",
                     StringValue.REF),
                 literal("Flaws"))),
@@ -202,13 +203,13 @@ public class JavaReaderTests {
             list(
                 assignStatement(
                     fieldAccess(
-                        thisReference(TypeName.of("com.example.Example")),
+                        thisReference(ScalarType.of("com.example.Example")),
                         "year",
                         IntegerValue.REF),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
-                        thisReference(TypeName.of("com.example.Example")),
+                        thisReference(ScalarType.of("com.example.Example")),
                         "name",
                         StringValue.REF),
                     literal("Flaws"))),
@@ -230,13 +231,13 @@ public class JavaReaderTests {
             list(
                 assignStatement(
                     fieldAccess(
-                        thisReference(TypeName.of("com.example.Example")),
+                        thisReference(ScalarType.of("com.example.Example")),
                         "year",
                         IntegerValue.REF),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
-                        thisReference(TypeName.of("com.example.Example")),
+                        thisReference(ScalarType.of("com.example.Example")),
                         "name",
                         StringValue.REF),
                     literal("Flaws"))),
@@ -256,7 +257,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    TypeName.of("com.example.Example"),
+                    ScalarType.of("com.example.Example"),
                     "name",
                     StringValue.REF),
                 literal("Flaws"))),
@@ -273,7 +274,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    TypeName.of("com.example.Example"),
+                    ScalarType.of("com.example.Example"),
                     "name",
                     StringValue.REF),
                 literal("Flaws"))),
@@ -287,7 +288,7 @@ public class JavaReaderTests {
         
         MethodNode method = classNode.getMethods().get(0);
         assertEquals(
-            list(annotation(TypeName.of("java.lang.Deprecated"))),
+            list(annotation(ScalarType.of("java.lang.Deprecated"))),
             method.getAnnotations());
     }
 
@@ -309,7 +310,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
         assertEquals(set(), classNode.getSuperTypes());
         assertEquals(list(), classNode.getTypeParameters());
@@ -322,7 +323,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         ClassNode classNode = (ClassNode) classes.get(0);
-        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
         assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
     }
 
@@ -333,7 +334,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
         assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
     }
 
@@ -344,9 +345,9 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(TypeName.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
-        assertThat(classNode.getSuperTypes(), contains(TypeName.of("java.util.function.IntSupplier")));
+        assertThat(classNode.getSuperTypes(), contains(ScalarType.of("java.util.function.IntSupplier")));
     }
 
     @Test

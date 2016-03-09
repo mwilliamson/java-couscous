@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
@@ -40,7 +40,7 @@ public class InterpreterValues {
             }
 
             @Override
-            public InterpreterValue visitType(TypeName value) {
+            public InterpreterValue visitType(ScalarType value) {
                 return TypeInterpreterValue.of(value);
             }
         });

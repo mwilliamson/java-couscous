@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
@@ -43,7 +44,7 @@ public class ExpressionReadingTests {
     @Test
     public void canReadThisReference() {
         assertEquals(
-            thisReference(TypeName.of("com.example.Example")),
+            thisReference(ScalarType.of("com.example.Example")),
             readExpressionInInstanceMethod("com.example.Example", "this"));
     }
 
@@ -59,7 +60,7 @@ public class ExpressionReadingTests {
             "private String name;");
 
         assertEquals(
-            list(field("name", TypeName.of("java.lang.String"))),
+            list(field("name", ScalarType.of("java.lang.String"))),
             classNode.getFields());
     }
 
@@ -69,7 +70,7 @@ public class ExpressionReadingTests {
             "private static String name;");
 
         assertEquals(
-            list(staticField("name", TypeName.of("java.lang.String"))),
+            list(staticField("name", ScalarType.of("java.lang.String"))),
             classNode.getFields());
     }
 
@@ -93,7 +94,7 @@ public class ExpressionReadingTests {
         ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
-                thisReference(TypeName.of("com.example.Example")),
+                thisReference(ScalarType.of("com.example.Example")),
                 "name",
                 StringValue.REF),
             returnNode.getValue());
@@ -119,7 +120,7 @@ public class ExpressionReadingTests {
         ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
-                TypeName.of("com.example.Example"),
+                ScalarType.of("com.example.Example"),
                 "name",
                 StringValue.REF),
             returnNode.getValue());
@@ -149,7 +150,7 @@ public class ExpressionReadingTests {
 
         assertEquals(
             methodCall(
-                ThisReferenceNode.thisReference(TypeName.of("com.example.Example")),
+                ThisReferenceNode.thisReference(ScalarType.of("com.example.Example")),
                 "loop",
                 list(),
                 StringValue.REF),
@@ -160,7 +161,7 @@ public class ExpressionReadingTests {
     public void canReadStaticMethodCalls() {
         assertEquals(
             staticMethodCall(
-                TypeName.of("java.lang.Integer"),
+                ScalarType.of("java.lang.Integer"),
                 "parseInt",
                 list(literal("42")),
                 IntegerValue.REF),
@@ -177,7 +178,7 @@ public class ExpressionReadingTests {
 
         assertEquals(
             staticMethodCall(
-                TypeName.of("com.example.Example"),
+                ScalarType.of("com.example.Example"),
                 "loop",
                 list(),
                 StringValue.REF),
@@ -187,7 +188,7 @@ public class ExpressionReadingTests {
     @Test
     public void canReadConstructorCalls() {
         assertEquals(
-            constructorCall(TypeName.of("java.lang.String"), list(literal("_"))),
+            constructorCall(ScalarType.of("java.lang.String"), list(literal("_"))),
             readExpression("String", "new String(\"_\")"));
     }
 
@@ -205,14 +206,14 @@ public class ExpressionReadingTests {
     public void canUseOperatorsOnReferences() {
         assertEquals(
             same(
-                constructorCall(TypeName.of("java.lang.Object"), emptyList()),
-                constructorCall(TypeName.of("java.lang.Object"), emptyList())),
+                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
+                constructorCall(ScalarType.of("java.lang.Object"), emptyList())),
             readBooleanExpression("new Object() == new Object()"));
 
         assertEquals(
             not(same(
-                constructorCall(TypeName.of("java.lang.Object"), emptyList()),
-                constructorCall(TypeName.of("java.lang.Object"), emptyList()))),
+                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
+                constructorCall(ScalarType.of("java.lang.Object"), emptyList()))),
             readBooleanExpression("new Object() != new Object()"));
     }
 
@@ -270,13 +271,13 @@ public class ExpressionReadingTests {
         assertEquals(
             equal(
                 literal(1),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1))))),
+                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 == new Integer(1)"));
 
         assertEquals(
             notEqual(
                 literal(1),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1))))),
+                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 != new Integer(1)"));
     }
 
@@ -299,8 +300,8 @@ public class ExpressionReadingTests {
     public void integerOperatorUnboxesWhenBothOperandsAreBoxed() {
         assertEquals(
             integerAdd(
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(1)))),
-                unboxInt(constructorCall(TypeName.of("java.lang.Integer"), list(literal(2))))),
+                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1)))),
+                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(2))))),
             readIntExpression("new Integer(1) + new Integer(2)"));
     }
 
@@ -323,7 +324,7 @@ public class ExpressionReadingTests {
         assertEquals(
             assign(
                 fieldAccess(
-                    thisReference(TypeName.of("com.example.Example")),
+                    thisReference(ScalarType.of("com.example.Example")),
                     "name",
                     StringValue.REF),
                 literal("blah")),
@@ -342,7 +343,7 @@ public class ExpressionReadingTests {
         assertEquals(
             assign(
                 fieldAccess(
-                    thisReference(TypeName.of("com.example.Example")),
+                    thisReference(ScalarType.of("com.example.Example")),
                     "value",
                     ObjectValues.OBJECT),
                 typeCoercion(literal(4), ObjectValues.OBJECT)),

@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.*;
@@ -25,23 +26,23 @@ public class LiteralNode implements ExpressionNode {
         return new LiteralNode(value(value), BooleanValue.REF);
     }
 
-    public static LiteralNode literal(TypeName type) {
+    public static LiteralNode literal(ScalarType type) {
         return new LiteralNode(value(type), ObjectValues.CLASS);
     }
     
-    public static LiteralNode of(PrimitiveValue value, TypeName type) {
+    public static LiteralNode of(PrimitiveValue value, ScalarType type) {
         return new LiteralNode(value, type);
     }
     
     private final PrimitiveValue value;
-    private final TypeName type;
+    private final ScalarType type;
 
-    private LiteralNode(PrimitiveValue value, TypeName type) {
+    private LiteralNode(PrimitiveValue value, ScalarType type) {
         this.value = value;
         this.type = type;
     }
     
-    public TypeName getType() {
+    public ScalarType getType() {
         return type;
     }
     

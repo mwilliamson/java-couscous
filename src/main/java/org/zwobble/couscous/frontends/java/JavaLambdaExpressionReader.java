@@ -3,13 +3,13 @@ package org.zwobble.couscous.frontends.java;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.sugar.Lambda;
+import org.zwobble.couscous.ast.types.Type;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
@@ -44,7 +44,7 @@ public class JavaLambdaExpressionReader {
     }
 
     private List<StatementNode> readLambdaExpressionBody(Scope scope, LambdaExpression expression) {
-        TypeName returnType = typeOf(expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType());
+        Type returnType = typeOf(expression.resolveTypeBinding().getFunctionalInterfaceMethod().getReturnType());
         if (expression.getBody() instanceof Block) {
             @SuppressWarnings("unchecked")
             List<Statement> statements = ((Block) expression.getBody()).statements();

@@ -1,6 +1,8 @@
 package org.zwobble.couscous.interpreter.types;
 
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
@@ -38,12 +40,12 @@ public class UserDefinedInterpreterType implements InterpreterType {
     }
 
     @Override
-    public TypeName getName() {
+    public ScalarType getType() {
         return type.getName();
     }
 
     @Override
-    public Set<TypeName> getSuperTypes() {
+    public Set<Type> getSuperTypes() {
         return type.getSuperTypes();
     }
 
@@ -65,7 +67,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
             // TODO: add test for this case
             .orElseThrow(() -> new RuntimeException("Cannot instantiate non-class types"))
             .getConstructor();
-        List<TypeName> formalArgumentTypes = eagerMap(
+        List<Type> formalArgumentTypes = eagerMap(
             constructor.getArguments(),
             FormalArgumentNode::getType);
         checkMethodArguments(formalArgumentTypes, arguments);
@@ -78,12 +80,12 @@ public class UserDefinedInterpreterType implements InterpreterType {
         return object;
     }
 
-    private static void checkMethodArguments(final List<TypeName> argumentTypes, List<InterpreterValue> arguments) {
+    private static void checkMethodArguments(final List<Type> argumentTypes, List<InterpreterValue> arguments) {
         if (argumentTypes.size() != arguments.size()) {
             throw new WrongNumberOfArguments(argumentTypes.size(), arguments.size());
         }
         for (int index = 0; index < arguments.size(); index++) {
-            TypeName formalArgumentType = argumentTypes.get(index);
+            Type formalArgumentType = argumentTypes.get(index);
             InterpreterTypes.checkIsInstance(formalArgumentType, arguments.get(index));
         }
     }

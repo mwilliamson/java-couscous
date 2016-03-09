@@ -8,6 +8,8 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -30,6 +32,7 @@ import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
@@ -62,7 +65,7 @@ public class JavaReader {
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
-    private final Map<TypeName, List<ReferenceNode>> nestedClasses = new HashMap<>();
+    private final Map<ScalarType, List<ReferenceNode>> nestedClasses = new HashMap<>();
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -74,18 +77,18 @@ public class JavaReader {
         NodeTransformer transformer = NodeTransformer.builder()
             .transformExpression(expression ->
                 tryCast(ConstructorCallNode.class, expression)
-                    .flatMap(call -> lookup(nestedClasses, call.getType()).map(captures ->
+                    .flatMap(call -> lookup(nestedClasses, erasure(call.getType())).map(captures ->
                         new ConstructorCallNode(call.getType(), ExtraLists.concat(captures, call.getArguments())))))
             .build();
         return eagerMap(classes, classNode -> classNode.transform(transformer));
     }
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
-        TypeName name = typeOf(type.resolveBinding());
+        ScalarType name = erasure(typeOf(type.resolveBinding()));
         Scope scope = topScope.enterClass(name);
         List<FormalTypeParameterNode> typeParameters = readTypeParameters(type);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
-        Set<TypeName> superTypes = superTypes(type);
+        Set<Type> superTypes = superTypes(type);
         if (type.isInterface()) {
             // TODO: throw exception if other parts of body are declared
             return InterfaceNode.declareInterface(name, typeParameters, superTypes, body.getMethods());
@@ -122,7 +125,7 @@ public class JavaReader {
     }
 
     private GeneratedClosure readLambda(Scope outerScope, Expression expression, Function<Scope, Lambda> lambda) {
-        TypeName name = generateAnonymousName(expression);
+        ScalarType name = generateAnonymousName(expression);
         Scope scope = outerScope.enterClass(name);
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         return generateClosure(scope, name, toAnonymousClass(functionalInterfaceMethod, lambda.apply(scope)));
@@ -144,7 +147,7 @@ public class JavaReader {
     }
 
     private List<StatementNode> replaceCaptureReferences(
-        TypeName className,
+        ScalarType className,
         List<StatementNode> body,
         List<CapturedVariable> freeVariables)
     {
@@ -157,7 +160,7 @@ public class JavaReader {
 
     private ConstructorNode buildConstructor(
         Scope outerScope,
-        TypeName type,
+        ScalarType type,
         List<CapturedVariable> freeVariables,
         ConstructorNode existing)
     {
@@ -178,13 +181,13 @@ public class JavaReader {
         return new ConstructorNode(arguments.build(), body.build());
     }
 
-    private FieldAccessNode captureAccess(TypeName type, CapturedVariable freeVariable) {
+    private FieldAccessNode captureAccess(ScalarType type, CapturedVariable freeVariable) {
         FieldDeclarationNode field = freeVariable.field;
         return fieldAccess(thisReference(type), field.getName(), field.getType());
     }
 
     GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
-        TypeName className = generateAnonymousName(declaration);
+        ScalarType className = generateAnonymousName(declaration);
         Scope scope = outerScope.enterClass(className);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations());
         AnonymousClass anonymousClass = new AnonymousClass(
@@ -194,7 +197,7 @@ public class JavaReader {
         return generateClosure(scope, className, anonymousClass);
     }
 
-    GeneratedClosure generateClosure(Scope scope, TypeName className, AnonymousClass anonymousClass) {
+    GeneratedClosure generateClosure(Scope scope, ScalarType className, AnonymousClass anonymousClass) {
         GeneratedClosure closure = classWithCapture(scope, className, anonymousClass);
         classes.add(closure.getClassNode());
         return closure;
@@ -245,7 +248,7 @@ public class JavaReader {
         return new GeneratedClosure(generatedClass, freeVariables);
     }
 
-    private boolean isThisReference(TypeName name, ReferenceNode reference) {
+    private boolean isThisReference(ScalarType name, ReferenceNode reference) {
         return tryCast(ThisReferenceNode.class, reference)
             .map(node -> node.getType().equals(name))
             .orElse(false);
@@ -253,7 +256,7 @@ public class JavaReader {
 
     private GeneratedClosure classWithCapture(
         Scope scope,
-        TypeName className,
+        ScalarType className,
         AnonymousClass anonymousClass
     ) {
         return classWithCapture(scope, ClassNode.declareClass(
@@ -275,19 +278,19 @@ public class JavaReader {
 
             @Override
             public FieldDeclarationNode visit(ThisReferenceNode thisReference) {
-                TypeName type = thisReference.getType();
-                String name = "this_" + type.getQualifiedName().replace(".", "__");
+                Type type = thisReference.getType();
+                String name = "this_" + erasure(type).getQualifiedName().replace(".", "__");
                 return field(name, type);
             }
         });
     }
 
-    private TypeName generateAnonymousName(ASTNode node) {
+    private ScalarType generateAnonymousName(ASTNode node) {
         ITypeBinding type = findDeclaringClass(node);
         while (type.isAnonymous()) {
             type = type.getDeclaringClass();
         }
-        return TypeName.of(type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
+        return ScalarType.of(type.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
     }
 
     private ITypeBinding findDeclaringClass(ASTNode node) {
@@ -297,7 +300,7 @@ public class JavaReader {
         return ((AbstractTypeDeclaration)node).resolveBinding();
     }
 
-    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, TypeName type, List<Object> bodyDeclarations) {
+    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, ScalarType type, List<Object> bodyDeclarations) {
         TypeDeclarationBody.Builder body = TypeDeclarationBody.builder();
 
         for (Object declaration : bodyDeclarations) {
@@ -318,7 +321,7 @@ public class JavaReader {
         return body.build();
     }
 
-    private TypeNode readNestedTypeDeclaration(TypeName outerType, TypeDeclaration typeDeclaration) {
+    private TypeNode readNestedTypeDeclaration(ScalarType outerType, TypeDeclaration typeDeclaration) {
         TypeNode typeNode = readTypeDeclaration(typeDeclaration);
         // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
         Scope scope = topScope.enterClass(typeNode.getName());
@@ -332,10 +335,10 @@ public class JavaReader {
             .orElse(typeNode);
     }
 
-    private void readField(TypeDeclarationBody.Builder builder, Scope scope, TypeName declaringType, FieldDeclaration field) {
+    private void readField(TypeDeclarationBody.Builder builder, Scope scope, ScalarType declaringType, FieldDeclaration field) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = field.fragments();
-        TypeName type = typeOf(field.getType());
+        Type type = typeOf(field.getType());
         fragments.forEach(fragment -> {
             builder.field(field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
             if (fragment.getInitializer() != null) {
@@ -358,7 +361,7 @@ public class JavaReader {
 
         List<FormalArgumentNode> formalArguments = readFormalArguments(scope, method);
         List<AnnotationNode> annotations = readAnnotations(method);
-        Optional<TypeName> returnType = Optional.ofNullable(method.getReturnType2())
+        Optional<Type> returnType = Optional.ofNullable(method.getReturnType2())
             .map(JavaTypes::typeOf);
         Optional<List<StatementNode>> body = readBody(scope, method, returnType);
 
@@ -391,7 +394,7 @@ public class JavaReader {
         return eagerMap(parameters, parameter -> JavaVariableDeclarationReader.read(scope, parameter));
     }
 
-    private Optional<List<StatementNode>> readBody(Scope scope, MethodDeclaration method, Optional<TypeName> returnType) {
+    private Optional<List<StatementNode>> readBody(Scope scope, MethodDeclaration method, Optional<Type> returnType) {
         if (method.getBody() == null) {
             return Optional.empty();
         } else {
@@ -406,12 +409,12 @@ public class JavaReader {
         return statementReader.readStatement(statement);
     }
 
-    List<StatementNode> readStatements(Scope scope, List<Statement> body, Optional<TypeName> returnType) {
+    List<StatementNode> readStatements(Scope scope, List<Statement> body, Optional<Type> returnType) {
         JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), returnType);
         return eagerFlatMap(body, statementReader::readStatement);
     }
 
-    ExpressionNode readExpression(Scope scope, TypeName targetType, Expression body) {
+    ExpressionNode readExpression(Scope scope, org.zwobble.couscous.ast.types.Type targetType, Expression body) {
         return expressionReader(scope).readExpression(targetType, body);
     }
 

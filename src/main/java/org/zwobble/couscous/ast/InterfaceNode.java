@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -8,23 +10,23 @@ import java.util.Set;
 
 public class InterfaceNode implements TypeNode {
     public static InterfaceNode declareInterface(
-        TypeName name,
+        ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
-        Set<TypeName> superTypes,
+        Set<Type> superTypes,
         List<MethodNode> methods)
     {
         return new InterfaceNode(name, typeParameters, superTypes, methods);
     }
 
-    private final TypeName name;
+    private final ScalarType name;
     private final List<FormalTypeParameterNode> typeParameters;
-    private final Set<TypeName> superTypes;
+    private final Set<Type> superTypes;
     private final List<MethodNode> methods;
 
     private InterfaceNode(
-        TypeName name,
+        ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
-        Set<TypeName> superTypes,
+        Set<Type> superTypes,
         List<MethodNode> methodNodes)
     {
         this.name = name;
@@ -34,7 +36,7 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
-    public TypeName getName() {
+    public ScalarType getName() {
         return name;
     }
 
@@ -44,7 +46,7 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
-    public Set<TypeName> getSuperTypes() {
+    public Set<Type> getSuperTypes() {
         return superTypes;
     }
 

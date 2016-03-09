@@ -1,26 +1,27 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class FieldDeclarationNode implements Node {
-    public static FieldDeclarationNode field(String name, TypeName type) {
+    public static FieldDeclarationNode field(String name, Type type) {
         return field(false, name, type);
     }
 
-    public static FieldDeclarationNode staticField(String name, TypeName type) {
+    public static FieldDeclarationNode staticField(String name, Type type) {
         return field(true, name, type);
     }
 
-    public static FieldDeclarationNode field(boolean isStatic, String name, TypeName type) {
+    public static FieldDeclarationNode field(boolean isStatic, String name, Type type) {
         return new FieldDeclarationNode(isStatic, name, type);
     }
 
     private final boolean isStatic;
     private final String name;
-    private final TypeName type;
+    private final Type type;
     
-    private FieldDeclarationNode(boolean isStatic, String name, TypeName type) {
+    private FieldDeclarationNode(boolean isStatic, String name, Type type) {
         this.isStatic = isStatic;
         this.name = name;
         this.type = type;
@@ -34,7 +35,7 @@ public class FieldDeclarationNode implements Node {
         return name;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 
@@ -45,7 +46,8 @@ public class FieldDeclarationNode implements Node {
 
     public FieldDeclarationNode transform(NodeTransformer transformer) {
         return new FieldDeclarationNode(
-            isStatic, name,
+            isStatic,
+            name,
             transformer.transform(type));
     }
 

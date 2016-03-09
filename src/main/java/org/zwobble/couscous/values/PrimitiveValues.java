@@ -1,6 +1,6 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 public class PrimitiveValues {
     public static final PrimitiveValue UNIT = UnitValue.UNIT;
@@ -19,7 +19,7 @@ public class PrimitiveValues {
         return value ? TRUE : FALSE;
     }
 
-    public static PrimitiveValue value(TypeName type) {
+    public static PrimitiveValue value(ScalarType type) {
         return new TypeValue(type);
     }
 }

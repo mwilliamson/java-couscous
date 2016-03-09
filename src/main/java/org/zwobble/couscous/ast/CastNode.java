@@ -1,17 +1,18 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class CastNode implements ExpressionNode {
-    public static ExpressionNode cast(ExpressionNode expression, TypeName type) {
+    public static ExpressionNode cast(ExpressionNode expression, Type type) {
         return new CastNode(expression, type);
     }
 
     private final ExpressionNode expression;
-    private final TypeName type;
+    private final Type type;
 
-    private CastNode(ExpressionNode expression, TypeName type) {
+    private CastNode(ExpressionNode expression, Type type) {
         this.expression = expression;
         this.type = type;
     }
@@ -21,7 +22,7 @@ public class CastNode implements ExpressionNode {
     }
 
     @Override
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

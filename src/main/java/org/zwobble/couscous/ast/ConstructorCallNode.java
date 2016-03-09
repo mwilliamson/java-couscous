@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -7,23 +8,25 @@ import java.util.List;
 
 public class ConstructorCallNode implements ExpressionNode {
     public static ConstructorCallNode constructorCall(
-            TypeName type,
-            List<? extends ExpressionNode> arguments) {
+        Type type,
+        List<? extends ExpressionNode> arguments)
+    {
         return new ConstructorCallNode(type, arguments);
     }
     
-    private final TypeName type;
+    private final Type type;
     private final List<? extends ExpressionNode> arguments;
     
     public ConstructorCallNode(
-            TypeName type,
-            List<? extends ExpressionNode> arguments) {
+        Type type,
+        List<? extends ExpressionNode> arguments)
+    {
         this.type = type;
         this.arguments = arguments;
     }
     
     @Override
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
     

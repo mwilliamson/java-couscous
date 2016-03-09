@@ -1,13 +1,15 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
+
 import java.util.List;
 
 public class MethodSignature {
     private final String name;
-    private final List<TypeName> arguments;
-    private final TypeName returnType;
+    private final List<Type> arguments;
+    private final Type returnType;
 
-    public MethodSignature(String name, List<TypeName> arguments, TypeName returnType) {
+    public MethodSignature(String name, List<Type> arguments, Type returnType) {
         this.name = name;
         this.arguments = arguments;
         this.returnType = returnType;
@@ -17,11 +19,11 @@ public class MethodSignature {
         return name;
     }
 
-    public List<TypeName> getArguments() {
+    public List<Type> getArguments() {
         return arguments;
     }
 
-    public TypeName getReturnType() {
+    public Type getReturnType() {
         return returnType;
     }
 

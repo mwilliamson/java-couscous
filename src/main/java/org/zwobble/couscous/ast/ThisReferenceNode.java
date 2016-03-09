@@ -1,20 +1,21 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
-    public static ThisReferenceNode thisReference(TypeName type) {
+    public static ThisReferenceNode thisReference(Type type) {
         return new ThisReferenceNode(type);
     }
     
-    private final TypeName type;
+    private final Type type;
 
-    private ThisReferenceNode(TypeName type) {
+    private ThisReferenceNode(Type type) {
         this.type = type;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
     

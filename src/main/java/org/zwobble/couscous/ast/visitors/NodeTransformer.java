@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 
 import java.util.List;
 import java.util.Map;
@@ -154,7 +156,7 @@ public class NodeTransformer {
 
     public static class Builder {
         private Function<ExpressionNode, Optional<ExpressionNode>> transformExpression = expression -> Optional.empty();
-        private Function<TypeName, TypeName> transformType = type -> type;
+        private Function<Type, Type> transformType = type -> type;
         private Function<MethodSignature, String> transformMethodName = MethodSignature::getName;
 
         public Builder transformExpression(
@@ -165,7 +167,7 @@ public class NodeTransformer {
         }
 
         public Builder transformType(
-            Function<TypeName, TypeName> transformType)
+            Function<Type, Type> transformType)
         {
             this.transformType = transformType;
             return this;
@@ -182,12 +184,12 @@ public class NodeTransformer {
     }
 
     private final Function<ExpressionNode, Optional<ExpressionNode>> transformExpression;
-    private final Function<TypeName, TypeName> transformType;
+    private final Function<Type, Type> transformType;
     private final Function<MethodSignature, String> transformMethodName;
 
     private NodeTransformer(
         Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
-        Function<TypeName, TypeName> transformType,
+        Function<Type, Type> transformType,
         Function<MethodSignature, String> transformMethodName)
     {
         this.transformExpression = transformExpression;
@@ -195,8 +197,12 @@ public class NodeTransformer {
         this.transformMethodName = transformMethodName;
     }
 
-    public TypeName transform(TypeName type) {
+    public Type transform(Type type) {
         return transformType.apply(type);
+    }
+
+    public ScalarType transform(ScalarType type) {
+        return (ScalarType)transformType.apply(type);
     }
 
     public String transformMethodName(MethodSignature signature) {
@@ -256,7 +262,7 @@ public class NodeTransformer {
         return transformList(annotations, this::transformAnnotation);
     }
 
-    public Set<TypeName> transformTypes(Set<TypeName> superTypes) {
+    public Set<Type> transformTypes(Set<Type> superTypes) {
         return transformSet(superTypes, this::transform);
     }
 

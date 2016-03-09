@@ -2,18 +2,18 @@ package org.zwobble.couscous.ast.sugar;
 
 import org.zwobble.couscous.ast.FieldDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.Type;
 
 import java.util.List;
 import java.util.Set;
 
 public class AnonymousClass {
-    private final Set<TypeName> superTypes;
+    private final Set<Type> superTypes;
     private final List<FieldDeclarationNode> fields;
     private final List<MethodNode> methods;
 
     public AnonymousClass(
-        Set<TypeName> superTypes,
+        Set<Type> superTypes,
         List<FieldDeclarationNode> fields,
         List<MethodNode> methods)
     {
@@ -23,7 +23,7 @@ public class AnonymousClass {
         this.methods = methods;
     }
 
-    public Set<TypeName> getSuperTypes() {
+    public Set<Type> getSuperTypes() {
         return superTypes;
     }
 

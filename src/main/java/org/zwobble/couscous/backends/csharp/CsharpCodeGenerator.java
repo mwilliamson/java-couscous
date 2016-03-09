@@ -2,6 +2,8 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.values.*;
@@ -9,15 +11,16 @@ import org.zwobble.couscous.values.*;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 
 public class CsharpCodeGenerator {
-    private final static Map<TypeName, TypeName> PRIMITIVES = ImmutableMap.<TypeName, TypeName>builder()
-        .put(IntegerValue.REF, TypeName.of("int"))
-        .put(StringValue.REF, TypeName.of("string"))
-        .put(BooleanValue.REF, TypeName.of("bool"))
-        .put(ObjectValues.CLASS, TypeName.of("System.Type"))
-        .put(UnitValue.REF, TypeName.of("void"))
+    private final static Map<ScalarType, ScalarType> PRIMITIVES = ImmutableMap.<ScalarType, ScalarType>builder()
+        .put(IntegerValue.REF, ScalarType.of("int"))
+        .put(StringValue.REF, ScalarType.of("string"))
+        .put(BooleanValue.REF, ScalarType.of("bool"))
+        .put(ObjectValues.CLASS, ScalarType.of("System.Type"))
+        .put(UnitValue.REF, ScalarType.of("void"))
         .build();
 
     private final String namespace;
@@ -40,7 +43,7 @@ public class CsharpCodeGenerator {
         return nodeTransformer.transform(node);
     }
 
-    private TypeName transformType(TypeName type) {
+    private Type transformType(Type type) {
         if (PRIMITIVES.containsKey(type)) {
             return PRIMITIVES.get(type);
         } else {
@@ -61,21 +64,26 @@ public class CsharpCodeGenerator {
         return call.getReceiver().accept(new Receiver.Mapper<Optional<ExpressionNode>>() {
             @Override
             public Optional<ExpressionNode> visit(ExpressionNode receiver) {
-                return CsharpPrimitiveMethods.getPrimitiveMethod(receiver.getType(), call.getMethodName())
+                return CsharpPrimitiveMethods.getPrimitiveMethod(erasure(receiver.getType()), call.getMethodName())
                     .map(generator -> generator.generate(
                         nodeTransformer.transformExpression(receiver),
                         nodeTransformer.transformExpressions(call.getArguments())));
             }
 
             @Override
-            public Optional<ExpressionNode> visit(TypeName receiver) {
+            public Optional<ExpressionNode> visit(ScalarType receiver) {
                 return CsharpPrimitiveMethods.getPrimitiveStaticMethod(receiver, call.getMethodName())
                     .map(generator -> generator.generate(nodeTransformer.transformExpressions(call.getArguments())));
             }
         });
     }
 
-    private TypeName addPrefix(TypeName name, String namespace) {
-        return TypeName.of(namespace + "." + name.getQualifiedName());
+    private Type addPrefix(Type type, String namespace) {
+        return type.accept(new Type.Visitor<Type>() {
+            @Override
+            public Type visit(ScalarType type) {
+                return ScalarType.of(namespace + "." + type.getQualifiedName());
+            }
+        });
     }
 }

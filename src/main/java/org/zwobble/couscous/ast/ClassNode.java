@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -7,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ClassNode implements TypeNode {
-    public static ClassNodeBuilder builder(TypeName name) {
+    public static ClassNodeBuilder builder(ScalarType name) {
         return new ClassNodeBuilder(name);
     }
     public static ClassNodeBuilder builder(String name) {
@@ -15,9 +17,9 @@ public class ClassNode implements TypeNode {
     }
 
     public static ClassNode declareClass(
-        TypeName name,
+        ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
-        Set<TypeName> superTypes,
+        Set<Type> superTypes,
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
         ConstructorNode constructor,
@@ -26,18 +28,18 @@ public class ClassNode implements TypeNode {
         return new ClassNode(name, typeParameters, superTypes, fields, staticConstructor, constructor, methods);
     }
     
-    private final TypeName name;
+    private final ScalarType name;
     private final List<FormalTypeParameterNode> typeParameters;
-    private final Set<TypeName> superTypes;
+    private final Set<Type> superTypes;
     private final List<FieldDeclarationNode> fields;
     private final List<StatementNode> staticConstructor;
     private final ConstructorNode constructor;
     private final List<MethodNode> methods;
     
     public ClassNode(
-        TypeName name,
+        ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
-        Set<TypeName> superTypes,
+        Set<Type> superTypes,
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
         ConstructorNode constructor,
@@ -53,7 +55,7 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
-    public TypeName getName() {
+    public ScalarType getName() {
         return name;
     }
 
@@ -63,7 +65,7 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
-    public Set<TypeName> getSuperTypes() {
+    public Set<Type> getSuperTypes() {
         return superTypes;
     }
 

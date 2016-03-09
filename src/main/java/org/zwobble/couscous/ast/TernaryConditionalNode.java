@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -50,7 +51,7 @@ public class TernaryConditionalNode implements ExpressionNode {
     }
 
     @Override
-    public TypeName getType() {
+    public Type getType() {
         return ifTrue.getType();
     }
 

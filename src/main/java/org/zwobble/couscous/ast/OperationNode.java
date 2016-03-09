@@ -1,20 +1,21 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.List;
 
 public class OperationNode implements ExpressionNode {
-    public static OperationNode operation(Operator operator, List<ExpressionNode> arguments, TypeName type) {
+    public static OperationNode operation(Operator operator, List<ExpressionNode> arguments, Type type) {
         return new OperationNode(operator, arguments, type);
     }
 
     private final Operator operator;
     private final List<ExpressionNode> arguments;
-    private TypeName type;
+    private Type type;
 
-    OperationNode(Operator operator, List<ExpressionNode> arguments, TypeName type) {
+    OperationNode(Operator operator, List<ExpressionNode> arguments, Type type) {
         this.operator = operator;
         this.arguments = arguments;
         this.type = type;
@@ -41,7 +42,7 @@ public class OperationNode implements ExpressionNode {
     }
 
     @Override
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

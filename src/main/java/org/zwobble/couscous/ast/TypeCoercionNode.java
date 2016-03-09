@@ -1,17 +1,19 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class TypeCoercionNode implements ExpressionNode {
-    public static TypeCoercionNode typeCoercion(ExpressionNode expression, TypeName type) {
+    public static TypeCoercionNode typeCoercion(ExpressionNode expression, Type type) {
         return new TypeCoercionNode(expression, type);
     }
 
     private final ExpressionNode expression;
-    private final TypeName type;
+    private final Type type;
 
-    private TypeCoercionNode(ExpressionNode expression, TypeName type) {
+    private TypeCoercionNode(ExpressionNode expression, Type type) {
         this.expression = expression;
         this.type = type;
     }
@@ -21,7 +23,7 @@ public class TypeCoercionNode implements ExpressionNode {
     }
 
     @Override
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

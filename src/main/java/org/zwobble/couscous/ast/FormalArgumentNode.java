@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -18,7 +19,7 @@ public class FormalArgumentNode implements VariableNode, Node {
         return declaration;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return declaration.getType();
     }
     

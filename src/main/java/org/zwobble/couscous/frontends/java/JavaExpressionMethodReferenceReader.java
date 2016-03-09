@@ -5,8 +5,12 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.FormalArgumentNode;
+import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.sugar.Lambda;
+import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.Types;
 
 import java.util.List;
 
@@ -52,11 +56,11 @@ public class JavaExpressionMethodReferenceReader {
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         String methodName = expression.getName().getIdentifier();
         List<ExpressionNode> arguments = eagerMap(formalArguments, VariableReferenceNode::reference);
-        TypeName type = typeOf(methodBinding.getReturnType());
+        Type type = typeOf(methodBinding.getReturnType());
 
         if (Modifier.isStatic(methodBinding.getModifiers())) {
             return staticMethodCall(
-                typeOf(methodBinding.getDeclaringClass()),
+                Types.erasure(typeOf(methodBinding.getDeclaringClass())),
                 methodName,
                 arguments,
                 type);

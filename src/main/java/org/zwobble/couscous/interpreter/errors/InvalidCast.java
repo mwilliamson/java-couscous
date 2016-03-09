@@ -1,22 +1,22 @@
 package org.zwobble.couscous.interpreter.errors;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.Type;
 
 public class InvalidCast extends InterpreterException {
-    private final TypeName expected;
-    private final TypeName actual;
+    private final Type expected;
+    private final Type actual;
 
-    public InvalidCast(TypeName expected, TypeName actual) {
+    public InvalidCast(Type expected, Type actual) {
 
         this.expected = expected;
         this.actual = actual;
     }
 
-    public TypeName getExpected() {
+    public Type getExpected() {
         return expected;
     }
 
-    public TypeName getActual() {
+    public Type getActual() {
         return actual;
     }
 }

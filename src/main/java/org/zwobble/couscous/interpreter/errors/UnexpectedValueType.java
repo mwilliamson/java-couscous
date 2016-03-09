@@ -1,22 +1,22 @@
 package org.zwobble.couscous.interpreter.errors;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.Type;
 
 public final class UnexpectedValueType extends InterpreterException {
     private static final long serialVersionUID = 1L;
-    private final TypeName expected;
-    private final TypeName actual;
+    private final Type expected;
+    private final Type actual;
 
-    public UnexpectedValueType(final TypeName expected, final TypeName actual) {
+    public UnexpectedValueType(final Type expected, final Type actual) {
         this.expected = expected;
         this.actual = actual;
     }
 
-    public TypeName getExpected() {
+    public Type getExpected() {
         return this.expected;
     }
 
-    public TypeName getActual() {
+    public Type getActual() {
         return this.actual;
     }
 

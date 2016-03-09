@@ -1,20 +1,20 @@
-package org.zwobble.couscous.ast;
+package org.zwobble.couscous.ast.types;
 
 import com.google.common.base.Strings;
 
 import java.util.Optional;
 
-public class TypeName {
-    public static TypeName of(String qualifiedName) {
+public class ScalarType implements Type {
+    public static ScalarType of(String qualifiedName) {
         if (Strings.isNullOrEmpty(qualifiedName)) {
             throw new IllegalArgumentException("qualifiedName cannot be blank");
         }
-        return new TypeName(qualifiedName);
+        return new ScalarType(qualifiedName);
     }
     
     private final String qualifiedName;
     
-    private TypeName(String qualifiedName) {
+    private ScalarType(String qualifiedName) {
         this.qualifiedName = qualifiedName;
     }
     
@@ -37,7 +37,7 @@ public class TypeName {
 
     @Override
     public String toString() {
-        return "TypeName(qualifiedName=" + qualifiedName + ")";
+        return "ScalarType(qualifiedName=" + qualifiedName + ")";
     }
 
     @Override
@@ -57,12 +57,17 @@ public class TypeName {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TypeName other = (TypeName) obj;
+        ScalarType other = (ScalarType) obj;
         if (qualifiedName == null) {
             if (other.qualifiedName != null)
                 return false;
         } else if (!qualifiedName.equals(other.qualifiedName))
             return false;
         return true;
+    }
+
+    @Override
+    public <T> T accept(Visitor<T> visitor) {
+        return visitor.visit(this);
     }
 }

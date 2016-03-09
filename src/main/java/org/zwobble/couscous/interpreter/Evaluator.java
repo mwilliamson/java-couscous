@@ -1,6 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
@@ -11,6 +12,8 @@ import org.zwobble.couscous.values.IntegerValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.zwobble.couscous.ast.types.Types.erasure;
 
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
@@ -93,7 +96,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     
     @Override
     public InterpreterValue visit(ConstructorCallNode call) {
-        StaticReceiverValue clazz = environment.findClass(call.getType());
+        StaticReceiverValue clazz = environment.findClass(erasure(call.getType()));
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
         return clazz.callConstructor(environment, arguments);
     }
@@ -127,7 +130,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public InterpreterValue visit(CastNode cast) {
         InterpreterValue value = eval(cast.getExpression());
         if (!InterpreterTypes.isSubType(cast.getType(), value.getType())) {
-            throw new InvalidCast(cast.getType(), value.getType().getName());
+            throw new InvalidCast(cast.getType(), value.getType().getType());
         }
         return value;
     }
@@ -166,7 +169,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
             }
 
             @Override
-            public ReceiverValue visit(TypeName receiver) {
+            public ReceiverValue visit(ScalarType receiver) {
                 return environment.findClass(receiver);
             }
         });

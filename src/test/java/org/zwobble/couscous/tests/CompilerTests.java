@@ -1,7 +1,7 @@
 package org.zwobble.couscous.tests;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -56,7 +56,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "recursive-factorial",
-                TypeName.of("com.example.RecursiveFactorial"),
+                ScalarType.of("com.example.RecursiveFactorial"),
                 "factorial",
                 list(value(6)),
                 IntegerValue.REF));
@@ -68,7 +68,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "while-factorial",
-                TypeName.of("com.example.WhileFactorial"),
+                ScalarType.of("com.example.WhileFactorial"),
                 "factorial",
                 list(value(6)),
                 IntegerValue.REF));
@@ -80,7 +80,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "for-factorial",
-                TypeName.of("com.example.ForFactorial"),
+                ScalarType.of("com.example.ForFactorial"),
                 "factorial",
                 list(value(6)),
                 IntegerValue.REF));
@@ -92,7 +92,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "static-nested-class",
-                TypeName.of("com.example.StaticNestedClass"),
+                ScalarType.of("com.example.StaticNestedClass"),
                 "value",
                 list(),
                 IntegerValue.REF));
@@ -104,7 +104,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "inner-class",
-                TypeName.of("com.example.InnerClass"),
+                ScalarType.of("com.example.InnerClass"),
                 "run",
                 list(),
                 IntegerValue.REF));
@@ -116,7 +116,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "inner-class-with-constructor-args",
-                TypeName.of("com.example.InnerClass"),
+                ScalarType.of("com.example.InnerClass"),
                 "run",
                 list(),
                 IntegerValue.REF));
@@ -128,7 +128,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "implement-user-interface",
-                TypeName.of("com.example.ConstantIntSupplier"),
+                ScalarType.of("com.example.ConstantIntSupplier"),
                 "value",
                 list(),
                 IntegerValue.REF));
@@ -140,7 +140,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "anonymous-class",
-                TypeName.of("com.example.AnonymousClass"),
+                ScalarType.of("com.example.AnonymousClass"),
                 "value",
                 list(),
                 IntegerValue.REF));
@@ -152,7 +152,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "anonymous-class-capture",
-                TypeName.of("com.example.AnonymousClass"),
+                ScalarType.of("com.example.AnonymousClass"),
                 "value",
                 list(value(42)),
                 IntegerValue.REF));
@@ -164,7 +164,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda",
-                TypeName.of("com.example.Lambda"),
+                ScalarType.of("com.example.Lambda"),
                 "value",
                 list(),
                 IntegerValue.REF));
@@ -176,7 +176,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda-capture",
-                TypeName.of("com.example.Lambda"),
+                ScalarType.of("com.example.Lambda"),
                 "value",
                 list(value(2)),
                 IntegerValue.REF));
@@ -188,7 +188,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda-this-capture",
-                TypeName.of("com.example.Lambda"),
+                ScalarType.of("com.example.Lambda"),
                 "value",
                 list(value(2)),
                 IntegerValue.REF));
@@ -200,7 +200,7 @@ public abstract class CompilerTests {
             value("Hello"),
             execTestProgram(
                 "generic-interface",
-                TypeName.of("com.example.GenericInterface"),
+                ScalarType.of("com.example.GenericInterface"),
                 "value",
                 list(),
                 StringValue.REF));
@@ -212,7 +212,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "static-method-overloads",
-                TypeName.of("com.example.StaticMethodOverloads"),
+                ScalarType.of("com.example.StaticMethodOverloads"),
                 "value",
                 list(),
                 IntegerValue.REF));
@@ -237,10 +237,10 @@ public abstract class CompilerTests {
 
     private PrimitiveValue execTestProgram(
         String directoryName,
-        TypeName type,
+        ScalarType type,
         String methodName,
         List<PrimitiveValue> arguments,
-        TypeName returnType) throws IOException, InterruptedException {
+        ScalarType returnType) throws IOException, InterruptedException {
 
         Path path = pathForResource(
             "/java/" + directoryName + "/" + type.getQualifiedName().replace(".", "/") + ".java");
@@ -255,10 +255,10 @@ public abstract class CompilerTests {
 
     protected abstract PrimitiveValue execProgram(
         Path directory,
-        TypeName type,
+        ScalarType type,
         String methodName,
         List<PrimitiveValue> arguments,
-        TypeName returnType) throws IOException, InterruptedException;
+        ScalarType returnType) throws IOException, InterruptedException;
 
     private Path directoryName(Path path, int length) {
         for (int i = 0; i < length; i++) {
@@ -267,7 +267,7 @@ public abstract class CompilerTests {
         return path;
     }
 
-    private PrimitiveValue exec(TypeName returnType, String source) {
+    private PrimitiveValue exec(ScalarType returnType, String source) {
         try {
             String javaClass =
                 "package com.example;" +
@@ -280,7 +280,7 @@ public abstract class CompilerTests {
                 Files.write(directoryPath.resolve("com/example/Example.java"), list(javaClass));
                 return execProgram(
                     directoryPath,
-                    TypeName.of("com.example.Example"),
+                    ScalarType.of("com.example.Example"),
                     "main",
                     list(),
                     returnType);
@@ -300,7 +300,7 @@ public abstract class CompilerTests {
         return evalExpression(IntegerValue.REF, expressionSource);
     }
 
-    private PrimitiveValue evalExpression(TypeName type, String expressionSource) {
+    private PrimitiveValue evalExpression(ScalarType type, String expressionSource) {
         return exec(type, "return " + expressionSource + ";");
     }
 

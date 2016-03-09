@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
 import org.zwobble.couscous.values.BooleanValue;
@@ -51,19 +52,19 @@ public class CsharpSerializerTests {
 
     @Test
     public void typeLiteralUsesTypeOfOperator() {
-        String output = serialize(literal(TypeName.of("com.example.Example")));
+        String output = serialize(literal(ScalarType.of("com.example.Example")));
         assertEquals("typeof(com.example.Example)", output);
     }
 
     @Test
     public void variableReferenceWritesIdentifier() {
-        String output = serialize(reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))));
+        String output = serialize(reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))));
         assertEquals("x", output);
     }
 
     @Test
     public void thisReferenceUsesThisKeyword() {
-        String output = serialize(thisReference(TypeName.of("X")));
+        String output = serialize(thisReference(ScalarType.of("X")));
         assertEquals("this", output);
     }
 
@@ -84,37 +85,37 @@ public class CsharpSerializerTests {
     @Test
     public void staticMethodCallWithNoArgumentsWritesStaticReceiver() {
         String output = serialize(staticMethodCall(
-            TypeName.of("X"),
+            ScalarType.of("X"),
             "y",
             list(),
-            TypeName.of("Y")));
+            ScalarType.of("Y")));
         assertEquals("X.y()", output);
     }
 
     @Test
     public void methodCallWithNoArgumentsWritesReceiver() {
         String output = serialize(methodCall(
-            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))),
             "y",
             list(),
-            TypeName.of("Y")));
+            ScalarType.of("Y")));
         assertEquals("x.y()", output);
     }
 
     @Test
     public void methodCallWithArguments() {
         String output = serialize(methodCall(
-            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))),
             "y",
             list(literal(1), literal(2)),
-            TypeName.of("Y")));
+            ScalarType.of("Y")));
         assertEquals("x.y(1, 2)", output);
     }
 
     @Test
     public void constructorCallWithNoArguments() {
         String output = serialize(constructorCall(
-            TypeName.of("X"),
+            ScalarType.of("X"),
             list()));
         assertEquals("new X()", output);
     }
@@ -122,7 +123,7 @@ public class CsharpSerializerTests {
     @Test
     public void constructorCallWithArguments() {
         String output = serialize(constructorCall(
-            TypeName.of("X"),
+            ScalarType.of("X"),
             list(literal(1), literal(2))));
         assertEquals("new X(1, 2)", output);
     }
@@ -143,18 +144,18 @@ public class CsharpSerializerTests {
     @Test
     public void fieldAccessSeparatesReceiverAndNameWithDot() {
         String output = serialize(fieldAccess(
-            reference(var(TestIds.ANY_ID, "x", TypeName.of("X"))),
+            reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))),
             "y",
-            TypeName.of("Y")));
+            ScalarType.of("Y")));
         assertEquals("x.y", output);
     }
 
     @Test
     public void staticFieldAccessSeparatesReceiverAndNameWithDot() {
         String output = serialize(fieldAccess(
-            TypeName.of("X"),
+            ScalarType.of("X"),
             "y",
-            TypeName.of("Y")));
+            ScalarType.of("Y")));
         assertEquals("X.y", output);
     }
 
@@ -181,7 +182,7 @@ public class CsharpSerializerTests {
         String output = serialize(localVariableDeclaration(
             TestIds.ANY_ID,
             "x",
-            TypeName.of("string"),
+            ScalarType.of("string"),
             literal("[value]")));
         assertEquals("string x = \"[value]\";\n", output);
     }
@@ -206,7 +207,7 @@ public class CsharpSerializerTests {
     @Test
     public void methodCanHaveVoidReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing")
-            .returns(TypeName.of("void"))
+            .returns(ScalarType.of("void"))
             .build());
         assertEquals("public static void nothing() {\n}\n", output);
     }
@@ -214,7 +215,7 @@ public class CsharpSerializerTests {
     @Test
     public void instanceMethodHasNoStaticKeword() {
         String output = serialize(MethodNode.builder("nothing")
-            .returns(TypeName.of("void"))
+            .returns(ScalarType.of("void"))
             .build());
         assertEquals("public void nothing() {\n}\n", output);
     }
@@ -222,7 +223,7 @@ public class CsharpSerializerTests {
     @Test
     public void methodWithReturnType() {
         MethodNode methodNode = MethodNode.staticMethod("nothing")
-            .returns(TypeName.of("X"))
+            .returns(ScalarType.of("X"))
             .build();
 
         String output = serialize(methodNode);
@@ -233,9 +234,9 @@ public class CsharpSerializerTests {
     @Test
     public void methodWithArguments() {
         MethodNode methodNode = MethodNode.staticMethod("nothing")
-            .argument(formalArg(var(TestIds.id("x"), "x", TypeName.of("X"))))
-            .argument(formalArg(var(TestIds.id("y"), "y", TypeName.of("Y"))))
-            .returns(TypeName.of("void"))
+            .argument(formalArg(var(TestIds.id("x"), "x", ScalarType.of("X"))))
+            .argument(formalArg(var(TestIds.id("y"), "y", ScalarType.of("Y"))))
+            .returns(ScalarType.of("void"))
             .build();
 
         String output = serialize(methodNode);
@@ -246,7 +247,7 @@ public class CsharpSerializerTests {
     @Test
     public void methodHasSerializedBody() {
         MethodNode method = MethodNode.staticMethod("nothing")
-            .returns(TypeName.of("void"))
+            .returns(ScalarType.of("void"))
             .statement(returns(literal(true)))
             .build();
         String output = serialize(method);
@@ -301,7 +302,7 @@ public class CsharpSerializerTests {
     @Test
     public void constructorHasSerializedBody() {
         ConstructorNode constructor = ConstructorNode.constructor(
-            list(formalArg(var(TestIds.ANY_ID, "x", TypeName.of("X")))),
+            list(formalArg(var(TestIds.ANY_ID, "x", ScalarType.of("X")))),
             list(expressionStatement(literal(true))));
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor)
@@ -316,8 +317,8 @@ public class CsharpSerializerTests {
     @Test
     public void classWithFields() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
-            .staticField("x", TypeName.of("X"))
-            .field("y", TypeName.of("Y"))
+            .staticField("x", ScalarType.of("X"))
+            .field("y", ScalarType.of("Y"))
             .build();
 
         String output = serialize(classNode);
@@ -327,7 +328,7 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceIsInNamespace() {
-        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example")).buildInterface();
+        Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example")).buildInterface();
 
         String output = serialize(node);
 
@@ -336,7 +337,7 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceWithTypeParameters() {
-        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+        Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
             .addTypeParameter("T")
             .addTypeParameter("U")
             .buildInterface();
@@ -348,7 +349,7 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceWithSuperTypes() {
-        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+        Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
             .addSuperType("com.example.Base")
             .buildInterface();
 
@@ -360,7 +361,7 @@ public class CsharpSerializerTests {
     @Test
     public void interfaceWithMethod() {
         MethodNode method = MethodNode.builder("get").isAbstract().returns(IntegerValue.REF).build();
-        Node node = new ClassNodeBuilder(TypeName.of("com.example.Example"))
+        Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
             .method(method)
             .buildInterface();
 

@@ -1,13 +1,13 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 public final class StringValue implements PrimitiveValue {
     
     public static StringValue of(String value) {
         return new StringValue(value);
     }
-    public static final TypeName REF = TypeName.of("java.lang.String");
+    public static final ScalarType REF = ScalarType.of("java.lang.String");
     private final String value;
     
     @Override
@@ -16,7 +16,7 @@ public final class StringValue implements PrimitiveValue {
     }
     
     @Override
-    public TypeName getType() {
+    public ScalarType getType() {
         return REF;
     }
     

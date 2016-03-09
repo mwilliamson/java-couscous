@@ -3,7 +3,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.CompilerTests;
@@ -25,10 +25,10 @@ public class JavaToCsharpTests extends CompilerTests {
 
     protected PrimitiveValue execProgram(
         Path directory,
-        TypeName type,
+        ScalarType type,
         String methodName,
         List<PrimitiveValue> arguments,
-        TypeName returnType) throws IOException, InterruptedException
+        ScalarType returnType) throws IOException, InterruptedException
     {
         Path directoryPath = Files.createTempDirectory(null);
         try {

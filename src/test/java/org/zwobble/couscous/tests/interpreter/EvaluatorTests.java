@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.interpreter;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.MapBackedProject;
@@ -171,7 +172,7 @@ public class EvaluatorTests extends BackendEvalTests {
 
     @Test
     public void cannotSetValueOfInstanceFieldAsThoughItIsAStaticField() {
-        TypeName type = TypeName.of("com.example.Example");
+        ScalarType type = ScalarType.of("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
             .field("value", IntegerValue.REF)
             .constructor(constructor -> constructor

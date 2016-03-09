@@ -3,6 +3,8 @@ package org.zwobble.couscous.ast;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
@@ -15,15 +17,15 @@ import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClassNodeBuilder {
-    private final TypeName name;
-    private final ImmutableSet.Builder<TypeName> superTypes;
+    private final ScalarType name;
+    private final ImmutableSet.Builder<Type> superTypes;
     private final ImmutableList.Builder<FormalTypeParameterNode> typeParameters;
     private final ImmutableList.Builder<FieldDeclarationNode> fields;
     private List<StatementNode> staticConstructor;
     private Optional<ConstructorNode> constructor;
     private final ImmutableList.Builder<MethodNode> methods;
 
-    public ClassNodeBuilder(TypeName name) {
+    public ClassNodeBuilder(ScalarType name) {
         this.name = name;
         this.typeParameters = ImmutableList.builder();
         this.superTypes = ImmutableSet.builder();
@@ -34,7 +36,7 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder(String name) {
-        this(TypeName.of(name));
+        this(ScalarType.of(name));
     }
 
     public ClassNodeBuilder addTypeParameter(String name) {
@@ -43,15 +45,15 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder addSuperType(String type) {
-        this.superTypes.add(TypeName.of(type));
+        this.superTypes.add(ScalarType.of(type));
         return this;
     }
 
-    public ClassNodeBuilder staticField(String name, TypeName type) {
+    public ClassNodeBuilder staticField(String name, ScalarType type) {
         return field(FieldDeclarationNode.staticField(name, type));
     }
 
-    public ClassNodeBuilder field(String name, TypeName type) {
+    public ClassNodeBuilder field(String name, ScalarType type) {
         return field(FieldDeclarationNode.field(name, type));
     }
 
@@ -132,7 +134,7 @@ public class ClassNodeBuilder {
         private final Function<MethodBuilder<?>, T> build;
         private final ImmutableList.Builder<AnnotationNode> annotations;
         private final ImmutableList.Builder<FormalArgumentNode> arguments;
-        private TypeName returnType = UnitValue.REF;
+        private ScalarType returnType = UnitValue.REF;
         private final ImmutableList.Builder<StatementNode> statements;
 
         public MethodBuilder(Function<MethodBuilder<?>, T> build) {
@@ -142,7 +144,7 @@ public class ClassNodeBuilder {
             this.statements = ImmutableList.builder();
         }
         
-        public MethodBuilder<T> annotation(TypeName type) {
+        public MethodBuilder<T> annotation(ScalarType type) {
             annotations.add(AnnotationNode.annotation(type));
             return this;
         }
@@ -151,12 +153,12 @@ public class ClassNodeBuilder {
             return ThisReferenceNode.thisReference(name);
         }
         
-        public MethodBuilder<T> argument(Identifier id, String name, TypeName type) {
+        public MethodBuilder<T> argument(Identifier id, String name, ScalarType type) {
             arguments.add(formalArg(var(id, name, type)));
             return this;
         }
 
-        public MethodBuilder<T> returns(TypeName returnType) {
+        public MethodBuilder<T> returns(ScalarType returnType) {
             this.returnType = returnType;
             return this;
         }

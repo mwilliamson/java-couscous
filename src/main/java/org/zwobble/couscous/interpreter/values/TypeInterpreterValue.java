@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
@@ -15,13 +15,13 @@ public class TypeInterpreterValue implements InterpreterValue {
         .builder(TypeInterpreterValue.class, ObjectValues.CLASS)
         .build();
 
-    public static InterpreterValue of(TypeName type) {
+    public static InterpreterValue of(ScalarType type) {
         return new TypeInterpreterValue(type);
     }
 
-    private final TypeName type;
+    private final ScalarType type;
 
-    public TypeInterpreterValue(TypeName type) {
+    public TypeInterpreterValue(ScalarType type) {
         this.type = type;
     }
 

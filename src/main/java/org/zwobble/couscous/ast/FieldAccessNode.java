@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
@@ -11,15 +13,15 @@ public class FieldAccessNode implements AssignableExpressionNode {
     public static FieldAccessNode fieldAccess(
             ExpressionNode left,
             String fieldName,
-            TypeName type)
+            Type type)
     {
         return fieldAccess(instanceReceiver(left), fieldName, type);
     }
 
     public static FieldAccessNode fieldAccess(
-        TypeName left,
+        ScalarType left,
         String fieldName,
-        TypeName type)
+        Type type)
     {
         return fieldAccess(staticReceiver(left), fieldName, type);
     }
@@ -27,19 +29,19 @@ public class FieldAccessNode implements AssignableExpressionNode {
     public static FieldAccessNode fieldAccess(
         Receiver left,
         String fieldName,
-        TypeName type)
+        Type type)
     {
         return new FieldAccessNode(left, fieldName, type);
     }
     
     private final Receiver left;
     private final String fieldName;
-    private final TypeName type;
+    private final Type type;
     
     public FieldAccessNode(
         Receiver left,
         String fieldName,
-        TypeName type)
+        Type type)
     {
         this.left = left;
         this.fieldName = fieldName;
@@ -54,7 +56,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
         return fieldName;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
     

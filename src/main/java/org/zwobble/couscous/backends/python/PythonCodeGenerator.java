@@ -6,6 +6,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
+import static org.zwobble.couscous.ast.types.Types.erasure;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
@@ -72,7 +75,7 @@ public class PythonCodeGenerator {
     }
 
     private static Stream<PythonImportNode> generateImports(TypeNode classNode) {
-        Set<TypeName> classes = findReferencedClasses(classNode);
+        Set<ScalarType> classes = findReferencedClasses(classNode);
         return classes.stream()
             .filter(name -> !name.equals(InternalCouscousValue.REF))
             .map(name -> pythonImport(importPathToRoot(classNode) + name.getQualifiedName(), list(pythonImportAlias(name.getSimpleName()))));
@@ -93,21 +96,21 @@ public class PythonCodeGenerator {
         return depth;
     }
 
-    private static Set<TypeName> findReferencedClasses(TypeNode classNode) {
+    private static Set<ScalarType> findReferencedClasses(TypeNode classNode) {
         return NodeStructure.descendantNodes(classNode)
-            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<TypeName>>(Stream.empty()) {
+            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<ScalarType>>(Stream.empty()) {
                 @Override
-                public Stream<TypeName> visit(StaticReceiver receiver) {
+                public Stream<ScalarType> visit(StaticReceiver receiver) {
                     return Stream.of(receiver.getType());
                 }
 
                 @Override
-                public Stream<TypeName> visit(ConstructorCallNode call) {
-                    return Stream.of(call.getType());
+                public Stream<ScalarType> visit(ConstructorCallNode call) {
+                    return Stream.of(erasure(call.getType()));
                 }
 
                 @Override
-                public Stream<TypeName> visit(TypeCoercionNode typeCoercion) {
+                public Stream<ScalarType> visit(TypeCoercionNode typeCoercion) {
                     if (isIntegerBox(typeCoercion)) {
                         return Stream.of(ObjectValues.BOXED_INT);
                     } else {
@@ -116,7 +119,7 @@ public class PythonCodeGenerator {
                 }
 
                 @Override
-                public Stream<TypeName> visit(LiteralNode literal) {
+                public Stream<ScalarType> visit(LiteralNode literal) {
                     if (literal.getValue() instanceof TypeValue) {
                         return Stream.of(((TypeValue)literal.getValue()).getValue());
                     } else {
@@ -151,7 +154,7 @@ public class PythonCodeGenerator {
             }
 
             @Override
-            public PythonExpressionNode visitType(TypeName value) {
+            public PythonExpressionNode visitType(ScalarType value) {
                 return typeReference(value);
             }
         });
@@ -272,12 +275,12 @@ public class PythonCodeGenerator {
             return methodCall.getReceiver().accept(new Receiver.Mapper<Optional<PythonExpressionNode>>() {
                 @Override
                 public Optional<PythonExpressionNode> visit(ExpressionNode receiver) {
-                    return PythonPrimitiveMethods.getPrimitiveMethod(receiver.getType(), methodCall.getMethodName())
+                    return PythonPrimitiveMethods.getPrimitiveMethod(erasure(receiver.getType()), methodCall.getMethodName())
                         .map(generator -> generator.generate(pythonReceiver, pythonArguments));
                 }
 
                 @Override
-                public Optional<PythonExpressionNode> visit(TypeName receiver) {
+                public Optional<PythonExpressionNode> visit(ScalarType receiver) {
                     return PythonPrimitiveMethods.getPrimitiveStaticMethod(receiver, methodCall.getMethodName())
                         .map(generator -> generator.generate(pythonArguments));
                 }
@@ -286,7 +289,7 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(ConstructorCallNode call) {
-            final org.zwobble.couscous.ast.TypeName className = call.getType();
+            final Type className = call.getType();
             final org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode classReference = typeReference(className);
             final java.util.List<org.zwobble.couscous.backends.python.ast.PythonExpressionNode> arguments = generateExpressions(call.getArguments());
             return pythonCall(classReference, arguments);
@@ -334,7 +337,7 @@ public class PythonCodeGenerator {
             }
 
             @Override
-            public PythonExpressionNode visit(TypeName receiver) {
+            public PythonExpressionNode visit(ScalarType receiver) {
                 return typeReference(receiver);
             }
         });
@@ -348,11 +351,11 @@ public class PythonCodeGenerator {
         return !isInteger(typeCoercion.getExpression().getType()) && isInteger(typeCoercion.getType());
     }
 
-    private static boolean isInteger(TypeName type) {
+    private static boolean isInteger(Type type) {
         return type.equals(IntegerValue.REF) || type.equals(ObjectValues.BOXED_INT);
     }
 
-    private static PythonVariableReferenceNode typeReference(TypeName className) {
-        return pythonVariableReference(className.getSimpleName());
+    private static PythonVariableReferenceNode typeReference(Type className) {
+        return pythonVariableReference(erasure(className).getSimpleName());
     }
 }

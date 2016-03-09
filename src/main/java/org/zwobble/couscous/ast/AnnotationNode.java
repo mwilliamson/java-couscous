@@ -1,20 +1,21 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class AnnotationNode implements Node {
-    public static AnnotationNode annotation(TypeName type) {
+    public static AnnotationNode annotation(Type type) {
         return new AnnotationNode(type);
     }
     
-    private final TypeName type;
+    private final Type type;
     
-    private AnnotationNode(TypeName type) {
+    private AnnotationNode(Type type) {
         this.type = type;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

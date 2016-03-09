@@ -1,17 +1,18 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.types.Type;
 
 public class VariableDeclaration {
-    public static VariableDeclaration var(Identifier id, String name, TypeName type) {
+    public static VariableDeclaration var(Identifier id, String name, Type type) {
         return new VariableDeclaration(id, name, type);
     }
     
     private final Identifier id;
     private final String name;
-    private final TypeName type;
+    private final Type type;
     
-    private VariableDeclaration(Identifier id, String name, TypeName type) {
+    private VariableDeclaration(Identifier id, String name, Type type) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -25,7 +26,7 @@ public class VariableDeclaration {
         return name;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

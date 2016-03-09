@@ -4,7 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.LiteralNode;
+import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
@@ -33,7 +37,7 @@ public class CsharpMethodRunner implements MethodRunner {
     private static final String NAMESPACE = "Couscous";
 
     @Override
-    public PrimitiveValue runMethod(List<TypeNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
+    public PrimitiveValue runMethod(List<TypeNode> classNodes, ScalarType className, String methodName, List<PrimitiveValue> arguments, Type returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             Backend compiler = new CsharpBackend(directoryPath, NAMESPACE);
@@ -50,10 +54,10 @@ public class CsharpMethodRunner implements MethodRunner {
 
     public static PrimitiveValue runFunction(
         Path directoryPath,
-        TypeName className,
+        ScalarType className,
         String methodName,
         List<PrimitiveValue> arguments,
-        TypeName returnType)
+        Type returnType)
         throws IOException, InterruptedException
     {
         MethodSignature signature = new MethodSignature(
@@ -63,7 +67,7 @@ public class CsharpMethodRunner implements MethodRunner {
         String csharpMethodName = Names.toUniqueName(signature);
         String value = CsharpSerializer.serialize(
             staticMethodCall(
-                TypeName.of(NAMESPACE + "." + className.getQualifiedName()),
+                ScalarType.of(NAMESPACE + "." + className.getQualifiedName()),
                 csharpMethodName,
                 eagerMap(arguments, LiteralNode::literal),
                 returnType));
@@ -122,7 +126,7 @@ public class CsharpMethodRunner implements MethodRunner {
                     return value(StringValue.REF);
                 } else {
                     assertThat(value, Matchers.startsWith(NAMESPACE_PREFIX));
-                    return value(TypeName.of(value.substring(NAMESPACE_PREFIX.length())));
+                    return value(ScalarType.of(value.substring(NAMESPACE_PREFIX.length())));
                 }
             default:
                 throw new RuntimeException("Unhandled type: " + type);

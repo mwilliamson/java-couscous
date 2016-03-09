@@ -2,6 +2,8 @@ package org.zwobble.couscous.tests.interpreter;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.Project;
@@ -106,10 +108,10 @@ public class InterpreterMethodTests extends BackendMethodTests {
             @Override
             public PrimitiveValue runMethod(
                 List<TypeNode> classNodes,
-                TypeName className,
+                ScalarType className,
                 String methodName,
                 List<PrimitiveValue> arguments,
-                TypeName returnType) {
+                Type returnType) {
                 
                 Project project = JavaProject.of(classNodes);
                 Interpreter interpreter = new Interpreter(project);

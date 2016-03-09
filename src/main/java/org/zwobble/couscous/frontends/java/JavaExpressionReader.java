@@ -2,6 +2,8 @@ package org.zwobble.couscous.frontends.java;
 
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.ast.types.Types;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
@@ -31,12 +33,12 @@ public class JavaExpressionReader {
         this.javaReader = javaReader;
     }
 
-    ExpressionNode readExpression(TypeName targetType, Expression expression) {
+    ExpressionNode readExpression(Type targetType, Expression expression) {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
         return coerceExpression(targetType, couscousExpression);
     }
 
-    static ExpressionNode coerceExpression(TypeName targetType, ExpressionNode couscousExpression) {
+    static ExpressionNode coerceExpression(Type targetType, ExpressionNode couscousExpression) {
         if (targetType.equals(couscousExpression.getType())) {
             return couscousExpression;
         } else {
@@ -44,7 +46,7 @@ public class JavaExpressionReader {
         }
     }
 
-    private static TypeName unboxedType(TypeName type) {
+    private static Type unboxedType(Type type) {
         if (type.equals(ObjectValues.BOXED_INT)) {
             return IntegerValue.REF;
         } else if (type.equals(ObjectValues.BOXED_BOOLEAN)) {
@@ -131,7 +133,7 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readTypeLiteral(TypeLiteral expression) {
-        return literal(typeOf(expression.getType()));
+        return literal(Types.erasure(typeOf(expression.getType())));
     }
 
     private ExpressionNode readSimpleName(SimpleName expression) {
@@ -148,9 +150,9 @@ public class JavaExpressionReader {
             return scope.reference(binding.getKey());
         } else {
             boolean isStatic = Modifier.isStatic(binding.getModifiers());
-            TypeName classType = typeOf(binding.getDeclaringClass());
+            Type classType = typeOf(binding.getDeclaringClass());
             Receiver receiver = isStatic
-                ? new StaticReceiver(classType)
+                ? new StaticReceiver(Types.erasure(classType))
                 : new InstanceReceiver(ThisReferenceNode.thisReference(classType));
             return FieldAccessNode.fieldAccess(
                 receiver,
@@ -167,7 +169,7 @@ public class JavaExpressionReader {
         IVariableBinding fieldBinding = expression.resolveFieldBinding();
         boolean isStatic = Modifier.isStatic(fieldBinding.getModifiers());
         Receiver receiver = isStatic
-            ? new StaticReceiver(typeOf(fieldBinding.getDeclaringClass()))
+            ? new StaticReceiver(Types.erasure(typeOf(fieldBinding.getDeclaringClass())))
             : new InstanceReceiver(readExpressionWithoutBoxing(expression.getExpression()));
 
         return FieldAccessNode.fieldAccess(
@@ -182,13 +184,13 @@ public class JavaExpressionReader {
         List<ExpressionNode> arguments = readArguments(
             expression.resolveMethodBinding(),
             expression.arguments());
-        final TypeName type = typeOf(expression);
+        final Type type = typeOf(expression);
 
         IMethodBinding methodBinding = expression.resolveMethodBinding();
-        TypeName receiverType = typeOf(methodBinding.getDeclaringClass());
+        Type receiverType = typeOf(methodBinding.getDeclaringClass());
         if ((Modifier.isStatic(methodBinding.getModifiers()))) {
             return staticMethodCall(
-                receiverType,
+                Types.erasure(receiverType),
                 methodName,
                 arguments,
                 type);
@@ -268,15 +270,15 @@ public class JavaExpressionReader {
     }
 
     private static boolean isPrimitiveOperation(InfixExpression expression) {
-        TypeName leftOperandType = typeOf(expression.getLeftOperand());
-        TypeName rightOperandType = typeOf(expression.getRightOperand());
+        Type leftOperandType = typeOf(expression.getLeftOperand());
+        Type rightOperandType = typeOf(expression.getRightOperand());
         return isPrimitive(leftOperandType)
             || isPrimitive(rightOperandType)
             || (expression.getOperator() != InfixExpression.Operator.NOT_EQUALS
             && expression.getOperator() != InfixExpression.Operator.EQUALS);
     }
 
-    private static boolean isPrimitive(TypeName type) {
+    private static boolean isPrimitive(Type type) {
         return type.equals(BooleanValue.REF) || type.equals(IntegerValue.REF);
     }
 
@@ -297,7 +299,7 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readConditionalExpression(ConditionalExpression expression) {
-        TypeName type = typeOf(expression);
+        Type type = typeOf(expression);
         return TernaryConditionalNode.ternaryConditional(
             readExpression(BooleanValue.REF, expression.getExpression()),
             readExpression(type, expression.getThenExpression()),

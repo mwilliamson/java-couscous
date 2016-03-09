@@ -1,10 +1,10 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 public class ObjectValues {
-    public static final TypeName CLASS = TypeName.of("java.lang.Class");
-    public static final TypeName OBJECT = TypeName.of("java.lang.Object");
-    public static final TypeName BOXED_INT = TypeName.of("java.lang.Integer");
-    public static final TypeName BOXED_BOOLEAN = TypeName.of("java.lang.Boolean");
+    public static final ScalarType CLASS = ScalarType.of("java.lang.Class");
+    public static final ScalarType OBJECT = ScalarType.of("java.lang.Object");
+    public static final ScalarType BOXED_INT = ScalarType.of("java.lang.Integer");
+    public static final ScalarType BOXED_BOOLEAN = ScalarType.of("java.lang.Boolean");
 }

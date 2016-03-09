@@ -2,8 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ReferenceNode;
-import org.zwobble.couscous.ast.TypeName;
-import org.zwobble.couscous.ast.VariableDeclaration;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class GeneratedClosure {
         return classNode;
     }
 
-    public TypeName getType() {
+    public ScalarType getType() {
         return classNode.getName();
     }
 

@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.UnitValue;
@@ -27,7 +28,7 @@ public class MethodNode implements Node {
         private final String name;
         private final ImmutableList.Builder<FormalArgumentNode> arguments =
             ImmutableList.builder();
-        private TypeName returnType = UnitValue.REF;
+        private Type returnType = UnitValue.REF;
         private final ImmutableList.Builder<StatementNode> body =
             ImmutableList.builder();
         
@@ -60,7 +61,7 @@ public class MethodNode implements Node {
             return this;
         }
 
-        public Builder returns(TypeName returnType) {
+        public Builder returns(Type returnType) {
             this.returnType = returnType;
             return this;
         }
@@ -91,7 +92,7 @@ public class MethodNode implements Node {
         boolean isStatic,
         String name,
         List<FormalArgumentNode> arguments,
-        TypeName returnType,
+        Type returnType,
         Optional<List<StatementNode>> body)
     {
         return new MethodNode(annotations, isStatic, name, arguments, returnType, body);
@@ -101,7 +102,7 @@ public class MethodNode implements Node {
     private final boolean isStatic;
     private final String name;
     private final List<FormalArgumentNode> arguments;
-    private final TypeName returnType;
+    private final Type returnType;
     private final Optional<List<StatementNode>> body;
     
     private MethodNode(
@@ -109,7 +110,7 @@ public class MethodNode implements Node {
         boolean isStatic,
         String name,
         List<FormalArgumentNode> arguments,
-        TypeName returnType,
+        Type returnType,
         Optional<List<StatementNode>> body)
     {
         this.annotations = annotations;
@@ -136,7 +137,7 @@ public class MethodNode implements Node {
         return arguments;
     }
 
-    public TypeName getReturnType() {
+    public Type getReturnType() {
         return returnType;
     }
     

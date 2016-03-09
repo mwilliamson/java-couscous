@@ -2,7 +2,7 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;
@@ -67,8 +67,8 @@ public class CsharpPrimitiveMethods {
         STRING_METHODS = methods.build();
     }
 
-    private static final Map<TypeName, Map<String, PrimitiveMethodGenerator>> METHODS =
-        ImmutableMap.<TypeName, Map<String, PrimitiveMethodGenerator>>builder()
+    private static final Map<ScalarType, Map<String, PrimitiveMethodGenerator>> METHODS =
+        ImmutableMap.<ScalarType, Map<String, PrimitiveMethodGenerator>>builder()
             .put(BooleanValue.REF, BOOLEAN_METHODS)
             .put(StringValue.REF, STRING_METHODS)
             .put(ObjectValues.BOXED_INT, BOXED_INT_METHODS)
@@ -78,19 +78,19 @@ public class CsharpPrimitiveMethods {
         ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
 
             .put("parseInt", arguments -> staticMethodCall(
-                TypeName.of("int"),
+                ScalarType.of("int"),
                 "Parse",
                 list(arguments.get(0)),
-                TypeName.of("int")))
+                ScalarType.of("int")))
 
             .build();
 
-    private static final Map<TypeName, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
-        ImmutableMap.<TypeName, Map<String, PrimitiveStaticMethodGenerator>>builder()
+    private static final Map<ScalarType, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
+        ImmutableMap.<ScalarType, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(ObjectValues.BOXED_INT, STATIC_INT_METHODS)
             .build();
 
-    public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(TypeName type, String methodName) {
+    public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(ScalarType type, String methodName) {
         return Optional.ofNullable(METHODS.get(type))
             .flatMap(methodsForType -> Optional.ofNullable(methodsForType.get(methodName)));
     }
@@ -100,7 +100,7 @@ public class CsharpPrimitiveMethods {
         ExpressionNode generate(ExpressionNode receiver, List<ExpressionNode> arguments);
     }
 
-    public static Optional<PrimitiveStaticMethodGenerator> getPrimitiveStaticMethod(TypeName type, String methodName) {
+    public static Optional<PrimitiveStaticMethodGenerator> getPrimitiveStaticMethod(ScalarType type, String methodName) {
         return Optional.ofNullable(STATIC_METHODS.get(type))
             .flatMap(methodsForType -> Optional.ofNullable(methodsForType.get(methodName)));
     }

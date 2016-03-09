@@ -3,8 +3,9 @@ package org.zwobble.couscous.tests.backends.python;
 import com.google.common.base.Joiner;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
@@ -28,7 +29,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class PythonMethodRunner implements MethodRunner {
     @Override
-    public PrimitiveValue runMethod(List<TypeNode> classNodes, TypeName className, String methodName, List<PrimitiveValue> arguments, TypeName returnType) {
+    public PrimitiveValue runMethod(List<TypeNode> classNodes, ScalarType className, String methodName, List<PrimitiveValue> arguments, Type returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
             PythonBackend compiler = new PythonBackend(directoryPath, "couscous");
@@ -45,10 +46,10 @@ public class PythonMethodRunner implements MethodRunner {
 
     public static PrimitiveValue runFunction(
             Path directoryPath,
-            TypeName className,
+            ScalarType className,
             String methodName,
             List<PrimitiveValue> arguments,
-            TypeName returnType)
+            Type returnType)
             throws IOException, InterruptedException {
         
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
@@ -82,7 +83,7 @@ public class PythonMethodRunner implements MethodRunner {
             case "<class 'type'>":
                 String typeName = value.substring(value.indexOf("'") + 1, value.lastIndexOf("'"));
                 assertThat(typeName, Matchers.startsWith(PACKAGE_PREFIX));
-                return value(TypeName.of(typeName.substring(PACKAGE_PREFIX.length(), typeName.lastIndexOf("."))));
+                return value(ScalarType.of(typeName.substring(PACKAGE_PREFIX.length(), typeName.lastIndexOf("."))));
             default:
                 throw new RuntimeException("Unhandled type: " + type);
         }

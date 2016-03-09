@@ -1,20 +1,21 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class StaticReceiver implements Receiver {
-    public static Receiver staticReceiver(TypeName type) {
+    public static Receiver staticReceiver(ScalarType type) {
         return new StaticReceiver(type);
     }
 
-    private final TypeName type;
+    private final ScalarType type;
 
-    public StaticReceiver(TypeName type) {
+    public StaticReceiver(ScalarType type) {
         this.type = type;
     }
 
-    public TypeName getType() {
+    public ScalarType getType() {
         return type;
     }
 

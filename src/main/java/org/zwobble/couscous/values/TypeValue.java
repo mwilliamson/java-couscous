@@ -1,15 +1,15 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
 
 public class TypeValue implements PrimitiveValue {
-    private final TypeName value;
+    private final ScalarType value;
 
-    public TypeValue(TypeName value) {
+    public TypeValue(ScalarType value) {
         this.value = value;
     }
 
-    public TypeName getValue() {
+    public ScalarType getValue() {
         return value;
     }
 
@@ -19,7 +19,7 @@ public class TypeValue implements PrimitiveValue {
     }
 
     @Override
-    public TypeName getType() {
+    public ScalarType getType() {
         return ObjectValues.CLASS;
     }
 

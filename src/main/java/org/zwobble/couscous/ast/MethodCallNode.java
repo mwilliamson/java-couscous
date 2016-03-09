@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -14,15 +16,15 @@ public class MethodCallNode implements ExpressionNode {
         String className,
         String methodName,
         List<ExpressionNode> arguments,
-        TypeName type) {
-        return staticMethodCall(TypeName.of(className), methodName, arguments, type);
+        Type type) {
+        return staticMethodCall(ScalarType.of(className), methodName, arguments, type);
     }
 
     public static ExpressionNode staticMethodCall(
-        TypeName className,
+        ScalarType className,
         String methodName,
         List<ExpressionNode> arguments,
-        TypeName type) {
+        Type type) {
         return MethodCallNode.methodCall(staticReceiver(className), methodName, arguments, type);
     }
 
@@ -30,7 +32,7 @@ public class MethodCallNode implements ExpressionNode {
         ExpressionNode receiver,
         String methodName,
         List<ExpressionNode> arguments,
-        TypeName type)
+        Type type)
     {
         return methodCall(instanceReceiver(receiver), methodName, arguments, type);
     }
@@ -39,7 +41,7 @@ public class MethodCallNode implements ExpressionNode {
         Receiver receiver,
         String methodName,
         List<ExpressionNode> arguments,
-        TypeName type)
+        Type type)
     {
         return new MethodCallNode(receiver, methodName, arguments, type);
     }
@@ -47,13 +49,13 @@ public class MethodCallNode implements ExpressionNode {
     private final Receiver receiver;
     private final String methodName;
     private final List<ExpressionNode> arguments;
-    private final TypeName type;
+    private final Type type;
     
     private MethodCallNode(
         Receiver receiver,
         String methodName,
         List<ExpressionNode> arguments,
-        TypeName type)
+        Type type)
     {
         this.receiver = receiver;
         this.methodName = methodName;
@@ -73,7 +75,7 @@ public class MethodCallNode implements ExpressionNode {
         return arguments;
     }
     
-    public TypeName getType() {
+    public Type getType() {
         return type;
     }
 

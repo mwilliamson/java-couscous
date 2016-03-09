@@ -1,11 +1,12 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public interface ExpressionNode extends Node {
-    TypeName getType();
+    Type getType();
     <T> T accept(ExpressionNodeMapper<T> visitor);
     
     @Override

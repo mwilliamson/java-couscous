@@ -33,7 +33,7 @@ public class CsharpBackend implements Backend {
     public void compile(List<TypeNode> classes) throws IOException {
         Files.write(
             directoryPath.resolve("Program.cs"),
-            Iterables.concat(
+            Iterables.<String>concat(
                 transform(
                     classes,
                     classNode -> compileClass(classNode)),

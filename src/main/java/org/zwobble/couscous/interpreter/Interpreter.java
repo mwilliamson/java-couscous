@@ -2,7 +2,8 @@ package org.zwobble.couscous.interpreter;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.TypeName;
+import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StaticReceiverValue;
 
@@ -18,7 +19,7 @@ public class Interpreter {
         this.project = project;
     }
     
-    public InterpreterValue run(TypeName className, String methodName, List<InterpreterValue> arguments, TypeName returnType) {
+    public InterpreterValue run(ScalarType className, String methodName, List<InterpreterValue> arguments, Type returnType) {
         final Environment environment = new Environment(
             project,
             Optional.empty(),
@@ -27,7 +28,7 @@ public class Interpreter {
         StaticReceiverValue clazz = environment.findClass(className);
         MethodSignature signature = new MethodSignature(
             methodName,
-            eagerMap(arguments, argument -> argument.getType().getName()),
+            eagerMap(arguments, argument -> argument.getType().getType()),
             returnType);
         return clazz.callMethod(environment, signature, arguments);
     }
