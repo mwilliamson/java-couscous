@@ -1,7 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
@@ -9,10 +8,8 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
-import org.zwobble.couscous.ast.types.BoundTypeParameter;
 import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.TypeParameter;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
 
@@ -434,37 +431,9 @@ public class JavaReader {
         return ExtraLists.concat(list(declaringClass), asList(declaringClass.getInterfaces()))
             .stream()
             .flatMap(type -> asList(type.getDeclaredMethods()).stream().filter(superMethod -> methodBinding.overrides(superMethod)))
-            .map(JavaReader::signature)
+            .map(JavaMethods::signature)
             .collect(Collectors.toList());
     }
-
-    // TODO: move this elsewhere
-    static MethodSignature signature(IMethodBinding method) {
-        ITypeBinding declaringClass = method.getDeclaringClass();
-        ITypeBinding erasedDeclaringClass = declaringClass.getErasure();
-
-        List<Type> argumentTypes = eagerMap(asList(method.getParameterTypes()), JavaTypes::typeOf);
-        Type returnType = typeOf(method.getReturnType());
-
-        if (declaringClass.isEqualTo(erasedDeclaringClass)) {
-            return new MethodSignature(method.getName(), argumentTypes, returnType);
-        } else {
-            IMethodBinding[] erasedMethods = erasedDeclaringClass.getDeclaredMethods();
-            IMethodBinding erasedMethod = Iterables.getOnlyElement(Iterables.filter(
-                asList(erasedMethods),
-                m -> m.isSubsignature(method)));
-            return new MethodSignature(
-                method.getName(),
-                eagerMap(
-                    argumentTypes,
-                    asList(erasedMethod.getParameterTypes()),
-                    (argumentType, erasedParameterType) -> new BoundTypeParameter((TypeParameter) typeOf(erasedParameterType), argumentType)),
-                new BoundTypeParameter(
-                    (TypeParameter) typeOf(erasedMethod.getReturnType()),
-                    returnType));
-        }
-    }
-
 
     private List<AnnotationNode> readAnnotations(MethodDeclaration method) {
         return eagerMap(asList(method.resolveBinding().getAnnotations()), this::readAnnotation);
