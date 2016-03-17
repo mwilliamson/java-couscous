@@ -195,11 +195,11 @@ public abstract class CompilerTests {
     }
 
     @Test
-    public void genericInterfaces() throws Exception {
+    public void genericInterfacesWithGenericTypeParameterAsReturnType() throws Exception {
         assertEquals(
             value("Hello"),
             execTestProgram(
-                "generic-interface",
+                "generic-interface-return-type",
                 ScalarType.of("com.example.GenericInterface"),
                 "value",
                 list(),
