@@ -2,6 +2,7 @@ package org.zwobble.couscous.backends.python;
 
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.backends.python.ast.*;
+import org.zwobble.couscous.backends.python.ast.visitors.PythonExpressionStatement;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
 public class PythonSerializer implements PythonNodeVisitor {
@@ -101,7 +102,14 @@ public class PythonSerializer implements PythonNodeVisitor {
         writer.writeSpace();
         writeParenthesised(operation.getRight(), operation);
     }
-    
+
+    @Override
+    public void visit(PythonExpressionStatement statement) {
+        writer.writeStatement(() -> {
+            write(statement.getExpression());
+        });
+    }
+
     @Override
     public void visit(PythonReturnNode pythonReturn) {
         writer.writeStatement(() -> {

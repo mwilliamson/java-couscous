@@ -185,7 +185,6 @@ public class JavaExpressionReader {
             expression.resolveMethodBinding(),
             expression.arguments());
         MethodSignature signature = JavaMethods.signature(expression.resolveMethodBinding());
-        final Type type = signature.getReturnType();
 
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         Type receiverType = typeOf(methodBinding.getDeclaringClass());
@@ -194,7 +193,7 @@ public class JavaExpressionReader {
                 Types.erasure(receiverType),
                 methodName,
                 arguments,
-                type);
+                signature);
         } else {
             ExpressionNode receiver = expression.getExpression() == null
                 ? ThisReferenceNode.thisReference(receiverType)
@@ -203,7 +202,7 @@ public class JavaExpressionReader {
                 receiver,
                 methodName,
                 arguments,
-                type);
+                signature);
         }
     }
 

@@ -13,6 +13,10 @@ public class TypeParameter implements Type {
         this.name = name;
     }
 
+    public ScalarType getDeclaringType() {
+        return declaringType;
+    }
+
     public String getName() {
         return name;
     }

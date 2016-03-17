@@ -207,6 +207,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void genericInterfacesCanHaveMethodsWithoutGenericReturnType() throws Exception {
+        assertEquals(
+            value("Hello"),
+            execTestProgram(
+                "generic-interface-non-generic-methods",
+                ScalarType.of("com.example.GenericInterface"),
+                "value",
+                list(),
+                StringValue.REF));
+    }
+
+    @Test
     public void staticMethodOverloads() throws Exception {
         assertEquals(
             value(42),

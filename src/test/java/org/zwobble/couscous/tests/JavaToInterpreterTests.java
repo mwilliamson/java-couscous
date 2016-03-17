@@ -1,6 +1,8 @@
 package org.zwobble.couscous.tests;
 
 import com.google.common.collect.ImmutableList;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
@@ -19,6 +21,11 @@ import static com.google.common.collect.Iterables.transform;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToInterpreterTests extends CompilerTests {
+    @Test
+    @Ignore("WIP")
+    public void genericInterfacesCanHaveMethodsWithoutGenericReturnType() throws Exception {
+    }
+
     @Override
     protected PrimitiveValue execProgram(
         Path directory,

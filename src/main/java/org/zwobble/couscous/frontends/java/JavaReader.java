@@ -417,7 +417,7 @@ public class JavaReader {
                                 thisReference(type),
                                 methodNode.getName(),
                                 eagerMap(arguments, argument -> reference(argument)),
-                                methodNode.getReturnType()),
+                                methodNode.signature()),
                             override.getReturnType()))
                     )));
             });

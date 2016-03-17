@@ -16,16 +16,36 @@ public class MethodCallNode implements ExpressionNode {
         String className,
         String methodName,
         List<ExpressionNode> arguments,
-        Type type) {
+        Type type)
+    {
         return staticMethodCall(ScalarType.of(className), methodName, arguments, type);
+    }
+
+    public static ExpressionNode staticMethodCall(
+        String className,
+        String methodName,
+        List<ExpressionNode> arguments,
+        MethodSignature signature)
+    {
+        return staticMethodCall(ScalarType.of(className), methodName, arguments, signature);
     }
 
     public static ExpressionNode staticMethodCall(
         ScalarType className,
         String methodName,
         List<ExpressionNode> arguments,
-        Type type) {
-        return MethodCallNode.methodCall(staticReceiver(className), methodName, arguments, type);
+        Type type)
+    {
+        return methodCall(staticReceiver(className), methodName, arguments, type);
+    }
+
+    public static ExpressionNode staticMethodCall(
+        ScalarType className,
+        String methodName,
+        List<ExpressionNode> arguments,
+        MethodSignature signature)
+    {
+        return methodCall(staticReceiver(className), methodName, arguments, signature);
     }
 
     public static MethodCallNode methodCall(
@@ -38,29 +58,51 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     public static MethodCallNode methodCall(
+        ExpressionNode receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        MethodSignature signature)
+    {
+        return methodCall(instanceReceiver(receiver), methodName, arguments, signature);
+    }
+
+    public static MethodCallNode methodCall(
         Receiver receiver,
         String methodName,
         List<ExpressionNode> arguments,
         Type type)
     {
-        return new MethodCallNode(receiver, methodName, arguments, type);
+        MethodSignature signature = new MethodSignature(
+            methodName,
+            eagerMap(arguments, argument -> argument.getType()),
+            type);
+        return methodCall(receiver, methodName, arguments, signature);
+    }
+
+    public static MethodCallNode methodCall(
+        Receiver receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        MethodSignature signature)
+    {
+        return new MethodCallNode(receiver, methodName, arguments, signature);
     }
     
     private final Receiver receiver;
     private final String methodName;
     private final List<ExpressionNode> arguments;
-    private final Type type;
+    private final MethodSignature signature;
     
     private MethodCallNode(
         Receiver receiver,
         String methodName,
         List<ExpressionNode> arguments,
-        Type type)
+        MethodSignature signature)
     {
         this.receiver = receiver;
         this.methodName = methodName;
         this.arguments = arguments;
-        this.type = type;
+        this.signature = signature;
     }
     
     public Receiver getReceiver() {
@@ -74,16 +116,14 @@ public class MethodCallNode implements ExpressionNode {
     public List<ExpressionNode> getArguments() {
         return arguments;
     }
-    
+
+    @Override
     public Type getType() {
-        return type;
+        return signature.getReturnType();
     }
 
     public MethodSignature signature() {
-        return new MethodSignature(
-            methodName,
-            eagerMap(arguments, argument -> argument.getType()),
-            type);
+        return signature;
     }
     
     @Override
@@ -97,13 +137,13 @@ public class MethodCallNode implements ExpressionNode {
             transformer.transformReceiver(receiver),
             transformer.transformMethodName(signature()),
             transformer.transformExpressions(arguments),
-            transformer.transform(type));
+            transformer.transform(signature));
     }
 
     @Override
     public String toString() {
         return "MethodCallNode(receiver=" + receiver + ", methodName="
-               + methodName + ", arguments=" + arguments + ", type=" + type
+               + methodName + ", arguments=" + arguments + ", signature=" + signature
                + ")";
     }
 
@@ -117,7 +157,7 @@ public class MethodCallNode implements ExpressionNode {
                  + ((methodName == null) ? 0 : methodName.hashCode());
         result = prime * result
                  + ((receiver == null) ? 0 : receiver.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((signature == null) ? 0 : signature.hashCode());
         return result;
     }
 
@@ -145,10 +185,10 @@ public class MethodCallNode implements ExpressionNode {
                 return false;
         } else if (!receiver.equals(other.receiver))
             return false;
-        if (type == null) {
-            if (other.type != null)
+        if (signature == null) {
+            if (other.signature != null)
                 return false;
-        } else if (!type.equals(other.type))
+        } else if (!signature.equals(other.signature))
             return false;
         return true;
     }

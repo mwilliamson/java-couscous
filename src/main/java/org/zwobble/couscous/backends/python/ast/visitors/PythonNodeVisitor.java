@@ -13,7 +13,8 @@ public interface PythonNodeVisitor {
     void visit(PythonGetSliceNode getSlice);
     void visit(PythonNotNode notOperation);
     void visit(PythonBinaryOperation operation);
-    
+
+    void visit(PythonExpressionStatement statement);
     void visit(PythonReturnNode pythonReturn);
     void visit(PythonPassNode pass);
     void visit(PythonClassNode pythonClass);
@@ -24,5 +25,4 @@ public interface PythonNodeVisitor {
     void visit(PythonWhileNode whileLoop);
 
     void visit(PythonModuleNode module);
-
 }

@@ -34,10 +34,17 @@ class JavaMethods {
                 eagerMap(
                     argumentTypes,
                     asList(erasedMethod.getParameterTypes()),
-                    (argumentType, erasedParameterType) -> new BoundTypeParameter((TypeParameter) typeOf(erasedParameterType), argumentType)),
-                new BoundTypeParameter(
-                    (TypeParameter) typeOf(erasedMethod.getReturnType()),
-                    returnType));
+                    (argumentType, erasedParameterType) -> typeParameterForGeneric(erasedParameterType, argumentType)),
+                typeParameterForGeneric(erasedMethod.getReturnType(), returnType));
+        }
+    }
+
+    private static Type typeParameterForGeneric(ITypeBinding erasedTypeBinding, Type type) {
+        Type erasedType = typeOf(erasedTypeBinding);
+        if (erasedType.equals(type)) {
+            return type;
+        } else {
+            return new BoundTypeParameter((TypeParameter) typeOf(erasedTypeBinding), type);
         }
     }
 }

@@ -39,6 +39,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonRe
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
+import static org.zwobble.couscous.backends.python.ast.visitors.PythonExpressionStatement.pythonExpressionStatement;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -195,10 +196,10 @@ public class PythonCodeGenerator {
         @Override
         public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
-                final org.zwobble.couscous.ast.AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();
+                AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();
                 return pythonAssignment(assignment.getTarget().accept(EXPRESSION_GENERATOR), generateExpression(assignment.getValue()));
             } else {
-                throw new UnsupportedOperationException();
+                return pythonExpressionStatement(generateExpression(expressionStatement.getExpression()));
             }
         }
 

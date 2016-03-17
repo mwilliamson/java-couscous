@@ -25,7 +25,7 @@ public class Names {
 
             @Override
             public String visit(TypeParameter parameter) {
-                return parameter.getName();
+                return typeToString(parameter.getDeclaringType()) + "_" + parameter.getName();
             }
 
             @Override

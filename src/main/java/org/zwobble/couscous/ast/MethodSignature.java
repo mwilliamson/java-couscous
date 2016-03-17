@@ -5,6 +5,10 @@ import org.zwobble.couscous.ast.types.Type;
 import java.util.List;
 
 public class MethodSignature {
+    public static MethodSignature signature(String name, List<Type> arguments, Type returnType) {
+        return new MethodSignature(name, arguments, returnType);
+    }
+
     private final String name;
     private final List<Type> arguments;
     private final Type returnType;

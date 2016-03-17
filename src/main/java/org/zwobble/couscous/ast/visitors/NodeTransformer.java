@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+
 public class NodeTransformer {
     public static NodeTransformer replaceExpressions(Map<ExpressionNode, ExpressionNode> replacements) {
         return builder().
@@ -195,6 +197,13 @@ public class NodeTransformer {
         this.transformExpression = transformExpression;
         this.transformType = transformType;
         this.transformMethodName = transformMethodName;
+    }
+
+    public MethodSignature transform(MethodSignature signature) {
+        return new MethodSignature(
+            transformMethodName(signature),
+            eagerMap(signature.getArguments(), this::transform),
+            transform(signature.getReturnType()));
     }
 
     public Type transform(Type type) {
