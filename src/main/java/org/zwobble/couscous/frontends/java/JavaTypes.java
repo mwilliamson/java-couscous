@@ -31,6 +31,9 @@ class JavaTypes {
     }
 
     static Type typeOf(ITypeBinding typeBinding) {
+        if (typeBinding.isAnonymous()) {
+            throw new RuntimeException("Cannot get type of anonymous type binding");
+        }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
         if (outerClass == null) {
             ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());
