@@ -12,10 +12,7 @@ import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.ObjectInterpreterValue;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.collect.Iterables.filter;
 import static org.zwobble.couscous.util.Casts.tryCast;

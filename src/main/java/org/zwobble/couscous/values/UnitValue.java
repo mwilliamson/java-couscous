@@ -3,7 +3,7 @@ package org.zwobble.couscous.values;
 import org.zwobble.couscous.ast.types.ScalarType;
 
 public class UnitValue implements PrimitiveValue {
-    public static final ScalarType REF = ScalarType.of("org.zwobble.couscous.runtime.Unit");
+    public static final ScalarType REF = ScalarType.of("void");
     
     static final UnitValue UNIT = new UnitValue();
     

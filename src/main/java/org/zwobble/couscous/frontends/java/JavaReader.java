@@ -12,6 +12,7 @@ import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.ast.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
+import org.zwobble.couscous.values.ObjectValues;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,6 +27,7 @@ import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
@@ -405,21 +407,23 @@ public class JavaReader {
                 override -> !override.equals(methodNode.signature())),
             override -> {
                 List<FormalArgumentNode> arguments = eagerMap(override.getArguments(), argument -> scope.formalArgument("arg", argument));
+                MethodCallNode call = MethodCallNode.methodCall(
+                    thisReference(type),
+                    methodNode.getName(),
+                    eagerMap(arguments, argument -> reference(argument)),
+                    methodNode.signature());
+
+                StatementNode body = override.getReturnType().equals(ObjectValues.VOID)
+                    ? expressionStatement(call)
+                    : returns(typeCoercion(call, override.getReturnType()));
+
                 return MethodNode.method(
                     methodNode.getAnnotations(),
                     methodNode.isStatic(),
                     methodNode.getName(),
                     arguments,
                     override.getReturnType(),
-                    Optional.of(list(
-                        returns(typeCoercion(
-                            MethodCallNode.methodCall(
-                                thisReference(type),
-                                methodNode.getName(),
-                                eagerMap(arguments, argument -> reference(argument)),
-                                methodNode.signature()),
-                            override.getReturnType()))
-                    )));
+                    Optional.of(list(body)));
             });
     }
 
