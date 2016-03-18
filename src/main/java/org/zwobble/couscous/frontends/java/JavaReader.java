@@ -8,8 +8,8 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.values.ObjectValues;
@@ -37,7 +37,7 @@ import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.ast.types.Types.erasure;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.util.Casts.tryCast;
@@ -473,7 +473,7 @@ public class JavaReader {
         return eagerFlatMap(body, statementReader::readStatement);
     }
 
-    ExpressionNode readExpression(Scope scope, org.zwobble.couscous.ast.types.Type targetType, Expression body) {
+    ExpressionNode readExpression(Scope scope, Type targetType, Expression body) {
         return expressionReader(scope).readExpression(targetType, body);
     }
 

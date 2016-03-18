@@ -1,6 +1,6 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 
 public class UnitValue implements PrimitiveValue {
     public static final ScalarType REF = ScalarType.of("void");

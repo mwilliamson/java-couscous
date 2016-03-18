@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter.errors;
 
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 
 public final class UnexpectedValueType extends InterpreterException {
     private static final long serialVersionUID = 1L;

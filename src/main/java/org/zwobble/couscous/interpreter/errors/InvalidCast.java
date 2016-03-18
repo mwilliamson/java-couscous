@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter.errors;
 
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 
 public class InvalidCast extends InterpreterException {
     private final Type expected;

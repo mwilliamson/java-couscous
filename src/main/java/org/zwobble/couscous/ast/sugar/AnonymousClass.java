@@ -2,7 +2,7 @@ package org.zwobble.couscous.ast.sugar;
 
 import org.zwobble.couscous.ast.FieldDeclarationNode;
 import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 import java.util.Set;

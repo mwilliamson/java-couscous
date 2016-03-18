@@ -1,4 +1,4 @@
-package org.zwobble.couscous.ast.types;
+package org.zwobble.couscous.types;
 
 public class BoundTypeParameter implements Type {
     public static BoundTypeParameter boundTypeParameter(TypeParameter parameter, Type value) {

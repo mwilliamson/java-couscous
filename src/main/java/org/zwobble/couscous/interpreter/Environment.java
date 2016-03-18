@@ -1,10 +1,10 @@
 package org.zwobble.couscous.interpreter;
 
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.VariableDeclaration;
 import org.zwobble.couscous.ast.VariableNode;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.errors.UnboundVariable;
 import org.zwobble.couscous.interpreter.errors.VariableNotInScope;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;

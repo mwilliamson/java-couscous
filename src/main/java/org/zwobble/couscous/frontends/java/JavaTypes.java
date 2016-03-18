@@ -2,10 +2,10 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.ast.types.ParameterizedType;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.TypeParameter;
+import org.zwobble.couscous.types.ParameterizedType;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.values.ObjectValues;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
-import static org.zwobble.couscous.ast.types.Types.erasure;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 class JavaTypes {

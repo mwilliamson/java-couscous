@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter.values;
 
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.PositionalArguments;
 

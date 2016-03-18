@@ -2,8 +2,8 @@ package org.zwobble.couscous.frontends.java;
 
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.Types;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.ObjectValues;

@@ -3,7 +3,7 @@ package org.zwobble.couscous.frontends.java;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.values.BooleanValue;
 import org.zwobble.couscous.values.ObjectValues;
 
@@ -35,7 +35,7 @@ class JavaStatementReader {
     JavaStatementReader(
         Scope scope,
         JavaExpressionReader expressionReader,
-        Optional<org.zwobble.couscous.ast.types.Type> returnType
+        Optional<Type> returnType
     ) {
         this.scope = scope;
         this.expressionReader = expressionReader;

@@ -2,7 +2,7 @@ package org.zwobble.couscous.tests;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.values.IntegerValue;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;

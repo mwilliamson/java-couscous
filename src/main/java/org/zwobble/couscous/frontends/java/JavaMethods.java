@@ -4,9 +4,9 @@ import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.types.BoundTypeParameter;
-import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.TypeParameter;
+import org.zwobble.couscous.types.BoundTypeParameter;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 
 import java.util.List;
 

@@ -2,8 +2,8 @@ package org.zwobble.couscous.interpreter;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StaticReceiverValue;
 

@@ -1,6 +1,6 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 

@@ -3,7 +3,7 @@ package org.zwobble.couscous.backends;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.ast.types.*;
+import org.zwobble.couscous.types.*;
 
 import static com.google.common.collect.Iterables.transform;
 import static org.zwobble.couscous.util.ExtraLists.list;

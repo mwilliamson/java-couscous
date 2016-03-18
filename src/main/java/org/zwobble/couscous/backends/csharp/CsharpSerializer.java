@@ -1,9 +1,9 @@
 package org.zwobble.couscous.backends.csharp;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
+import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.util.Action;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.UnitValue;

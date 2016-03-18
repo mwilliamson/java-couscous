@@ -9,8 +9,8 @@ import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
 import org.zwobble.couscous.ast.sugar.Lambda;
-import org.zwobble.couscous.ast.types.Type;
-import org.zwobble.couscous.ast.types.Types;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 

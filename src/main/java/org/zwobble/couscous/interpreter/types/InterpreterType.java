@@ -3,7 +3,7 @@ package org.zwobble.couscous.interpreter.types;
 import org.zwobble.couscous.ast.FieldDeclarationNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 

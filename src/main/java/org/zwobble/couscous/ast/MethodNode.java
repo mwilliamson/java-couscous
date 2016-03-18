@@ -1,7 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.values.UnitValue;

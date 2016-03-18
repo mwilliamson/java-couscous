@@ -1,7 +1,7 @@
 package org.zwobble.couscous.tests;
 
 import org.zwobble.couscous.CouscousCompiler;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;

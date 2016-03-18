@@ -1,6 +1,6 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 

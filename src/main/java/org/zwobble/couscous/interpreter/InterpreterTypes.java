@@ -1,6 +1,6 @@
 package org.zwobble.couscous.interpreter;
 
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.errors.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;

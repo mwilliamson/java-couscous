@@ -3,7 +3,7 @@ package org.zwobble.couscous.tests;
 import com.google.common.collect.ImmutableList;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.interpreter.Interpreter;

@@ -2,8 +2,8 @@ package org.zwobble.couscous.tests.interpreter;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.Interpreter;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.Project;

@@ -2,15 +2,15 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.Names;
+import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.values.*;
 
 import java.util.Map;
 import java.util.Optional;
 
-import static org.zwobble.couscous.ast.types.Types.erasure;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 

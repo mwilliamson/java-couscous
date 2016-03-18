@@ -1,4 +1,4 @@
-package org.zwobble.couscous.ast.types;
+package org.zwobble.couscous.types;
 
 import org.zwobble.couscous.values.ObjectValues;
 

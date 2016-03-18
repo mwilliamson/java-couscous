@@ -2,7 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ReferenceNode;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 
 import java.util.List;
 

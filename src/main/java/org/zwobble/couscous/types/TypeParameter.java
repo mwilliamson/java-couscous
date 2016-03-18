@@ -1,4 +1,4 @@
-package org.zwobble.couscous.ast.types;
+package org.zwobble.couscous.types;
 
 public class TypeParameter implements Type {
     public static TypeParameter typeParameter(ScalarType declaringType, String name) {

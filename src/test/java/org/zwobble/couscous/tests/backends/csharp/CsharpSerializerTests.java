@@ -2,7 +2,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
 import org.zwobble.couscous.values.BooleanValue;

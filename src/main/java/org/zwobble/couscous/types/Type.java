@@ -1,4 +1,4 @@
-package org.zwobble.couscous.ast.types;
+package org.zwobble.couscous.types;
 
 public interface Type {
     <T> T accept(Visitor<T> visitor);

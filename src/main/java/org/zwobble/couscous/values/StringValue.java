@@ -1,6 +1,6 @@
 package org.zwobble.couscous.values;
 
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 
 public final class StringValue implements PrimitiveValue {
     

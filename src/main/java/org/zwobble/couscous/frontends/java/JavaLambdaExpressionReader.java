@@ -3,9 +3,8 @@ package org.zwobble.couscous.frontends.java;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.StatementNode;
-import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.sugar.Lambda;
-import org.zwobble.couscous.ast.types.Type;
+import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 import java.util.Optional;

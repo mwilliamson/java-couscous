@@ -1,12 +1,12 @@
 package org.zwobble.couscous.interpreter;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 
 import java.util.Map;
 
-import static org.zwobble.couscous.ast.types.Types.erasure;
+import static org.zwobble.couscous.types.Types.erasure;
 
 public class MapBackedProject implements Project {
     public static Builder builder() {

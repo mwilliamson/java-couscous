@@ -3,7 +3,7 @@ package org.zwobble.couscous.tests.interpreter;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.types.ScalarType;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.MapBackedProject;
