@@ -1,6 +1,10 @@
 package org.zwobble.couscous.values;
 
+import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
+
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class TypeValue implements PrimitiveValue {
     private final ScalarType value;
@@ -19,8 +23,8 @@ public class TypeValue implements PrimitiveValue {
     }
 
     @Override
-    public ScalarType getType() {
-        return ObjectValues.CLASS;
+    public Type getType() {
+        return new ParameterizedType(ObjectValues.CLASS, list(value));
     }
 
     @Override

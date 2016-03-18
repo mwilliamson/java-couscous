@@ -1,13 +1,13 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.ParameterizedType;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.values.*;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.PrimitiveValues;
+import org.zwobble.couscous.values.TypeValue;
 
-import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class LiteralNode implements ExpressionNode {
@@ -18,19 +18,19 @@ public class LiteralNode implements ExpressionNode {
     }
     
     public static LiteralNode literal(String value) {
-        return new LiteralNode(value(value), StringValue.REF);
+        return literal(value(value));
     }
     
     public static LiteralNode literal(int value) {
-        return new LiteralNode(value(value), IntegerValue.REF);
+        return literal(value(value));
     }
     
     public static LiteralNode literal(boolean value) {
-        return new LiteralNode(value(value), BooleanValue.REF);
+        return literal(value(value));
     }
 
     public static LiteralNode literal(ScalarType type) {
-        return new LiteralNode(value(type), new ParameterizedType(ObjectValues.CLASS, list(type)));
+        return literal(value(type));
     }
     
     public static LiteralNode of(PrimitiveValue value, Type type) {
