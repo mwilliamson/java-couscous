@@ -16,7 +16,7 @@ public final class BooleanValue implements PrimitiveValue {
     }
     
     @Override
-    public <T> T accept(PrimitiveValueVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visitBoolean(value);
     }
     

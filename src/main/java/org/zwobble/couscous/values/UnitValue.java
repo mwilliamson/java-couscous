@@ -11,7 +11,7 @@ public class UnitValue implements PrimitiveValue {
     }
     
     @Override
-    public <T> T accept(PrimitiveValueVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visitUnit();
     }
 

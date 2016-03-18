@@ -7,7 +7,7 @@ public final class IntegerValue implements PrimitiveValue {
     private final int value;
     
     @Override
-    public <T> T accept(PrimitiveValueVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visitInteger(value);
     }
     

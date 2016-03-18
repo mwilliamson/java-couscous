@@ -132,7 +132,7 @@ public class PythonCodeGenerator {
     }
 
     public static PythonExpressionNode generateCode(PrimitiveValue value) {
-        return value.accept(new PrimitiveValueVisitor<PythonExpressionNode>(){
+        return value.accept(new PrimitiveValue.Visitor<PythonExpressionNode>(){
 
             @Override
             public PythonExpressionNode visitInteger(int value) {

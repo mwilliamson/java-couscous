@@ -5,7 +5,7 @@ import org.zwobble.couscous.ast.types.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.util.Action;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
+import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
@@ -42,7 +42,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(LiteralNode literal) {
-        literal.getValue().accept(new PrimitiveValueVisitor<Void>() {
+        literal.getValue().accept(new PrimitiveValue.Visitor<Void>() {
             @Override
             public Void visitInteger(int value) {
                 writer.writeInteger(value);

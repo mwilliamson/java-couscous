@@ -11,7 +11,7 @@ public final class StringValue implements PrimitiveValue {
     private final String value;
     
     @Override
-    public <T> T accept(PrimitiveValueVisitor<T> visitor) {
+    public <T> T accept(Visitor<T> visitor) {
         return visitor.visitString(value);
     }
     

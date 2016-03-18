@@ -2,7 +2,6 @@ package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.types.ScalarType;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.PrimitiveValueVisitor;
 
 public class InterpreterValues {
     public static final UnitInterpreterValue UNIT = UnitInterpreterValue.UNIT;
@@ -18,7 +17,7 @@ public class InterpreterValues {
     }
 
     public static InterpreterValue value(PrimitiveValue value) {
-        return value.accept(new PrimitiveValueVisitor<InterpreterValue>() {
+        return value.accept(new PrimitiveValue.Visitor<InterpreterValue>() {
             @Override
             public InterpreterValue visitInteger(int value) {
                 return new IntegerInterpreterValue(value);
