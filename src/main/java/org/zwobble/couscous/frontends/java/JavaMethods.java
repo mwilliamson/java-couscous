@@ -43,6 +43,8 @@ class JavaMethods {
         Type erasedType = typeOf(erasedTypeBinding);
         if (erasedType.equals(type)) {
             return type;
+        } else if (!(erasedType instanceof TypeParameter)) {
+            throw new RuntimeException("Type parameter was " + erasedType);
         } else {
             return new BoundTypeParameter((TypeParameter) typeOf(erasedTypeBinding), type);
         }
