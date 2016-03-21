@@ -4,6 +4,7 @@ import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.*;
 
 import java.util.Optional;
@@ -11,25 +12,25 @@ import java.util.Optional;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class StringInterpreterValue implements InterpreterValue {
-    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(StringInterpreterValue.class, StringValue.REF)
-        .method("length", list(), IntegerValue.REF, (environment, arguments) ->
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(StringInterpreterValue.class, Types.STRING)
+        .method("length", list(), Types.INT, (environment, arguments) ->
             new IntegerInterpreterValue(arguments.getReceiver().value.length()))
 
-        .method("substring", list(IntegerValue.REF, IntegerValue.REF), StringValue.REF, (environment, arguments) -> {
+        .method("substring", list(Types.INT, Types.INT), Types.STRING, (environment, arguments) -> {
             IntegerInterpreterValue startIndex = (IntegerInterpreterValue)arguments.get(0);
             IntegerInterpreterValue endIndex = (IntegerInterpreterValue)arguments.get(1);
             return of(arguments.getReceiver().value.substring(startIndex.getValue(), endIndex.getValue()));
         })
 
-        .method(Operator.ADD.getSymbol(), list(StringValue.REF), StringValue.REF, (environment, arguments) -> {
+        .method(Operator.ADD.getSymbol(), list(Types.STRING), Types.STRING, (environment, arguments) -> {
             StringInterpreterValue right = (StringInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().value + right.value);
         })
 
-        .method("toLowerCase", list(), StringValue.REF, (environment, arguments) ->
+        .method("toLowerCase", list(), Types.STRING, (environment, arguments) ->
             of(arguments.getReceiver().value.toLowerCase()))
 
-        .method("equals", list(ObjectValues.OBJECT), BooleanValue.REF, (environment, arguments) -> {
+        .method("equals", list(Types.OBJECT), Types.BOOLEAN, (environment, arguments) -> {
             InterpreterValue right = arguments.get(0);
             if (right instanceof StringInterpreterValue) {
                 return BooleanInterpreterValue.of(arguments.getReceiver().value.equals(((StringInterpreterValue)right).value));

@@ -2,10 +2,8 @@ package org.zwobble.couscous.tests;
 
 import org.junit.Test;
 import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +21,7 @@ import static org.zwobble.couscous.values.PrimitiveValues.value;
 public abstract class CompilerTests {
     @Test
     public void canEvaluateLiterals() {
-        assertEquals(value("hello"), evalExpression(StringValue.REF, "\"hello\""));
+        assertEquals(value("hello"), evalExpression(Types.STRING, "\"hello\""));
         assertEquals(value(42), evalIntExpression("42"));
     }
 
@@ -41,13 +39,13 @@ public abstract class CompilerTests {
     @Test
     public void equalityOnReferenceTypesChecksForIdentity() {
         assertEquals(value(false), evalBooleanExpression("new Object() == new Object()"));
-        assertEquals(value(true), exec(BooleanValue.REF, "Object x = new Object(); return x == x;"));
+        assertEquals(value(true), exec(Types.BOOLEAN, "Object x = new Object(); return x == x;"));
     }
 
     @Test
     public void integersCanBeAssignedToObjectVariable() {
-        assertEquals(value(false), exec(BooleanValue.REF, "Object x = 1; return x.equals(new Object());"));
-        assertEquals(value(true), exec(BooleanValue.REF, "Object x = 1; return x.equals(1);"));
+        assertEquals(value(false), exec(Types.BOOLEAN, "Object x = 1; return x.equals(new Object());"));
+        assertEquals(value(true), exec(Types.BOOLEAN, "Object x = 1; return x.equals(1);"));
     }
 
     @Test
@@ -59,7 +57,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.RecursiveFactorial"),
                 "factorial",
                 list(value(6)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -71,7 +69,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.WhileFactorial"),
                 "factorial",
                 list(value(6)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -83,7 +81,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.ForFactorial"),
                 "factorial",
                 list(value(6)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -95,7 +93,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.StaticNestedClass"),
                 "value",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -107,7 +105,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.InnerClass"),
                 "run",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -119,7 +117,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.InnerClass"),
                 "run",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -131,7 +129,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.ConstantIntSupplier"),
                 "value",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -143,7 +141,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.AnonymousClass"),
                 "value",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -155,7 +153,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.AnonymousClass"),
                 "value",
                 list(value(42)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -167,7 +165,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.Lambda"),
                 "value",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -179,7 +177,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.Lambda"),
                 "value",
                 list(value(2)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -191,7 +189,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.Lambda"),
                 "value",
                 list(value(2)),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
@@ -203,7 +201,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.GenericInterface"),
                 "value",
                 list(),
-                StringValue.REF));
+                Types.STRING));
     }
 
     @Test
@@ -215,7 +213,7 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.GenericInterface"),
                 "value",
                 list(),
-                StringValue.REF));
+                Types.STRING));
     }
 
     @Test
@@ -227,17 +225,17 @@ public abstract class CompilerTests {
                 ScalarType.of("com.example.StaticMethodOverloads"),
                 "value",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
     }
 
     @Test
     public void stringAdd() throws Exception {
-        assertEquals(value("42"), evalExpression(StringValue.REF, "\"4\" + \"2\""));
+        assertEquals(value("42"), evalExpression(Types.STRING, "\"4\" + \"2\""));
     }
 
     @Test
     public void stringToLowerCase() throws Exception {
-        assertEquals(value("patrick wolf"), evalExpression(StringValue.REF, "\"Patrick Wolf\".toLowerCase()"));
+        assertEquals(value("patrick wolf"), evalExpression(Types.STRING, "\"Patrick Wolf\".toLowerCase()"));
     }
 
     @Test
@@ -305,11 +303,11 @@ public abstract class CompilerTests {
     }
 
     private PrimitiveValue evalBooleanExpression(String expressionSource) {
-        return evalExpression(BooleanValue.REF, expressionSource);
+        return evalExpression(Types.BOOLEAN, expressionSource);
     }
 
     private PrimitiveValue evalIntExpression(String expressionSource) {
-        return evalExpression(IntegerValue.REF, expressionSource);
+        return evalExpression(Types.INT, expressionSource);
     }
 
     private PrimitiveValue evalExpression(ScalarType type, String expressionSource) {

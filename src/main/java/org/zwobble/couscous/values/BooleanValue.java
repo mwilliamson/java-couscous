@@ -1,10 +1,9 @@
 package org.zwobble.couscous.values;
 
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Types;
 
 public final class BooleanValue implements PrimitiveValue {
-    public static final ScalarType REF = ScalarType.of("boolean");
-
     private final boolean value;
 
     public BooleanValue(final boolean value) {
@@ -22,7 +21,7 @@ public final class BooleanValue implements PrimitiveValue {
     
     @Override
     public ScalarType getType() {
-        return REF;
+        return Types.BOOLEAN;
     }
     
     @java.lang.Override

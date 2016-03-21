@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.values.UnitValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +28,7 @@ public class MethodNode implements Node {
         private final String name;
         private final ImmutableList.Builder<FormalArgumentNode> arguments =
             ImmutableList.builder();
-        private Type returnType = UnitValue.REF;
+        private Type returnType = Types.VOID;
         private final ImmutableList.Builder<StatementNode> body =
             ImmutableList.builder();
         

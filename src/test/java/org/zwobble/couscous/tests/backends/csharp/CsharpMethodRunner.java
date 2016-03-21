@@ -14,11 +14,10 @@ import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
-import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.UnitValue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -72,7 +71,7 @@ public class CsharpMethodRunner implements MethodRunner {
                 eagerMap(arguments, LiteralNode::literal),
                 returnType));
 
-        boolean isVoid = returnType.equals(UnitValue.REF);
+        boolean isVoid = returnType.equals(Types.VOID);
         String body = isVoid
             ? value + ";"
             : "var value = " + value + ";" +
@@ -123,7 +122,7 @@ public class CsharpMethodRunner implements MethodRunner {
                 return value(value.equals("True"));
             case "System.MonoType":
                 if (value.equals("System.String")) {
-                    return value(StringValue.REF);
+                    return value(Types.STRING);
                 } else {
                     assertThat(value, Matchers.startsWith(NAMESPACE_PREFIX));
                     return value(ScalarType.of(value.substring(NAMESPACE_PREFIX.length())));

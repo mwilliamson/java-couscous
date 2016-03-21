@@ -3,10 +3,7 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 
@@ -38,7 +35,7 @@ public class ExpressionReadingTests {
         assertEquals(literal(false), readBooleanExpression("false"));
         assertEquals(literal(42), readIntExpression("42"));
         assertEquals(literal('h'), readIntExpression("'h'"));
-        assertEquals(literal(StringValue.REF), readExpression("Class<String>", "String.class"));
+        assertEquals(literal(Types.STRING), readExpression("Class<String>", "String.class"));
     }
 
     @Test
@@ -51,7 +48,7 @@ public class ExpressionReadingTests {
     @Test
     public void canReadCasts() {
         assertEquals(
-            cast(literal(42), ObjectValues.OBJECT),
+            cast(literal(42), Types.OBJECT),
             readExpression("Object", "(Object)42"));
     }
     @Test
@@ -96,7 +93,7 @@ public class ExpressionReadingTests {
             fieldAccess(
                 thisReference(ScalarType.of("com.example.Example")),
                 "name",
-                StringValue.REF),
+                Types.STRING),
             returnNode.getValue());
     }
 
@@ -122,21 +119,21 @@ public class ExpressionReadingTests {
             fieldAccess(
                 ScalarType.of("com.example.Example"),
                 "name",
-                StringValue.REF),
+                Types.STRING),
             returnNode.getValue());
     }
 
     @Test
     public void canReadInstanceMethodCalls() {
         assertEquals(
-            methodCall(literal("hello"), "startsWith", list(literal("h")), BooleanValue.REF),
+            methodCall(literal("hello"), "startsWith", list(literal("h")), Types.BOOLEAN),
             readBooleanExpression("\"hello\".startsWith(\"h\")"));
 
         List<StatementNode> statements = readStatements("int", "Object x = 1; return x.hashCode();");
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         ReturnNode returnNode = (ReturnNode) statements.get(1);
         assertEquals(
-            methodCall(reference(declaration), "hashCode", list(), IntegerValue.REF),
+            methodCall(reference(declaration), "hashCode", list(), Types.INT),
             returnNode.getValue());
     }
 
@@ -153,7 +150,7 @@ public class ExpressionReadingTests {
                 ThisReferenceNode.thisReference(ScalarType.of("com.example.Example")),
                 "loop",
                 list(),
-                StringValue.REF),
+                Types.STRING),
             returnNode.getValue());
     }
 
@@ -164,7 +161,7 @@ public class ExpressionReadingTests {
                 ScalarType.of("java.lang.Integer"),
                 "parseInt",
                 list(literal("42")),
-                IntegerValue.REF),
+                Types.INT),
             readIntExpression("Integer.parseInt(\"42\")"));
     }
 
@@ -181,7 +178,7 @@ public class ExpressionReadingTests {
                 ScalarType.of("com.example.Example"),
                 "loop",
                 list(),
-                StringValue.REF),
+                Types.STRING),
             returnNode.getValue());
     }
 
@@ -198,7 +195,7 @@ public class ExpressionReadingTests {
             "String",
             "java.util.Objects.toString(42)");
         assertEquals(
-            typeCoercion(literal(42), ObjectValues.OBJECT),
+            typeCoercion(literal(42), Types.OBJECT),
             expression.getArguments().get(0));
     }
 
@@ -285,14 +282,14 @@ public class ExpressionReadingTests {
     public void equalityOperatorDoesNotUnboxIfBothOperandsAreBoxed() {
         assertEquals(
             same(
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(1))), ObjectValues.OBJECT),
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(2))), ObjectValues.OBJECT)),
+                typeCoercion(constructorCall(Types.BOXED_INT, list(literal(1))), Types.OBJECT),
+                typeCoercion(constructorCall(Types.BOXED_INT, list(literal(2))), Types.OBJECT)),
             readBooleanExpression("new Integer(1) == new Integer(2)"));
 
         assertEquals(
             not(same(
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(1))), ObjectValues.OBJECT),
-                typeCoercion(constructorCall(ObjectValues.BOXED_INT, list(literal(2))), ObjectValues.OBJECT))),
+                typeCoercion(constructorCall(Types.BOXED_INT, list(literal(1))), Types.OBJECT),
+                typeCoercion(constructorCall(Types.BOXED_INT, list(literal(2))), Types.OBJECT))),
             readBooleanExpression("new Integer(1) != new Integer(2)"));
     }
 
@@ -326,7 +323,7 @@ public class ExpressionReadingTests {
                 fieldAccess(
                     thisReference(ScalarType.of("com.example.Example")),
                     "name",
-                    StringValue.REF),
+                    Types.STRING),
                 literal("blah")),
             returnNode.getValue());
     }
@@ -345,8 +342,8 @@ public class ExpressionReadingTests {
                 fieldAccess(
                     thisReference(ScalarType.of("com.example.Example")),
                     "value",
-                    ObjectValues.OBJECT),
-                typeCoercion(literal(4), ObjectValues.OBJECT)),
+                    Types.OBJECT),
+                typeCoercion(literal(4), Types.OBJECT)),
             returnNode.getValue());
     }
 

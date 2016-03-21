@@ -4,7 +4,7 @@ import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
-import org.zwobble.couscous.values.ObjectValues;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class TypeInterpreterValue implements InterpreterValue {
     public static final InterpreterType TYPE = IntrinsicInterpreterType
-        .builder(TypeInterpreterValue.class, ObjectValues.CLASS)
+        .builder(TypeInterpreterValue.class, Types.CLASS)
         .build();
 
     public static InterpreterValue of(ScalarType type) {

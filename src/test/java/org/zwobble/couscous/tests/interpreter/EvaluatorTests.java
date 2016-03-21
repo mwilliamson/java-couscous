@@ -13,10 +13,8 @@ import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +39,7 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void valueOfAssignmentExpressionIsNewValue() {
-        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", Types.STRING));
         Environment environment = new Environment(
             new MapBackedProject(ImmutableMap.of()),
             Optional.empty(),
@@ -66,8 +64,8 @@ public class EvaluatorTests extends BackendEvalTests {
                     literal("hello"),
                     "size",
                     list(),
-                    IntegerValue.REF)));
-        assertEquals(new MethodSignature("size", list(), IntegerValue.REF), exception.getSignature());
+                    Types.INT)));
+        assertEquals(new MethodSignature("size", list(), Types.INT), exception.getSignature());
     }
     
     @Test
@@ -78,8 +76,8 @@ public class EvaluatorTests extends BackendEvalTests {
                     literal("hello"),
                     "substring",
                     list(literal(1)),
-                    StringValue.REF)));
-        assertEquals(new MethodSignature("substring", list(IntegerValue.REF), StringValue.REF), exception.getSignature());
+                    Types.STRING)));
+        assertEquals(new MethodSignature("substring", list(Types.INT), Types.STRING), exception.getSignature());
     }
     
     @Test
@@ -90,15 +88,15 @@ public class EvaluatorTests extends BackendEvalTests {
                     literal("hello"),
                     "substring",
                     list(literal(0), literal("")),
-                    StringValue.REF)));
+                    Types.STRING)));
         assertEquals(
-            new MethodSignature("substring", list(IntegerValue.REF, StringValue.REF), StringValue.REF),
+            new MethodSignature("substring", list(Types.INT, Types.STRING), Types.STRING),
             exception.getSignature());
     }
 
     @Test
     public void errorIfConstructorArgumentIsWrongType() {
-        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", Types.INT));
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
                 .argument(argument))
@@ -111,7 +109,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     classNode.getName(),
                     list(literal("")))));
 
-        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+        assertEquals(new UnexpectedValueType(Types.INT, Types.STRING), exception);
     }
 
     @Test
@@ -127,7 +125,7 @@ public class EvaluatorTests extends BackendEvalTests {
                         classNode.getName(),
                         list()),
                     "value",
-                    IntegerValue.REF)));
+                    Types.INT)));
         
         assertEquals(new NoSuchField("value"), exception);
     }
@@ -135,7 +133,7 @@ public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void cannotGetValueOfUnboundField() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
-            .field("value", IntegerValue.REF)
+            .field("value", Types.INT)
             .build();
         
         UnboundField exception = assertThrows(UnboundField.class,
@@ -146,7 +144,7 @@ public class EvaluatorTests extends BackendEvalTests {
                         classNode.getName(),
                         list()),
                     "value",
-                    IntegerValue.REF)));
+                    Types.INT)));
         
         assertEquals(new UnboundField("value"), exception);
     }
@@ -156,7 +154,7 @@ public class EvaluatorTests extends BackendEvalTests {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .constructor(constructor -> constructor
                 .statement(assignStatement(
-                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    fieldAccess(constructor.thisReference(), "value", Types.INT),
                     literal(42))))
             .build();
         
@@ -174,10 +172,10 @@ public class EvaluatorTests extends BackendEvalTests {
     public void cannotSetValueOfInstanceFieldAsThoughItIsAStaticField() {
         ScalarType type = ScalarType.of("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
-            .field("value", IntegerValue.REF)
+            .field("value", Types.INT)
             .constructor(constructor -> constructor
                 .statement(assignStatement(
-                    fieldAccess(type, "value", IntegerValue.REF),
+                    fieldAccess(type, "value", Types.INT),
                     literal(42))))
             .build();
 
@@ -194,10 +192,10 @@ public class EvaluatorTests extends BackendEvalTests {
     @Test
     public void cannotSetValueOfFieldWithWrongType() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
-            .field("value", IntegerValue.REF)
+            .field("value", Types.INT)
             .constructor(constructor -> constructor
                 .statement(assignStatement(
-                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    fieldAccess(constructor.thisReference(), "value", Types.INT),
                     literal(""))))
             .build();
         
@@ -208,14 +206,14 @@ public class EvaluatorTests extends BackendEvalTests {
                     classNode.getName(),
                     list())));
         
-        assertEquals(new UnexpectedValueType(IntegerValue.REF, StringValue.REF), exception);
+        assertEquals(new UnexpectedValueType(Types.INT, Types.STRING), exception);
     }
 
     @Test
     public void validCastPassesValueThrough() {
         InterpreterValue value = eval(
             emptyEnvironment(),
-            cast(literal("42"), ObjectValues.OBJECT));
+            cast(literal("42"), Types.OBJECT));
         assertEquals(value("42"), value);
     }
 
@@ -223,9 +221,9 @@ public class EvaluatorTests extends BackendEvalTests {
     public void errorIfCastIsNotValid() {
         InvalidCast exception = assertThrows(InvalidCast.class,
             () -> eval(emptyEnvironment(),
-                cast(literal(42), StringValue.REF)));
-        assertEquals(StringValue.REF, exception.getExpected());
-        assertEquals(IntegerValue.REF, exception.getActual());
+                cast(literal(42), Types.STRING)));
+        assertEquals(Types.STRING, exception.getExpected());
+        assertEquals(Types.INT, exception.getActual());
     }
     
     private static Environment emptyEnvironment() {

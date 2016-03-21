@@ -13,6 +13,7 @@ import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.backends.python.ast.*;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.*;
 
 import java.util.*;
@@ -113,7 +114,7 @@ public class PythonCodeGenerator {
                 @Override
                 public Stream<ScalarType> visit(TypeCoercionNode typeCoercion) {
                     if (isIntegerBox(typeCoercion)) {
-                        return Stream.of(ObjectValues.BOXED_INT);
+                        return Stream.of(Types.BOXED_INT);
                     } else {
                         return Stream.empty();
                     }
@@ -312,7 +313,7 @@ public class PythonCodeGenerator {
             if (isIntegerBox(typeCoercion)) {
                 // TODO: perform this replacement at the start so that we don't split the import handling and actual expression
                 return visit(ConstructorCallNode.constructorCall(
-                    ObjectValues.BOXED_INT,
+                    Types.BOXED_INT,
                     list(typeCoercion.getExpression())));
             } else if (isIntegerUnbox(typeCoercion)) {
                 return pythonAttributeAccess(value, "_value");
@@ -353,7 +354,7 @@ public class PythonCodeGenerator {
     }
 
     private static boolean isInteger(Type type) {
-        return type.equals(IntegerValue.REF) || type.equals(ObjectValues.BOXED_INT);
+        return type.equals(Types.INT) || type.equals(Types.BOXED_INT);
     }
 
     private static PythonVariableReferenceNode typeReference(Type className) {

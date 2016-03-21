@@ -6,7 +6,6 @@ import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.util.Action;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
 
@@ -181,7 +180,7 @@ public class CsharpSerializer implements NodeVisitor {
     public void visit(ReturnNode returnNode) {
         writer.writeStatement(() -> {
             writer.writeKeyword("return");
-            if (!returnNode.getValue().getType().equals(UnitValue.REF)) {
+            if (!returnNode.getValue().getType().equals(Types.VOID)) {
                 writer.writeSpace();
                 write(returnNode.getValue());
             }

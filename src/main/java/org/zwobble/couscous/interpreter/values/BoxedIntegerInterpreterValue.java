@@ -2,10 +2,7 @@ package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.types.Types;
 
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -21,24 +18,24 @@ public class BoxedIntegerInterpreterValue {
     }
 
     public static final InterpreterType TYPE = IntrinsicInterpreterType.classBuilder("java.lang.Integer")
-        .field("value", IntegerValue.REF)
+        .field("value", Types.INT)
 
-        .staticMethod("parseInt", list(StringValue.REF), IntegerValue.REF,
+        .staticMethod("parseInt", list(Types.STRING), Types.INT,
             (environment, arguments) -> {
                 StringInterpreterValue value = (StringInterpreterValue)arguments.get(0);
                 return new IntegerInterpreterValue(Integer.parseInt(value.getValue()));
             })
 
-        .staticMethod("valueOf", list(IntegerValue.REF), ObjectValues.BOXED_INT,
+        .staticMethod("valueOf", list(Types.INT), Types.BOXED_INT,
             (environment, arguments) -> {
                 IntegerInterpreterValue value = (IntegerInterpreterValue)arguments.get(0);
                 return of(value);
             })
 
-        .method("equals", list(ObjectValues.OBJECT), BooleanValue.REF,
+        .method("equals", list(Types.OBJECT), Types.BOOLEAN,
             (environment, arguments) -> {
                 InterpreterValue right = arguments.getPositionalArguments().get(0);
-                if (right.getType().getType().equals(ObjectValues.BOXED_INT)) {
+                if (right.getType().getType().equals(Types.BOXED_INT)) {
                     IntegerInterpreterValue leftValue = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
                     IntegerInterpreterValue rightValue = (IntegerInterpreterValue)right.getField("value");
                     return BooleanInterpreterValue.of(leftValue.getValue() == rightValue.getValue());
@@ -47,7 +44,7 @@ public class BoxedIntegerInterpreterValue {
                 }
             })
 
-        .method("toString", list(), StringValue.REF,
+        .method("toString", list(), Types.STRING,
             (environment, arguments) -> {
                 IntegerInterpreterValue value = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
                 return StringInterpreterValue.of(Integer.toString(value.getValue()));

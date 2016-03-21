@@ -4,8 +4,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.ObjectValues;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +93,7 @@ class JavaStatementReader {
             ? list()
             : readStatement(statement.getElseStatement());
         return ifStatement(
-            readExpression(BooleanValue.REF, statement.getExpression()),
+            readExpression(Types.BOOLEAN, statement.getExpression()),
             readStatement(statement.getThenStatement()),
             falseBranch);
     }
@@ -128,8 +127,8 @@ class JavaStatementReader {
                         methodCall(
                             reference(switchValueAssignment),
                             "equals",
-                            list(coerceExpression(ObjectValues.OBJECT, value)),
-                            BooleanValue.REF),
+                            list(coerceExpression(Types.OBJECT, value)),
+                            Types.BOOLEAN),
                         currentCase.getStatements(), handle)))
                     .orElse(handle)));
     }
@@ -157,7 +156,7 @@ class JavaStatementReader {
 
     private WhileNode readWhileStatement(WhileStatement statement) {
         return whileLoop(
-            readExpression(BooleanValue.REF, statement.getExpression()),
+            readExpression(Types.BOOLEAN, statement.getExpression()),
             readStatement(statement.getBody()));
     }
 
@@ -175,7 +174,7 @@ class JavaStatementReader {
         return append(
             readDeclarationFragments(fragments, typeOf(javaDeclaration.getType())),
             whileLoop(
-                readExpression(BooleanValue.REF, statement.getExpression()),
+                readExpression(Types.BOOLEAN, statement.getExpression()),
                 concat(
                     readStatement(statement.getBody()),
                     eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));

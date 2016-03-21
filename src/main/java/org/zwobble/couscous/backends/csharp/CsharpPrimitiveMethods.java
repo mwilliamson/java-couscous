@@ -3,10 +3,7 @@ package org.zwobble.couscous.backends.csharp;
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +31,7 @@ public class CsharpPrimitiveMethods {
             receiver,
             "ToString",
             list(),
-            StringValue.REF)));
+            Types.STRING)));
         BOXED_INT_METHODS = methods.build();
     }
 
@@ -42,7 +39,7 @@ public class CsharpPrimitiveMethods {
 
     static {
         ImmutableMap.Builder<String, PrimitiveMethodGenerator> methods = ImmutableMap.builder();
-        methods.put("length", (receiver, arguments) -> fieldAccess(receiver, "Length", IntegerValue.REF));
+        methods.put("length", (receiver, arguments) -> fieldAccess(receiver, "Length", Types.INT));
         methods.put("substring", (receiver, arguments) -> {
             ExpressionNode startIndex = arguments.get(0);
             ExpressionNode endIndex = arguments.get(1);
@@ -52,26 +49,26 @@ public class CsharpPrimitiveMethods {
                 receiver,
                 "Substring",
                 list(startIndex, length),
-                StringValue.REF);
+                Types.STRING);
         });
         methods.put("toLowerCase", (receiver, arguments) -> methodCall(
             receiver,
             "ToLower",
             list(),
-            StringValue.REF));
+            Types.STRING));
         methods.put("equals", (receiver, arguments) -> methodCall(
             receiver,
             "Equals",
             arguments,
-            StringValue.REF));
+            Types.STRING));
         STRING_METHODS = methods.build();
     }
 
     private static final Map<ScalarType, Map<String, PrimitiveMethodGenerator>> METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveMethodGenerator>>builder()
-            .put(BooleanValue.REF, BOOLEAN_METHODS)
-            .put(StringValue.REF, STRING_METHODS)
-            .put(ObjectValues.BOXED_INT, BOXED_INT_METHODS)
+            .put(Types.BOOLEAN, BOOLEAN_METHODS)
+            .put(Types.STRING, STRING_METHODS)
+            .put(Types.BOXED_INT, BOXED_INT_METHODS)
             .build();
 
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INT_METHODS =
@@ -87,7 +84,7 @@ public class CsharpPrimitiveMethods {
 
     private static final Map<ScalarType, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveStaticMethodGenerator>>builder()
-            .put(ObjectValues.BOXED_INT, STATIC_INT_METHODS)
+            .put(Types.BOXED_INT, STATIC_INT_METHODS)
             .build();
 
     public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(ScalarType type, String methodName) {

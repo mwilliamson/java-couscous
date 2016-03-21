@@ -1,9 +1,7 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.InternalCouscousValue;
-import org.zwobble.couscous.values.ObjectValues;
 
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
@@ -11,14 +9,14 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Operations {
     public static ExpressionNode same(ExpressionNode left, ExpressionNode right) {
-        return staticMethodCall(InternalCouscousValue.REF, "same", list(left, right), BooleanValue.REF);
+        return staticMethodCall(InternalCouscousValue.REF, "same", list(left, right), Types.BOOLEAN);
     }
 
     public static ExpressionNode not(ExpressionNode value) {
-        if (value.getType().equals(BooleanValue.REF)) {
+        if (value.getType().equals(Types.BOOLEAN)) {
             return OperationNode.operation(
                 Operator.BOOLEAN_NOT, list(value),
-                BooleanValue.REF);
+                Types.BOOLEAN);
         } else {
             throw new IllegalArgumentException("Can only negate booleans");
         }
@@ -53,7 +51,7 @@ public class Operations {
     }
 
     public static ExpressionNode integerOperation(Operator operator, ExpressionNode left, ExpressionNode right) {
-        return new OperationNode(operator, list(left, right), IntegerValue.REF);
+        return new OperationNode(operator, list(left, right), Types.INT);
     }
 
     public static ExpressionNode equal(ExpressionNode left, ExpressionNode right) {
@@ -81,15 +79,15 @@ public class Operations {
     }
 
     private static ExpressionNode booleanOperation(Operator operator, ExpressionNode left, ExpressionNode right) {
-        return new OperationNode(operator, list(left, right), BooleanValue.REF);
+        return new OperationNode(operator, list(left, right), Types.BOOLEAN);
     }
 
     public static ExpressionNode boxInt(ExpressionNode value) {
-        return typeCoercion(value, ObjectValues.BOXED_INT);
+        return typeCoercion(value, Types.BOXED_INT);
     }
 
     public static ExpressionNode unboxInt(ExpressionNode value) {
-        return typeCoercion(value, IntegerValue.REF);
+        return typeCoercion(value, Types.INT);
     }
 
 }

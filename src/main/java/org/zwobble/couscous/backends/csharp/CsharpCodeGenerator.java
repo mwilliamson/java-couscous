@@ -5,7 +5,6 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.Names;
 import org.zwobble.couscous.types.*;
-import org.zwobble.couscous.values.*;
 
 import java.util.Map;
 import java.util.Optional;
@@ -16,11 +15,11 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class CsharpCodeGenerator {
     private final static Map<ScalarType, ScalarType> PRIMITIVES = ImmutableMap.<ScalarType, ScalarType>builder()
-        .put(IntegerValue.REF, ScalarType.of("int"))
-        .put(StringValue.REF, ScalarType.of("string"))
-        .put(BooleanValue.REF, ScalarType.of("bool"))
-        .put(ObjectValues.CLASS, ScalarType.of("System.Type"))
-        .put(UnitValue.REF, ScalarType.of("void"))
+        .put(Types.INT, ScalarType.of("int"))
+        .put(Types.STRING, ScalarType.of("string"))
+        .put(Types.BOOLEAN, ScalarType.of("bool"))
+        .put(Types.CLASS, ScalarType.of("System.Type"))
+        .put(Types.VOID, ScalarType.of("void"))
         .build();
 
     private final String namespace;
@@ -61,7 +60,7 @@ public class CsharpCodeGenerator {
 
             @Override
             public Type visit(ParameterizedType type) {
-                if (type.getRawType().equals(ObjectValues.CLASS)) {
+                if (type.getRawType().equals(Types.CLASS)) {
                     return ScalarType.of("System.Type");
                 } else {
                     return new ParameterizedType(

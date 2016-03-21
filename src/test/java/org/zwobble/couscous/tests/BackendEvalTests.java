@@ -3,9 +3,8 @@ package org.zwobble.couscous.tests;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +34,7 @@ public abstract class BackendEvalTests {
         assertEquals(value(true), evalExpression(literal(true)));
         assertEquals(value(false), evalExpression(literal(false)));
         assertEquals(value(42), evalExpression(literal(42)));
-        assertEquals(value(StringValue.REF), evalExpression(literal(StringValue.REF)));
+        assertEquals(value(Types.STRING), evalExpression(literal(Types.STRING)));
     }
     
     @Test
@@ -127,7 +126,7 @@ public abstract class BackendEvalTests {
             literal("hello"),
             "length",
             list(),
-            IntegerValue.REF));
+            Types.INT));
         assertEquals(value(5), result);
     }
     
@@ -137,7 +136,7 @@ public abstract class BackendEvalTests {
             literal("hello"),
             "substring",
             list(literal(1), literal(4)),
-            StringValue.REF));
+            Types.STRING));
         assertEquals(value("ell"), result);
     }
     
@@ -147,7 +146,7 @@ public abstract class BackendEvalTests {
             "java.lang.Integer",
             "parseInt",
             list(literal("42")),
-            IntegerValue.REF));
+            Types.INT));
         assertEquals(value(42), result);
     }
     
@@ -155,15 +154,15 @@ public abstract class BackendEvalTests {
     public void canCallStaticMethodFromUserDefinedStaticMethod() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .staticMethod("main", method -> method
-                .returns(IntegerValue.REF)
+                .returns(Types.INT)
                 .statement(returns(staticMethodCall(
                     "java.lang.Integer",
                     "parseInt",
                     list(literal("42")),
-                    IntegerValue.REF))))
+                    Types.INT))))
             .build();
         PrimitiveValue result = evalExpression(list(classNode),
-            staticMethodCall("com.example.Example", "main", list(), IntegerValue.REF));
+            staticMethodCall("com.example.Example", "main", list(), Types.INT));
         assertEquals(value(42), result);
     }
     
@@ -171,21 +170,21 @@ public abstract class BackendEvalTests {
     public void canCallInstanceMethodWithNoArgumentsOnUserDefinedClass() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
-                .returns(IntegerValue.REF)
+                .returns(Types.INT)
                 .statement(returns(literal(42))))
             .build();
         PrimitiveValue result = evalExpression(list(classNode),
-            methodCall(constructorCall(classNode.getName(), list()), "main", list(), IntegerValue.REF));
+            methodCall(constructorCall(classNode.getName(), list()), "main", list(), Types.INT));
         assertEquals(value(42), result);
     }
     
     @Test
     public void canCallInstanceMethodWithArgumentsOnUserDefinedClass() {
-        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", Types.INT));
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .method("main", method -> method
                 .argument(argument)
-                .returns(IntegerValue.REF)
+                .returns(Types.INT)
                 .statement(returns(reference(argument))))
             .build();
         
@@ -195,25 +194,25 @@ public abstract class BackendEvalTests {
                 constructorCall(classNode.getName(), list()),
                 "main",
                 list(literal(42)),
-                IntegerValue.REF));
+                Types.INT));
         
         assertEquals(value(42), result);
     }
     
     @Test
     public void constructorIsExecutedOnConstruction() {
-        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", IntegerValue.REF));
+        FormalArgumentNode argument = formalArg(var(ANY_ID, "x", Types.INT));
         ClassNode classNode = ClassNode.builder("com.example.Example")
-            .field("value", IntegerValue.REF)
+            .field("value", Types.INT)
             .constructor(constructor -> constructor
                 .argument(argument)
                 .statement(assignStatement(
-                    fieldAccess(constructor.thisReference(), "value", IntegerValue.REF),
+                    fieldAccess(constructor.thisReference(), "value", Types.INT),
                     reference(argument))))
             .method("main", method -> method
-                .returns(IntegerValue.REF)
+                .returns(Types.INT)
                 .statement(returns(
-                    fieldAccess(method.thisReference(), "value", IntegerValue.REF))))
+                    fieldAccess(method.thisReference(), "value", Types.INT))))
             .build();
         
         PrimitiveValue result = evalExpression(
@@ -222,7 +221,7 @@ public abstract class BackendEvalTests {
                 constructorCall(classNode.getName(), list(literal(42))),
                 "main",
                 list(),
-                IntegerValue.REF));
+                Types.INT));
         
         assertEquals(value(42), result);
     }
@@ -231,16 +230,16 @@ public abstract class BackendEvalTests {
     public void staticConstructorIsExecutedOnReference() {
         ScalarType type = ScalarType.of("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
-            .staticField("value", IntegerValue.REF)
+            .staticField("value", Types.INT)
             .staticConstructor(list(
                 assignStatement(
-                    fieldAccess(type, "value", IntegerValue.REF),
+                    fieldAccess(type, "value", Types.INT),
                     literal(42))))
             .build();
 
         PrimitiveValue result = evalExpression(
             list(classNode),
-            fieldAccess(type, "value", IntegerValue.REF));
+            fieldAccess(type, "value", Types.INT));
 
         assertEquals(value(42), result);
     }

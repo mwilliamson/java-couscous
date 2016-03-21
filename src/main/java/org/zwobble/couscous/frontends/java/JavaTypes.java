@@ -2,11 +2,9 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
+import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.types.ParameterizedType;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
-import org.zwobble.couscous.values.ObjectValues;
 
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +77,6 @@ class JavaTypes {
     private static Optional<Type> superClass(ITypeBinding typeBinding) {
         return Optional.ofNullable(typeBinding.getSuperclass())
             .map(JavaTypes::typeOf)
-            .filter(type -> !type.equals(ObjectValues.OBJECT));
+            .filter(type -> !type.equals(Types.OBJECT));
     }
 }

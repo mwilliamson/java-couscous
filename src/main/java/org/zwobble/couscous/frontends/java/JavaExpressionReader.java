@@ -4,9 +4,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,10 +44,10 @@ public class JavaExpressionReader {
     }
 
     private static Type unboxedType(Type type) {
-        if (type.equals(ObjectValues.BOXED_INT)) {
-            return IntegerValue.REF;
-        } else if (type.equals(ObjectValues.BOXED_BOOLEAN)) {
-            return BooleanValue.REF;
+        if (type.equals(Types.BOXED_INT)) {
+            return Types.INT;
+        } else if (type.equals(Types.BOXED_BOOLEAN)) {
+            return Types.BOOLEAN;
         } else {
             return type;
         }
@@ -257,8 +254,8 @@ public class JavaExpressionReader {
                 expression.getLeftOperand(),
                 expression.getRightOperand());
         } else {
-            ExpressionNode left = readExpression(ObjectValues.OBJECT, expression.getLeftOperand());
-            ExpressionNode right = readExpression(ObjectValues.OBJECT, expression.getRightOperand());
+            ExpressionNode left = readExpression(Types.OBJECT, expression.getLeftOperand());
+            ExpressionNode right = readExpression(Types.OBJECT, expression.getRightOperand());
             if (expression.getOperator() == InfixExpression.Operator.EQUALS) {
                 return Operations.same(left, right);
             } else if (expression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
@@ -279,12 +276,12 @@ public class JavaExpressionReader {
     }
 
     private static boolean isPrimitive(Type type) {
-        return type.equals(BooleanValue.REF) || type.equals(IntegerValue.REF);
+        return type.equals(Types.BOOLEAN) || type.equals(Types.INT);
     }
 
     private ExpressionNode readPrefixExpression(PrefixExpression expression) {
         if (expression.getOperator() == PrefixExpression.Operator.NOT) {
-            return not(readExpression(BooleanValue.REF, expression.getOperand()));
+            return not(readExpression(Types.BOOLEAN, expression.getOperand()));
         } else {
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
@@ -292,16 +289,16 @@ public class JavaExpressionReader {
                 operation(
                     operator,
                     list(
-                        readExpression(IntegerValue.REF, expression.getOperand()),
+                        readExpression(Types.INT, expression.getOperand()),
                         literal(1)),
-                    IntegerValue.REF));
+                    Types.INT));
         }
     }
 
     private ExpressionNode readConditionalExpression(ConditionalExpression expression) {
         Type type = typeOf(expression);
         return TernaryConditionalNode.ternaryConditional(
-            readExpression(BooleanValue.REF, expression.getExpression()),
+            readExpression(Types.BOOLEAN, expression.getExpression()),
             readExpression(type, expression.getThenExpression()),
             readExpression(type, expression.getElseExpression()));
     }
@@ -327,7 +324,7 @@ public class JavaExpressionReader {
         return operation(
             operator,
             list(left, right),
-            operator.isBoolean() ? BooleanValue.REF : left.getType());
+            operator.isBoolean() ? Types.BOOLEAN : left.getType());
     }
 
     private ExpressionNode readCastExpression(CastExpression expression) {

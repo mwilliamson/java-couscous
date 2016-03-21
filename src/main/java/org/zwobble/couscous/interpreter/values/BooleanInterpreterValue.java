@@ -4,7 +4,7 @@ import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
-import org.zwobble.couscous.values.BooleanValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
@@ -22,15 +22,15 @@ public final class BooleanInterpreterValue implements InterpreterValue {
 
     private static final InterpreterType TYPE = IntrinsicInterpreterType.builder(BooleanInterpreterValue.class, "boolean")
         
-        .method(Operator.BOOLEAN_NOT.getSymbol(), list(), BooleanValue.REF, (environment, arguments) ->
+        .method(Operator.BOOLEAN_NOT.getSymbol(), list(), Types.BOOLEAN, (environment, arguments) ->
             of(!arguments.getReceiver().getValue()))
 
-        .method(Operator.BOOLEAN_AND.getSymbol(), list(BooleanValue.REF), BooleanValue.REF, (environment, arguments) -> {
+        .method(Operator.BOOLEAN_AND.getSymbol(), list(Types.BOOLEAN), Types.BOOLEAN, (environment, arguments) -> {
             BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().getValue() && right.getValue());
         })
 
-        .method(Operator.BOOLEAN_OR.getSymbol(), list(BooleanValue.REF), BooleanValue.REF, (environment, arguments) -> {
+        .method(Operator.BOOLEAN_OR.getSymbol(), list(Types.BOOLEAN), Types.BOOLEAN, (environment, arguments) -> {
             BooleanInterpreterValue right = (BooleanInterpreterValue)arguments.get(0);
             return of(arguments.getReceiver().getValue() || right.getValue());
         })

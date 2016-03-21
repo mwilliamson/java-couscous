@@ -11,8 +11,8 @@ import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
-import org.zwobble.couscous.values.ObjectValues;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -413,7 +413,7 @@ public class JavaReader {
                     eagerMap(arguments, argument -> reference(argument)),
                     methodNode.signature());
 
-                StatementNode body = override.getReturnType().equals(ObjectValues.VOID)
+                StatementNode body = override.getReturnType().equals(Types.VOID)
                     ? expressionStatement(call)
                     : returns(typeCoercion(call, override.getReturnType()));
 

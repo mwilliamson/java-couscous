@@ -1,9 +1,9 @@
 package org.zwobble.couscous.values;
 
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Types;
 
 public final class IntegerValue implements PrimitiveValue {
-    public static final ScalarType REF = ScalarType.of("int");
     private final int value;
     
     @Override
@@ -13,7 +13,7 @@ public final class IntegerValue implements PrimitiveValue {
     
     @Override
     public ScalarType getType() {
-        return REF;
+        return Types.INT;
     }
     
     public IntegerValue(final int value) {

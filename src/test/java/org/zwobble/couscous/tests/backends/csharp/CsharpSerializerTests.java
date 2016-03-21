@@ -5,8 +5,7 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
@@ -71,7 +70,7 @@ public class CsharpSerializerTests {
     @Test
     public void assignmentSeparatesTargetAndValueWithEqualsSign() {
         String output = serialize(assign(
-            reference(var(TestIds.ANY_ID, "x", BooleanValue.REF)),
+            reference(var(TestIds.ANY_ID, "x", Types.BOOLEAN)),
             literal(true)));
         assertEquals("x = true", output);
     }
@@ -131,7 +130,7 @@ public class CsharpSerializerTests {
     @Test
     public void prefixExpression() {
         String output = serialize(not(
-            reference(var(TestIds.ANY_ID, "x", BooleanValue.REF))));
+            reference(var(TestIds.ANY_ID, "x", Types.BOOLEAN))));
         assertEquals("!x", output);
     }
 
@@ -360,7 +359,7 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceWithMethod() {
-        MethodNode method = MethodNode.builder("get").isAbstract().returns(IntegerValue.REF).build();
+        MethodNode method = MethodNode.builder("get").isAbstract().returns(Types.INT).build();
         Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
             .method(method)
             .buildInterface();

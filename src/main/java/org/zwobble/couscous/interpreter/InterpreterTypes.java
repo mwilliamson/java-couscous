@@ -4,7 +4,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.errors.UnexpectedValueType;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.values.ObjectValues;
+import org.zwobble.couscous.types.Types;
 
 public class InterpreterTypes {
     public static void checkIsInstance(Type type, InterpreterValue value) {
@@ -20,7 +20,7 @@ public class InterpreterTypes {
     public static boolean isSubType(Type superType, InterpreterType subType) {
         return
             superType.equals(subType.getType()) ||
-            superType.equals(ObjectValues.OBJECT) ||
+            superType.equals(Types.OBJECT) ||
             subType.getSuperTypes().contains(superType);
     }
 }

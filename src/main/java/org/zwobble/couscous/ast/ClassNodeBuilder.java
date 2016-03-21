@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.values.UnitValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Optional;
@@ -134,7 +134,7 @@ public class ClassNodeBuilder {
         private final Function<MethodBuilder<?>, T> build;
         private final ImmutableList.Builder<AnnotationNode> annotations;
         private final ImmutableList.Builder<FormalArgumentNode> arguments;
-        private ScalarType returnType = UnitValue.REF;
+        private ScalarType returnType = Types.VOID;
         private final ImmutableList.Builder<StatementNode> statements;
 
         public MethodBuilder(Function<MethodBuilder<?>, T> build) {

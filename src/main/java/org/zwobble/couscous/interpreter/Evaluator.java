@@ -7,8 +7,7 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.errors.InvalidCast;
 import org.zwobble.couscous.interpreter.values.*;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -136,23 +135,23 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     }
 
     private static boolean isIntegerBox(TypeCoercionNode typeCoercion) {
-        return typeCoercion.getExpression().getType().equals(IntegerValue.REF) &&
-            !typeCoercion.getType().equals(IntegerValue.REF);
+        return typeCoercion.getExpression().getType().equals(Types.INT) &&
+            !typeCoercion.getType().equals(Types.INT);
     }
 
     private static boolean isIntegerUnbox(TypeCoercionNode typeCoercion) {
-        return !typeCoercion.getExpression().getType().equals(IntegerValue.REF) &&
-            typeCoercion.getType().equals(IntegerValue.REF);
+        return !typeCoercion.getExpression().getType().equals(Types.INT) &&
+            typeCoercion.getType().equals(Types.INT);
     }
 
     private static boolean isBooleanBox(TypeCoercionNode typeCoercion) {
-        return typeCoercion.getExpression().getType().equals(BooleanValue.REF) &&
-            !typeCoercion.getType().equals(BooleanValue.REF);
+        return typeCoercion.getExpression().getType().equals(Types.BOOLEAN) &&
+            !typeCoercion.getType().equals(Types.BOOLEAN);
     }
 
     private static boolean isBooleanUnbox(TypeCoercionNode typeCoercion) {
-        return !typeCoercion.getExpression().getType().equals(BooleanValue.REF) &&
-            typeCoercion.getType().equals(BooleanValue.REF);
+        return !typeCoercion.getExpression().getType().equals(Types.BOOLEAN) &&
+            typeCoercion.getType().equals(Types.BOOLEAN);
     }
 
     private List<InterpreterValue> evalArguments(List<? extends ExpressionNode> arguments) {

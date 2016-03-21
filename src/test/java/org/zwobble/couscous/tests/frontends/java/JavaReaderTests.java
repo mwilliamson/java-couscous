@@ -3,9 +3,7 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.values.IntegerValue;
-import org.zwobble.couscous.values.ObjectValues;
-import org.zwobble.couscous.values.StringValue;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 
@@ -41,7 +39,7 @@ public class JavaReaderTests {
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
         assertEquals("x", declaration.getName());
-        assertEquals(IntegerValue.REF, declaration.getType());
+        assertEquals(Types.INT, declaration.getType());
         assertEquals(literal(4), declaration.getInitialValue());
         ReturnNode returnNode = (ReturnNode) statements.get(1);
         assertEquals(
@@ -54,7 +52,7 @@ public class JavaReaderTests {
         StatementNode statement = readStatement("void", "Object x = 4;");
         
         LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statement;
-        assertEquals(typeCoercion(literal(4), ObjectValues.OBJECT), declaration.getInitialValue());
+        assertEquals(typeCoercion(literal(4), Types.OBJECT), declaration.getInitialValue());
     }
 
     @Test
@@ -65,7 +63,7 @@ public class JavaReaderTests {
             "}");
 
         MethodNode method = classNode.getMethods().get(0);
-        assertEquals(IntegerValue.REF, method.getReturnType());
+        assertEquals(Types.INT, method.getReturnType());
     }
     
     @Test
@@ -93,7 +91,7 @@ public class JavaReaderTests {
                     ScalarType.of("java.lang.Integer"),
                     "parseInt",
                     list(literal("42")),
-                    IntegerValue.REF)),
+                    Types.INT)),
             readStatement("void", "Integer.parseInt(\"42\");"));
     }
     
@@ -182,7 +180,7 @@ public class JavaReaderTests {
                 fieldAccess(
                     thisReference(ScalarType.of("com.example.Example")),
                     "name",
-                    StringValue.REF),
+                    Types.STRING),
                 literal("Flaws"))),
             constructor.getBody());
     }
@@ -205,13 +203,13 @@ public class JavaReaderTests {
                     fieldAccess(
                         thisReference(ScalarType.of("com.example.Example")),
                         "year",
-                        IntegerValue.REF),
+                        Types.INT),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
                         thisReference(ScalarType.of("com.example.Example")),
                         "name",
-                        StringValue.REF),
+                        Types.STRING),
                     literal("Flaws"))),
             constructor.getBody());
     }
@@ -233,13 +231,13 @@ public class JavaReaderTests {
                     fieldAccess(
                         thisReference(ScalarType.of("com.example.Example")),
                         "year",
-                        IntegerValue.REF),
+                        Types.INT),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
                         thisReference(ScalarType.of("com.example.Example")),
                         "name",
-                        StringValue.REF),
+                        Types.STRING),
                     literal("Flaws"))),
             constructor.getBody());
     }
@@ -259,7 +257,7 @@ public class JavaReaderTests {
                 fieldAccess(
                     ScalarType.of("com.example.Example"),
                     "name",
-                    StringValue.REF),
+                    Types.STRING),
                 literal("Flaws"))),
             staticConstructor);
     }
@@ -276,7 +274,7 @@ public class JavaReaderTests {
                 fieldAccess(
                     ScalarType.of("com.example.Example"),
                     "name",
-                    StringValue.REF),
+                    Types.STRING),
                 literal("Flaws"))),
             staticConstructor);
     }
@@ -362,7 +360,7 @@ public class JavaReaderTests {
 
         MethodNode expectedMethod = MethodNode.builder("get")
             .isAbstract()
-            .returns(IntegerValue.REF)
+            .returns(Types.INT)
             .build();
         assertEquals(list(expectedMethod), classNode.getMethods());
     }

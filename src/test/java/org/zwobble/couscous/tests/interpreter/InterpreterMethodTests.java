@@ -15,10 +15,8 @@ import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.tests.BackendMethodTests;
 import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
-import org.zwobble.couscous.values.StringValue;
-import org.zwobble.couscous.values.UnitValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,12 +44,12 @@ public class InterpreterMethodTests extends BackendMethodTests {
         NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> runMethod(method, value("hello, world!")));
         
-        assertEquals(new MethodSignature("hello", list(StringValue.REF), UnitValue.REF), exception.getSignature());
+        assertEquals(new MethodSignature("hello", list(Types.STRING), Types.VOID), exception.getSignature());
     }
     
     @Test
     public void errorIfTryingToAssignValueOfWrongTypeToVariable() {
-        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", Types.STRING));
         MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
             .statement(expressionStatement(assign(reference(arg), literal(0))));
@@ -59,13 +57,13 @@ public class InterpreterMethodTests extends BackendMethodTests {
         UnexpectedValueType exception = assertThrows(UnexpectedValueType.class,
             () -> runMethod(method, value("")));
         
-        assertEquals(new UnexpectedValueType(StringValue.REF, IntegerValue.REF), exception);
+        assertEquals(new UnexpectedValueType(Types.STRING, Types.INT), exception);
     }
     
     @Test
     public void errorIfTryingToAssignToVariableNotInScope() {
         LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
-            ANY_ID, "x", StringValue.REF, literal(""));
+            ANY_ID, "x", Types.STRING, literal(""));
         MethodNode.Builder method = staticMethod("hello")
             .statement(expressionStatement(assign(reference(localVariableDeclaration), LiteralNode.literal("[updated value]"))));
 
@@ -78,7 +76,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
     @Test
     public void errorIfTryingToGetValueOfVariableNotInScope() {
         LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
-            ANY_ID, "x", StringValue.REF, literal(""));
+            ANY_ID, "x", Types.STRING, literal(""));
         MethodNode.Builder method = staticMethod("hello")
             .statement(returns(reference(localVariableDeclaration)));
 
@@ -91,7 +89,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
     @Test
     public void errorIfTryingToGetValueOfUnboundVariable() {
         LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(
-            ANY_ID, "x", StringValue.REF, literal(""));
+            ANY_ID, "x", Types.STRING, literal(""));
         MethodNode.Builder method = staticMethod("hello")
             .statement(returns(reference(localVariableDeclaration)))
             .statement(localVariableDeclaration);

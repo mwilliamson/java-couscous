@@ -2,10 +2,9 @@ package org.zwobble.couscous.tests;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
-import org.zwobble.couscous.values.StringValue;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +37,7 @@ public abstract class BackendMethodTests {
     @Test
     public void canReturnLiteralValue() {
         MethodNode.Builder method = staticMethod("hello")
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(returns(literal("hello, world!")));
         final java.lang.Object result = runMethod(method);
         assertEquals(value("hello, world!"), result);
@@ -46,10 +45,10 @@ public abstract class BackendMethodTests {
     
     @Test
     public void canPassValueToMethod() {
-        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", Types.STRING));
         MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(returns(reference(arg)));
         final java.lang.Object result = runMethod(method, value("hello, world!"));
         assertEquals(value("hello, world!"), result);
@@ -57,10 +56,10 @@ public abstract class BackendMethodTests {
     
     @Test
     public void canReassignValueToArgument() {
-        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", StringValue.REF));
+        FormalArgumentNode arg = formalArg(var(ANY_ID, "x", Types.STRING));
         MethodNode.Builder method = staticMethod("hello")
             .argument(arg)
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(expressionStatement(assign(
                 reference(arg),
                 literal("[updated value]"))))
@@ -71,9 +70,9 @@ public abstract class BackendMethodTests {
     
     @Test
     public void canDeclareVariable() {
-        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
+        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", Types.STRING, LiteralNode.literal("[initial value]"));
         MethodNode.Builder method = staticMethod("hello")
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(localVariableDeclaration)
             .statement(returns(reference(localVariableDeclaration)));
         final java.lang.Object result = runMethod(method);
@@ -82,9 +81,9 @@ public abstract class BackendMethodTests {
     
     @Test
     public void canDeclareVariableAndThenAssignValues() {
-        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", StringValue.REF, LiteralNode.literal("[initial value]"));
+        LocalVariableDeclarationNode localVariableDeclaration = localVariableDeclaration(ANY_ID, "x", Types.STRING, LiteralNode.literal("[initial value]"));
         MethodNode.Builder method = staticMethod("hello")
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(localVariableDeclaration)
             .statement(expressionStatement(assign(
                 reference(localVariableDeclaration),
@@ -97,7 +96,7 @@ public abstract class BackendMethodTests {
     @Test
     public void whenConditionIsTrueIfStatementExecutesTrueBranch() {
         MethodNode.Builder method = staticMethod("hello")
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(ifStatement(
                 literal(true),
                 list(returns(literal("[true]"))),
@@ -108,7 +107,7 @@ public abstract class BackendMethodTests {
     @Test
     public void whenConditionIsFalseIfStatementExecutesTrueBranch() {
         MethodNode.Builder method = staticMethod("hello")
-            .returns(StringValue.REF)
+            .returns(Types.STRING)
             .statement(ifStatement(
                 literal(false),
                 list(returns(literal("[true]"))),
@@ -118,10 +117,10 @@ public abstract class BackendMethodTests {
 
     @Test
     public void whileLoopIsExecutedWhileConditionIsTrue() {
-        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
-        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
+        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", Types.INT, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", Types.INT, literal(2));
         MethodNode.Builder method = staticMethod("hello")
-            .returns(IntegerValue.REF)
+            .returns(Types.INT)
             .statement(x)
             .statement(y)
             .statement(whileLoop(
@@ -133,10 +132,10 @@ public abstract class BackendMethodTests {
 
     @Test
     public void returnWillExitWhileLoopEarly() {
-        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", IntegerValue.REF, literal(0));
-        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", IntegerValue.REF, literal(2));
+        LocalVariableDeclarationNode x = localVariableDeclaration(TestIds.id("x"), "x", Types.INT, literal(0));
+        LocalVariableDeclarationNode y = localVariableDeclaration(TestIds.id("y"), "y", Types.INT, literal(2));
         MethodNode.Builder method = staticMethod("hello")
-            .returns(IntegerValue.REF)
+            .returns(Types.INT)
             .statement(x)
             .statement(y)
             .statement(whileLoop(

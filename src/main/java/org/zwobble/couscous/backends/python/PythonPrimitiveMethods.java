@@ -7,6 +7,7 @@ import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.python.ast.PythonBinaryOperation;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonNotNode;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.*;
 
 import java.util.List;
@@ -112,10 +113,10 @@ public class PythonPrimitiveMethods {
     
     private static final Map<ScalarType, Map<String, PrimitiveMethodGenerator>> METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveMethodGenerator>>builder()
-            .put(StringValue.REF, STRING_METHODS)
-            .put(BooleanValue.REF, BOOLEAN_METHODS)
-            .put(IntegerValue.REF, INT_METHODS)
-            .put(ObjectValues.BOXED_INT, INT_METHODS)
+            .put(Types.STRING, STRING_METHODS)
+            .put(Types.BOOLEAN, BOOLEAN_METHODS)
+            .put(Types.INT, INT_METHODS)
+            .put(Types.BOXED_INT, INT_METHODS)
             .build();
     
     private static final Map<String, PrimitiveStaticMethodGenerator> INTERNAL_METHODS =
@@ -135,7 +136,7 @@ public class PythonPrimitiveMethods {
     private static final Map<ScalarType, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(InternalCouscousValue.REF, INTERNAL_METHODS)
-            .put(ObjectValues.BOXED_INT, BOXED_INT_STATIC_METHODS)
+            .put(Types.BOXED_INT, BOXED_INT_STATIC_METHODS)
             .build();
 
     public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(ScalarType type, String methodName) {

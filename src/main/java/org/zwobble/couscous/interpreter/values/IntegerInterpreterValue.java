@@ -5,8 +5,7 @@ import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.errors.NoSuchField;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
-import org.zwobble.couscous.values.BooleanValue;
-import org.zwobble.couscous.values.IntegerValue;
+import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
@@ -16,31 +15,31 @@ import java.util.function.BiFunction;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public final class IntegerInterpreterValue implements InterpreterValue {
-    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(IntegerInterpreterValue.class, IntegerValue.REF)
-        .method(Operator.ADD.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
+    public static final InterpreterType TYPE = IntrinsicInterpreterType.builder(IntegerInterpreterValue.class, Types.INT)
+        .method(Operator.ADD.getSymbol(), list(Types.INT), Types.INT,
             infixReturningInteger((left, right) -> left + right))
-        .method(Operator.SUBTRACT.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
+        .method(Operator.SUBTRACT.getSymbol(), list(Types.INT), Types.INT,
             infixReturningInteger((left, right) -> left - right))
-        .method(Operator.MULTIPLY.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
+        .method(Operator.MULTIPLY.getSymbol(), list(Types.INT), Types.INT,
             infixReturningInteger((left, right) -> left * right))
-        .method(Operator.DIVIDE.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
+        .method(Operator.DIVIDE.getSymbol(), list(Types.INT), Types.INT,
             infixReturningInteger((left, right) -> left / right))
-        .method(Operator.MOD.getSymbol(), list(IntegerValue.REF), IntegerValue.REF,
+        .method(Operator.MOD.getSymbol(), list(Types.INT), Types.INT,
             infixReturningInteger((left, right) -> left % right))
-        .method(Operator.EQUALS.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.EQUALS.getSymbol(), list(Types.INT), Types.BOOLEAN,
             (environment, arguments) -> {
                 IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getPositionalArguments().get(0);
                 return integerEquals(arguments, right);
             })
-        .method(Operator.NOT_EQUALS.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.NOT_EQUALS.getSymbol(), list(Types.INT), Types.BOOLEAN,
             infixReturningBoolean((left, right) -> !left.equals(right)))
-        .method(Operator.GREATER_THAN.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.GREATER_THAN.getSymbol(), list(Types.INT), Types.BOOLEAN,
             infixReturningBoolean((left, right) -> left > right))
-        .method(Operator.GREATER_THAN_OR_EQUAL.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.GREATER_THAN_OR_EQUAL.getSymbol(), list(Types.INT), Types.BOOLEAN,
             infixReturningBoolean((left, right) -> left >= right))
-        .method(Operator.LESS_THAN.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.LESS_THAN.getSymbol(), list(Types.INT), Types.BOOLEAN,
             infixReturningBoolean((left, right) -> left < right))
-        .method(Operator.LESS_THAN_OR_EQUAL.getSymbol(), list(IntegerValue.REF), BooleanValue.REF,
+        .method(Operator.LESS_THAN_OR_EQUAL.getSymbol(), list(Types.INT), Types.BOOLEAN,
             infixReturningBoolean((left, right) -> left <= right))
         .build();
 
