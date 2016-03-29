@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
-class JavaTypes {
+public class JavaTypes {
     static Type typeOf(Expression expression) {
         return typeOf(expression.resolveTypeBinding());
     }
@@ -81,7 +81,7 @@ class JavaTypes {
             .filter(type -> !type.equals(Types.OBJECT));
     }
 
-    static Type bind(Type genericType, Type concreteType) {
+    public static Type bind(Type genericType, Type concreteType) {
         if (genericType.equals(concreteType)) {
             return concreteType;
         } else if (!(genericType instanceof TypeParameter)) {
