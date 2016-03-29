@@ -2,8 +2,9 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.types.ParameterizedType;
+import org.zwobble.couscous.types.*;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
 
 import java.util.List;
