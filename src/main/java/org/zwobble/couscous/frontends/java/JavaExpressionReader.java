@@ -108,7 +108,10 @@ public class JavaExpressionReader {
                 return readCastExpression((CastExpression)expression);
 
             default:
-                throw new RuntimeException("Unsupported expression: " + expression.getClass());
+                CompilationUnit root = (CompilationUnit) expression.getRoot();
+                throw new RuntimeException(
+                    "Unsupported expression: " + expression.getClass() +
+                        "\n" + root.getLineNumber(expression.getStartPosition()) + ":" + root.getColumnNumber(expression.getStartPosition()));
 
         }
     }
