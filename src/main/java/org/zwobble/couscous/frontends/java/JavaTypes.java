@@ -2,10 +2,11 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.*;
+import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
+import org.zwobble.couscous.util.Optionals;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.types.Types.erasure;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class JavaTypes {
@@ -84,10 +86,33 @@ public class JavaTypes {
     public static Type bind(Type genericType, Type concreteType) {
         if (genericType.equals(concreteType)) {
             return concreteType;
-        } else if (!(genericType instanceof TypeParameter)) {
-            throw new RuntimeException("Type parameter was " + genericType);
+        }
+        return Optionals.flatMap(
+            tryCast(ParameterizedType.class, genericType),
+            tryCast(ParameterizedType.class, concreteType),
+            JavaTypes::bindParameterizedType)
+            .orElseGet(() -> {
+                if (!(genericType instanceof TypeParameter)) {
+                    return concreteType;
+                } else {
+                    return new BoundTypeParameter((TypeParameter) genericType, concreteType);
+                }
+            });
+    }
+
+    private static Optional<Type> bindParameterizedType(
+        ParameterizedType genericType,
+        ParameterizedType concreteType)
+    {
+        if (genericType.getRawType().equals(concreteType.getRawType())) {
+            return Optional.of(new ParameterizedType(
+                genericType.getRawType(),
+                eagerMap(
+                    genericType.getParameters(),
+                    concreteType.getParameters(),
+                    JavaTypes::bind)));
         } else {
-            return new BoundTypeParameter((TypeParameter) genericType, concreteType);
+            return Optional.empty();
         }
     }
 }
