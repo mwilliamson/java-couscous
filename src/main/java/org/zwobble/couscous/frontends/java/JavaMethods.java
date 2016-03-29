@@ -4,9 +4,7 @@ import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.zwobble.couscous.ast.MethodSignature;
-import org.zwobble.couscous.types.BoundTypeParameter;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.types.TypeParameter;
 
 import java.util.List;
 
@@ -34,19 +32,9 @@ class JavaMethods {
                 eagerMap(
                     argumentTypes,
                     asList(erasedMethod.getParameterTypes()),
-                    (argumentType, erasedParameterType) -> typeParameterForGeneric(erasedParameterType, argumentType)),
-                typeParameterForGeneric(erasedMethod.getReturnType(), returnType));
+                    (argumentType, erasedParameterType) -> JavaTypes.bind(typeOf(erasedParameterType), argumentType)),
+                JavaTypes.bind(typeOf(erasedMethod.getReturnType()), returnType));
         }
     }
 
-    private static Type typeParameterForGeneric(ITypeBinding erasedTypeBinding, Type type) {
-        Type erasedType = typeOf(erasedTypeBinding);
-        if (erasedType.equals(type)) {
-            return type;
-        } else if (!(erasedType instanceof TypeParameter)) {
-            throw new RuntimeException("Type parameter was " + erasedType);
-        } else {
-            return new BoundTypeParameter((TypeParameter) typeOf(erasedTypeBinding), type);
-        }
-    }
 }

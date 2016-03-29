@@ -80,4 +80,14 @@ class JavaTypes {
             .map(JavaTypes::typeOf)
             .filter(type -> !type.equals(Types.OBJECT));
     }
+
+    static Type bind(Type genericType, Type concreteType) {
+        if (genericType.equals(concreteType)) {
+            return concreteType;
+        } else if (!(genericType instanceof TypeParameter)) {
+            throw new RuntimeException("Type parameter was " + genericType);
+        } else {
+            return new BoundTypeParameter((TypeParameter) genericType, concreteType);
+        }
+    }
 }
