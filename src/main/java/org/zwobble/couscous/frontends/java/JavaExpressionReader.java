@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
@@ -239,10 +240,21 @@ public class JavaExpressionReader {
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {
-        return IntStream.range(0, javaArguments.size())
-            .mapToObj(index -> readExpression(
-                typeOf(method.getParameterTypes()[index]),
-                javaArguments.get(index)))
+        ITypeBinding[] parameterTypes = method.getParameterTypes();
+        return IntStream.range(0, parameterTypes.length)
+            .mapToObj(index -> {
+                if (method.isVarargs() && index == parameterTypes.length - 1) {
+                    Type elementType = typeOf(parameterTypes[index].getElementType());
+                    List<ExpressionNode> elements = IntStream.range(index, javaArguments.size())
+                        .mapToObj(argumentIndex -> readExpression(elementType, javaArguments.get(argumentIndex)))
+                        .collect(Collectors.toList());
+                    return array(elementType, elements);
+                } else {
+                    return readExpression(
+                        typeOf(parameterTypes[index]),
+                        javaArguments.get(index));
+                }
+            })
             .collect(Collectors.toList());
     }
 

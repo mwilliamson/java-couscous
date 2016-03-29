@@ -32,11 +32,11 @@ public class LiteralNode implements ExpressionNode {
     public static LiteralNode literal(ScalarType type) {
         return literal(value(type));
     }
-    
+
     public static LiteralNode of(PrimitiveValue value, Type type) {
         return new LiteralNode(value, type);
     }
-    
+
     private final PrimitiveValue value;
     private final Type type;
 

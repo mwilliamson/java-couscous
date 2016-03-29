@@ -45,6 +45,11 @@ public class NodeTransformer {
             }
 
             @Override
+            public Node visit(ArrayNode array) {
+                return transformExpression(array);
+            }
+
+            @Override
             public Node visit(AssignmentNode assignment) {
                 return transformExpression(assignment);
             }

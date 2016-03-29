@@ -42,6 +42,7 @@ public class ValueObjectTests {
     public static Iterable<Object[]> valueObjectTypes() {
         return asList(new Object[][] {
             {AnnotationNode.class},
+            {ArrayNode.class},
             {AssignmentNode.class},
             {BoundTypeParameter.class},
             {CastNode.class},

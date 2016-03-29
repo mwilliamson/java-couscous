@@ -251,6 +251,11 @@ public class PythonCodeGenerator {
         }
 
         @Override
+        public PythonExpressionNode visit(ArrayNode arrayNode) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public PythonExpressionNode visit(AssignmentNode assignment) {
             throw new UnsupportedOperationException();
         }

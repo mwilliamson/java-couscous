@@ -28,6 +28,11 @@ public interface ExpressionNode extends Node {
             }
 
             @Override
+            public T visit(ArrayNode array) {
+                return visitor.visit(array);
+            }
+
+            @Override
             public T visit(AssignmentNode assignment) {
                 return visitor.visit(assignment);
             }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
@@ -25,6 +26,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
+import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ExpressionReadingTests {
@@ -180,6 +182,28 @@ public class ExpressionReadingTests {
                 list(),
                 Types.STRING),
             returnNode.getValue());
+    }
+
+    @Test
+    public void canReadMethodCallsWithZeroExpressionsAsVarargs() {
+        assertEquals(
+            staticMethodCall(
+                ScalarType.of("java.util.Arrays"),
+                "asList",
+                list(array(Types.STRING, list())),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING))),
+            readExpression("java.util.List<String>", "java.util.Arrays.asList()"));
+    }
+
+    @Test
+    public void canReadMethodCallsWithMultipleExpressionsAsVarargs() {
+        assertEquals(
+            staticMethodCall(
+                ScalarType.of("java.util.Arrays"),
+                "asList",
+                list(array(Types.STRING, list(literal("one"), literal("two")))),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING))),
+            readExpression("java.util.List<String>", "java.util.Arrays.asList(\"one\", \"two\")"));
     }
 
     @Test

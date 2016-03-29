@@ -50,7 +50,12 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         InterpreterTypes.checkIsInstance(reference.getType(), thisValue);
         return thisValue;
     }
-    
+
+    @Override
+    public InterpreterValue visit(ArrayNode arrayNode) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public InterpreterValue visit(AssignmentNode assignment) {
         InterpreterValue value = eval(assignment.getValue());

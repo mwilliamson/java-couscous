@@ -6,6 +6,7 @@ public interface NodeMapper<T> {
     T visit(LiteralNode literal);
     T visit(VariableReferenceNode variableReference);
     T visit(ThisReferenceNode reference);
+    T visit(ArrayNode array);
     T visit(AssignmentNode assignment);
     T visit(TernaryConditionalNode ternaryConditional);
     T visit(MethodCallNode methodCall);

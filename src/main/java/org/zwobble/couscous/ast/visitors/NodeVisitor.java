@@ -6,6 +6,7 @@ public interface NodeVisitor {
     void visit(LiteralNode literal);
     void visit(VariableReferenceNode variableReference);
     void visit(ThisReferenceNode reference);
+    void visit(ArrayNode array);
     void visit(AssignmentNode assignment);
     void visit(TernaryConditionalNode ternaryConditional);
     void visit(MethodCallNode methodCall);

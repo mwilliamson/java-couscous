@@ -1,6 +1,7 @@
 package org.zwobble.couscous.util;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -19,5 +20,13 @@ public class ExtraArrays {
     
     public static <T> Stream<T> stream(T[] array) {
         return StreamSupport.stream(Arrays.spliterator(array), false);
+    }
+
+    public static <T> Optional<T> last(T[] array) {
+        if (array.length == 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(array[array.length - 1]);
+        }
     }
 }

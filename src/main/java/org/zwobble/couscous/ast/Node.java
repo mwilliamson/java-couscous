@@ -25,6 +25,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(ArrayNode array) {
+                visitor.visit(array);
+                return null;
+            }
+
+            @Override
             public Void visit(AssignmentNode assignment) {
                 visitor.visit(assignment);
                 return null;

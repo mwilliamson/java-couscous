@@ -47,6 +47,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(ArrayNode array) {
+                return array.getElements().stream();
+            }
+
+            @Override
             public Stream<Node> visit(AssignmentNode assignment) {
                 return Stream.of(assignment.getValue(), assignment.getTarget());
             }

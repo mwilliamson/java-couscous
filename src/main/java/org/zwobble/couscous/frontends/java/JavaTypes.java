@@ -35,6 +35,9 @@ public class JavaTypes {
         if (typeBinding.isAnonymous()) {
             throw new RuntimeException("Cannot get type of anonymous type binding");
         }
+        if (typeBinding.isArray()) {
+            return Types.array(typeOf(typeBinding.getElementType()));
+        }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
         if (outerClass == null) {
             ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());

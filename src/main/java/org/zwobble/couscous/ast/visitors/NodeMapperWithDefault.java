@@ -23,7 +23,12 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     public T visit(ThisReferenceNode reference) {
         return defaultValue;
     }
-    
+
+    @Override
+    public T visit(ArrayNode array) {
+        return defaultValue;
+    }
+
     @Override
     public T visit(AssignmentNode assignment) {
         return defaultValue;
