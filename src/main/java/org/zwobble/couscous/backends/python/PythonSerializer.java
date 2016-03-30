@@ -46,7 +46,20 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonVariableReferenceNode reference) {
         writer.writeIdentifier(reference.getName());
     }
-    
+
+    @Override
+    public void visit(PythonArrayNode array) {
+        writer.writeSymbol("[");
+        writer.writeWithSeparator(
+            array.getElements(),
+            element -> write(element),
+            () -> {
+                writer.writeSymbol(",");
+                writer.writeSpace();
+            });
+        writer.writeSymbol("]");
+    }
+
     @Override
     public void visit(PythonConditionalExpressionNode conditional) {
         writeParenthesised(conditional.getTrueValue(), conditional);

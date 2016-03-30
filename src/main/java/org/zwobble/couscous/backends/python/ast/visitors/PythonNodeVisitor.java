@@ -7,6 +7,7 @@ public interface PythonNodeVisitor {
     void visit(PythonStringLiteralNode stringLiteral);
     void visit(PythonBooleanLiteralNode booleanLiteral);
     void visit(PythonVariableReferenceNode reference);
+    void visit(PythonArrayNode array);
     void visit(PythonConditionalExpressionNode conditional);
     void visit(PythonAttributeAccessNode attributeAccess);
     void visit(PythonCallNode call);
