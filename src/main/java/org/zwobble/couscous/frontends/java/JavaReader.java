@@ -50,7 +50,7 @@ public class JavaReader {
     public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
 
-        ImmutableList<IProblem> errors = ImmutableList.copyOf(filter(asList(ast.getProblems()), problem -> problem.isError()));
+        List<IProblem> errors = eagerFilter(asList(ast.getProblems()), problem -> problem.isError());
         if (!errors.isEmpty()) {
             throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
         }
