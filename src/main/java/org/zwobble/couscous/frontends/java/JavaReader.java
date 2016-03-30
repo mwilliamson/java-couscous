@@ -120,14 +120,14 @@ public class JavaReader {
         return readLambda(
             outerScope,
             expression,
-            scope -> new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
+            scope -> new JavaMethodReferenceReader(this).toLambda(scope, expression));
     }
 
     GeneratedClosure readCreationReference(Scope outerScope, CreationReference expression) {
         return readLambda(
             outerScope,
             expression,
-            scope -> new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
+            scope -> new JavaMethodReferenceReader(this).toLambda(scope, expression));
     }
 
     GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {

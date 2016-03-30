@@ -21,10 +21,10 @@ import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
-public class JavaExpressionMethodReferenceReader {
+public class JavaMethodReferenceReader {
     private final JavaReader javaReader;
 
-    public JavaExpressionMethodReferenceReader(JavaReader javaReader) {
+    public JavaMethodReferenceReader(JavaReader javaReader) {
         this.javaReader = javaReader;
     }
 
