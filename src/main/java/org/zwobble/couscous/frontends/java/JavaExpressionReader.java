@@ -3,6 +3,7 @@ package org.zwobble.couscous.frontends.java;
 import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.InsertionOrderSet;
@@ -81,6 +82,9 @@ public class JavaExpressionReader {
 
             case ASTNode.FIELD_ACCESS:
                 return readFieldAccess((FieldAccess)expression);
+
+            case ASTNode.QUALIFIED_NAME:
+                return readQualifiedName((QualifiedName)expression);
 
             case ASTNode.METHOD_INVOCATION:
                 return readMethodInvocation((MethodInvocation)expression);
@@ -177,6 +181,13 @@ public class JavaExpressionReader {
 
         return FieldAccessNode.fieldAccess(
             receiver,
+            expression.getName().getIdentifier(),
+            typeOf(expression));
+    }
+
+    private ExpressionNode readQualifiedName(QualifiedName expression) {
+        return FieldAccessNode.fieldAccess(
+            ScalarType.of(expression.getQualifier().getFullyQualifiedName()),
             expression.getName().getIdentifier(),
             typeOf(expression));
     }
