@@ -9,6 +9,9 @@ public class ScalarType implements Type {
         if (Strings.isNullOrEmpty(qualifiedName)) {
             throw new IllegalArgumentException("qualifiedName cannot be blank");
         }
+        if (qualifiedName.contains("<")) {
+            throw new IllegalArgumentException(qualifiedName + " contains <");
+        }
         return new ScalarType(qualifiedName);
     }
     
