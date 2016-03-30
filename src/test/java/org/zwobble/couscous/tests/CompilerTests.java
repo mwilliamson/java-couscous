@@ -181,6 +181,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void lambdasWithSameVariableCapturedMultipleTimes() throws Exception {
+        assertEquals(
+            value(84),
+            execTestProgram(
+                "lambda-multiple-capture",
+                ScalarType.of("com.example.Lambda"),
+                "value",
+                list(value(2)),
+                Types.INT));
+    }
+
+    @Test
     public void lambdasWithThisCapture() throws Exception {
         assertEquals(
             value(42),

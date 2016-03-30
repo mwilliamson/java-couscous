@@ -3,14 +3,13 @@ package org.zwobble.couscous.frontends.java;
 import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.ReferenceNode;
 import org.zwobble.couscous.types.ScalarType;
-
-import java.util.List;
+import org.zwobble.couscous.util.InsertionOrderSet;
 
 public class GeneratedClosure {
     private final ClassNode classNode;
-    private final List<ReferenceNode> captures;
+    private final InsertionOrderSet<ReferenceNode> captures;
 
-    public GeneratedClosure(ClassNode classNode, List<ReferenceNode> captures) {
+    public GeneratedClosure(ClassNode classNode, InsertionOrderSet<ReferenceNode> captures) {
         this.classNode = classNode;
         this.captures = captures;
     }
@@ -23,7 +22,7 @@ public class GeneratedClosure {
         return classNode.getName();
     }
 
-    public List<ReferenceNode> getCaptures() {
+    public InsertionOrderSet<ReferenceNode> getCaptures() {
         return captures;
     }
 }

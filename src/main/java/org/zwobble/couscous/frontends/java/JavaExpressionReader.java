@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
+import org.zwobble.couscous.util.InsertionOrderSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -229,17 +230,17 @@ public class JavaExpressionReader {
         GeneratedClosure closure = javaReader.readLambda(scope, expression);
         return constructorCall(
             closure.getType(),
-            captureArguments(closure));
+            captureArguments(closure).asList());
     }
 
     private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
         GeneratedClosure closure = javaReader.readExpressionMethodReference(scope, expression);
         return constructorCall(
             closure.getType(),
-            captureArguments(closure));
+            captureArguments(closure).asList());
     }
 
-    private List<? extends ExpressionNode> captureArguments(GeneratedClosure closure) {
+    private InsertionOrderSet<? extends ExpressionNode> captureArguments(GeneratedClosure closure) {
         return closure.getCaptures();
     }
 

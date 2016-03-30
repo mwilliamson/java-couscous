@@ -1,6 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
@@ -8,11 +9,12 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
+import org.zwobble.couscous.util.InsertionOrderSet;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -37,15 +39,14 @@ import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.lookup;
 
 public class JavaReader {
-    // TODO: de-dupe captures (multiple reference nodes may reference the same free variable)
     public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
         CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
 
@@ -70,7 +71,7 @@ public class JavaReader {
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
-    private final Map<ScalarType, List<ReferenceNode>> nestedClasses = new HashMap<>();
+    private final Map<ScalarType, InsertionOrderSet<ReferenceNode>> nestedClasses = new HashMap<>();
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -160,7 +161,7 @@ public class JavaReader {
     private List<StatementNode> replaceCaptureReferences(
         ScalarType className,
         List<StatementNode> body,
-        List<CapturedVariable> freeVariables)
+        InsertionOrderSet<CapturedVariable> freeVariables)
     {
         Map<ExpressionNode, ExpressionNode> replacements = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
@@ -172,7 +173,7 @@ public class JavaReader {
     private ConstructorNode buildConstructor(
         Scope outerScope,
         ScalarType type,
-        List<CapturedVariable> freeVariables,
+        InsertionOrderSet<CapturedVariable> freeVariables,
         ConstructorNode existing)
     {
         Scope scope = outerScope.enterConstructor();
@@ -228,13 +229,13 @@ public class JavaReader {
         Scope scope,
         ClassNode classNode
     ) {
-        List<ReferenceNode> freeVariables = eagerFilter(
+        InsertionOrderSet<ReferenceNode> freeVariables = InsertionOrderSet.copyOf(Iterables.filter(
             findFreeVariables(ExtraLists.concat(
                 classNode.getFields(),
                 classNode.getMethods())),
             // TODO: check this references work correctly in anonymous classes
-            variable -> !isThisReference(classNode.getName(), variable));
-        List<CapturedVariable> capturedVariables = ImmutableList.copyOf(transform(
+            variable -> !isThisReference(classNode.getName(), variable)));
+        InsertionOrderSet<CapturedVariable> capturedVariables = InsertionOrderSet.copyOf(transform(
             freeVariables,
             freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
         Iterable<FieldDeclarationNode> captureFields = transform(capturedVariables, capture -> capture.field);
