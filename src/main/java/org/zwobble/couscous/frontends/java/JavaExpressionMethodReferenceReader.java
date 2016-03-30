@@ -1,10 +1,7 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
-import org.eclipse.jdt.core.dom.ExpressionMethodReference;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.VariableReferenceNode;
@@ -14,6 +11,7 @@ import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -38,6 +36,19 @@ public class JavaExpressionMethodReferenceReader {
             list(returns(JavaExpressionReader.coerceExpression(
                 typeOf(functionalInterfaceMethod.getReturnType()),
                 generateValue(scope, expression, formalArguments)))));
+    }
+
+    public Lambda toLambda(Scope scope, CreationReference expression) {
+        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
+        List<FormalArgumentNode> formalArguments = formalArguments(scope, functionalInterfaceMethod);
+
+        return lambda(
+            formalArguments,
+            list(returns(JavaExpressionReader.coerceExpression(
+                typeOf(functionalInterfaceMethod.getReturnType()),
+                constructorCall(
+                    typeOf(functionalInterfaceMethod.getReturnType()),
+                    eagerMap(formalArguments, VariableReferenceNode::reference))))));
     }
 
     private List<FormalArgumentNode> formalArguments(Scope scope, IMethodBinding functionalInterfaceMethod) {

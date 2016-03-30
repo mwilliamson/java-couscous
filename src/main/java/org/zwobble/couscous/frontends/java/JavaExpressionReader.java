@@ -98,6 +98,9 @@ public class JavaExpressionReader {
             case ASTNode.EXPRESSION_METHOD_REFERENCE:
                 return readExpressionMethodReference((ExpressionMethodReference)expression);
 
+            case ASTNode.CREATION_REFERENCE:
+                return readCreationReference((CreationReference)expression);
+
             case ASTNode.INFIX_EXPRESSION:
                 return readInfixExpression((InfixExpression)expression);
 
@@ -246,6 +249,13 @@ public class JavaExpressionReader {
 
     private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
         GeneratedClosure closure = javaReader.readExpressionMethodReference(scope, expression);
+        return constructorCall(
+            closure.getType(),
+            captureArguments(closure).asList());
+    }
+
+    private ExpressionNode readCreationReference(CreationReference expression) {
+        GeneratedClosure closure = javaReader.readCreationReference(scope, expression);
         return constructorCall(
             closure.getType(),
             captureArguments(closure).asList());

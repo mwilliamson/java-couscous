@@ -48,6 +48,15 @@ public class InnerTypeReadingTests {
     }
 
     @Test
+    public void expressionConstructorReferenceWithStaticReceiverIsReadAsLambda() {
+        assertEquals(
+            readTypes(generateMethodSource("void",
+                "java.util.function.Function<String, String> function = arg0 -> new String(arg0);")),
+            readTypes(generateMethodSource("void",
+                "java.util.function.Function<String, String> function = String::new;")));
+    }
+
+    @Test
     public void expressionMethodReferenceWithInstanceReceiverIsReadAsLambda() {
         assertEquals(
             readTypes(generateMethodSource("void",

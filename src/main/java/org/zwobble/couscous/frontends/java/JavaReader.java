@@ -123,6 +123,13 @@ public class JavaReader {
             scope -> new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
     }
 
+    GeneratedClosure readCreationReference(Scope outerScope, CreationReference expression) {
+        return readLambda(
+            outerScope,
+            expression,
+            scope -> new JavaExpressionMethodReferenceReader(this).toLambda(scope, expression));
+    }
+
     GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {
         return readLambda(
             outerScope,
