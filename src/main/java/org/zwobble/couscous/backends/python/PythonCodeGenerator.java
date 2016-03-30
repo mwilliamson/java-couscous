@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
+import static org.zwobble.couscous.backends.python.ast.PythonArrayNode.pythonArray;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
@@ -42,6 +43,7 @@ import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNo
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
 import static org.zwobble.couscous.backends.python.ast.visitors.PythonExpressionStatement.pythonExpressionStatement;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonCodeGenerator {
@@ -225,7 +227,7 @@ public class PythonCodeGenerator {
         }
     }
 
-    private static PythonExpressionNode generateExpression(ExpressionNode expression) {
+    public static PythonExpressionNode generateExpression(ExpressionNode expression) {
         return expression.accept(EXPRESSION_GENERATOR);
     }
 
@@ -251,8 +253,10 @@ public class PythonCodeGenerator {
         }
 
         @Override
-        public PythonExpressionNode visit(ArrayNode arrayNode) {
-            throw new UnsupportedOperationException();
+        public PythonExpressionNode visit(ArrayNode array) {
+            return pythonArray(eagerMap(
+                array.getElements(),
+                PythonCodeGenerator::generateExpression));
         }
 
         @Override
