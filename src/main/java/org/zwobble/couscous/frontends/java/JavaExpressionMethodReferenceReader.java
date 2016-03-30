@@ -10,6 +10,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -28,27 +29,33 @@ public class JavaExpressionMethodReferenceReader {
     }
 
     public Lambda toLambda(Scope scope, ExpressionMethodReference expression) {
-        IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        List<FormalArgumentNode> formalArguments = formalArguments(scope, functionalInterfaceMethod);
-
-        return lambda(
-            formalArguments,
-            list(returns(JavaExpressionReader.coerceExpression(
-                typeOf(functionalInterfaceMethod.getReturnType()),
-                generateValue(scope, expression, formalArguments)))));
+        return toLambda(
+            scope,
+            expression,
+            arguments -> generateValue(scope, expression, arguments));
     }
 
     public Lambda toLambda(Scope scope, CreationReference expression) {
+        return toLambda(
+            scope,
+            expression,
+            arguments -> constructorCall(typeOf(expression.getType()), arguments));
+    }
+
+    private Lambda toLambda(
+        Scope scope,
+        MethodReference expression,
+        Function<List<ExpressionNode>, ExpressionNode> generateValue)
+    {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
         List<FormalArgumentNode> formalArguments = formalArguments(scope, functionalInterfaceMethod);
+        List<ExpressionNode> arguments = eagerMap(formalArguments, VariableReferenceNode::reference);
 
         return lambda(
             formalArguments,
             list(returns(JavaExpressionReader.coerceExpression(
                 typeOf(functionalInterfaceMethod.getReturnType()),
-                constructorCall(
-                    typeOf(functionalInterfaceMethod.getReturnType()),
-                    eagerMap(formalArguments, VariableReferenceNode::reference))))));
+                generateValue.apply(arguments)))));
     }
 
     private List<FormalArgumentNode> formalArguments(Scope scope, IMethodBinding functionalInterfaceMethod) {
@@ -63,10 +70,9 @@ public class JavaExpressionMethodReferenceReader {
         return arguments.build();
     }
 
-    private ExpressionNode generateValue(Scope scope, ExpressionMethodReference expression, List<FormalArgumentNode> formalArguments) {
+    private ExpressionNode generateValue(Scope scope, ExpressionMethodReference expression, List<ExpressionNode> arguments) {
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         String methodName = expression.getName().getIdentifier();
-        List<ExpressionNode> arguments = eagerMap(formalArguments, VariableReferenceNode::reference);
         Type type = typeOf(methodBinding.getReturnType());
 
         if (Modifier.isStatic(methodBinding.getModifiers())) {
