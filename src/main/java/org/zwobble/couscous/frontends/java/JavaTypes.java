@@ -52,7 +52,8 @@ public class JavaTypes {
         } else if (typeBinding.isTypeVariable()) {
             return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
         } else {
-            return ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getName());
+            // TODO: test for erasure of inner type name
+            return ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
         }
     }
 
