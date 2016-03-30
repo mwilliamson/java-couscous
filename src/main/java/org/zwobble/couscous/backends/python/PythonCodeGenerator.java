@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
-import static org.zwobble.couscous.backends.python.ast.PythonArrayNode.pythonArray;
+import static org.zwobble.couscous.backends.python.ast.PythonListNode.pythonList;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
@@ -254,7 +254,7 @@ public class PythonCodeGenerator {
 
         @Override
         public PythonExpressionNode visit(ArrayNode array) {
-            return pythonArray(eagerMap(
+            return pythonList(eagerMap(
                 array.getElements(),
                 PythonCodeGenerator::generateExpression));
         }

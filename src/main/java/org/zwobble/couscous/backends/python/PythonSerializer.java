@@ -48,10 +48,10 @@ public class PythonSerializer implements PythonNodeVisitor {
     }
 
     @Override
-    public void visit(PythonArrayNode array) {
+    public void visit(PythonListNode list) {
         writer.writeSymbol("[");
         writer.writeWithSeparator(
-            array.getElements(),
+            list.getElements(),
             element -> write(element),
             () -> {
                 writer.writeSymbol(",");

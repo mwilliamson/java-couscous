@@ -4,7 +4,7 @@ import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
-import org.zwobble.couscous.backends.python.ast.PythonArrayNode;
+import org.zwobble.couscous.backends.python.ast.PythonListNode;
 import org.zwobble.couscous.backends.python.ast.PythonExpressionNode;
 import org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode;
 import org.zwobble.couscous.types.Types;
@@ -42,7 +42,7 @@ public class PythonCodeGeneratorTests {
     private static Matcher<PythonExpressionNode> isPythonList(
         List<Matcher<? super PythonExpressionNode>> expectedElements)
     {
-        return isA(PythonArrayNode.class, hasFeature(
+        return isA(PythonListNode.class, hasFeature(
             "elements",
             list -> list.getElements(),
             contains(expectedElements)));

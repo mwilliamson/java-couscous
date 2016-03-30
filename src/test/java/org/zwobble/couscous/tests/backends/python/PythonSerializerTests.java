@@ -7,7 +7,7 @@ import org.zwobble.couscous.backends.python.ast.PythonModuleNode;
 
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
-import static org.zwobble.couscous.backends.python.ast.PythonArrayNode.pythonArray;
+import static org.zwobble.couscous.backends.python.ast.PythonListNode.pythonList;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBinaryOperation.pythonAnd;
@@ -61,11 +61,11 @@ public class PythonSerializerTests {
 
     @Test
     public void elementsOfArrayAreSerialised() {
-        assertEquals("[]", serialize(pythonArray(list())));
-        assertEquals("[one]", serialize(pythonArray(list(pythonVariableReference("one")))));
+        assertEquals("[]", serialize(pythonList(list())));
+        assertEquals("[one]", serialize(pythonList(list(pythonVariableReference("one")))));
         assertEquals(
             "[one, two]",
-            serialize(pythonArray(list(
+            serialize(pythonList(list(
                 pythonVariableReference("one"),
                 pythonVariableReference("two")))));
     }

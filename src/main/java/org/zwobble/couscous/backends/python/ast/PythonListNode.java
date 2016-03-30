@@ -4,14 +4,14 @@ import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
 import java.util.List;
 
-public class PythonArrayNode implements PythonExpressionNode {
-    public static PythonExpressionNode pythonArray(List<PythonExpressionNode> elements) {
-        return new PythonArrayNode(elements);
+public class PythonListNode implements PythonExpressionNode {
+    public static PythonExpressionNode pythonList(List<PythonExpressionNode> elements) {
+        return new PythonListNode(elements);
     }
 
     private final List<PythonExpressionNode> elements;
 
-    public PythonArrayNode(List<PythonExpressionNode> elements) {
+    public PythonListNode(List<PythonExpressionNode> elements) {
         this.elements = elements;
     }
 
