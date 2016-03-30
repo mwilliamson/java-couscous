@@ -261,6 +261,9 @@ public class ExpressionReadingTests {
             integerMultiply(literal(1), literal(2)),
             readIntExpression("1 * 2"));
         assertEquals(
+            integerMultiply(integerMultiply(literal(1), literal(2)), literal(3)),
+            readIntExpression("1 * 2 * 3"));
+        assertEquals(
             integerDivide(literal(1), literal(2)),
             readIntExpression("1 / 2"));
         assertEquals(

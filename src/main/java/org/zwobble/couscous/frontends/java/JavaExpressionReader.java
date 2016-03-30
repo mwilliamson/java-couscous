@@ -1,5 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
+import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.Type;
@@ -19,8 +20,8 @@ import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
-import static org.zwobble.couscous.util.ExtraLists.concat;
-import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.Fold.foldLeft;
 
 public class JavaExpressionReader {
     private final Scope scope;
@@ -264,10 +265,7 @@ public class JavaExpressionReader {
     private ExpressionNode readInfixExpression(InfixExpression expression) {
         if (isPrimitiveOperation(expression)) {
             Operator operator = readOperator(expression.getOperator());
-            return readPrimitiveOperation(
-                operator,
-                expression.getLeftOperand(),
-                expression.getRightOperand());
+            return readPrimitiveOperation(operator, operands(expression));
         } else {
             ExpressionNode left = readExpression(Types.OBJECT, expression.getLeftOperand());
             ExpressionNode right = readExpression(Types.OBJECT, expression.getRightOperand());
@@ -281,7 +279,17 @@ public class JavaExpressionReader {
         }
     }
 
+    private Iterable<Expression> operands(InfixExpression expression) {
+        @SuppressWarnings("unchecked")
+        List<Expression> extendedOperands = expression.extendedOperands();
+        return Iterables.concat(
+            list(expression.getLeftOperand()),
+            list(expression.getRightOperand()),
+            extendedOperands);
+    }
+
     private static boolean isPrimitiveOperation(InfixExpression expression) {
+        // TODO: consider expression.extendedOperands
         Type leftOperandType = typeOf(expression.getLeftOperand());
         Type rightOperandType = typeOf(expression.getRightOperand());
         return isPrimitive(leftOperandType)
@@ -329,17 +337,17 @@ public class JavaExpressionReader {
                 left,
                 coerceExpression(
                     left.getType(),
-                    readPrimitiveOperation(operator, expression.getLeftHandSide(), expression.getRightHandSide())));
+                    readPrimitiveOperation(operator, list(expression.getLeftHandSide(), expression.getRightHandSide()))));
         }
     }
 
-    private ExpressionNode readPrimitiveOperation(Operator operator, Expression leftJava, Expression rightJava) {
-        ExpressionNode left = readUnboxedExpression(leftJava);
-        ExpressionNode right = readUnboxedExpression(rightJava);
-        return operation(
+    private ExpressionNode readPrimitiveOperation(Operator operator, Iterable<Expression> javaOperands) {
+        List<ExpressionNode> operands = eagerMap(javaOperands, operand -> readUnboxedExpression(operand));
+        return foldLeft(operands, (left, right) -> operation(
             operator,
             list(left, right),
-            operator.isBoolean() ? Types.BOOLEAN : left.getType());
+            operator.isBoolean() ? Types.BOOLEAN : left.getType())
+        );
     }
 
     private ExpressionNode readCastExpression(CastExpression expression) {
