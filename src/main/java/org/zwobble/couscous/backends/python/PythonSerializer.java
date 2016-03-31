@@ -13,7 +13,6 @@ public class PythonSerializer implements PythonNodeVisitor {
         );
         PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);
-        System.out.println(writer.asString());
         return writer.asString();
     }
     
