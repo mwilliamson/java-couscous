@@ -28,7 +28,7 @@ public final class IntegerInterpreterValue implements InterpreterValue {
             infixReturningInteger((left, right) -> left % right))
         .method(Operator.EQUALS.getSymbol(), list(Types.INT), Types.BOOLEAN,
             (environment, arguments) -> {
-                IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getPositionalArguments().get(0);
+                IntegerInterpreterValue right = (IntegerInterpreterValue)arguments.getArguments().get(0);
                 return integerEquals(arguments, right);
             })
         .method(Operator.NOT_EQUALS.getSymbol(), list(Types.INT), Types.BOOLEAN,

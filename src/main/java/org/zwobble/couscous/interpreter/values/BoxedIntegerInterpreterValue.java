@@ -34,7 +34,7 @@ public class BoxedIntegerInterpreterValue {
 
         .method("equals", list(Types.OBJECT), Types.BOOLEAN,
             (environment, arguments) -> {
-                InterpreterValue right = arguments.getPositionalArguments().get(0);
+                InterpreterValue right = arguments.getArguments().get(0);
                 if (right.getType().getType().equals(Types.BOXED_INT)) {
                     IntegerInterpreterValue leftValue = (IntegerInterpreterValue)arguments.getReceiver().getField("value");
                     IntegerInterpreterValue rightValue = (IntegerInterpreterValue)right.getField("value");

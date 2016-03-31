@@ -20,7 +20,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         Environment environment,
         MethodNode method,
         Optional<InterpreterValue> thisValue,
-        PositionalArguments actualArguments)
+        Arguments actualArguments)
     {
         List<StatementNode> body = method.getBody().orElseThrow(() -> new RuntimeException("Cannot call abstract method"));
         return callMethod(environment, method.getArguments(), body, thisValue, actualArguments);
@@ -30,7 +30,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         Environment environment,
         ConstructorNode constructor,
         InterpreterValue thisValue,
-        PositionalArguments actualArguments)
+        Arguments actualArguments)
     {
         return callMethod(environment, constructor.getArguments(), constructor.getBody(), Optional.of(thisValue), actualArguments);
     }
@@ -40,7 +40,7 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         List<FormalArgumentNode> formalArguments,
         List<StatementNode> statements,
         Optional<InterpreterValue> thisValue,
-        PositionalArguments actualArguments)
+        Arguments actualArguments)
     {
         Environment innerEnvironment = buildEnvironment(environment, formalArguments, statements, thisValue, actualArguments);
         return exec(innerEnvironment, statements)
@@ -52,10 +52,10 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         List<FormalArgumentNode> formalArguments,
         List<StatementNode> statements,
         Optional<InterpreterValue> thisValue,
-        PositionalArguments arguments)
+        Arguments arguments)
     {
         StackFrameBuilder stackFrame = new StackFrameBuilder();
-        forEach(formalArguments, arguments, stackFrame::declare);
+        forEach(formalArguments, arguments.getValues(), stackFrame::declare);
         findDeclarations(statements).forEach(declaration -> stackFrame.declare(declaration));
         return environment.withStackFrame(thisValue, stackFrame.build());
     }

@@ -7,7 +7,7 @@ import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.Environment;
-import org.zwobble.couscous.interpreter.PositionalArguments;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.values.*;
 
@@ -72,7 +72,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
                 argumentsTypes,
                 (environment, arguments) ->
                     tryCast(interpreterValueType, arguments.getReceiver())
-                        .map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getPositionalArguments())))
+                        .map(typedReceiver -> method.apply(environment, MethodCallArguments.of(typedReceiver, arguments.getArguments())))
                         .orElseThrow(() -> new RuntimeException("receiver is of wrong type")));
         }
 
@@ -80,7 +80,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
             String name,
             List<Type> argumentsTypes,
             Type returnType,
-            BiFunction<Environment, PositionalArguments, InterpreterValue> method)
+            BiFunction<Environment, Arguments, InterpreterValue> method)
         {
             staticMethods.put(new MethodSignature(name, argumentsTypes, returnType), new StaticMethodValue(argumentsTypes, method));
             return this;
@@ -139,13 +139,13 @@ public class IntrinsicInterpreterType implements InterpreterType {
     @Override
     public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, MethodSignature signature, List<InterpreterValue> arguments) {
         MethodValue method = findMethod(methods, signature);
-        return method.apply(environment, MethodCallArguments.of(receiver, new PositionalArguments(arguments)));
+        return method.apply(environment, MethodCallArguments.of(receiver, new Arguments(arguments)));
     }
 
     @Override
     public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
         StaticMethodValue method = findMethod(staticMethods, signature);
-        return method.apply(environment, new PositionalArguments(arguments));
+        return method.apply(environment, new Arguments(arguments));
     }
 
     private static <T extends Callable> T findMethod(Map<MethodSignature, T> methods, MethodSignature signature) {
@@ -157,7 +157,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
 
     @Override
     public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
-        constructor.apply(environment, MethodCallArguments.of(thisValue, new PositionalArguments(arguments)));
+        constructor.apply(environment, MethodCallArguments.of(thisValue, new Arguments(arguments)));
     }
 
     @Override

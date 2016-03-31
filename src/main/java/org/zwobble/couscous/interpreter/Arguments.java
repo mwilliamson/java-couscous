@@ -2,13 +2,12 @@ package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 
-import java.util.Iterator;
 import java.util.List;
 
-public class PositionalArguments implements Iterable<InterpreterValue> {
+public class Arguments {
     private List<InterpreterValue> values;
     
-    public PositionalArguments(List<InterpreterValue> values) {
+    public Arguments(List<InterpreterValue> values) {
         this.values = values;
     }
     
@@ -16,8 +15,7 @@ public class PositionalArguments implements Iterable<InterpreterValue> {
         return values.get(index);
     }
 
-    @Override
-    public Iterator<InterpreterValue> iterator() {
-        return values.iterator();
+    public List<InterpreterValue> getValues() {
+        return values;
     }
 }

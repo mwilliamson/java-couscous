@@ -4,7 +4,7 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
-import org.zwobble.couscous.interpreter.PositionalArguments;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
@@ -74,7 +74,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
             environment,
             constructor,
             thisValue,
-            new PositionalArguments(arguments));
+            new Arguments(arguments));
     }
 
     private static void checkMethodArguments(final List<Type> argumentTypes, List<InterpreterValue> arguments) {
@@ -93,7 +93,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
             environment,
             findMethod(signature, false),
             Optional.of(value),
-            new PositionalArguments(arguments));
+            new Arguments(arguments));
     }
 
     @Override
@@ -102,7 +102,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
             environment,
             findMethod(signature, true),
             Optional.empty(),
-            new PositionalArguments(arguments));
+            new Arguments(arguments));
     }
 
     private MethodNode findMethod(MethodSignature signature, boolean isStatic) {
