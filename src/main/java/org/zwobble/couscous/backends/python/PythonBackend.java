@@ -19,7 +19,6 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 public class PythonBackend implements Backend {
     private static final List<String> RUNTIME_FILES = ImmutableList.of(
         "java.lang.Object",
-        "java.lang.Boolean",
         "java.lang.Integer",
         "java.lang.String",
         "_couscous");
