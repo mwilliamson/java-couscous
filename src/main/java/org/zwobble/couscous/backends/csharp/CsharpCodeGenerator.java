@@ -1,9 +1,12 @@
 package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.Node;
+import org.zwobble.couscous.ast.Receiver;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.backends.Names;
+import org.zwobble.couscous.backends.Naming;
 import org.zwobble.couscous.types.*;
 
 import java.util.Map;
@@ -26,15 +29,15 @@ public class CsharpCodeGenerator {
     private final NodeTransformer nodeTransformer;
 
     public static Node generateCode(Node node, String namespace) {
-        return new CsharpCodeGenerator(namespace).generateCode(node);
+        return new CsharpCodeGenerator(Naming.signaturesContainsSimpleNames(), namespace).generateCode(node);
     }
 
-    private CsharpCodeGenerator(String namespace) {
+    private CsharpCodeGenerator(Naming naming, String namespace) {
         this.namespace = namespace;
         nodeTransformer = NodeTransformer.builder()
             .transformType(this::transformType)
             .transformExpression(this::transformExpression)
-            .transformMethodName(this::transformMethodName)
+            .transformMethodName(naming::methodName)
             .build();
     }
 
@@ -76,10 +79,6 @@ public class CsharpCodeGenerator {
                     transformType(type.getValue()));
             }
         });
-    }
-
-    private String transformMethodName(MethodSignature signature) {
-        return Names.toUniqueName(signature);
     }
 
     private Optional<ExpressionNode> transformExpression(ExpressionNode expression) {
