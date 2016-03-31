@@ -2,12 +2,10 @@ package org.zwobble.couscous.tests.interpreter;
 
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matcher;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.interpreter.Environment;
-import org.zwobble.couscous.interpreter.JavaProject;
-import org.zwobble.couscous.interpreter.MapBackedProject;
-import org.zwobble.couscous.interpreter.StackFrameBuilder;
+import org.zwobble.couscous.interpreter.*;
 import org.zwobble.couscous.interpreter.errors.*;
 import org.zwobble.couscous.interpreter.values.ArrayInterpreterValue;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
@@ -41,7 +39,9 @@ import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.*;
+import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraMaps.map;
 
 public class EvaluatorTests extends BackendEvalTests {
     @Test
@@ -247,6 +247,24 @@ public class EvaluatorTests extends BackendEvalTests {
             isArrayInterpreterValue(Types.STRING, list(
                 StringInterpreterValue.of("one"),
                 StringInterpreterValue.of("two"))));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void typeOfValueCanBeParameterisedType() {
+        ScalarType rawType = ScalarType.of("Box");
+        ClassNode classNode = ClassNode.builder(rawType)
+            .addTypeParameter("T")
+            .build();
+        Project project = JavaProject.of(list(classNode));
+        Environment environment = new Environment(project, Optional.empty(), map());
+        ConstructorCallNode call = constructorCall(
+            parameterizedType(rawType, list(Types.STRING)),
+            list());
+        InterpreterValue value = eval(environment, call);
+        assertThat(
+            value.getType().getType(),
+            equalTo(parameterizedType(rawType, list(Types.STRING))));
     }
 
     private Matcher<InterpreterValue> isArrayInterpreterValue(ScalarType elementType, List<InterpreterValue> elements) {
