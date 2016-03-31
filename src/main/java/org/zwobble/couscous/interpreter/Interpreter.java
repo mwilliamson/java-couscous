@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Interpreter {
     private Project project;
@@ -30,6 +31,6 @@ public class Interpreter {
             methodName,
             eagerMap(arguments, argument -> argument.getType().getType()),
             returnType);
-        return clazz.callMethod(environment, signature, new Arguments(arguments));
+        return clazz.callMethod(environment, signature, new Arguments(list(), arguments));
     }
 }

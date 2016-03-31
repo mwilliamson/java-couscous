@@ -12,12 +12,12 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
@@ -102,16 +102,17 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         MethodSignature signature = methodCall.signature();
 
         return evalReceiver(methodCall.getReceiver())
-            .callMethod(environment, signature, new Arguments(arguments));
+            .callMethod(environment, signature, new Arguments(list(), arguments));
     }
     
     @Override
     public InterpreterValue visit(ConstructorCallNode call) {
         StaticReceiverValue clazz = environment.findClass(erasure(call.getType()));
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
-        Optional<List<Type>> typeParameters = tryCast(ParameterizedType.class, call.getType())
-            .map(type -> type.getParameters());
-        return clazz.callConstructor(environment, typeParameters, new Arguments(arguments));
+        List<Type> typeParameters = tryCast(ParameterizedType.class, call.getType())
+            .map(type -> type.getParameters())
+            .orElse(list());
+        return clazz.callConstructor(environment, new Arguments(typeParameters, arguments));
     }
 
     @Override
