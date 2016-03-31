@@ -1,7 +1,6 @@
 package org.zwobble.couscous.tests.backends.python;
 
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
+import org.hamcrest.*;
 import org.junit.Test;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.ast.PythonListNode;
@@ -36,7 +35,35 @@ public class PythonCodeGeneratorTests {
     }
 
     private static <T, U> Matcher<T> isA(Class<U> type, Matcher<? super U> downcastMatcher) {
-        return allOf(instanceOf(type), (Matcher<? super T>) downcastMatcher);
+        return new DiagnosingMatcher<T>() {
+            @Override
+            protected boolean matches(Object item, Description mismatch) {
+                if (null == item) {
+                    mismatch.appendText("null");
+                    return false;
+                }
+
+                if (!type.isInstance(item)) {
+                    mismatch.appendValue(item).appendText(" is a " + item.getClass().getName());
+                    return false;
+                }
+
+                if (!downcastMatcher.matches(item)) {
+                    downcastMatcher.describeMismatch(item, mismatch);
+                    return false;
+                }
+
+                return true;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description
+                    .appendText(type.getSimpleName())
+                    .appendText(" with ");
+                downcastMatcher.describeTo(description);
+            }
+        };
     }
 
     private static Matcher<PythonExpressionNode> isPythonList(
