@@ -137,15 +137,15 @@ public class IntrinsicInterpreterType implements InterpreterType {
     }
 
     @Override
-    public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callMethod(Environment environment, InterpreterValue receiver, MethodSignature signature, Arguments arguments) {
         MethodValue method = findMethod(methods, signature);
-        return method.apply(environment, MethodCallArguments.of(receiver, new Arguments(arguments)));
+        return method.apply(environment, MethodCallArguments.of(receiver, arguments));
     }
 
     @Override
-    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, Arguments arguments) {
         StaticMethodValue method = findMethod(staticMethods, signature);
-        return method.apply(environment, new Arguments(arguments));
+        return method.apply(environment, arguments);
     }
 
     private static <T extends Callable> T findMethod(Map<MethodSignature, T> methods, MethodSignature signature) {
@@ -156,8 +156,8 @@ public class IntrinsicInterpreterType implements InterpreterType {
     }
 
     @Override
-    public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
-        constructor.apply(environment, MethodCallArguments.of(thisValue, new Arguments(arguments)));
+    public void callConstructor(Environment environment, InterpreterValue thisValue, Arguments arguments) {
+        constructor.apply(environment, MethodCallArguments.of(thisValue, arguments));
     }
 
     @Override

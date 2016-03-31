@@ -1,12 +1,11 @@
 package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 
-import java.util.List;
-
 public interface ReceiverValue {
-    InterpreterValue callMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments);
+    InterpreterValue callMethod(Environment environment, MethodSignature signature, Arguments arguments);
     InterpreterValue getField(String fieldName);
     void setField(String fieldName, InterpreterValue value);
 }

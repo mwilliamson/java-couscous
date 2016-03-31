@@ -102,7 +102,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         MethodSignature signature = methodCall.signature();
 
         return evalReceiver(methodCall.getReceiver())
-            .callMethod(environment, signature, arguments);
+            .callMethod(environment, signature, new Arguments(arguments));
     }
     
     @Override
@@ -111,7 +111,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
         Optional<List<Type>> typeParameters = tryCast(ParameterizedType.class, call.getType())
             .map(type -> type.getParameters());
-        return clazz.callConstructor(environment, typeParameters, arguments);
+        return clazz.callConstructor(environment, typeParameters, new Arguments(arguments));
     }
 
     @Override

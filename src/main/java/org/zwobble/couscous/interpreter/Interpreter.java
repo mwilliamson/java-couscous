@@ -30,6 +30,6 @@ public class Interpreter {
             methodName,
             eagerMap(arguments, argument -> argument.getType().getType()),
             returnType);
-        return clazz.callMethod(environment, signature, arguments);
+        return clazz.callMethod(environment, signature, new Arguments(arguments));
     }
 }

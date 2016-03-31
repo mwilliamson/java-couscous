@@ -1,6 +1,7 @@
 package org.zwobble.couscous.interpreter.values;
 
 import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
@@ -20,7 +21,7 @@ public class StaticReceiverValue implements ReceiverValue {
     }
 
     @Override
-    public InterpreterValue callMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callMethod(Environment environment, MethodSignature signature, Arguments arguments) {
         return type.callStaticMethod(environment, signature, arguments);
     }
 
@@ -38,7 +39,7 @@ public class StaticReceiverValue implements ReceiverValue {
         Executor.exec(environment, type.getStaticConstructor());
     }
 
-    public InterpreterValue callConstructor(Environment environment, Optional<List<Type>> typeParameters, List<InterpreterValue> arguments) {
+    public InterpreterValue callConstructor(Environment environment, Optional<List<Type>> typeParameters, Arguments arguments) {
         InterpreterType objectType = typeParameters
             .<InterpreterType>map(parameters -> new ParameterizedInterpreterType(type, parameters))
             .orElse(type);

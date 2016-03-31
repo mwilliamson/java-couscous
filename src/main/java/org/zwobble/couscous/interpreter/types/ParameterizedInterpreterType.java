@@ -3,6 +3,7 @@ package org.zwobble.couscous.interpreter.types;
 import org.zwobble.couscous.ast.FieldDeclarationNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.StatementNode;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.types.ScalarType;
@@ -49,17 +50,17 @@ public class ParameterizedInterpreterType implements InterpreterType {
     }
 
     @Override
-    public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
+    public void callConstructor(Environment environment, InterpreterValue thisValue, Arguments arguments) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, Arguments arguments) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, Arguments arguments) {
         throw new UnsupportedOperationException();
     }
 }

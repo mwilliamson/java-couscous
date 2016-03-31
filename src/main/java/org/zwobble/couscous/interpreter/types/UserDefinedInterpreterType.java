@@ -61,7 +61,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
     }
 
     @Override
-    public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
+    public void callConstructor(Environment environment, InterpreterValue thisValue, Arguments arguments) {
         ConstructorNode constructor = tryCast(ClassNode.class, type)
             // TODO: add test for this case
             .orElseThrow(() -> new RuntimeException("Cannot instantiate non-class types"))
@@ -69,12 +69,12 @@ public class UserDefinedInterpreterType implements InterpreterType {
         List<Type> formalArgumentTypes = eagerMap(
             constructor.getArguments(),
             FormalArgumentNode::getType);
-        checkMethodArguments(formalArgumentTypes, arguments);
+        checkMethodArguments(formalArgumentTypes, arguments.getValues());
         Executor.callConstructor(
             environment,
             constructor,
             thisValue,
-            new Arguments(arguments));
+            arguments);
     }
 
     private static void checkMethodArguments(final List<Type> argumentTypes, List<InterpreterValue> arguments) {
@@ -88,21 +88,21 @@ public class UserDefinedInterpreterType implements InterpreterType {
     }
 
     @Override
-    public InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, Arguments arguments) {
         return Executor.callMethod(
             environment,
             findMethod(signature, false),
             Optional.of(value),
-            new Arguments(arguments));
+            arguments);
     }
 
     @Override
-    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments) {
+    public InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, Arguments arguments) {
         return Executor.callMethod(
             environment,
             findMethod(signature, true),
             Optional.empty(),
-            new Arguments(arguments));
+            arguments);
     }
 
     private MethodNode findMethod(MethodSignature signature, boolean isStatic) {
