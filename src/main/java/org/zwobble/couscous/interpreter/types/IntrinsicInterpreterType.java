@@ -156,10 +156,8 @@ public class IntrinsicInterpreterType implements InterpreterType {
     }
 
     @Override
-    public InterpreterValue callConstructor(Environment environment, List<InterpreterValue> arguments) {
-        ObjectInterpreterValue object = new ObjectInterpreterValue(this);
-        constructor.apply(environment, MethodCallArguments.of(object, new PositionalArguments(arguments)));
-        return object;
+    public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
+        constructor.apply(environment, MethodCallArguments.of(thisValue, new PositionalArguments(arguments)));
     }
 
     @Override

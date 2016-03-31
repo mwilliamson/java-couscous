@@ -1,8 +1,6 @@
 package org.zwobble.couscous.interpreter.types;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
@@ -10,9 +8,13 @@ import org.zwobble.couscous.interpreter.PositionalArguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.interpreter.values.ObjectInterpreterValue;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.collect.Iterables.filter;
 import static org.zwobble.couscous.util.Casts.tryCast;
@@ -59,7 +61,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
     }
 
     @Override
-    public InterpreterValue callConstructor(Environment environment, List<InterpreterValue> arguments) {
+    public void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments) {
         ConstructorNode constructor = tryCast(ClassNode.class, type)
             // TODO: add test for this case
             .orElseThrow(() -> new RuntimeException("Cannot instantiate non-class types"))
@@ -68,13 +70,11 @@ public class UserDefinedInterpreterType implements InterpreterType {
             constructor.getArguments(),
             FormalArgumentNode::getType);
         checkMethodArguments(formalArgumentTypes, arguments);
-        InterpreterValue object = new ObjectInterpreterValue(this);
         Executor.callConstructor(
             environment,
             constructor,
-            object,
+            thisValue,
             new PositionalArguments(arguments));
-        return object;
     }
 
     private static void checkMethodArguments(final List<Type> argumentTypes, List<InterpreterValue> arguments) {

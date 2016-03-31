@@ -6,13 +6,17 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.errors.InvalidCast;
 import org.zwobble.couscous.interpreter.values.*;
+import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.Types.erasure;
+import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
@@ -105,7 +109,9 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public InterpreterValue visit(ConstructorCallNode call) {
         StaticReceiverValue clazz = environment.findClass(erasure(call.getType()));
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
-        return clazz.callConstructor(environment, arguments);
+        Optional<List<Type>> typeParameters = tryCast(ParameterizedType.class, call.getType())
+            .map(type -> type.getParameters());
+        return clazz.callConstructor(environment, typeParameters, arguments);
     }
 
     @Override

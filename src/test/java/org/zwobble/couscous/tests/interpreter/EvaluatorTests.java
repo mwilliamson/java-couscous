@@ -2,7 +2,6 @@ package org.zwobble.couscous.tests.interpreter;
 
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matcher;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.interpreter.*;
@@ -250,7 +249,6 @@ public class EvaluatorTests extends BackendEvalTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void typeOfValueCanBeParameterisedType() {
         ScalarType rawType = ScalarType.of("Box");
         ClassNode classNode = ClassNode.builder(rawType)

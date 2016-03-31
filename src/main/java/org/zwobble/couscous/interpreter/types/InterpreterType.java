@@ -16,7 +16,7 @@ public interface InterpreterType {
     Set<Type> getSuperTypes();
     Optional<FieldDeclarationNode> getField(String fieldName);
     List<StatementNode> getStaticConstructor();
-    InterpreterValue callConstructor(Environment environment, List<InterpreterValue> arguments);
+    void callConstructor(Environment environment, InterpreterValue thisValue, List<InterpreterValue> arguments);
     InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, List<InterpreterValue> arguments);
     InterpreterValue callStaticMethod(Environment environment, MethodSignature signature, List<InterpreterValue> arguments);
 }
