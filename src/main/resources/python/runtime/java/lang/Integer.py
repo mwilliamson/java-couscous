@@ -1,12 +1,12 @@
 class Integer(object):
     @staticmethod
-    def valueOf__int__java_lang_Integer(value):
+    def valueOf__int__Integer(value):
         return value
     
     def __init__(self, value):
         self._value = value
     
-    def equals__java_lang_Object__boolean(self, other):
+    def equals__Object__boolean(self, other):
         # TODO: test this properly
         return isinstance(other, Integer) and other._value == self._value
 

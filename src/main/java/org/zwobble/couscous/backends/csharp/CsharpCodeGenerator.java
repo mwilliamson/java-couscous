@@ -29,7 +29,7 @@ public class CsharpCodeGenerator {
     private final NodeTransformer nodeTransformer;
 
     public static Node generateCode(Node node, String namespace) {
-        return new CsharpCodeGenerator(Naming.signaturesContainsSimpleNames(), namespace).generateCode(node);
+        return new CsharpCodeGenerator(Naming.signaturesContainSimpleNames(), namespace).generateCode(node);
     }
 
     private CsharpCodeGenerator(Naming naming, String namespace) {

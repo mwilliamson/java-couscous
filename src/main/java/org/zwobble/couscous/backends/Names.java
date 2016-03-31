@@ -20,7 +20,7 @@ public class Names {
         return argument.accept(new Type.Visitor<String>() {
             @Override
             public String visit(ScalarType type) {
-                return type.getQualifiedName().replace('.', '_');
+                return type.getSimpleName();
             }
 
             @Override
