@@ -130,6 +130,7 @@ public class PythonPrimitiveMethods {
         ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
 
             .put("parseInt", arguments -> pythonCall(pythonVariableReference("int"), arguments))
+            .put("valueOf", arguments -> arguments.get(0))
 
             .build();
     

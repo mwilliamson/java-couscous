@@ -1,8 +1,4 @@
 class Integer(object):
-    @staticmethod
-    def valueOf__int__Integer(value):
-        return value
-    
     def __init__(self, value):
         self._value = value
     
