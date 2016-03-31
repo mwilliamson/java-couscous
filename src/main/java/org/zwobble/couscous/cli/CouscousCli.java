@@ -2,8 +2,8 @@ package org.zwobble.couscous.cli;
 
 import org.apache.commons.cli.*;
 import org.zwobble.couscous.Backend;
-import org.zwobble.couscous.ast.ClassNode;
 import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 
@@ -13,9 +13,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class CouscousCli {
     public static final String SOURCEPATH = "sourcepath";
@@ -56,6 +54,8 @@ public class CouscousCli {
         switch (backend) {
             case "python":
                 return new PythonBackend(path(output), "_couscous");
+            case "csharp":
+                return new CsharpBackend(path(output), "_Couscous");
             default:
                 throw new RuntimeException("Unrecognised backend: " + backend);
         }
