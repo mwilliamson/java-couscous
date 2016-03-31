@@ -6,27 +6,33 @@ import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
+import org.zwobble.couscous.types.Types;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
+import static org.zwobble.couscous.util.ExtraMaps.toMap;
 
 public class ParameterizedInterpreterType implements InterpreterType {
-    private final InterpreterType rawType;
+    private final InterpreterType genericType;
     private final List<Type> parameters;
 
-    public ParameterizedInterpreterType(InterpreterType rawType, List<Type> parameters) {
-        this.rawType = rawType;
+    public ParameterizedInterpreterType(InterpreterType genericType, List<Type> parameters) {
+        this.genericType = genericType;
         this.parameters = parameters;
     }
 
     @Override
     public Type getType() {
-        return parameterizedType((ScalarType) rawType.getType(), parameters);
+        return parameterizedType(((ParameterizedType) genericType.getType()).getRawType(), parameters);
     }
 
     // TODO: implement the other methods properly.
@@ -36,12 +42,18 @@ public class ParameterizedInterpreterType implements InterpreterType {
 
     @Override
     public Set<Type> getSuperTypes() {
-        throw new UnsupportedOperationException();
+        Map<TypeParameter, Type> replacements = toMap(
+            ExtraIterables.cast(TypeParameter.class, ((ParameterizedType) genericType.getType()).getParameters()),
+            parameters);
+        return genericType.getSuperTypes()
+            .stream()
+            .map(type -> Types.substitute(type, replacements))
+            .collect(Collectors.toSet());
     }
 
     @Override
     public Optional<FieldDeclarationNode> getField(String fieldName) {
-        throw new UnsupportedOperationException();
+        return genericType.getField(fieldName);
     }
 
     @Override
@@ -56,7 +68,7 @@ public class ParameterizedInterpreterType implements InterpreterType {
 
     @Override
     public InterpreterValue callMethod(Environment environment, InterpreterValue value, MethodSignature signature, Arguments arguments) {
-        throw new UnsupportedOperationException();
+        return genericType.callMethod(environment, value, signature.generic(), arguments);
     }
 
     @Override

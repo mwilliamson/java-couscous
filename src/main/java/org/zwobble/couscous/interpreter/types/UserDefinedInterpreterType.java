@@ -1,15 +1,15 @@
 package org.zwobble.couscous.interpreter.types;
 
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
 import org.zwobble.couscous.interpreter.InterpreterTypes;
-import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.errors.NoSuchMethod;
 import org.zwobble.couscous.interpreter.errors.WrongNumberOfArguments;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
-import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Iterables.filter;
+import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -35,12 +36,17 @@ public class UserDefinedInterpreterType implements InterpreterType {
             .orElse(map());
         this.methods = toMapWithKeys(
             filter(type.getMethods(), method -> !method.isAbstract()),
-            method -> method.signature());
+            method -> method.signature().generic());
     }
 
     @Override
-    public ScalarType getType() {
-        return type.getName();
+    public Type getType() {
+        List<Type> parameters = eagerMap(
+            type.getTypeParameters(),
+            parameter -> new TypeParameter(type.getName(), parameter.getName()));
+        return parameters.isEmpty()
+            ? type.getName()
+            : parameterizedType(type.getName(), parameters);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package org.zwobble.couscous.types;
 
+import java.util.Map;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Types {
@@ -37,6 +40,58 @@ public class Types {
             @Override
             public ScalarType visit(BoundTypeParameter type) {
                 return erasure(type.getParameter());
+            }
+        });
+    }
+
+    public static Type substitute(Type type, Map<TypeParameter, Type> replacements) {
+        return type.accept(new Type.Visitor<Type>() {
+            @Override
+            public Type visit(ScalarType type) {
+                return type;
+            }
+
+            @Override
+            public Type visit(TypeParameter type) {
+                return replacements.getOrDefault(type, type);
+            }
+
+            @Override
+            public Type visit(ParameterizedType type) {
+                return new ParameterizedType(
+                    type.getRawType(),
+                    eagerMap(type.getParameters(), parameter -> parameter.accept(this)));
+            }
+
+            @Override
+            public Type visit(BoundTypeParameter type) {
+                throw new UnsupportedOperationException();
+            }
+        });
+    }
+
+    public static Type generic(Type type) {
+        return type.accept(new Type.Visitor<Type>() {
+            @Override
+            public Type visit(ScalarType type) {
+                return type;
+            }
+
+            @Override
+            public Type visit(TypeParameter parameter) {
+                return parameter;
+            }
+
+            @Override
+            public Type visit(ParameterizedType type) {
+                return new ParameterizedType(
+                    type.getRawType(),
+                    eagerMap(type.getParameters(), parameter -> parameter.accept(this)));
+            }
+
+            @Override
+            public Type visit(BoundTypeParameter type) {
+                return type.getParameter();
             }
         });
     }

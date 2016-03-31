@@ -1,8 +1,11 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class MethodSignature {
     public static MethodSignature signature(String name, List<Type> arguments, Type returnType) {
@@ -29,6 +32,13 @@ public class MethodSignature {
 
     public Type getReturnType() {
         return returnType;
+    }
+
+    public MethodSignature generic() {
+        return new MethodSignature(
+            name,
+            eagerMap(arguments, Types::generic),
+            Types.generic(returnType));
     }
 
     @Override

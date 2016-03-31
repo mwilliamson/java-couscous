@@ -52,7 +52,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public InterpreterValue visit(ThisReferenceNode reference) {
         InterpreterValue thisValue = environment.getThis().get();
         // TODO: add a test for this
-        InterpreterTypes.checkIsInstance(reference.getType(), thisValue);
+        //InterpreterTypes.checkIsInstance(reference.getType(), thisValue);
         return thisValue;
     }
 
@@ -102,7 +102,7 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         MethodSignature signature = methodCall.signature();
 
         return evalReceiver(methodCall.getReceiver())
-            .callMethod(environment, signature, new Arguments(list(), arguments));
+            .callMethod(environment, signature.generic(), new Arguments(list(), arguments));
     }
     
     @Override
