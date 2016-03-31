@@ -2,8 +2,10 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.Operator;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
+import org.zwobble.couscous.values.InternalCouscousValue;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Optional;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.integerSubtract;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -82,9 +85,17 @@ public class CsharpPrimitiveMethods {
 
             .build();
 
+    private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INTERNAL_METHODS =
+        ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
+
+            .put("same", arguments -> operation(Operator.EQUALS, arguments, Types.BOOLEAN))
+
+            .build();
+
     private static final Map<ScalarType, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(Types.BOXED_INT, STATIC_INT_METHODS)
+            .put(InternalCouscousValue.REF, STATIC_INTERNAL_METHODS)
             .build();
 
     public static Optional<PrimitiveMethodGenerator> getPrimitiveMethod(ScalarType type, String methodName) {

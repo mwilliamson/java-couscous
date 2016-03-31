@@ -18,8 +18,7 @@ public class CsharpBackend implements Backend {
     private static final List<String> RUNTIME_FILES = ImmutableList.of(
         "java/lang/Integer.cs",
         "java/lang/Object.cs",
-        "java/lang/String.cs",
-        "_couscous.cs");
+        "java/lang/String.cs");
 
     private final Path directoryPath;
     private final String namespace;
