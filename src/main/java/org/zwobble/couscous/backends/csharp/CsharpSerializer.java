@@ -158,7 +158,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     private void writeArguments(List<? extends ExpressionNode> arguments) {
         writer.writeSymbol("(");
-        writer.writeWithSeparator(arguments, this::write, () -> writer.writeSymbol(", "));
+        writer.writeCommaSeparated(arguments, this::write);
         writer.writeSymbol(")");
     }
 
@@ -285,10 +285,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     private void writeFormalArguments(List<FormalArgumentNode> arguments) {
         writer.writeSymbol("(");
-        writer.writeWithSeparator(
-            arguments,
-            this::write,
-            () -> writer.writeSymbol(", "));
+        writer.writeCommaSeparated(arguments, this::write);
         writer.writeSymbol(")");
     }
 
@@ -364,13 +361,9 @@ public class CsharpSerializer implements NodeVisitor {
     private void writeTypeParameters(TypeNode node) {
         if (!node.getTypeParameters().isEmpty()) {
             writer.writeSymbol("<");
-            writer.writeWithSeparator(
+            writer.writeCommaSeparated(
                 node.getTypeParameters(),
-                parameter -> writer.writeIdentifier(parameter.getName()),
-                () -> {
-                    writer.writeSymbol(",");
-                    writer.writeSpace();
-                });
+                parameter -> writer.writeIdentifier(parameter.getName()));
             writer.writeSymbol(">");
         }
     }
@@ -380,13 +373,9 @@ public class CsharpSerializer implements NodeVisitor {
             writer.writeSpace();
             writer.writeSymbol(":");
             writer.writeSpace();
-            writer.writeWithSeparator(
+            writer.writeCommaSeparated(
                 node.getSuperTypes(),
-                this::writeTypeReference,
-                () -> {
-                    writer.writeSymbol(",");
-                    writer.writeSpace();
-                });
+                this::writeTypeReference);
         }
     }
 
@@ -444,14 +433,9 @@ public class CsharpSerializer implements NodeVisitor {
             public Void visit(ParameterizedType type) {
                 writer.writeIdentifier(typeReference(type.getRawType()));
                 writer.writeSymbol("<");
-                writer.writeWithSeparator(
+                writer.writeCommaSeparated(
                     type.getParameters(),
-                    parameter -> writeTypeReference(parameter),
-                    () -> {
-                        writer.writeSymbol(",");
-                        writer.writeSpace();
-                    }
-                );
+                    parameter -> writeTypeReference(parameter));
                 writer.writeSymbol(">");
                 return null;
             }

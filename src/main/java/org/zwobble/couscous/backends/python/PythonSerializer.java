@@ -49,13 +49,9 @@ public class PythonSerializer implements PythonNodeVisitor {
     @Override
     public void visit(PythonListNode list) {
         writer.writeSymbol("[");
-        writer.writeWithSeparator(
+        writer.writeCommaSeparated(
             list.getElements(),
-            element -> write(element),
-            () -> {
-                writer.writeSymbol(",");
-                writer.writeSpace();
-            });
+            element -> write(element));
         writer.writeSymbol("]");
     }
 
@@ -83,10 +79,7 @@ public class PythonSerializer implements PythonNodeVisitor {
     public void visit(PythonCallNode call) {
         writeParenthesised(call.getCallee(), call);
         writer.writeSymbol("(");
-        writer.writeWithSeparator(call.getArguments(), this::write, () -> {
-            writer.writeSymbol(",");
-            writer.writeSpace();
-        });
+        writer.writeCommaSeparated(call.getArguments(), this::write);
         writer.writeSymbol(")");
     }
     
@@ -185,11 +178,8 @@ public class PythonSerializer implements PythonNodeVisitor {
             writer.writeSpace();
             writer.writeKeyword("import");
             writer.writeSpace();
-            writer.writeWithSeparator(importNode.getAliases(), alias -> {
+            writer.writeCommaSeparated(importNode.getAliases(), alias -> {
                 writer.writeIdentifier(alias.getName());
-            }, () -> {
-                writer.writeSymbol(",");
-                writer.writeSpace();
             });
         });
     }
@@ -230,10 +220,7 @@ public class PythonSerializer implements PythonNodeVisitor {
     }
     
     private void writeArgumentNames(PythonFunctionDefinitionNode functionDefinition) {
-        writer.writeWithSeparator(functionDefinition.getArgumentNames(), writer::writeIdentifier, () -> {
-            writer.writeSymbol(",");
-            writer.writeSpace();
-        });
+        writer.writeCommaSeparated(functionDefinition.getArgumentNames(), writer::writeIdentifier);
     }
 
     @Override
