@@ -93,6 +93,13 @@ public class SourceCodeWriter {
         action.run(this);
     }
 
+    public <T> void writeCommaSeparated(Iterable<T> values, Consumer<T> writeValue) {
+        writeWithSeparator(values, writeValue, () -> {
+            writeSymbol(",");
+            writeSpace();
+        });
+    }
+
     public <T> void writeWithSeparator(Iterable<T> values, Consumer<T> writeValue, Action separator) {
         Iterator<T> iterator = values.iterator();
         if (iterator.hasNext()) {

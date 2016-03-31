@@ -88,7 +88,15 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ArrayNode array) {
-        throw new UnsupportedOperationException();
+        writer.writeKeyword("new");
+        writer.writeSpace();
+        writeTypeReference(array.getElementType());
+        writer.writeSymbol("[");
+        writer.writeSymbol("]");
+        writer.writeSpace();
+        writer.writeSymbol("{");
+        writer.writeCommaSeparated(array.getElements(), this::write);
+        writer.writeSymbol("}");
     }
 
     @Override

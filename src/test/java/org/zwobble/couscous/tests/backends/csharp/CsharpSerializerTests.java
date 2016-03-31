@@ -8,6 +8,7 @@ import org.zwobble.couscous.tests.TestIds;
 import org.zwobble.couscous.types.Types;
 
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
@@ -65,6 +66,18 @@ public class CsharpSerializerTests {
     public void thisReferenceUsesThisKeyword() {
         String output = serialize(thisReference(ScalarType.of("X")));
         assertEquals("this", output);
+    }
+
+    @Test
+    public void emptyArraySpecifiesTypeOfArray() {
+        String output = serialize(array(ScalarType.of("X"), list()));
+        assertEquals("new X[] {}", output);
+    }
+
+    @Test
+    public void arrayElementsAreSeparatedByComma() {
+        String output = serialize(array(ScalarType.of("X"), list(literal(1), literal(2))));
+        assertEquals("new X[] {1, 2}", output);
     }
 
     @Test
