@@ -83,6 +83,8 @@ public class CsharpPrimitiveMethods {
                 list(arguments.get(0)),
                 ScalarType.of("int")))
 
+            .put("valueOf", arguments -> arguments.get(0))
+
             .build();
 
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INTERNAL_METHODS =
