@@ -1,18 +1,19 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.errors.InvalidCast;
 import org.zwobble.couscous.interpreter.values.*;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.Types.erasure;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
@@ -52,8 +53,10 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     }
 
     @Override
-    public InterpreterValue visit(ArrayNode arrayNode) {
-        throw new UnsupportedOperationException();
+    public InterpreterValue visit(ArrayNode array) {
+        return new ArrayInterpreterValue(
+            array.getElementType(),
+            eagerMap(array.getElements(), this::eval));
     }
 
     @Override

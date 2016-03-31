@@ -1,25 +1,31 @@
 package org.zwobble.couscous.tests.interpreter;
 
 import com.google.common.collect.ImmutableMap;
+import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.JavaProject;
 import org.zwobble.couscous.interpreter.MapBackedProject;
 import org.zwobble.couscous.interpreter.StackFrameBuilder;
 import org.zwobble.couscous.interpreter.errors.*;
+import org.zwobble.couscous.interpreter.values.ArrayInterpreterValue;
 import org.zwobble.couscous.interpreter.values.IntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.CastNode.cast;
@@ -34,6 +40,7 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.values.InterpreterValues.value;
 import static org.zwobble.couscous.tests.TestIds.ANY_ID;
 import static org.zwobble.couscous.tests.util.ExtraAsserts.assertThrows;
+import static org.zwobble.couscous.tests.util.ExtraMatchers.*;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class EvaluatorTests extends BackendEvalTests {
@@ -225,7 +232,31 @@ public class EvaluatorTests extends BackendEvalTests {
         assertEquals(Types.STRING, exception.getExpected());
         assertEquals(Types.INT, exception.getActual());
     }
-    
+
+    @Test
+    public void canEvaluateEmptyArray() {
+        InterpreterValue array = eval(emptyEnvironment(), array(Types.STRING, list()));
+        assertThat(array, isArrayInterpreterValue(Types.STRING, list()));
+    }
+
+    @Test
+    public void canEvaluateArrayWithElements() {
+        InterpreterValue array = eval(emptyEnvironment(), array(Types.STRING, list(literal("one"), literal("two"))));
+        assertThat(
+            array,
+            isArrayInterpreterValue(Types.STRING, list(
+                StringInterpreterValue.of("one"),
+                StringInterpreterValue.of("two"))));
+    }
+
+    private Matcher<InterpreterValue> isArrayInterpreterValue(ScalarType elementType, List<InterpreterValue> elements) {
+        return isInstance(
+            ArrayInterpreterValue.class,
+            allOf(
+                hasFeature("elementType", value -> value.getElementType(), equalTo(elementType)),
+                hasFeature("elements", value -> value.getElements(), containsExactElements(elements))));
+    }
+
     private static Environment emptyEnvironment() {
         return new Environment(
             JavaProject.builder().build(),

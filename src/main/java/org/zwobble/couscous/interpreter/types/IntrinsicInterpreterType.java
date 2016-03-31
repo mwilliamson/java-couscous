@@ -22,7 +22,7 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class IntrinsicInterpreterType implements InterpreterType {
-    public static <T> Builder<T> builder(Class<T> interpreterValueType, ScalarType reference) {
+    public static <T> Builder<T> builder(Class<T> interpreterValueType, Type reference) {
         return new Builder<>(interpreterValueType, reference);
     }
 
@@ -40,11 +40,11 @@ public class IntrinsicInterpreterType implements InterpreterType {
         private final ImmutableMap.Builder<MethodSignature, MethodValue> methods = ImmutableMap.builder();
         private final ImmutableMap.Builder<MethodSignature, StaticMethodValue> staticMethods = ImmutableMap.builder();
         private final Class<T> interpreterValueType;
-        private final ScalarType name;
+        private final Type type;
 
-        public Builder(Class<T> interpreterValueType, ScalarType name) {
+        public Builder(Class<T> interpreterValueType, Type type) {
             this.interpreterValueType = interpreterValueType;
-            this.name = name;
+            this.type = type;
         }
 
         public Builder<T> field(String name, ScalarType type) {
@@ -88,7 +88,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
 
         public InterpreterType build() {
             return new IntrinsicInterpreterType(
-                name,
+                type,
                 fields.build(),
                 constructor,
                 methods.build(),
@@ -96,20 +96,20 @@ public class IntrinsicInterpreterType implements InterpreterType {
         }
     }
 
-    private final ScalarType name;
+    private final Type type;
     private final Map<String, FieldDeclarationNode> fields;
     private final MethodValue constructor;
     private final Map<MethodSignature, MethodValue> methods;
     private final Map<MethodSignature, StaticMethodValue> staticMethods;
 
     private IntrinsicInterpreterType(
-        ScalarType name,
+        Type type,
         Map<String, FieldDeclarationNode> fields,
         MethodValue constructor,
         Map<MethodSignature, MethodValue> methods,
         Map<MethodSignature, StaticMethodValue> staticMethods)
     {
-        this.name = name;
+        this.type = type;
         this.fields = fields;
         this.constructor = constructor;
         this.methods = methods;
@@ -117,8 +117,8 @@ public class IntrinsicInterpreterType implements InterpreterType {
     }
 
     @Override
-    public ScalarType getType() {
-        return name;
+    public Type getType() {
+        return type;
     }
 
     @Override
@@ -164,6 +164,6 @@ public class IntrinsicInterpreterType implements InterpreterType {
 
     @Override
     public String toString() {
-        return "IntrinsicInterpreterType<" + name + ">";
+        return "IntrinsicInterpreterType<" + type + ">";
     }
 }

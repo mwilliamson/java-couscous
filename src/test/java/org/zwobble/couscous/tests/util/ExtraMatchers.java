@@ -1,11 +1,12 @@
 package org.zwobble.couscous.tests.util;
 
-import org.hamcrest.Description;
-import org.hamcrest.DiagnosingMatcher;
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
+import org.hamcrest.*;
 
+import java.util.List;
 import java.util.function.Function;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ExtraMatchers {
     public static <T, U> Matcher<T> isInstance(Class<U> type, Matcher<? super U> downcastMatcher) {
@@ -50,5 +51,17 @@ public class ExtraMatchers {
                 return extract.apply(actual);
             }
         };
+    }
+
+    public static <T> Matcher<Iterable<? extends T>> containsExactly(List<Matcher<? super T>> matchers) {
+        if (matchers.isEmpty()) {
+            return Matchers.emptyIterable();
+        } else {
+            return Matchers.contains(matchers);
+        }
+    }
+
+    public static <T> Matcher<Iterable<? extends T>> containsExactElements(List<T> values) {
+        return containsExactly(eagerMap(values, value -> equalTo(value)));
     }
 }

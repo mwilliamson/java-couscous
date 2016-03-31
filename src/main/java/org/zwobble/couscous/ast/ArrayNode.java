@@ -20,6 +20,10 @@ public class ArrayNode implements ExpressionNode {
         this.elements = elements;
     }
 
+    public Type getElementType() {
+        return elementType;
+    }
+
     public List<ExpressionNode> getElements() {
         return elements;
     }
