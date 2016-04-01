@@ -12,7 +12,6 @@ import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.util.InsertionOrderSet;
 
@@ -29,15 +28,12 @@ import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
-import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
-import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
-import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
@@ -142,10 +138,10 @@ public class JavaReader {
         ScalarType name = generateAnonymousName(expression);
         Scope scope = outerScope.enterClass(name);
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        return generateClosure(scope, name, toAnonymousClass(scope, name, functionalInterfaceMethod, lambda.apply(scope)));
+        return generateClosure(scope, name, toAnonymousClass(functionalInterfaceMethod, lambda.apply(scope)));
     }
 
-    private AnonymousClass toAnonymousClass(Scope scope, ScalarType name, IMethodBinding functionalInterfaceMethod, Lambda lambda) {
+    private AnonymousClass toAnonymousClass(IMethodBinding functionalInterfaceMethod, Lambda lambda) {
         // TODO: does this need type coercion adding? Since the body is straight from the lambda, but the type signature is from the interface method
         // TODO: can generate override methods by using a placeholder this reference for, well, this references.
         // They can be replaced once the anonymous class is turned into a real class.
