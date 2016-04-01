@@ -11,6 +11,7 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -441,7 +442,7 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeStatement(() -> {
             writer.writeKeyword("namespace");
             writer.writeSpace();
-            writer.writeIdentifier(node.getName().getPackage().get());
+            writeQualifiedName(node.getName().getPackage().get());
             writer.startBlock();
             writer.writeStatement(() -> {
                 writer.writeKeyword("internal");
@@ -524,7 +525,7 @@ public class CsharpSerializer implements NodeVisitor {
                 if (isReservedTypeIdentifier(type)) {
                     writer.writeKeyword(type.getQualifiedName());
                 } else {
-                    writer.writeIdentifier(typeReference(type));
+                    writeQualifiedName(type.getQualifiedName());
                 }
                 return null;
             }
@@ -537,7 +538,7 @@ public class CsharpSerializer implements NodeVisitor {
 
             @Override
             public Void visit(ParameterizedType type) {
-                writer.writeIdentifier(typeReference(type.getRawType()));
+                writeTypeReference(type.getRawType());
                 writer.writeSymbol("<");
                 writer.writeCommaSeparated(
                     type.getParameters(),
@@ -558,7 +559,12 @@ public class CsharpSerializer implements NodeVisitor {
         return RESERVED_TYPE_IDENTIFIERS.contains(type.getQualifiedName());
     }
 
-    private String typeReference(ScalarType value) {
-        return value.getQualifiedName();
+    private void writeQualifiedName(String name) {
+        writer.writeWithSeparator(
+            asList(name.split("\\.")),
+            writer::writeIdentifier,
+            () -> {
+                writer.writeSymbol(".");
+            });
     }
 }

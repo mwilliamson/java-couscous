@@ -57,6 +57,18 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void typeLiteralUsesAtSymbolToEscapeReservedIdentifiers() {
+        String output = serialize(literal(ScalarType.of("internal")));
+        assertEquals("typeof(@internal)", output);
+    }
+
+    @Test
+    public void typeLiteralDoesntUseAtSymbolForReservedTypeIdentifiers() {
+        String output = serialize(literal(ScalarType.of("string")));
+        assertEquals("typeof(string)", output);
+    }
+
+    @Test
     public void variableReferenceWritesIdentifier() {
         String output = serialize(reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))));
         assertEquals("x", output);
@@ -302,6 +314,26 @@ public class CsharpSerializerTests {
         String output = serialize(classNode);
 
         assertEquals("namespace com.example {\n    internal class Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void namespacePartsInNamespaceDeclarationAreMangledInIfReserved() {
+        ClassNode classNode = ClassNode.builder("com.example.internal.Example")
+            .build();
+
+        String output = serialize(classNode);
+
+        assertEquals("namespace com.example.@internal {\n    internal class Example {\n    }\n}\n", output);
+    }
+
+    @Test
+    public void namespacePartsInNamespaceReferenceAreMangledInIfReserved() {
+        String output = serialize(localVariableDeclaration(
+            TestIds.ANY_ID,
+            "x",
+            ScalarType.of("com.example.internal.Example"),
+            literal("[value]")));
+        assertEquals("com.example.@internal.Example x = \"[value]\";\n", output);
     }
 
     @Test
