@@ -7,5 +7,9 @@ public interface Naming {
         return new SignaturesContainSimpleNames();
     }
 
+    static Naming noMangling() {
+        return new NoMangling();
+    }
+
     String methodName(MethodSignature signature);
 }
