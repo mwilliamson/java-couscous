@@ -143,9 +143,6 @@ public class JavaReader {
 
     private AnonymousClass toAnonymousClass(IMethodBinding functionalInterfaceMethod, Lambda lambda) {
         // TODO: does this need type coercion adding? Since the body is straight from the lambda, but the type signature is from the interface method
-        // TODO: can generate override methods by using a placeholder this reference for, well, this references.
-        // They can be replaced once the anonymous class is turned into a real class.
-        // Or perhaps we should just do the conversion directly? Since we (in practice) already know the real class name.
         MethodNode method = MethodNode.method(
             emptyList(),
             false,
