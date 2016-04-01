@@ -85,6 +85,24 @@ public class ExtraLists {
             .collect(Collectors.toList());
     }
 
+    public static <T, R> List<R> eagerMapWithIndex(
+        Iterable<T> iterable,
+        FunctionWithIndex<T, R> function)
+    {
+        ImmutableList.Builder<R> builder = ImmutableList.builder();
+        int index = 0;
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            builder.add(function.apply(iterator.next(), index));
+            index++;
+        }
+        return builder.build();
+    }
+
+    public interface FunctionWithIndex<T, R> {
+        R apply(T value, int index);
+    }
+
     public static <T1, T2, R> List<R> eagerMap(
         Iterable<T1> iterable1,
         Iterable<T2> iterable2,

@@ -414,7 +414,7 @@ public class JavaReader {
                 overrides(method),
                 override -> !override.equals(methodNode.signature())),
             override -> {
-                List<FormalArgumentNode> arguments = eagerMap(override.getArguments(), argument -> scope.formalArgument("arg", argument));
+                List<FormalArgumentNode> arguments = eagerMapWithIndex(override.getArguments(), (argument, index) -> scope.formalArgument("arg" + index, argument));
                 MethodCallNode call = MethodCallNode.methodCall(
                     thisReference(type),
                     methodNode.getName(),
