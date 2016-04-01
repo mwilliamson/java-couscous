@@ -1,4 +1,4 @@
-package org.zwobble.couscous.backends;
+package org.zwobble.couscous.backends.naming;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;

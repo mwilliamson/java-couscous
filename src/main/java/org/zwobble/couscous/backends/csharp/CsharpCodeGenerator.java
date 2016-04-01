@@ -6,7 +6,7 @@ import org.zwobble.couscous.ast.MethodCallNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.Receiver;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.backends.Naming;
+import org.zwobble.couscous.backends.naming.Naming;
 import org.zwobble.couscous.types.*;
 
 import java.util.Map;

@@ -11,7 +11,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
-import org.zwobble.couscous.backends.Names;
+import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.*;

@@ -9,7 +9,7 @@ import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.backends.Names;
+import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;

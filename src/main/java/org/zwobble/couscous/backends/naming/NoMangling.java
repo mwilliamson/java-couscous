@@ -1,4 +1,4 @@
-package org.zwobble.couscous.backends;
+package org.zwobble.couscous.backends.naming;
 
 import org.zwobble.couscous.ast.MethodSignature;
 
