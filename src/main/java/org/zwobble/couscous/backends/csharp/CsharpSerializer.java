@@ -226,19 +226,28 @@ public class CsharpSerializer implements NodeVisitor {
     @Override
     public void visit(IfStatementNode ifStatement) {
         writer.writeStatement(() -> {
-            writer.writeKeyword("if");
-            writer.writeSpace();
-            writer.writeSymbol("(");
-            write(ifStatement.getCondition());
-            writer.writeSymbol(")");
-
-            writeBlock(ifStatement.getTrueBranch());
-
-            writer.writeSpace();
-            writer.writeKeyword("else");
-
-            writeBlock(ifStatement.getFalseBranch());
+            writeIfContent(ifStatement);
         });
+    }
+
+    private void writeIfContent(IfStatementNode ifStatement) {
+        writer.writeKeyword("if");
+        writer.writeSpace();
+        writer.writeSymbol("(");
+        write(ifStatement.getCondition());
+        writer.writeSymbol(")");
+
+        writeBlock(ifStatement.getTrueBranch());
+
+        writer.writeSpace();
+        writer.writeKeyword("else");
+
+        if (ifStatement.getFalseBranch().size() == 1 && ifStatement.getFalseBranch().get(0) instanceof IfStatementNode) {
+            writer.writeSpace();
+            writeIfContent((IfStatementNode) ifStatement.getFalseBranch().get(0));
+        } else {
+            writeBlock(ifStatement.getFalseBranch());
+        }
     }
 
     @Override

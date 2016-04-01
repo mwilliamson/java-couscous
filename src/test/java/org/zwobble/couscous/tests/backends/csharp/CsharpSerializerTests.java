@@ -209,6 +209,18 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void elseIfBranchesDontCauseNesting() {
+        String output = serialize(ifStatement(
+            literal(true),
+            list(returns(literal(1))),
+            list(ifStatement(
+                literal(false),
+                list(returns(literal(2))),
+                list(returns(literal(3)))))));
+        assertEquals("if (true) {\n    return 1;\n} else if (false) {\n    return 2;\n} else {\n    return 3;\n}\n", output);
+    }
+
+    @Test
     public void whileLoopPrintsConditionAndBody() {
         String output = serialize(whileLoop(
             literal(true),
