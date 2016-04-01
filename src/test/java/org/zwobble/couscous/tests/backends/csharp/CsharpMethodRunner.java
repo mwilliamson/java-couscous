@@ -7,13 +7,13 @@ import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeNode;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
+import org.zwobble.couscous.backends.csharp.CsharpCodeGenerator;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
 import org.zwobble.couscous.tests.backends.Processes;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -63,7 +63,7 @@ public class CsharpMethodRunner implements MethodRunner {
             methodName,
             eagerMap(arguments, argument -> argument.getType()),
             returnType);
-        String csharpMethodName = Names.toUniqueName(signature);
+        String csharpMethodName = CsharpCodeGenerator.NAMING.methodName(signature);
         String value = CsharpSerializer.serialize(
             staticMethodCall(
                 ScalarType.of(NAMESPACE + "." + className.getQualifiedName()),

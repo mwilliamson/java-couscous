@@ -31,7 +31,9 @@ public class MethodNode implements Node {
         private Type returnType = Types.VOID;
         private final ImmutableList.Builder<StatementNode> body =
             ImmutableList.builder();
-        
+        private final ImmutableList.Builder<MethodSignature> overrides =
+            ImmutableList.builder();
+
         public Builder(String name) {
             this.name = name;
         }
@@ -83,7 +85,8 @@ public class MethodNode implements Node {
                 name,
                 arguments.build(),
                 returnType,
-                isAbstract ? Optional.empty() : Optional.of(body.build()));
+                isAbstract ? Optional.empty() : Optional.of(body.build()),
+                overrides.build());
         }
     }
     
@@ -93,9 +96,10 @@ public class MethodNode implements Node {
         String name,
         List<FormalArgumentNode> arguments,
         Type returnType,
-        Optional<List<StatementNode>> body)
+        Optional<List<StatementNode>> body,
+        List<MethodSignature> overrides)
     {
-        return new MethodNode(annotations, isStatic, name, arguments, returnType, body);
+        return new MethodNode(annotations, isStatic, name, arguments, returnType, body, overrides);
     }
     
     private final List<AnnotationNode> annotations;
@@ -104,14 +108,16 @@ public class MethodNode implements Node {
     private final List<FormalArgumentNode> arguments;
     private final Type returnType;
     private final Optional<List<StatementNode>> body;
-    
+    private final List<MethodSignature> overrides;
+
     private MethodNode(
         List<AnnotationNode> annotations,
         boolean isStatic,
         String name,
         List<FormalArgumentNode> arguments,
         Type returnType,
-        Optional<List<StatementNode>> body)
+        Optional<List<StatementNode>> body,
+        List<MethodSignature> overrides)
     {
         this.annotations = annotations;
         this.isStatic = isStatic;
@@ -119,6 +125,7 @@ public class MethodNode implements Node {
         this.arguments = arguments;
         this.returnType = returnType;
         this.body = body;
+        this.overrides = overrides;
     }
     
     public List<AnnotationNode> getAnnotations() {
@@ -145,6 +152,10 @@ public class MethodNode implements Node {
         return body;
     }
 
+    public List<MethodSignature> getOverrides() {
+        return overrides;
+    }
+
     public boolean isAbstract() {
         return !body.isPresent();
     }
@@ -157,7 +168,7 @@ public class MethodNode implements Node {
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
-        return new MethodNode(annotations, isStatic, name, arguments, returnType, body.map(function));
+        return new MethodNode(annotations, isStatic, name, arguments, returnType, body.map(function), overrides);
     }
 
     @Override
@@ -172,19 +183,8 @@ public class MethodNode implements Node {
             transformer.transformMethodName(signature()),
             transformer.transformFormalArguments(arguments),
             transformer.transform(returnType),
-            body.map(transformer::transformStatements));
-    }
-
-    @Override
-    public String toString() {
-        return "MethodNode(" +
-            "annotations=" + annotations +
-            ", isStatic=" + isStatic +
-            ", name=" + name +
-            ", arguments=" + arguments +
-            ", returnType=" + returnType +
-            ", body=" + body +
-            ')';
+            body.map(transformer::transformStatements),
+            eagerMap(overrides, transformer::transform));
     }
 
     @Override
@@ -199,7 +199,8 @@ public class MethodNode implements Node {
         if (!name.equals(that.name)) return false;
         if (!arguments.equals(that.arguments)) return false;
         if (!returnType.equals(that.returnType)) return false;
-        return body.equals(that.body);
+        if (!body.equals(that.body)) return false;
+        return overrides.equals(that.overrides);
 
     }
 
@@ -211,6 +212,21 @@ public class MethodNode implements Node {
         result = 31 * result + arguments.hashCode();
         result = 31 * result + returnType.hashCode();
         result = 31 * result + body.hashCode();
+        result = 31 * result + overrides.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "MethodNode(" +
+            "annotations=" + annotations +
+            ", isStatic=" + isStatic +
+            ", name=" + name +
+            ", arguments=" + arguments +
+            ", returnType=" + returnType +
+            ", body=" + body +
+            ", overrides=" + overrides +
+            ')';
+    }
+
 }

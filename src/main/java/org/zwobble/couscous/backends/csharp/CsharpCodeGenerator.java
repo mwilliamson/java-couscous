@@ -17,6 +17,8 @@ import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class CsharpCodeGenerator {
+    public static final Naming NAMING = Naming.noMangling();
+
     private final static Map<ScalarType, ScalarType> PRIMITIVES = ImmutableMap.<ScalarType, ScalarType>builder()
         .put(Types.INT, ScalarType.of("int"))
         .put(Types.STRING, ScalarType.of("string"))
@@ -29,7 +31,7 @@ public class CsharpCodeGenerator {
     private final NodeTransformer nodeTransformer;
 
     public static Node generateCode(Node node, String namespace) {
-        return new CsharpCodeGenerator(Naming.signaturesContainSimpleNames(), namespace).generateCode(node);
+        return new CsharpCodeGenerator(NAMING, namespace).generateCode(node);
     }
 
     private CsharpCodeGenerator(Naming naming, String namespace) {

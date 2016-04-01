@@ -19,10 +19,10 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.filter;
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.Casts.tryCast;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-import static org.zwobble.couscous.util.ExtraLists.list;
-import static org.zwobble.couscous.util.ExtraMaps.map;
-import static org.zwobble.couscous.util.ExtraMaps.toMapWithKeys;
+import static org.zwobble.couscous.util.ExtraIterables.lazyFlatMap;
+import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
+import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraMaps.*;
 
 public class UserDefinedInterpreterType implements InterpreterType {
     private final TypeNode type;
@@ -34,9 +34,14 @@ public class UserDefinedInterpreterType implements InterpreterType {
         this.fields = tryCast(ClassNode.class, type)
             .map(classNode -> toMapWithKeys(classNode.getFields(), FieldDeclarationNode::getName))
             .orElse(map());
-        this.methods = toMapWithKeys(
-            filter(type.getMethods(), method -> !method.isAbstract()),
-            method -> method.signature().generic());
+
+        Iterable<MethodNode> concreteMethods = filter(type.getMethods(), method -> !method.isAbstract());
+
+        Iterable<Map.Entry<MethodSignature, MethodNode>> entries = lazyFlatMap(concreteMethods, method -> {
+            List<MethodSignature> signatures = cons(method.signature(), method.getOverrides());
+            return lazyMap(signatures, signature -> entry(signature.generic(), method));
+        });
+        this.methods = toMap(entries);
     }
 
     @Override

@@ -6,7 +6,7 @@ namespace Couscous.java.lang {
             _value = value;
         }
 
-        internal override bool equals__Object__boolean(Object other) {
+        internal override bool equals(Object other) {
             var integer = other as Integer;
             return integer != null && integer._value == _value;
         }

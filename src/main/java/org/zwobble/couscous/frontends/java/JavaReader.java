@@ -40,6 +40,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
+import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
@@ -155,14 +156,13 @@ public class JavaReader {
             functionalInterfaceMethod.getName(),
             lambda.getFormalArguments(),
             typeOf(functionalInterfaceMethod.getReturnType()),
-            Optional.of(lambda.getBody()));
-
-        Iterable<MethodNode> overrides = generateOverrideMethods(name, functionalInterfaceMethod, scope, method);
+            Optional.of(lambda.getBody()),
+            overrides(functionalInterfaceMethod));
 
         return new AnonymousClass(
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             list(),
-            ExtraLists.cons(method, overrides));
+            list(method));
     }
 
     private List<StatementNode> replaceCaptureReferences(
@@ -397,45 +397,14 @@ public class JavaReader {
                 methodName,
                 formalArguments,
                 returnType.get(),
-                body);
+                body,
+                overrides(method.resolveBinding()));
             builder.addMethod(methodNode);
-
-            Iterable<MethodNode> overrideMethods = generateOverrideMethods(type, method.resolveBinding(), scope, methodNode);
-
-            for (MethodNode overrideMethod : overrideMethods) {
-                builder.addMethod(overrideMethod);
-            }
         }
     }
 
-    private Iterable<MethodNode> generateOverrideMethods(ScalarType type, IMethodBinding method, Scope scope, MethodNode methodNode) {
-        return transform(
-            filter(
-                overrides(method),
-                override -> !override.equals(methodNode.signature())),
-            override -> {
-                List<FormalArgumentNode> arguments = eagerMapWithIndex(override.getArguments(), (argument, index) -> scope.formalArgument("arg" + index, argument));
-                MethodCallNode call = MethodCallNode.methodCall(
-                    thisReference(type),
-                    methodNode.getName(),
-                    eagerMap(arguments, argument -> reference(argument)),
-                    methodNode.signature());
-
-                StatementNode body = override.getReturnType().equals(Types.VOID)
-                    ? expressionStatement(call)
-                    : returns(typeCoercion(call, override.getReturnType()));
-
-                return MethodNode.method(
-                    methodNode.getAnnotations(),
-                    methodNode.isStatic(),
-                    methodNode.getName(),
-                    arguments,
-                    override.getReturnType(),
-                    Optional.of(list(body)));
-            });
-    }
-
-    private Iterable<MethodSignature> overrides(IMethodBinding methodBinding) {
+    private List<MethodSignature> overrides(IMethodBinding methodBinding) {
+        MethodSignature overrideSignature = signature(methodBinding);
         ITypeBinding declaringClass = methodBinding.getDeclaringClass();
 
         // TODO: remove duplication with JavaTypes
@@ -444,6 +413,7 @@ public class JavaReader {
             .stream()
             .flatMap(type -> asList(type.getDeclaredMethods()).stream().filter(superMethod -> methodBinding.overrides(superMethod)))
             .map(JavaMethods::signature)
+            .filter(signature -> !overrideSignature.equals(signature))
             .collect(Collectors.toList());
     }
 

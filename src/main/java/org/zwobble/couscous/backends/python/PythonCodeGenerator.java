@@ -6,15 +6,17 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
-import org.zwobble.couscous.values.*;
+import org.zwobble.couscous.values.InternalCouscousValue;
+import org.zwobble.couscous.values.PrimitiveValue;
+import org.zwobble.couscous.values.TypeValue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,8 +25,14 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Iterators.singletonIterator;
-import static org.zwobble.couscous.backends.python.ast.PythonListNode.pythonList;
-import static org.zwobble.couscous.types.Types.erasure;
+import static java.util.Collections.emptyList;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
+import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.backends.python.ast.PythonAssignmentNode.pythonAssignment;
 import static org.zwobble.couscous.backends.python.ast.PythonAttributeAccessNode.pythonAttributeAccess;
 import static org.zwobble.couscous.backends.python.ast.PythonBooleanLiteralNode.pythonBooleanLiteral;
@@ -36,15 +44,17 @@ import static org.zwobble.couscous.backends.python.ast.PythonIfStatementNode.pyt
 import static org.zwobble.couscous.backends.python.ast.PythonImportAliasNode.pythonImportAlias;
 import static org.zwobble.couscous.backends.python.ast.PythonImportNode.pythonImport;
 import static org.zwobble.couscous.backends.python.ast.PythonIntegerLiteralNode.pythonIntegerLiteral;
+import static org.zwobble.couscous.backends.python.ast.PythonListNode.pythonList;
 import static org.zwobble.couscous.backends.python.ast.PythonModuleNode.pythonModule;
 import static org.zwobble.couscous.backends.python.ast.PythonReturnNode.pythonReturn;
 import static org.zwobble.couscous.backends.python.ast.PythonStringLiteralNode.pythonStringLiteral;
 import static org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode.pythonVariableReference;
 import static org.zwobble.couscous.backends.python.ast.PythonWhileNode.pythonWhile;
 import static org.zwobble.couscous.backends.python.ast.visitors.PythonExpressionStatement.pythonExpressionStatement;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraIterables.*;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(TypeNode typeNode) {
@@ -63,9 +73,9 @@ public class PythonCodeGenerator {
             .map(node -> generateStatements(node.getStaticConstructor()))
             .orElse(list());
 
-        Iterable<PythonFunctionDefinitionNode> pythonMethods = transform(
+        Iterable<PythonFunctionDefinitionNode> pythonMethods = lazyFlatMap(
             filter(typeNode.getMethods(), method -> !method.isAbstract()),
-            PythonCodeGenerator::generateFunction);
+            method -> generateMethods(typeNode.getName(), method));
 
         PythonClassNode pythonClass = pythonClass(
             typeNode.getName().getSimpleName(),
@@ -169,6 +179,40 @@ public class PythonCodeGenerator {
         Iterable<String> argumentNames = Iterables.concat(list("self"), explicitArgumentNames);
         List<PythonStatementNode> pythonBody = constructor.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
         return pythonFunctionDefinition("__init__", ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
+    }
+
+    private static Iterable<PythonFunctionDefinitionNode> generateMethods(ScalarType type, MethodNode method) {
+        return lazyMap(
+            lazyCons(method, generateOverrideMethods(type, method)),
+            PythonCodeGenerator::generateFunction);
+    }
+
+    private static Iterable<MethodNode> generateOverrideMethods(ScalarType type, MethodNode methodNode) {
+        return transform(
+            methodNode.getOverrides(),
+            override -> {
+                List<FormalArgumentNode> arguments = eagerMapWithIndex(
+                    override.getArguments(),
+                    (argument, index) -> formalArg(var(null, "arg" + index, argument)));
+                MethodCallNode call = MethodCallNode.methodCall(
+                    thisReference(type),
+                    methodNode.getName(),
+                    eagerMap(arguments, argument -> reference(argument)),
+                    methodNode.signature());
+
+                StatementNode body = override.getReturnType().equals(Types.VOID)
+                    ? expressionStatement(call)
+                    : returns(typeCoercion(call, override.getReturnType()));
+
+                return MethodNode.method(
+                    methodNode.getAnnotations(),
+                    methodNode.isStatic(),
+                    methodNode.getName(),
+                    arguments,
+                    override.getReturnType(),
+                    Optional.of(list(body)),
+                    emptyList());
+            });
     }
 
     private static PythonFunctionDefinitionNode generateFunction(MethodNode method) {

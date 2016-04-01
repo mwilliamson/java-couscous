@@ -11,22 +11,22 @@ public class InnerTypeReadingTests {
     public void lambdaWithNoArgumentsAndExpressionBodyIsReadAsAnonymousClassCreation() {
         assertEquals(
             readTypes(generateMethodSource("void",
-                "java.util.function.Supplier<Integer> supplier = new java.util.function.Supplier<Integer>() {\n" +
-                    "    public Integer get() {\n" +
+                "java.util.function.IntSupplier supplier = new java.util.function.IntSupplier() {\n" +
+                    "    public int getAsInt() {\n" +
                     "        return 42;\n" +
                     "    }\n" +
                     "};")),
             readTypes(generateMethodSource("void",
-                "java.util.function.Supplier<Integer> supplier = () -> 42;")));
+                "java.util.function.IntSupplier supplier = () -> 42;")));
     }
 
     @Test
     public void lambdaWithNoArgumentsAndBlockBodyIsReadAsAnonymousClassCreation() {
         assertEquals(
             readTypes(generateMethodSource("void",
-                "java.util.function.Supplier<Integer> supplier = () -> 42;")),
+                "java.util.function.IntSupplier supplier = () -> 42;")),
             readTypes(generateMethodSource("void",
-                "java.util.function.Supplier<Integer> supplier = () -> { return 42; };")));
+                "java.util.function.IntSupplier supplier = () -> { return 42; };")));
     }
 
     @Test
