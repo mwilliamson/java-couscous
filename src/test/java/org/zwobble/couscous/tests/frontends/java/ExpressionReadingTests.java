@@ -100,7 +100,12 @@ public class ExpressionReadingTests {
     }
 
     @Test
-    public void canReadExplicitStaticFieldReferenceWithClassAsReceiver() {
+    public void canReadExplicitStaticFieldReferenceWithSimplyNamedClassAsReceiver() {
+        canReadStaticFieldReference("Example.name");
+    }
+
+    @Test
+    public void canReadExplicitStaticFieldReferenceWithFullyQualifiedClassAsReceiver() {
         canReadStaticFieldReference("com.example.Example.name");
     }
 

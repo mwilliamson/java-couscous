@@ -190,7 +190,7 @@ public class JavaExpressionReader {
 
     private ExpressionNode readQualifiedName(QualifiedName expression) {
         return FieldAccessNode.fieldAccess(
-            ScalarType.of(expression.getQualifier().getFullyQualifiedName()),
+            ScalarType.of(((ITypeBinding)expression.getQualifier().resolveBinding()).getQualifiedName()),
             expression.getName().getIdentifier(),
             typeOf(expression));
     }
