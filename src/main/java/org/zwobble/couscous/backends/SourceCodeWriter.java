@@ -1,9 +1,11 @@
 package org.zwobble.couscous.backends;
 
+import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import org.zwobble.couscous.util.Action;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class SourceCodeWriter {
@@ -16,11 +18,15 @@ public class SourceCodeWriter {
 
     private final WriterAction blockStart;
     private final WriterAction blockEnd;
+    private final Set<String> reservedIdentifiers;
+    private final Function<String, String> mangleReservedIdentifier;
     private int depth = 0;
 
-    public SourceCodeWriter(WriterAction blockStart, WriterAction blockEnd) {
+    public SourceCodeWriter(WriterAction blockStart, WriterAction blockEnd, Set<String> reservedIdentifiers, Function<String, String> mangleReservedIdentifier) {
         this.blockStart = blockStart;
         this.blockEnd = blockEnd;
+        this.reservedIdentifiers = reservedIdentifiers;
+        this.mangleReservedIdentifier = mangleReservedIdentifier;
     }
     
     public String asString() {
@@ -51,7 +57,10 @@ public class SourceCodeWriter {
     }
 
     public void writeIdentifier(String name) {
-        builder.append(name);
+        String nameToWrite = reservedIdentifiers.contains(name)
+            ? mangleReservedIdentifier.apply(name)
+            : name;
+        builder.append(nameToWrite);
     }
 
     public void writeSymbol(String symbol) {

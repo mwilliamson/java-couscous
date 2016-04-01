@@ -5,11 +5,15 @@ import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonExpressionStatement;
 import org.zwobble.couscous.backends.python.ast.visitors.PythonNodeVisitor;
 
+import static org.zwobble.couscous.util.ExtraSets.set;
+
 public class PythonSerializer implements PythonNodeVisitor {
     public static String serialize(PythonNode node) {
         SourceCodeWriter writer = new SourceCodeWriter(
             (writer2) -> writer2.writeSymbol(":"),
-            (writer2) -> {}
+            (writer2) -> {},
+            set(),
+            identifier -> identifier
         );
         PythonSerializer serializer = new PythonSerializer(writer);
         serializer.write(node);

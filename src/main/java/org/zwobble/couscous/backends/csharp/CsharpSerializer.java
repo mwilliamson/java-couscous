@@ -1,5 +1,6 @@
 package org.zwobble.couscous.backends.csharp;
 
+import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
@@ -8,10 +9,100 @@ import org.zwobble.couscous.util.Action;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class CsharpSerializer implements NodeVisitor {
+    private static final Set<String> RESERVED_TYPE_IDENTIFIERS = set(
+        "bool",
+        "byte",
+        "char",
+        "decimal",
+        "double",
+        "float",
+        "int",
+        "long",
+        "object",
+        "sbyte",
+        "short",
+        "string",
+        "uint",
+        "ulong",
+        "ushort",
+        "void");
+
+    private static final Set<String> RESERVED_IDENTIFIERS;
+
+    static {
+        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
+        builder.add("abstract",
+            "as",
+            "base",
+            "break",
+            "case",
+            "catch",
+            "checked",
+            "class",
+            "const",
+            "continue",
+            "default",
+            "delegate",
+            "do",
+            "else",
+            "enum",
+            "event",
+            "explicit",
+            "extern",
+            "false",
+            "finally",
+            "fixed",
+            "for",
+            "foreach",
+            "goto",
+            "if",
+            "implicit",
+            "in",
+            "interface",
+            "internal",
+            "is",
+            "lock",
+            "namespace",
+            "new",
+            "null",
+            "operator",
+            "out",
+            "out (generic modifier)",
+            "override",
+            "params",
+            "private",
+            "protected",
+            "public",
+            "readonly",
+            "ref",
+            "return",
+            "sealed",
+            "sizeof",
+            "stackalloc",
+            "static",
+            "struct",
+            "switch",
+            "this",
+            "throw",
+            "true",
+            "try",
+            "typeof",
+            "unchecked",
+            "unsafe",
+            "using",
+            "virtual",
+            "volatile",
+            "while");
+        builder.addAll(RESERVED_TYPE_IDENTIFIERS);
+        RESERVED_IDENTIFIERS = builder.build();
+    } ;
+
     public static String serialize(Node node) {
         SourceCodeWriter writer = new SourceCodeWriter(
             (writer2) -> {
@@ -21,7 +112,9 @@ public class CsharpSerializer implements NodeVisitor {
             (writer2) -> {
                 writer2.writeIndentation();
                 writer2.writeSymbol("}");
-            }
+            },
+            RESERVED_IDENTIFIERS,
+            identifier -> "@" + identifier
         );
         CsharpSerializer serializer = new CsharpSerializer(writer);
 
@@ -428,7 +521,11 @@ public class CsharpSerializer implements NodeVisitor {
         value.accept(new Type.Visitor<Void>() {
             @Override
             public Void visit(ScalarType type) {
-                writer.writeIdentifier(typeReference(type));
+                if (isReservedTypeIdentifier(type)) {
+                    writer.writeKeyword(type.getQualifiedName());
+                } else {
+                    writer.writeIdentifier(typeReference(type));
+                }
                 return null;
             }
 
@@ -455,6 +552,10 @@ public class CsharpSerializer implements NodeVisitor {
                 return null;
             }
         });
+    }
+
+    private static boolean isReservedTypeIdentifier(ScalarType type) {
+        return RESERVED_TYPE_IDENTIFIERS.contains(type.getQualifiedName());
     }
 
     private String typeReference(ScalarType value) {

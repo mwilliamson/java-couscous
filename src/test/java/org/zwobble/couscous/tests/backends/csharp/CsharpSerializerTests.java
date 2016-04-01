@@ -63,6 +63,12 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void identifierIsEscapedWithAtSymbolIfItsAReservedWord() {
+        String output = serialize(reference(var(TestIds.ANY_ID, "internal", ScalarType.of("X"))));
+        assertEquals("@internal", output);
+    }
+
+    @Test
     public void thisReferenceUsesThisKeyword() {
         String output = serialize(thisReference(ScalarType.of("X")));
         assertEquals("this", output);
@@ -191,6 +197,16 @@ public class CsharpSerializerTests {
 
     @Test
     public void localVariableDeclarationCanDeclareVariable() {
+        String output = serialize(localVariableDeclaration(
+            TestIds.ANY_ID,
+            "x",
+            ScalarType.of("X"),
+            literal("[value]")));
+        assertEquals("X x = \"[value]\";\n", output);
+    }
+
+    @Test
+    public void builtinTypesAreNotMangled() {
         String output = serialize(localVariableDeclaration(
             TestIds.ANY_ID,
             "x",
@@ -384,14 +400,14 @@ public class CsharpSerializerTests {
 
     @Test
     public void interfaceWithMethod() {
-        MethodNode method = MethodNode.builder("get").isAbstract().returns(Types.INT).build();
+        MethodNode method = MethodNode.builder("get").isAbstract().returns(ScalarType.of("X")).build();
         Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
             .method(method)
             .buildInterface();
 
         String output = serialize(node);
 
-        assertEquals("namespace com.example {\n    internal interface Example {\n        int get();\n    }\n}\n", output);
+        assertEquals("namespace com.example {\n    internal interface Example {\n        X get();\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {
