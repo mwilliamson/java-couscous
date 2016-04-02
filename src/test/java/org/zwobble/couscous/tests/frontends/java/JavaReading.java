@@ -66,7 +66,7 @@ public class JavaReading {
                 Files.createDirectories(sourcePath.getParent());
                 Files.write(sourcePath, list(contents));
 
-                return JavaReader.readClassFromFile(list(directoryPath), directoryPath.resolve(path));
+                return JavaReader.readClassesFromFiles(list(directoryPath), list(directoryPath.resolve(path)));
             } finally {
                 deleteRecursively(directoryPath.toFile());
             }

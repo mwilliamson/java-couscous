@@ -14,13 +14,14 @@ import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAn
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
 import static org.zwobble.couscous.util.ExtraLists.flatMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class JavaFrontend {
     public List<TypeNode> readSourceDirectory(List<Path> sourcePaths, Path directoryPath) throws IOException {
         List<TypeNode> classNodes = flatMap(
             findJavaFiles(directoryPath),
-            javaFile -> JavaReader.readClassFromFile(sourcePaths, javaFile));
+            javaFile -> JavaReader.readClassesFromFiles(sourcePaths, list(javaFile)));
         ensureDeclarationsAreUnique(classNodes);
         return classNodes;
     }

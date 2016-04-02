@@ -44,15 +44,19 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.lookup;
 
 public class JavaReader {
-    public static List<TypeNode> readClassFromFile(List<Path> sourcePaths, Path sourcePath) throws IOException {
-        CompilationUnit ast = new JavaParser().parseCompilationUnit(sourcePaths, sourcePath);
-
-        List<IProblem> errors = eagerFilter(asList(ast.getProblems()), problem -> problem.isError());
-        if (!errors.isEmpty()) {
-            throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
-        }
+    public static List<TypeNode> readClassesFromFiles(List<Path> sourcePaths, List<Path> sourceFiles) throws IOException {
+        JavaParser parser = new JavaParser();
         JavaReader reader = new JavaReader();
-        return reader.readCompilationUnit(ast);
+        for (Path sourceFile : sourceFiles) {
+            CompilationUnit ast = parser.parseCompilationUnit(sourcePaths, sourceFile);
+
+            List<IProblem> errors = eagerFilter(asList(ast.getProblems()), problem -> problem.isError());
+            if (!errors.isEmpty()) {
+                throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
+            }
+            reader.readCompilationUnit(ast);
+        }
+        return reader.types();
     }
 
     private static String describe(List<IProblem> errors) {
@@ -74,9 +78,13 @@ public class JavaReader {
         classes = ImmutableList.builder();
     }
 
-    private List<TypeNode> readCompilationUnit(CompilationUnit ast) {
+    private void readCompilationUnit(CompilationUnit ast) {
         TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        List<TypeNode> classes = cons(readTypeDeclaration(type), this.classes.build());
+        classes.add(readTypeDeclaration(type));
+    }
+
+    private List<TypeNode> types() {
+        List<TypeNode> classes = this.classes.build();
         NodeTransformer transformer = NodeTransformer.builder()
             .transformExpression(expression ->
                 tryCast(ConstructorCallNode.class, expression)
