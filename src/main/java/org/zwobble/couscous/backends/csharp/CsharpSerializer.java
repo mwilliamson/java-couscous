@@ -270,7 +270,11 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(CastNode cast) {
-        throw new UnsupportedOperationException();
+        writer.writeSymbol("(");
+        writeTypeReference(cast.getType());
+        writer.writeSymbol(")");
+        writer.writeSpace();
+        write(cast.getExpression());
     }
 
     @Override

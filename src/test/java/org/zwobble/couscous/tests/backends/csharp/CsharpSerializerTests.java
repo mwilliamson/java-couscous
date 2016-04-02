@@ -10,6 +10,7 @@ import org.zwobble.couscous.types.Types;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
+import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
@@ -187,6 +188,14 @@ public class CsharpSerializerTests {
             "y",
             ScalarType.of("Y")));
         assertEquals("X.y", output);
+    }
+
+    @Test
+    public void castIsWrittenWithParenthesisedType() {
+        String output = serialize(cast(
+            reference(var(TestIds.ANY_ID, "x", ScalarType.of("X"))),
+            ScalarType.of("Y")));
+        assertEquals("(Y) x", output);
     }
 
     @Test
