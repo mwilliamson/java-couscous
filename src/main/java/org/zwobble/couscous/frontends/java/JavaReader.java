@@ -336,12 +336,12 @@ public class JavaReader {
                 .ifPresent(field -> readField(body, scope, type, field));
 
             tryCast(TypeDeclaration.class, declaration)
-                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(type, typeDeclaration)));
+                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(typeDeclaration)));
         }
         return body.build();
     }
 
-    private TypeNode readNestedTypeDeclaration(ScalarType outerType, TypeDeclaration typeDeclaration) {
+    private TypeNode readNestedTypeDeclaration(TypeDeclaration typeDeclaration) {
         TypeNode typeNode = readTypeDeclaration(typeDeclaration);
         // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
         Scope scope = topScope.enterClass(typeNode.getName());
