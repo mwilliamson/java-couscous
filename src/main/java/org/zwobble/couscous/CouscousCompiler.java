@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class CouscousCompiler {
     private final JavaFrontend frontend;
     private final Backend backend;
@@ -17,7 +19,7 @@ public class CouscousCompiler {
     }
 
     public void compileDirectory(List<Path> sourcePaths, Path path) throws IOException {
-        List<TypeNode> classes = frontend.readSourceDirectory(sourcePaths, path);
+        List<TypeNode> classes = frontend.readSourceDirectory(sourcePaths, list(path));
         backend.compile(classes);
     }
 

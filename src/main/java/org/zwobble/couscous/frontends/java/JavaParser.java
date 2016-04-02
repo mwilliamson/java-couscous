@@ -25,6 +25,9 @@ public class JavaParser {
     
     public JavaParser() {
         parser = ASTParser.newParser(AST.JLS8);
+    }
+    
+    public CompilationUnit parseCompilationUnit(List<Path> sourcePaths, Path sourcePath) throws IOException {
         parser.setBindingsRecovery(false);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         @SuppressWarnings("unchecked")
@@ -34,9 +37,6 @@ public class JavaParser {
         options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
         parser.setCompilerOptions(options);
         parser.setResolveBindings(true);
-    }
-    
-    public CompilationUnit parseCompilationUnit(List<Path> sourcePaths, Path sourcePath) throws IOException {
         parser.setUnitName(sourcePath.toString());
 
         String[] sourcePathArguments = Iterables.toArray(

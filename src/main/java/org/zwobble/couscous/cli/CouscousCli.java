@@ -1,5 +1,8 @@
 package org.zwobble.couscous.cli;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import org.apache.commons.cli.*;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.TypeNode;
@@ -7,6 +10,7 @@ import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -16,37 +20,32 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class CouscousCli {
+    public static final String FILES = "files";
     public static final String SOURCEPATH = "sourcepath";
     public static final String BACKEND = "backend";
     public static final String OUTPUT = "output";
 
     public static void main(String[] rawArguments) throws Exception {
-        CommandLine arguments = parseArguments(rawArguments);
+        JsonObject configuration = Json.parse(new FileReader("couscous.json")).asObject();
+        String backendName = configuration.get(BACKEND).asString();
+        String outputDirectory = configuration.get(OUTPUT).asString();
+        List<String> sourcePaths = eagerMap(
+            configuration.get(SOURCEPATH).asArray().values(),
+            JsonValue::asString);
+        List<String> files = eagerMap(
+            configuration.get(FILES).asArray().values(),
+            JsonValue::asString);
+
+        Backend backend = backend(backendName, outputDirectory);
 
         JavaFrontend frontend = new JavaFrontend();
-        List<TypeNode> classNodes = eagerFlatMap(
-            arguments.getArgList(),
-            path -> {
-                try {
-                    return frontend.readSourceDirectory(
-                        eagerMap(sourcePath(arguments), sourcePath -> path(sourcePath)),
-                        path(path));
-                } catch (IOException exception) {
-                    throw new RuntimeException(exception);
-                }
-            });
-
-        Backend backend = backend(
-            arguments.getOptionValue(BACKEND),
-            arguments.getOptionValue(OUTPUT));
-        backend.compile(classNodes);
-    }
-
-    private static List<String> sourcePath(CommandLine arguments) {
-        if (arguments.hasOption(SOURCEPATH)) {
-            return asList(arguments.getOptionValues(SOURCEPATH));
-        } else {
-            return list();
+        try {
+            List<TypeNode> classNodes = frontend.readSourceDirectory(
+                paths(sourcePaths),
+                paths(files));
+            backend.compile(classNodes);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
         }
     }
 
@@ -61,31 +60,11 @@ public class CouscousCli {
         }
     }
 
+    private static List<Path> paths(List<String> paths) {
+        return eagerMap(paths, path -> path(path));
+    }
+
     private static Path path(String output) {
         return FileSystems.getDefault().getPath(output);
-    }
-
-    private static CommandLine parseArguments(String[] rawArguments) throws ParseException {
-        Options options = new Options();
-        options.addOption(requiredOption(BACKEND));
-        options.addOption(requiredOption(OUTPUT));
-        options.addOption(multipleOption(SOURCEPATH));
-
-        return new DefaultParser().parse(options, rawArguments);
-    }
-
-    private static Option requiredOption(String name) {
-        return Option.builder()
-            .longOpt(name)
-            .required()
-            .hasArg()
-            .build();
-    }
-
-    private static Option multipleOption(String name) {
-        return Option.builder()
-            .longOpt(name)
-            .hasArgs()
-            .build();
     }
 }

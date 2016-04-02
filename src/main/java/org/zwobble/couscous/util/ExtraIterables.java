@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -105,15 +106,19 @@ public class ExtraIterables {
     }
 
     public static <T, R> Iterable<R> lazyFlatMap(Iterable<T> iterable, Function<T, Iterable<R>> function) {
-        return new Iterable<R>() {
-            @Override
-            public Iterator<R> iterator() {
-                return stream(iterable).flatMap(element -> stream(function.apply(element))).iterator();
-            }
-        };
+        return iterable(() -> stream(iterable).flatMap(element -> stream(function.apply(element))));
     }
 
     public static <T> Stream<T> stream(Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false);
+    }
+
+    public static <T, E> Iterable<T> iterable(Supplier<Stream<T>> stream) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return stream.get().iterator();
+            }
+        };
     }
 }

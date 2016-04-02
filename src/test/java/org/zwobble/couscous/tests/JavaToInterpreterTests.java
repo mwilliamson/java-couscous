@@ -28,7 +28,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         ScalarType returnType
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
-        List<TypeNode> classNodes = frontend.readSourceDirectory(list(directory), directory);
+        List<TypeNode> classNodes = frontend.readSourceDirectory(list(directory), list(directory));
 
         Project project = JavaProject.of(classNodes);
         Interpreter interpreter = new Interpreter(project);
