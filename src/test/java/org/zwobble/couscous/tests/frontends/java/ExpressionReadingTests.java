@@ -8,6 +8,7 @@ import org.zwobble.couscous.types.Types;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
@@ -20,12 +21,12 @@ import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.Operations.*;
-import static org.zwobble.couscous.ast.Operations.unboxInt;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
+import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.*;
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -74,12 +75,12 @@ public class ExpressionReadingTests {
     }
 
     @Test
-    public void canReadExplicitFieldReference() {
+    public void canReadFieldReferenceWithExplicitThis() {
         canReadFieldReference("this.name");
     }
 
     @Test
-    public void canReadImplicitFieldReference() {
+    public void canReadFieldReferenceWithImplicitThis() {
         canReadFieldReference("name");
     }
 
@@ -97,6 +98,22 @@ public class ExpressionReadingTests {
                 "name",
                 Types.STRING),
             returnNode.getValue());
+    }
+
+    @Test
+    public void canReadFieldReferenceWithVariableReceiver() {
+        ClassNode classNode = readClass(
+            "private String name;" +
+            "public String getName() {" +
+            "    Example self = this;" +
+            "    return self.name;" +
+            "}");
+
+        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(1);
+        assertThat(returnNode.getValue(), isFieldAccess(
+            fieldHasReceiver(isVariableReference("self", ScalarType.of("com.example.Example"))),
+            fieldHasName("name"),
+            expressionHasType(Types.STRING)));
     }
 
     @Test

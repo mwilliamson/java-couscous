@@ -15,11 +15,13 @@ import java.util.stream.IntStream;
 import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.not;
+import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
@@ -192,10 +194,22 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readQualifiedName(QualifiedName expression) {
+        Receiver receiver = toReceiver(expression.getQualifier().resolveBinding());
         return FieldAccessNode.fieldAccess(
-            ScalarType.of(((ITypeBinding)expression.getQualifier().resolveBinding()).getQualifiedName()),
+            receiver,
             expression.getName().getIdentifier(),
             typeOf(expression));
+    }
+
+    private Receiver toReceiver(IBinding binding) {
+        if (binding instanceof ITypeBinding) {
+            ScalarType receiver = ScalarType.of(((ITypeBinding) binding).getQualifiedName());
+            return staticReceiver(receiver);
+        } else if (binding instanceof IVariableBinding) {
+            return instanceReceiver(readVariableBinding((IVariableBinding) binding));
+        } else {
+            throw new UnsupportedOperationException("Unsupported binding: " + binding);
+        }
     }
 
     private ExpressionNode readMethodInvocation(MethodInvocation expression) {
