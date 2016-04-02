@@ -59,7 +59,11 @@ public class JavaReader {
             if (!errors.isEmpty()) {
                 throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
             }
-            reader.readCompilationUnit(ast);
+            try {
+                reader.readCompilationUnit(ast);
+            } catch (Exception exception) {
+                throw new RuntimeException("Error reading " + sourceFile, exception);
+            }
         }
         return reader.types();
     }

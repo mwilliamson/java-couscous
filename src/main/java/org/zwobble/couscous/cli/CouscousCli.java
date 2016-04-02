@@ -3,12 +3,12 @@ package org.zwobble.couscous.cli;
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
-import org.apache.commons.cli.*;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
+import org.zwobble.couscous.util.FileSet;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,8 +16,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
-import static java.util.Arrays.asList;
-import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class CouscousCli {
     public static final String FILES = "files";
@@ -42,7 +41,7 @@ public class CouscousCli {
         try {
             List<TypeNode> classNodes = frontend.readSourceDirectory(
                 paths(sourcePaths),
-                paths(files));
+                FileSet.globs(files));
             backend.compile(classNodes);
         } catch (IOException exception) {
             throw new RuntimeException(exception);

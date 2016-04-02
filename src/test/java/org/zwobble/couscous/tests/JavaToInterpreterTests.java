@@ -9,6 +9,7 @@ import org.zwobble.couscous.interpreter.Project;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.InterpreterValues;
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.util.FileSet;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class JavaToInterpreterTests extends CompilerTests {
         ScalarType returnType
     ) throws IOException, InterruptedException {
         JavaFrontend frontend = new JavaFrontend();
-        List<TypeNode> classNodes = frontend.readSourceDirectory(list(directory), list(directory));
+        List<TypeNode> classNodes = frontend.readSourceDirectory(list(directory), FileSet.directory(directory));
 
         Project project = JavaProject.of(classNodes);
         Interpreter interpreter = new Interpreter(project);

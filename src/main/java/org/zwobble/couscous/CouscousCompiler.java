@@ -2,6 +2,7 @@ package org.zwobble.couscous;
 
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
+import org.zwobble.couscous.util.FileSet;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -19,7 +20,7 @@ public class CouscousCompiler {
     }
 
     public void compileDirectory(List<Path> sourcePaths, Path path) throws IOException {
-        List<TypeNode> classes = frontend.readSourceDirectory(sourcePaths, list(path));
+        List<TypeNode> classes = frontend.readSourceDirectory(sourcePaths, FileSet.globs(list(path.toString())));
         backend.compile(classes);
     }
 
