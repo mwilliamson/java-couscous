@@ -17,21 +17,26 @@ import org.zwobble.couscous.util.InsertionOrderSet;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.concat;
-import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
+import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -40,8 +45,8 @@ import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.*;
-import static org.zwobble.couscous.util.ExtraMaps.lookup;
 
 public class JavaReader {
     public static List<TypeNode> readClassesFromFiles(List<Path> sourcePaths, List<Path> sourceFiles) throws IOException {
@@ -72,7 +77,6 @@ public class JavaReader {
     private final ImmutableList.Builder<TypeNode> classes;
     private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
-    private final Map<ScalarType, InsertionOrderSet<ReferenceNode>> nestedClasses = new HashMap<>();
 
     private JavaReader() {
         classes = ImmutableList.builder();
@@ -84,14 +88,7 @@ public class JavaReader {
     }
 
     private List<TypeNode> types() {
-        List<TypeNode> classes = this.classes.build();
-        NodeTransformer transformer = NodeTransformer.builder()
-            .transformExpression(expression ->
-                tryCast(ConstructorCallNode.class, expression)
-                    .flatMap(call -> lookup(nestedClasses, erasure(call.getType())).map(captures ->
-                        new ConstructorCallNode(call.getType(), ExtraLists.concat(captures, call.getArguments())))))
-            .build();
-        return eagerMap(classes, classNode -> classNode.transform(transformer));
+        return this.classes.build();
     }
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
@@ -336,12 +333,12 @@ public class JavaReader {
                 .ifPresent(field -> readField(body, scope, type, field));
 
             tryCast(TypeDeclaration.class, declaration)
-                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(typeDeclaration)));
+                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(body, typeDeclaration)));
         }
         return body.build();
     }
 
-    private TypeNode readNestedTypeDeclaration(TypeDeclaration typeDeclaration) {
+    private TypeNode readNestedTypeDeclaration(TypeDeclarationBody.Builder body, TypeDeclaration typeDeclaration) {
         TypeNode typeNode = readTypeDeclaration(typeDeclaration);
         // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
         Scope scope = topScope.enterClass(typeNode.getName());
@@ -349,7 +346,24 @@ public class JavaReader {
             .filter(node -> !Modifier.isStatic(typeDeclaration.getModifiers()))
             .<TypeNode>map(node -> {
                 GeneratedClosure closure = classWithCapture(scope, node);
-                nestedClasses.put(node.getName(), closure.getCaptures());
+//                Type type = node.getTypeParameters().isEmpty()
+//                    ? typeNode.getName()
+//                    : parameterizedType(typeNode.getName(), eagerMap(node.getTypeParameters()));
+                Type type = typeNode.getName();
+                // TODO: method type parameters
+                List<FormalArgumentNode> methodArguments = eagerMap(
+                    node.getConstructor().getArguments(),
+                    // TODO: use scope of outer class
+                    argument -> scope.formalArgument(argument.getName(), argument.getType()));
+                List<ExpressionNode> constructorArguments = ExtraLists.concat(
+                    closure.getCaptures(),
+                    lazyMap(methodArguments, argument -> reference(argument)));
+                MethodNode method = MethodNode.builder("create_" + typeDeclaration.getName().getIdentifier())
+                    .arguments(methodArguments)
+                    .returns(type)
+                    .statement(returns(constructorCall(type, constructorArguments)))
+                    .build();
+                body.addMethod(method);
                 return closure.getClassNode();
             })
             .orElse(typeNode);

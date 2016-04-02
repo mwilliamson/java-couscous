@@ -16,12 +16,15 @@ import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.not;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.Fold.foldLeft;
 
@@ -143,7 +146,7 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readTypeLiteral(TypeLiteral expression) {
-        return literal(Types.erasure(typeOf(expression.getType())));
+        return literal(erasure(typeOf(expression.getType())));
     }
 
     private ExpressionNode readSimpleName(SimpleName expression) {
@@ -162,8 +165,8 @@ public class JavaExpressionReader {
             boolean isStatic = Modifier.isStatic(binding.getModifiers());
             Type classType = typeOf(binding.getDeclaringClass());
             Receiver receiver = isStatic
-                ? new StaticReceiver(Types.erasure(classType))
-                : new InstanceReceiver(ThisReferenceNode.thisReference(classType));
+                ? new StaticReceiver(erasure(classType))
+                : new InstanceReceiver(thisReference(classType));
             return FieldAccessNode.fieldAccess(
                 receiver,
                 binding.getName(),
@@ -172,14 +175,14 @@ public class JavaExpressionReader {
     }
 
     private static ExpressionNode readThisExpression(ThisExpression expression) {
-        return ThisReferenceNode.thisReference(typeOf(expression));
+        return thisReference(typeOf(expression));
     }
 
     private ExpressionNode readFieldAccess(FieldAccess expression) {
         IVariableBinding fieldBinding = expression.resolveFieldBinding();
         boolean isStatic = Modifier.isStatic(fieldBinding.getModifiers());
         Receiver receiver = isStatic
-            ? new StaticReceiver(Types.erasure(typeOf(fieldBinding.getDeclaringClass())))
+            ? new StaticReceiver(erasure(typeOf(fieldBinding.getDeclaringClass())))
             : new InstanceReceiver(readExpressionWithoutBoxing(expression.getExpression()));
 
         return FieldAccessNode.fieldAccess(
@@ -207,15 +210,15 @@ public class JavaExpressionReader {
         Type receiverType = typeOf(methodBinding.getDeclaringClass());
         if ((Modifier.isStatic(methodBinding.getModifiers()))) {
             return staticMethodCall(
-                Types.erasure(receiverType),
+                erasure(receiverType),
                 methodName,
                 arguments,
                 signature);
         } else {
             ExpressionNode receiver = expression.getExpression() == null
-                ? ThisReferenceNode.thisReference(receiverType)
+                ? thisReference(receiverType)
                 : readExpressionWithoutBoxing(expression.getExpression());
-            return MethodCallNode.methodCall(
+            return methodCall(
                 receiver,
                 methodName,
                 arguments,
@@ -229,12 +232,25 @@ public class JavaExpressionReader {
         IMethodBinding constructor = expression.resolveConstructorBinding();
         List<ExpressionNode> arguments = readArguments(constructor, javaArguments);
 
-        if (constructor.getDeclaringClass().isAnonymous()) {
+        ITypeBinding declaringClass = constructor.getDeclaringClass();
+        if (declaringClass.isAnonymous()) {
             GeneratedClosure closure =
                 javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
             return constructorCall(
                 closure.getType(),
                 concat(captureArguments(closure), arguments));
+        } else if (declaringClass.isNested() && !Modifier.isStatic(declaringClass.getModifiers())) {
+            if (expression.getExpression() == null) {
+                Type type = typeOf(declaringClass);
+                return methodCall(
+                    thisReference(typeOf(declaringClass.getDeclaringClass())),
+                    // TODO: remove duplication with JavaReader in name generation
+                    "create_" + declaringClass.getName(),
+                    arguments,
+                    type);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         } else {
             return constructorCall(typeOf(expression), arguments);
         }
