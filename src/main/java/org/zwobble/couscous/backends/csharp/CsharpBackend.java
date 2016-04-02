@@ -30,6 +30,7 @@ public class CsharpBackend implements Backend {
 
     @Override
     public void compile(List<TypeNode> classes) throws IOException {
+        directoryPath.toFile().mkdirs();
         Files.write(
             directoryPath.resolve("Program.cs"),
             Iterables.<String>concat(
