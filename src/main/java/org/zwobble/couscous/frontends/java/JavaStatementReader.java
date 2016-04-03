@@ -61,6 +61,9 @@ class JavaStatementReader {
             case ASTNode.FOR_STATEMENT:
                 return readForStatement((ForStatement)statement);
 
+            case ASTNode.ENHANCED_FOR_STATEMENT:
+                return readEnhancedForStatement((EnhancedForStatement)statement);
+
             case ASTNode.VARIABLE_DECLARATION_STATEMENT:
                 return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
 
@@ -178,6 +181,24 @@ class JavaStatementReader {
                 concat(
                     readStatement(statement.getBody()),
                     eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));
+    }
+
+    private List<StatementNode> readEnhancedForStatement(EnhancedForStatement statement) {
+        SingleVariableDeclaration parameter = statement.getParameter();
+        Type elementType = typeOf(parameter.getType());
+
+        ExpressionNode iterableValue = readExpression(JavaTypes.iterable(elementType), statement.getExpression());
+        ExpressionNode iteratorValue = methodCall(iterableValue, "iterator", list(), JavaTypes.iterator(elementType));
+        LocalVariableDeclarationNode iterator = scope.temporaryVariable(iteratorValue);
+
+        ExpressionNode hasNext = methodCall(reference(iterator), "hasNext", list(), Types.BOOLEAN);
+        ExpressionNode next = methodCall(reference(iterator), "next", list(), elementType);
+        IVariableBinding parameterBinding = parameter.resolveBinding();
+        WhileNode loop = whileLoop(hasNext, cons(
+            scope.localVariable(parameterBinding.getKey(), parameterBinding.getName(), elementType, next),
+            readStatement(statement.getBody())));
+
+        return list(iterator, loop);
     }
 
     private List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {

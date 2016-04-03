@@ -10,6 +10,10 @@ import static org.zwobble.couscous.tests.util.ExtraMatchers.hasFeature;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.isInstance;
 
 public class NodeMatchers {
+    public static Matcher<LocalVariableDeclarationNode> declarationHasValue(Matcher<ExpressionNode> matcher) {
+        return hasFeature("initial value", node -> node.getInitialValue(), matcher);
+    }
+
     @SafeVarargs
     public static Matcher<ExpressionNode> isFieldAccess(Matcher<? super FieldAccessNode>... matchers) {
         return isInstance(FieldAccessNode.class, allOf(matchers));

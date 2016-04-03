@@ -14,9 +14,11 @@ import java.util.Set;
 
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaTypes {
     static Type typeOf(Expression expression) {
@@ -118,5 +120,13 @@ public class JavaTypes {
         } else {
             return Optional.empty();
         }
+    }
+
+    public static Type iterable(Type elementType) {
+        return parameterizedType(ScalarType.of("java.lang.Iterable"), list(elementType));
+    }
+
+    public static Type iterator(Type elementType) {
+        return parameterizedType(ScalarType.of("java.lang.Iterator"), list(elementType));
     }
 }

@@ -85,6 +85,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void forEach() throws Exception {
+        assertEquals(
+            value("abc"),
+            execTestProgram(
+                "for-each",
+                ScalarType.of("com.example.ForEach"),
+                "value",
+                list(),
+                Types.STRING));
+    }
+
+    @Test
     public void staticNestedClasses() throws Exception {
         assertEquals(
             value(42),
