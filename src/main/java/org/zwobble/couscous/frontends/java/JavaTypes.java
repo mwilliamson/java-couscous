@@ -39,6 +39,7 @@ public class JavaTypes {
             return Types.array(typeOf(typeBinding.getElementType()));
         }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
+        // TODO: handle type variables for methods
         if (typeBinding.isTypeVariable() && outerClass != null) {
             return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
         }
