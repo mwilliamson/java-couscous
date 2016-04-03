@@ -39,21 +39,20 @@ public class JavaTypes {
             return Types.array(typeOf(typeBinding.getElementType()));
         }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
-        if (outerClass == null) {
-            ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());
-            if (typeBinding.isParameterizedType()) {
-                List<Type> typeParameters = eagerMap(
-                    asList(typeBinding.getTypeArguments()),
-                    JavaTypes::typeOf);
-                return new ParameterizedType(rawType, typeParameters);
-            } else {
-                return rawType;
-            }
-        } else if (typeBinding.isTypeVariable()) {
+        if (typeBinding.isTypeVariable() && outerClass != null) {
             return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
-        } else {
+        }
+        ScalarType rawType = outerClass == null
+            ? ScalarType.of(typeBinding.getErasure().getQualifiedName())
             // TODO: test for erasure of inner type name
-            return ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
+            : ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
+        if (typeBinding.isParameterizedType()) {
+            List<Type> typeParameters = eagerMap(
+                asList(typeBinding.getTypeArguments()),
+                JavaTypes::typeOf);
+            return new ParameterizedType(rawType, typeParameters);
+        } else {
+            return rawType;
         }
     }
 
