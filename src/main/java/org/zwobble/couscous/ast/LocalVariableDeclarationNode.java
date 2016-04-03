@@ -5,6 +5,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
+import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 
 public class LocalVariableDeclarationNode implements VariableNode, StatementNode {
@@ -19,7 +20,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     public static LocalVariableDeclarationNode localVariableDeclaration(
             VariableDeclaration declaration,
             ExpressionNode initialValue) {
-        return new LocalVariableDeclarationNode(declaration, initialValue);
+        return new LocalVariableDeclarationNode(declaration, coerce(initialValue, declaration.getType()));
     }
     
     private final VariableDeclaration declaration;

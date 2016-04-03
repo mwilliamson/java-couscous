@@ -15,10 +15,10 @@ import static com.google.common.collect.Iterables.tryFind;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
-import static org.zwobble.couscous.frontends.java.JavaExpressionReader.coerceExpression;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.Fold.foldRight;
@@ -127,7 +127,7 @@ class JavaStatementReader {
                         methodCall(
                             reference(switchValueAssignment),
                             "equals",
-                            list(coerceExpression(Types.OBJECT, value)),
+                            list(coerce(value, Types.OBJECT)),
                             Types.BOOLEAN),
                         currentCase.getStatements(), handle)))
                     .orElse(handle)));

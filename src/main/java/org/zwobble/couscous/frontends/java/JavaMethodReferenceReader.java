@@ -16,6 +16,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
@@ -53,9 +54,7 @@ public class JavaMethodReferenceReader {
 
         return lambda(
             formalArguments,
-            list(returns(JavaExpressionReader.coerceExpression(
-                typeOf(functionalInterfaceMethod.getReturnType()),
-                generateValue.apply(arguments)))));
+            list(returns(coerce(generateValue.apply(arguments), typeOf(functionalInterfaceMethod.getReturnType())))));
     }
 
     private List<FormalArgumentNode> formalArguments(Scope scope, IMethodBinding functionalInterfaceMethod) {

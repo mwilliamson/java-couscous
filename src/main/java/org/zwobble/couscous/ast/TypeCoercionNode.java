@@ -5,6 +5,14 @@ import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class TypeCoercionNode implements ExpressionNode {
+    public static ExpressionNode coerce(ExpressionNode expression, Type type) {
+        if (type.equals(expression.getType())) {
+            return expression;
+        } else {
+            return new TypeCoercionNode(expression, type);
+        }
+    }
+
     public static TypeCoercionNode typeCoercion(ExpressionNode expression, Type type) {
         return new TypeCoercionNode(expression, type);
     }

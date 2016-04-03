@@ -23,7 +23,7 @@ import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
-import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
+import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.types.Types.erasure;
@@ -41,15 +41,7 @@ public class JavaExpressionReader {
 
     ExpressionNode readExpression(Type targetType, Expression expression) {
         ExpressionNode couscousExpression = readExpressionWithoutBoxing(expression);
-        return coerceExpression(targetType, couscousExpression);
-    }
-
-    static ExpressionNode coerceExpression(Type targetType, ExpressionNode couscousExpression) {
-        if (targetType.equals(couscousExpression.getType())) {
-            return couscousExpression;
-        } else {
-            return typeCoercion(couscousExpression, targetType);
-        }
+        return coerce(couscousExpression, targetType);
     }
 
     private static Type unboxedType(Type type) {
@@ -387,9 +379,7 @@ public class JavaExpressionReader {
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(
                 left,
-                coerceExpression(
-                    left.getType(),
-                    readPrimitiveOperation(operator, list(expression.getLeftHandSide(), expression.getRightHandSide()))));
+                coerce(readPrimitiveOperation(operator, list(expression.getLeftHandSide(), expression.getRightHandSide())), left.getType()));
         }
     }
 
