@@ -246,6 +246,15 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void elseBranchIsNotGeneratedIfEmpty() {
+        String output = serialize(ifStatement(
+            literal(true),
+            list(returns(literal(1))),
+            list()));
+        assertEquals("if (true) {\n    return 1;\n}\n", output);
+    }
+
+    @Test
     public void elseIfBranchesDontCauseNesting() {
         String output = serialize(ifStatement(
             literal(true),

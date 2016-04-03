@@ -337,14 +337,16 @@ public class CsharpSerializer implements NodeVisitor {
 
         writeBlock(ifStatement.getTrueBranch());
 
-        writer.writeSpace();
-        writer.writeKeyword("else");
-
-        if (ifStatement.getFalseBranch().size() == 1 && ifStatement.getFalseBranch().get(0) instanceof IfStatementNode) {
+        if (!ifStatement.getFalseBranch().isEmpty()) {
             writer.writeSpace();
-            writeIfContent((IfStatementNode) ifStatement.getFalseBranch().get(0));
-        } else {
-            writeBlock(ifStatement.getFalseBranch());
+            writer.writeKeyword("else");
+
+            if (ifStatement.getFalseBranch().size() == 1 && ifStatement.getFalseBranch().get(0) instanceof IfStatementNode) {
+                writer.writeSpace();
+                writeIfContent((IfStatementNode) ifStatement.getFalseBranch().get(0));
+            } else {
+                writeBlock(ifStatement.getFalseBranch());
+            }
         }
     }
 
