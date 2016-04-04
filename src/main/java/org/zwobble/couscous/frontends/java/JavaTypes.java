@@ -41,8 +41,11 @@ public class JavaTypes {
             return Types.array(typeOf(typeBinding.getElementType()));
         }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
-        // TODO: handle type variables for methods
-        if (typeBinding.isTypeVariable() && outerClass != null) {
+        if (typeBinding.isTypeVariable()) {
+            if (outerClass == null) {
+                // TODO: handle type variables for methods properly
+                outerClass = typeBinding.getDeclaringMethod().getDeclaringClass();
+            }
             return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
         }
         ScalarType rawType = outerClass == null

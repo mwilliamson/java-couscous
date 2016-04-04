@@ -208,6 +208,8 @@ public class PythonCodeGenerator {
                     methodNode.getAnnotations(),
                     methodNode.isStatic(),
                     methodNode.getName(),
+                    // TODO: should get type parameters from signature
+                    list(),
                     arguments,
                     override.getReturnType(),
                     Optional.of(list(body)),

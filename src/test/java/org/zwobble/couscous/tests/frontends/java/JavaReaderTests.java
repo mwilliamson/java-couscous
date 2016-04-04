@@ -29,7 +29,9 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
-import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isArgument;
+import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isFormalArgument;
+import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isFormalTypeParameter;
+import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -75,10 +77,23 @@ public class JavaReaderTests {
             "}");
         
         MethodNode method = classNode.getMethods().get(0);
-        assertThat(method.getArguments(), contains(isArgument("value", ScalarType.of("int"))));
+        assertThat(method.getArguments(), contains(isFormalArgument("value", ScalarType.of("int"))));
         
         ReturnNode returnNode = (ReturnNode)method.getBody().get().get(0);
         assertEquals(reference(method.getArguments().get(0)), returnNode.getValue());
+    }
+
+    @Test
+    public void canReadTypeParametersForMethod() {
+        ClassNode classNode = readClass(
+            "public <T> T identity(T value) {" +
+            "    return value;" +
+            "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        assertThat(method.getTypeParameters(), contains(isFormalTypeParameter("T")));
+        // TODO: typeParameter should be declared on method, not class
+        assertThat(method.getArguments(), contains(isFormalArgument("value", typeParameter(classNode.getName(), "T"))));
     }
     
     @Test

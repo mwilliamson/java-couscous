@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class MethodNode implements Node {
     public static Builder staticMethod(String name) {
@@ -83,6 +84,7 @@ public class MethodNode implements Node {
                 annotations.build(),
                 isStatic,
                 name,
+                list(),
                 arguments.build(),
                 returnType,
                 isAbstract ? Optional.empty() : Optional.of(body.build()),
@@ -94,17 +96,19 @@ public class MethodNode implements Node {
         List<AnnotationNode> annotations,
         boolean isStatic,
         String name,
+        List<FormalTypeParameterNode> typeParameters,
         List<FormalArgumentNode> arguments,
         Type returnType,
         Optional<List<StatementNode>> body,
         List<MethodSignature> overrides)
     {
-        return new MethodNode(annotations, isStatic, name, arguments, returnType, body, overrides);
+        return new MethodNode(annotations, isStatic, name, typeParameters, arguments, returnType, body, overrides);
     }
     
     private final List<AnnotationNode> annotations;
     private final boolean isStatic;
     private final String name;
+    private final List<FormalTypeParameterNode> typeParameters;
     private final List<FormalArgumentNode> arguments;
     private final Type returnType;
     private final Optional<List<StatementNode>> body;
@@ -114,6 +118,7 @@ public class MethodNode implements Node {
         List<AnnotationNode> annotations,
         boolean isStatic,
         String name,
+        List<FormalTypeParameterNode> typeParameters,
         List<FormalArgumentNode> arguments,
         Type returnType,
         Optional<List<StatementNode>> body,
@@ -122,6 +127,7 @@ public class MethodNode implements Node {
         this.annotations = annotations;
         this.isStatic = isStatic;
         this.name = name;
+        this.typeParameters = typeParameters;
         this.arguments = arguments;
         this.returnType = returnType;
         this.body = body;
@@ -139,7 +145,11 @@ public class MethodNode implements Node {
     public String getName() {
         return name;
     }
-    
+
+    public List<FormalTypeParameterNode> getTypeParameters() {
+        return typeParameters;
+    }
+
     public List<FormalArgumentNode> getArguments() {
         return arguments;
     }
@@ -168,7 +178,7 @@ public class MethodNode implements Node {
     }
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
-        return new MethodNode(annotations, isStatic, name, arguments, returnType, body.map(function), overrides);
+        return new MethodNode(annotations, isStatic, name, typeParameters, arguments, returnType, body.map(function), overrides);
     }
 
     @Override
@@ -181,10 +191,25 @@ public class MethodNode implements Node {
             transformer.transformAnnotations(annotations),
             isStatic,
             transformer.transformMethodName(signature()),
+            transformer.transformFormalTypeParameters(typeParameters),
             transformer.transformFormalArguments(arguments),
             transformer.transform(returnType),
             body.map(transformer::transformStatements),
             eagerMap(overrides, transformer::transform));
+    }
+
+    @Override
+    public String toString() {
+        return "MethodNode(" +
+            "annotations=" + annotations +
+            ", isStatic=" + isStatic +
+            ", name=" + name +
+            ", typeParameters=" + typeParameters +
+            ", arguments=" + arguments +
+            ", returnType=" + returnType +
+            ", body=" + body +
+            ", overrides=" + overrides +
+            ')';
     }
 
     @Override
@@ -197,6 +222,7 @@ public class MethodNode implements Node {
         if (isStatic != that.isStatic) return false;
         if (!annotations.equals(that.annotations)) return false;
         if (!name.equals(that.name)) return false;
+        if (!typeParameters.equals(that.typeParameters)) return false;
         if (!arguments.equals(that.arguments)) return false;
         if (!returnType.equals(that.returnType)) return false;
         if (!body.equals(that.body)) return false;
@@ -209,24 +235,11 @@ public class MethodNode implements Node {
         int result = annotations.hashCode();
         result = 31 * result + (isStatic ? 1 : 0);
         result = 31 * result + name.hashCode();
+        result = 31 * result + typeParameters.hashCode();
         result = 31 * result + arguments.hashCode();
         result = 31 * result + returnType.hashCode();
         result = 31 * result + body.hashCode();
         result = 31 * result + overrides.hashCode();
         return result;
     }
-
-    @Override
-    public String toString() {
-        return "MethodNode(" +
-            "annotations=" + annotations +
-            ", isStatic=" + isStatic +
-            ", name=" + name +
-            ", arguments=" + arguments +
-            ", returnType=" + returnType +
-            ", body=" + body +
-            ", overrides=" + overrides +
-            ')';
-    }
-
 }

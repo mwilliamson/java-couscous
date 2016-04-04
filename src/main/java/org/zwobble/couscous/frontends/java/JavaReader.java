@@ -117,8 +117,12 @@ public class JavaReader {
     }
 
     private List<FormalTypeParameterNode> readTypeParameters(TypeDeclaration typeDeclaration) {
+        return readTypeParameters(typeDeclaration.resolveBinding().getTypeParameters());
+    }
+
+    private List<FormalTypeParameterNode> readTypeParameters(ITypeBinding[] typeParameters) {
         return eagerMap(
-            asList(typeDeclaration.resolveBinding().getTypeParameters()),
+            asList(typeParameters),
             parameter -> formalTypeParameter(parameter.getName()));
     }
 
@@ -156,6 +160,8 @@ public class JavaReader {
             emptyList(),
             false,
             functionalInterfaceMethod.getName(),
+            // TODO: should get formal type parameters from the lambda
+            list(),
             lambda.getFormalArguments(),
             typeOf(functionalInterfaceMethod.getReturnType()),
             Optional.of(lambda.getBody()),
@@ -414,6 +420,7 @@ public class JavaReader {
                 annotations,
                 isStatic,
                 methodName,
+                readTypeParameters(method.resolveBinding().getTypeParameters()),
                 formalArguments,
                 returnType.get(),
                 body,

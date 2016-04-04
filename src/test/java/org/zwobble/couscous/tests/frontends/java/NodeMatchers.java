@@ -14,7 +14,11 @@ public class NodeMatchers {
         return hasFeature("initial value", node -> node.getInitialValue(), matcher);
     }
 
-    public static Matcher<FormalArgumentNode> isArgument(String name, Type type) {
+    public static Matcher<FormalTypeParameterNode> isFormalTypeParameter(String name) {
+        return hasFeature("name", node -> node.getName(), equalTo(name));
+    }
+
+    public static Matcher<FormalArgumentNode> isFormalArgument(String name, Type type) {
         return allOf(
             hasFeature("name", node -> node.getName(), equalTo(name)),
             hasFeature("type", node -> node.getType(), equalTo(type)));
