@@ -14,6 +14,12 @@ public class NodeMatchers {
         return hasFeature("initial value", node -> node.getInitialValue(), matcher);
     }
 
+    public static Matcher<FormalArgumentNode> isArgument(String name, Type type) {
+        return allOf(
+            hasFeature("name", node -> node.getName(), equalTo(name)),
+            hasFeature("type", node -> node.getType(), equalTo(type)));
+    }
+
     @SafeVarargs
     public static Matcher<ExpressionNode> isFieldAccess(Matcher<? super FieldAccessNode>... matchers) {
         return isInstance(FieldAccessNode.class, allOf(matchers));

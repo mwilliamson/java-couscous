@@ -29,6 +29,7 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
+import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isArgument;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -74,13 +75,10 @@ public class JavaReaderTests {
             "}");
         
         MethodNode method = classNode.getMethods().get(0);
-        FormalArgumentNode argument = method.getArguments().get(0);
-        assertEquals("value", argument.getName());
-        assertEquals(ScalarType.of("int"), argument.getType());
-        assertEquals(1, method.getArguments().size());
+        assertThat(method.getArguments(), contains(isArgument("value", ScalarType.of("int"))));
         
         ReturnNode returnNode = (ReturnNode)method.getBody().get().get(0);
-        assertEquals(reference(argument), returnNode.getValue());
+        assertEquals(reference(method.getArguments().get(0)), returnNode.getValue());
     }
     
     @Test
