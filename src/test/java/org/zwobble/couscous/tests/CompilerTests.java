@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
@@ -214,6 +215,19 @@ public abstract class CompilerTests {
                 "value",
                 list(value(2)),
                 Types.INT));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void genericMethods() throws Exception {
+        assertEquals(
+            value("two"),
+            execTestProgram(
+                "generic-method",
+                ScalarType.of("com.example.GenericMethod"),
+                "value",
+                list(),
+                Types.STRING));
     }
 
     @Test
