@@ -11,6 +11,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 class JavaMethods {
     static MethodSignature signature(IMethodBinding method) {
@@ -21,7 +22,7 @@ class JavaMethods {
         Type returnType = typeOf(method.getReturnType());
 
         if (declaringClass.isEqualTo(erasedDeclaringClass)) {
-            return new MethodSignature(method.getName(), argumentTypes, returnType);
+            return new MethodSignature(method.getName(), list(), argumentTypes, returnType);
         } else {
             IMethodBinding[] erasedMethods = erasedDeclaringClass.getDeclaredMethods();
             IMethodBinding erasedMethod = Iterables.getOnlyElement(Iterables.filter(
@@ -29,6 +30,7 @@ class JavaMethods {
                 m -> m.isSubsignature(method)));
             return new MethodSignature(
                 method.getName(),
+                list(),
                 eagerMap(
                     argumentTypes,
                     asList(erasedMethod.getParameterTypes()),

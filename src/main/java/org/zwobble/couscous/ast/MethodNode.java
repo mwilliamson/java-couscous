@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.zwobble.couscous.types.MethodTypeParameter.methodTypeParameter;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -173,6 +174,7 @@ public class MethodNode implements Node {
     public MethodSignature signature() {
         return new MethodSignature(
             name,
+            eagerMap(typeParameters, parameter -> methodTypeParameter(parameter.getName())),
             eagerMap(arguments, argument -> argument.getType()),
             returnType);
     }

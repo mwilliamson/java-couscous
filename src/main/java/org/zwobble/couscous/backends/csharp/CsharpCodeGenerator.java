@@ -59,6 +59,11 @@ public class CsharpCodeGenerator {
             }
 
             @Override
+            public Type visit(MethodTypeParameter parameter) {
+                return parameter;
+            }
+
+            @Override
             public TypeParameter visit(TypeParameter parameter) {
                 return parameter;
             }
@@ -111,6 +116,11 @@ public class CsharpCodeGenerator {
             @Override
             public ScalarType visit(ScalarType type) {
                 return ScalarType.of(namespace + "." + type.getQualifiedName());
+            }
+
+            @Override
+            public Type visit(MethodTypeParameter parameter) {
+                return parameter;
             }
 
             @Override

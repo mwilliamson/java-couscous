@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
@@ -63,7 +64,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
             Type returnType,
             BiFunction<Environment, MethodCallArguments<T>, InterpreterValue> method)
         {
-            methods.put(new MethodSignature(name, argumentsTypes, returnType), toMethodValue(argumentsTypes, method));
+            methods.put(signature(name, argumentsTypes, returnType), toMethodValue(argumentsTypes, method));
             return this;
         }
 
@@ -82,7 +83,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
             Type returnType,
             BiFunction<Environment, Arguments, InterpreterValue> method)
         {
-            staticMethods.put(new MethodSignature(name, argumentsTypes, returnType), new StaticMethodValue(argumentsTypes, method));
+            staticMethods.put(signature(name, argumentsTypes, returnType), new StaticMethodValue(argumentsTypes, method));
             return this;
         }
 

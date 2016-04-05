@@ -61,6 +61,7 @@ public class CsharpMethodRunner implements MethodRunner {
     {
         MethodSignature signature = new MethodSignature(
             methodName,
+            list(),
             eagerMap(arguments, argument -> argument.getType()),
             returnType);
         String csharpMethodName = CsharpCodeGenerator.NAMING.methodName(signature);

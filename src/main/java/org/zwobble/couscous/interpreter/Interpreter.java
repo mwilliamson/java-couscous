@@ -29,6 +29,7 @@ public class Interpreter {
         StaticReceiverValue clazz = environment.findClass(className);
         MethodSignature signature = new MethodSignature(
             methodName,
+            list(),
             eagerMap(arguments, argument -> argument.getType().getType()),
             returnType);
         return clazz.callMethod(environment, signature, new Arguments(list(), arguments));

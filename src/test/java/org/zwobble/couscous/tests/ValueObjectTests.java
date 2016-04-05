@@ -61,6 +61,7 @@ public class ValueObjectTests {
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
             {MethodNode.class},
+            {MethodTypeParameter.class},
             {OperationNode.class},
             {ParameterizedType.class},
             {ReturnNode.class},

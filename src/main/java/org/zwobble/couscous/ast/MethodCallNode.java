@@ -10,6 +10,7 @@ import java.util.List;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class MethodCallNode implements ExpressionNode {
     public static ExpressionNode staticMethodCall(
@@ -74,6 +75,7 @@ public class MethodCallNode implements ExpressionNode {
     {
         MethodSignature signature = new MethodSignature(
             methodName,
+            list(),
             eagerMap(arguments, argument -> argument.getType()),
             type);
         return methodCall(receiver, methodName, arguments, signature);

@@ -32,6 +32,7 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.interpreter.Evaluator.eval;
@@ -72,7 +73,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     "size",
                     list(),
                     Types.INT)));
-        assertEquals(new MethodSignature("size", list(), Types.INT), exception.getSignature());
+        assertEquals(signature("size", list(), Types.INT), exception.getSignature());
     }
     
     @Test
@@ -84,7 +85,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     "substring",
                     list(literal(1)),
                     Types.STRING)));
-        assertEquals(new MethodSignature("substring", list(Types.INT), Types.STRING), exception.getSignature());
+        assertEquals(signature("substring", list(Types.INT), Types.STRING), exception.getSignature());
     }
     
     @Test
@@ -97,7 +98,7 @@ public class EvaluatorTests extends BackendEvalTests {
                     list(literal(0), literal("")),
                     Types.STRING)));
         assertEquals(
-            new MethodSignature("substring", list(Types.INT, Types.STRING), Types.STRING),
+            signature("substring", list(Types.INT, Types.STRING), Types.STRING),
             exception.getSignature());
     }
 

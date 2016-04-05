@@ -1,5 +1,7 @@
 ## TODO
 
+* Do we need capture of type parameters (both class and method)?
+
 * Do this references work for anonymous classes?
 
 * Type names for generics

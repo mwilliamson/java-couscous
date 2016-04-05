@@ -21,6 +21,7 @@ import java.util.List;
 
 import static java.lang.Integer.parseInt;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -53,7 +54,7 @@ public class PythonMethodRunner implements MethodRunner {
             throws IOException, InterruptedException {
         
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
-        MethodSignature signature = new MethodSignature(
+        MethodSignature signature = signature(
             methodName,
             eagerMap(arguments, argument -> argument.getType()),
             returnType);

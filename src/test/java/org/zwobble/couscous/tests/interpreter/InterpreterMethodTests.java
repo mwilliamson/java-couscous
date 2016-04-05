@@ -28,6 +28,7 @@ import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodNode.staticMethod;
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -44,7 +45,7 @@ public class InterpreterMethodTests extends BackendMethodTests {
         NoSuchMethod exception = assertThrows(NoSuchMethod.class,
             () -> runMethod(method, value("hello, world!")));
         
-        assertEquals(new MethodSignature("hello", list(Types.STRING), Types.VOID), exception.getSignature());
+        assertEquals(signature("hello", list(Types.STRING), Types.VOID), exception.getSignature());
     }
     
     @Test
