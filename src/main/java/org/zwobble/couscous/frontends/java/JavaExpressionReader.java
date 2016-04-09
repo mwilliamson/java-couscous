@@ -206,6 +206,9 @@ public class JavaExpressionReader {
     private ExpressionNode readMethodInvocation(MethodInvocation expression) {
         String methodName = expression.getName().getIdentifier();
         @SuppressWarnings("unchecked")
+        List<org.eclipse.jdt.core.dom.Type> typeArguments = expression.typeArguments();
+        List<Type> typeParameters = eagerMap(typeArguments, JavaTypes::typeOf);
+        @SuppressWarnings("unchecked")
         List<ExpressionNode> arguments = readArguments(
             expression.resolveMethodBinding(),
             expression.arguments());
@@ -218,6 +221,7 @@ public class JavaExpressionReader {
             return methodCall(
                 staticReceiver(erasure(receiverType)),
                 methodName,
+                typeParameters,
                 arguments,
                 returnType,
                 signature);
@@ -228,6 +232,7 @@ public class JavaExpressionReader {
             return methodCall(
                 instanceReceiver(receiver),
                 methodName,
+                typeParameters,
                 arguments,
                 returnType,
                 signature);

@@ -257,6 +257,7 @@ public class ExpressionReadingTests {
             methodCall(
                 staticReceiver("java.util.Collections"),
                 "emptyList",
+                list(Types.STRING),
                 list(),
                 parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
                 signature(
