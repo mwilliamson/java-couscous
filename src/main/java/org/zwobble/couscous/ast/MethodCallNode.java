@@ -26,9 +26,10 @@ public class MethodCallNode implements ExpressionNode {
         String className,
         String methodName,
         List<ExpressionNode> arguments,
+        Type returnType,
         MethodSignature signature)
     {
-        return staticMethodCall(ScalarType.of(className), methodName, arguments, signature);
+        return staticMethodCall(ScalarType.of(className), methodName, arguments, returnType, signature);
     }
 
     public static ExpressionNode staticMethodCall(
@@ -44,9 +45,10 @@ public class MethodCallNode implements ExpressionNode {
         ScalarType className,
         String methodName,
         List<ExpressionNode> arguments,
+        Type returnType,
         MethodSignature signature)
     {
-        return methodCall(staticReceiver(className), methodName, arguments, signature);
+        return methodCall(staticReceiver(className), methodName, arguments, returnType, signature);
     }
 
     public static MethodCallNode methodCall(
@@ -62,9 +64,10 @@ public class MethodCallNode implements ExpressionNode {
         ExpressionNode receiver,
         String methodName,
         List<ExpressionNode> arguments,
+        Type returnType,
         MethodSignature signature)
     {
-        return methodCall(instanceReceiver(receiver), methodName, arguments, signature);
+        return methodCall(instanceReceiver(receiver), methodName, arguments, returnType, signature);
     }
 
     public static MethodCallNode methodCall(
@@ -78,16 +81,7 @@ public class MethodCallNode implements ExpressionNode {
             list(),
             eagerMap(arguments, argument -> argument.getType()),
             type);
-        return methodCall(receiver, methodName, arguments, signature);
-    }
-
-    public static MethodCallNode methodCall(
-        Receiver receiver,
-        String methodName,
-        List<ExpressionNode> arguments,
-        MethodSignature signature)
-    {
-        return new MethodCallNode(receiver, methodName, arguments, signature.getReturnType(), signature);
+        return methodCall(receiver, methodName, arguments, type, signature);
     }
 
     public static MethodCallNode methodCall(

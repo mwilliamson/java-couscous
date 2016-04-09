@@ -198,6 +198,7 @@ public class PythonCodeGenerator {
                     thisReference(type),
                     methodNode.getName(),
                     eagerMap(arguments, argument -> reference(argument)),
+                    methodNode.getReturnType(),
                     methodNode.signature());
 
                 StatementNode body = override.getReturnType().equals(Types.VOID)
