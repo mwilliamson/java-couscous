@@ -304,8 +304,8 @@ public class CsharpSerializerTests {
     @Test
     public void methodWithArguments() {
         MethodNode methodNode = MethodNode.staticMethod("nothing")
-            .argument(formalArg(var(TestIds.id("x"), "x", ScalarType.of("X"))))
-            .argument(formalArg(var(TestIds.id("y"), "y", ScalarType.of("Y"))))
+            .argument(formalArg(var(TestIds.variable("x"), "x", ScalarType.of("X"))))
+            .argument(formalArg(var(TestIds.variable("y"), "y", ScalarType.of("Y"))))
             .returns(ScalarType.of("void"))
             .build();
 

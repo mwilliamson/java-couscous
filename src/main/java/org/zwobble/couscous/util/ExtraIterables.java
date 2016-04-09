@@ -78,6 +78,10 @@ public class ExtraIterables {
         };
     }
 
+    public static <T> Iterable<T> lazyAppend(Iterable<T> head, T tail) {
+        return Iterables.concat(head, list(tail));
+    }
+
     public static <T> Iterable<T> lazyCons(T head, Iterable<T> tails) {
         return Iterables.concat(list(head), tails);
     }

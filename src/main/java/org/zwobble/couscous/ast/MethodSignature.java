@@ -1,7 +1,7 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.MethodTypeParameter;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
@@ -14,16 +14,16 @@ public class MethodSignature {
         return signature(name, list(), arguments, returnType);
     }
 
-    public static MethodSignature signature(String name, List<MethodTypeParameter> typeParameters, List<Type> arguments, Type returnType) {
+    public static MethodSignature signature(String name, List<TypeParameter> typeParameters, List<Type> arguments, Type returnType) {
         return new MethodSignature(name, typeParameters, arguments, returnType);
     }
 
     private final String name;
-    private final List<MethodTypeParameter> typeParameters;
+    private final List<TypeParameter> typeParameters;
     private final List<Type> arguments;
     private final Type returnType;
 
-    public MethodSignature(String name, List<MethodTypeParameter> typeParameters, List<Type> arguments, Type returnType) {
+    public MethodSignature(String name, List<TypeParameter> typeParameters, List<Type> arguments, Type returnType) {
         this.name = name;
         this.typeParameters = typeParameters;
         this.arguments = arguments;
@@ -34,7 +34,7 @@ public class MethodSignature {
         return name;
     }
 
-    public List<MethodTypeParameter> getTypeParameters() {
+    public List<TypeParameter> getTypeParameters() {
         return typeParameters;
     }
 

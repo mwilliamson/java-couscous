@@ -25,14 +25,9 @@ public class Names {
             }
 
             @Override
-            public String visit(MethodTypeParameter parameter) {
-                return parameter.getName();
-            }
-
-            @Override
             public String visit(TypeParameter parameter) {
-                // TODO
-                Iterable<String> parts = lazyMap(parameter.getDeclaringScope().getParts(), part -> part.replace(".", "_"));
+                // TODO: should we care about the type?
+                Iterable<String> parts = lazyMap(parameter.getDeclaringScope().getParts(), part -> part.getName().replace(".", "_"));
                 return String.join("_", parts) + "_" + parameter.getName();
             }
 

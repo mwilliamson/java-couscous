@@ -1,7 +1,7 @@
 package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
-import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.frontends.java.JavaTypes;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.TypeParameter;
@@ -24,7 +24,7 @@ public class JavaTypesTests {
 
     @Test
     public void bindingTypeToGenericTypeParameterReturnsBoundTypeParameter() {
-        TypeParameter typeParameter = typeParameter(Identifier.TOP.extend("List"), "T");
+        TypeParameter typeParameter = typeParameter(Identifiers.forType("List"), "T");
         assertEquals(
             boundTypeParameter(typeParameter, INT_TYPE),
             JavaTypes.bind(typeParameter, INT_TYPE));
@@ -33,7 +33,7 @@ public class JavaTypesTests {
     @Test
     public void bindingTypeToParameterizedTypeBindsParameters() {
         ScalarType rawList = ScalarType.of("List");
-        TypeParameter typeParameter = typeParameter(Identifier.TOP.extend("List"), "T");
+        TypeParameter typeParameter = typeParameter(Identifiers.forType("List"), "T");
         assertEquals(
             parameterizedType(rawList, list(boundTypeParameter(typeParameter, INT_TYPE))),
             JavaTypes.bind(

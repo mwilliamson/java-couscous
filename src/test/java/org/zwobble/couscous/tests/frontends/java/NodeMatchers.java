@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.hamcrest.Matcher;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.Type;
 
 import static org.hamcrest.Matchers.allOf;
@@ -14,8 +15,10 @@ public class NodeMatchers {
         return hasFeature("initial value", node -> node.getInitialValue(), matcher);
     }
 
-    public static Matcher<FormalTypeParameterNode> isFormalTypeParameter(String name) {
-        return hasFeature("name", node -> node.getName(), equalTo(name));
+    public static Matcher<FormalTypeParameterNode> isFormalTypeParameter(Identifier declaringScope, String name) {
+        return allOf(
+            hasFeature("name", node -> node.getType().getName(), equalTo(name)),
+            hasFeature("declaringScope", node -> node.getType().getDeclaringScope(), equalTo(declaringScope)));
     }
 
     public static Matcher<FormalArgumentNode> isFormalArgument(String name, Type type) {

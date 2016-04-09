@@ -61,7 +61,6 @@ public class ValueObjectTests {
             {LocalVariableDeclarationNode.class},
             {MethodCallNode.class},
             {MethodNode.class},
-            {MethodTypeParameter.class},
             {OperationNode.class},
             {ParameterizedType.class},
             {ReturnNode.class},
@@ -151,7 +150,7 @@ public class ValueObjectTests {
         } else if (type.equals(Operator.class)) {
             return Operator.DIVIDE;
         } else if (type.equals(Identifier.class)) {
-            return TestIds.id((String)generateFirstInstance(String.class));
+            return TestIds.variable((String)generateFirstInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateFirstInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -181,7 +180,7 @@ public class ValueObjectTests {
         } else if (type.equals(Operator.class)) {
             return Operator.MULTIPLY;
         } else if (type.equals(Identifier.class)) {
-            return TestIds.id((String)generateSecondInstance(String.class));
+            return TestIds.variable((String)generateSecondInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateSecondInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {
@@ -211,7 +210,7 @@ public class ValueObjectTests {
         } else if (type.equals(Operator.class)) {
             return Operator.ADD;
         } else if (type.equals(Identifier.class)) {
-            return TestIds.id((String)generateInstance(String.class));
+            return TestIds.variable((String)generateInstance(String.class));
         } else if (type.equals(PrimitiveValue.class)) {
             return generateInstance(StringValue.class);
         } else if (type.equals(ExpressionNode.class)) {

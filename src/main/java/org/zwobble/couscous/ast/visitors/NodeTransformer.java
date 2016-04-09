@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.types.MethodTypeParameter;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 
 import java.util.List;
 import java.util.Map;
@@ -221,8 +221,8 @@ public class NodeTransformer {
         return (ScalarType)transformType.apply(type);
     }
 
-    public MethodTypeParameter transform(MethodTypeParameter type) {
-        return (MethodTypeParameter)transformType.apply(type);
+    public TypeParameter transform(TypeParameter type) {
+        return (TypeParameter)transformType.apply(type);
     }
 
     public String transformMethodName(MethodSignature signature) {

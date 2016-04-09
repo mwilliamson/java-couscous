@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
@@ -92,10 +93,13 @@ public class JavaReaderTests {
             "}");
 
         MethodNode method = classNode.getMethods().get(0);
-        assertThat(method.getTypeParameters(), contains(isFormalTypeParameter("T")));
+
+        Identifier classIdentifier = Identifiers.forType("com.example.Example");
+        Identifier expectedMethodIdentifier = Identifiers.method(classIdentifier, "identity");
+        assertThat(method.getTypeParameters(), contains(isFormalTypeParameter(expectedMethodIdentifier, "T")));
         assertThat(
             method.getArguments(),
-            contains(isFormalArgument("value", typeParameter(Identifier.TOP.extend("com.example.Example").extend("identity"), "T"))));
+            contains(isFormalArgument("value",  typeParameter(expectedMethodIdentifier, "T"))));
     }
     
     @Test
@@ -337,7 +341,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         ClassNode classNode = (ClassNode) classes.get(0);
         assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(Identifiers.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
     @Test
@@ -348,7 +352,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
         assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter("T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(Identifiers.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
     @Test

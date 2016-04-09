@@ -2,6 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.NaturalNumbers;
@@ -10,7 +11,7 @@ import java.util.*;
 
 public class Scope {
     public static Scope create() {
-        return new Scope(new HashMap<>(), new HashSet<>(), Identifier.TOP, NaturalNumbers.INSTANCE.iterator());
+        return new Scope(new HashMap<>(), new HashSet<>(), Identifiers.TOP, NaturalNumbers.INSTANCE.iterator());
     }
 
     private final Map<String, VariableDeclaration> variablesByKey;
@@ -30,21 +31,25 @@ public class Scope {
         this.temporaryCounter = temporaryCounter;
     }
 
+    public Identifier getIdentifier() {
+        return identifier;
+    }
+
     public Scope enterClass(ScalarType className) {
-        return enter("class#" + className.getQualifiedName());
+        return enter(Identifiers.type(identifier, className.getQualifiedName()));
     }
 
     public Scope enterConstructor() {
-        return enter("constructor");
+        return enter(Identifiers.constructor(identifier));
     }
 
     public Scope enterMethod(String name) {
         // TODO: distinguish overloads
-        return enter("method#" + name);
+        return enter(Identifiers.method(identifier, name));
     }
 
-    private Scope enter(String name) {
-        return new Scope(variablesByKey, identifiers, identifier.extend(name), temporaryCounter);
+    private Scope enter(Identifier newIdentifier) {
+        return new Scope(variablesByKey, identifiers, newIdentifier, temporaryCounter);
     }
 
     public FormalArgumentNode formalArgument(String name, Type type) {
@@ -102,15 +107,15 @@ public class Scope {
     }
 
     public VariableDeclaration generateVariable(String name, Type type) {
-        Identifier identifier = generateIdentifier(name);
+        Identifier identifier = generateVariableIdentifier(name);
         return VariableDeclaration.var(identifier, name, type);
     }
 
-    private Identifier generateIdentifier(String name) {
-        Identifier identifier = this.identifier.extend(name);
+    private Identifier generateVariableIdentifier(String name) {
+        Identifier identifier = Identifiers.variable(this.identifier, name);
         int index = 0;
         while (identifiers.contains(identifier)) {
-            identifier = this.identifier.extend(name + "_" + index);
+            identifier = Identifiers.variable(this.identifier, name + "_" + index);
             index++;
         }
         identifiers.add(identifier);

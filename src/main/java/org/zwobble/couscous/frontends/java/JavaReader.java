@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
@@ -98,7 +99,7 @@ public class JavaReader {
     private TypeNode readTypeDeclaration(TypeDeclaration type) {
         ScalarType name = erasure(typeOf(type.resolveBinding()));
         Scope scope = topScope.enterClass(name);
-        List<FormalTypeParameterNode> typeParameters = readTypeParameters(type);
+        List<FormalTypeParameterNode> typeParameters = readTypeParameters(scope.getIdentifier(), type);
         TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
         Set<Type> superTypes = superTypes(type);
         if (type.isInterface()) {
@@ -116,14 +117,14 @@ public class JavaReader {
         }
     }
 
-    private List<FormalTypeParameterNode> readTypeParameters(TypeDeclaration typeDeclaration) {
-        return readTypeParameters(typeDeclaration.resolveBinding().getTypeParameters());
+    private List<FormalTypeParameterNode> readTypeParameters(Identifier declaringScope, TypeDeclaration typeDeclaration) {
+        return readTypeParameters(declaringScope, typeDeclaration.resolveBinding().getTypeParameters());
     }
 
-    private List<FormalTypeParameterNode> readTypeParameters(ITypeBinding[] typeParameters) {
+    private List<FormalTypeParameterNode> readTypeParameters(Identifier declaringScope, ITypeBinding[] typeParameters) {
         return eagerMap(
             asList(typeParameters),
-            parameter -> formalTypeParameter(parameter.getName()));
+            parameter -> formalTypeParameter(declaringScope, parameter.getName()));
     }
 
     GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
@@ -420,7 +421,7 @@ public class JavaReader {
                 annotations,
                 isStatic,
                 methodName,
-                readTypeParameters(method.resolveBinding().getTypeParameters()),
+                readTypeParameters(scope.getIdentifier(), method.resolveBinding().getTypeParameters()),
                 formalArguments,
                 returnType.get(),
                 body,

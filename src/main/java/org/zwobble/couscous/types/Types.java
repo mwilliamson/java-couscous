@@ -28,11 +28,6 @@ public class Types {
             }
 
             @Override
-            public ScalarType visit(MethodTypeParameter parameter) {
-                return OBJECT;
-            }
-
-            @Override
             public ScalarType visit(TypeParameter parameter) {
                 return OBJECT;
             }
@@ -54,11 +49,6 @@ public class Types {
             @Override
             public Type visit(ScalarType type) {
                 return type;
-            }
-
-            @Override
-            public Type visit(MethodTypeParameter parameter) {
-                return parameter;
             }
 
             @Override
@@ -85,11 +75,6 @@ public class Types {
             @Override
             public Type visit(ScalarType type) {
                 return type;
-            }
-
-            @Override
-            public Type visit(MethodTypeParameter parameter) {
-                return parameter;
             }
 
             @Override

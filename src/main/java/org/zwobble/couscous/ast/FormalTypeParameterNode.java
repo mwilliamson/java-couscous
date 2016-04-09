@@ -1,25 +1,35 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.TypeParameter;
 
 public class FormalTypeParameterNode implements Node {
-    public static FormalTypeParameterNode formalTypeParameter(String name) {
-        return new FormalTypeParameterNode(name);
+    public static FormalTypeParameterNode formalTypeParameter(Identifier declaringScope, String name) {
+        return new FormalTypeParameterNode(new TypeParameter(declaringScope, name));
     }
 
-    private final String name;
+    public static FormalTypeParameterNode formalTypeParameter(TypeParameter type) {
+        return new FormalTypeParameterNode(type);
+    }
 
-    public FormalTypeParameterNode(String name) {
-        this.name = name;
+    private final TypeParameter type;
+
+    public FormalTypeParameterNode(TypeParameter type) {
+        this.type = type;
+    }
+
+    public TypeParameter getType() {
+        return type;
     }
 
     public String getName() {
-        return name;
+        return type.getName();
     }
 
     public FormalTypeParameterNode transform(NodeTransformer transformer) {
-        return this;
+        return new FormalTypeParameterNode(transformer.transform(type));
     }
 
     @Override
@@ -30,7 +40,7 @@ public class FormalTypeParameterNode implements Node {
     @Override
     public String toString() {
         return "FormalTypeParameterNode(" +
-            "name=" + name +
+            "type=" + type +
             ')';
     }
 
@@ -41,12 +51,12 @@ public class FormalTypeParameterNode implements Node {
 
         FormalTypeParameterNode that = (FormalTypeParameterNode) o;
 
-        return name.equals(that.name);
+        return type.equals(that.type);
 
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return type.hashCode();
     }
 }

@@ -537,12 +537,6 @@ public class CsharpSerializer implements NodeVisitor {
             }
 
             @Override
-            public Void visit(MethodTypeParameter parameter) {
-                writer.writeIdentifier(parameter.getName());
-                return null;
-            }
-
-            @Override
             public Void visit(TypeParameter parameter) {
                 writer.writeIdentifier(parameter.getName());
                 return null;
