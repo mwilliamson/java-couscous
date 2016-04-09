@@ -1,5 +1,6 @@
 package org.zwobble.couscous.tests.frontends.java;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifiers;
@@ -251,7 +252,7 @@ public class ExpressionReadingTests {
     }
 
     @Test
-    public void canReadGenericStaticMethodCalls() {
+    public void canReadGenericStaticMethodCallsWithExplicitTypeParameters() {
         TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
         assertEquals(
             methodCall(
@@ -266,6 +267,25 @@ public class ExpressionReadingTests {
                     list(),
                     parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Collections.<String>emptyList()"));
+    }
+
+    @Test
+    @Ignore("WIP")
+    public void canReadGenericStaticMethodCallsWithImplicitTypeParameters() {
+        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
+        assertEquals(
+            methodCall(
+                staticReceiver("java.util.Collections"),
+                "emptyList",
+                list(Types.STRING),
+                list(),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                signature(
+                    "emptyList",
+                    list(typeParameter),
+                    list(),
+                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+            readExpression("java.util.List<String>", "java.util.Collections.emptyList()"));
     }
 
     @Test
