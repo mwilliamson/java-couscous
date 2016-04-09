@@ -25,6 +25,8 @@ public interface NodeMapper<T> {
     T visit(IfStatementNode ifStatement);
     T visit(WhileNode whileLoop);
 
+
+    T visit(FormalTypeParameterNode parameter);
     T visit(FormalArgumentNode formalArgumentNode);
     T visit(AnnotationNode annotation);
     T visit(MethodNode methodNode);

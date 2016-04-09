@@ -1,9 +1,9 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
-import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class MethodNode implements Node {
     public static Builder staticMethod(String name) {
@@ -27,6 +26,8 @@ public class MethodNode implements Node {
         private boolean isStatic = false;
         private boolean isAbstract = false;
         private final String name;
+        private final ImmutableList.Builder<FormalTypeParameterNode> parameters =
+            ImmutableList.builder();
         private final ImmutableList.Builder<FormalArgumentNode> arguments =
             ImmutableList.builder();
         private Type returnType = Types.VOID;
@@ -51,6 +52,11 @@ public class MethodNode implements Node {
 
         public Builder isAbstract() {
             this.isAbstract = true;
+            return this;
+        }
+
+        public Builder typeParameter(FormalTypeParameterNode parameter) {
+            parameters.add(parameter);
             return this;
         }
         
@@ -84,7 +90,7 @@ public class MethodNode implements Node {
                 annotations.build(),
                 isStatic,
                 name,
-                list(),
+                parameters.build(),
                 arguments.build(),
                 returnType,
                 isAbstract ? Optional.empty() : Optional.of(body.build()),

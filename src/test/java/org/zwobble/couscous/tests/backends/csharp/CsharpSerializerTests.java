@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
@@ -15,6 +16,7 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
+import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
@@ -322,6 +324,19 @@ public class CsharpSerializerTests {
             .build();
         String output = serialize(method);
         assertEquals("public static void nothing() {\n    return true;\n}\n", output);
+    }
+
+    @Test
+    public void methodWithTypeParameters() {
+        MethodNode methodNode = MethodNode.staticMethod("nothing")
+            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "T"))
+            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "U"))
+            .returns(ScalarType.of("void"))
+            .build();
+
+        String output = serialize(methodNode);
+
+        assertEquals("public static void nothing<T, U>() {\n}\n", output);
     }
 
     @Test

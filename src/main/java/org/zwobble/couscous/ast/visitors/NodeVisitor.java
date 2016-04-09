@@ -25,6 +25,7 @@ public interface NodeVisitor {
     void visit(IfStatementNode ifStatement);
     void visit(WhileNode whileLoop);
 
+    void visit(FormalTypeParameterNode parameter);
     void visit(FormalArgumentNode formalArgumentNode);
     void visit(AnnotationNode annotation);
     void visit(MethodNode methodNode);

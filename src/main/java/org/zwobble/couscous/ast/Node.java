@@ -121,6 +121,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(FormalTypeParameterNode parameter) {
+                visitor.visit(parameter);
+                return null;
+            }
+
+            @Override
             public Void visit(FormalArgumentNode formalArgumentNode) {
                 visitor.visit(formalArgumentNode);
                 return null;

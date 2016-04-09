@@ -34,7 +34,7 @@ public class FormalTypeParameterNode implements Node {
 
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
-        throw new UnsupportedOperationException();
+        return visitor.visit(this);
     }
 
     @Override

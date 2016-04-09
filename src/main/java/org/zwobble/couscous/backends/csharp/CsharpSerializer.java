@@ -364,6 +364,11 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     @Override
+    public void visit(FormalTypeParameterNode parameter) {
+        writer.writeIdentifier(parameter.getName());
+    }
+
+    @Override
     public void visit(FormalArgumentNode argument) {
         writeTypeReference(argument.getType());
         writer.writeSpace();
@@ -387,9 +392,18 @@ public class CsharpSerializer implements NodeVisitor {
             writeTypeReference(method.getReturnType());
             writer.writeSpace();
             writer.writeIdentifier(method.getName());
+            writeFormalTypeParameters(method.getTypeParameters());
             writeFormalArguments(method.getArguments());
             writeBlock(method.getBody().get());
         });
+    }
+
+    private void writeFormalTypeParameters(List<FormalTypeParameterNode> typeParameters) {
+        if (!typeParameters.isEmpty()) {
+            writer.writeSymbol("<");
+            writer.writeCommaSeparated(typeParameters, this::write);
+            writer.writeSymbol(">");
+        }
     }
 
     private void writeFormalArguments(List<FormalArgumentNode> arguments) {

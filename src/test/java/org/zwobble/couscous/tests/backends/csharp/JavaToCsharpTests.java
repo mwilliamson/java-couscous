@@ -18,11 +18,6 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToCsharpTests extends CompilerTests {
-    @Test
-    @Ignore("WIP")
-    public void genericMethods() throws Exception {
-    }
-
     protected PrimitiveValue execProgram(
         Path directory,
         ScalarType type,

@@ -126,6 +126,11 @@ public class NodeTransformer {
             }
 
             @Override
+            public Node visit(FormalTypeParameterNode parameter) {
+                return transformFormalTypeParameter(parameter);
+            }
+
+            @Override
             public Node visit(FormalArgumentNode formalArgumentNode) {
                 return transformFormalArgument(formalArgumentNode);
             }

@@ -137,6 +137,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(FormalTypeParameterNode parameter) {
+                return Stream.empty();
+            }
+
+            @Override
             public Stream<? extends Node> visit(FormalArgumentNode formalArgumentNode) {
                 return Stream.empty();
             }
