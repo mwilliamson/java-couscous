@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Arrays.asList;
 import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
@@ -206,7 +207,7 @@ public class JavaExpressionReader {
     private ExpressionNode readMethodInvocation(MethodInvocation expression) {
         String methodName = expression.getName().getIdentifier();
         @SuppressWarnings("unchecked")
-        List<org.eclipse.jdt.core.dom.Type> typeArguments = expression.typeArguments();
+        List<ITypeBinding> typeArguments = asList(expression.resolveMethodBinding().getTypeArguments());
         List<Type> typeParameters = eagerMap(typeArguments, JavaTypes::typeOf);
         @SuppressWarnings("unchecked")
         List<ExpressionNode> arguments = readArguments(

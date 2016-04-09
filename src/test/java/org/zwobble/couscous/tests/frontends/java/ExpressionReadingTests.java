@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests.frontends.java;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifiers;
@@ -224,6 +223,7 @@ public class ExpressionReadingTests {
             methodCall(
                 staticReceiver("java.util.Arrays"),
                 "asList",
+                list(Types.STRING),
                 list(array(Types.STRING, list())),
                 parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
                 signature(
@@ -241,6 +241,7 @@ public class ExpressionReadingTests {
             methodCall(
                 staticReceiver("java.util.Arrays"),
                 "asList",
+                list(Types.STRING),
                 list(array(Types.STRING, list(literal("one"), literal("two")))),
                 parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
                 signature(
@@ -270,7 +271,6 @@ public class ExpressionReadingTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void canReadGenericStaticMethodCallsWithImplicitTypeParameters() {
         TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
         assertEquals(
