@@ -95,4 +95,30 @@ public class Types {
             }
         });
     }
+
+    public static Type concrete(Type type) {
+        return type.accept(new Type.Visitor<Type>() {
+            @Override
+            public Type visit(ScalarType type) {
+                return type;
+            }
+
+            @Override
+            public Type visit(TypeParameter parameter) {
+                return parameter;
+            }
+
+            @Override
+            public Type visit(ParameterizedType type) {
+                return new ParameterizedType(
+                    type.getRawType(),
+                    eagerMap(type.getParameters(), parameter -> parameter.accept(this)));
+            }
+
+            @Override
+            public Type visit(BoundTypeParameter type) {
+                return type.getValue();
+            }
+        });
+    }
 }

@@ -87,23 +87,36 @@ public class MethodCallNode implements ExpressionNode {
         List<ExpressionNode> arguments,
         MethodSignature signature)
     {
-        return new MethodCallNode(receiver, methodName, arguments, signature);
+        return new MethodCallNode(receiver, methodName, arguments, signature.getReturnType(), signature);
+    }
+
+    public static MethodCallNode methodCall(
+        Receiver receiver,
+        String methodName,
+        List<ExpressionNode> arguments,
+        Type returnType,
+        MethodSignature signature)
+    {
+        return new MethodCallNode(receiver, methodName, arguments, returnType, signature);
     }
     
     private final Receiver receiver;
     private final String methodName;
     private final List<ExpressionNode> arguments;
+    private final Type returnType;
     private final MethodSignature signature;
     
     private MethodCallNode(
         Receiver receiver,
         String methodName,
         List<ExpressionNode> arguments,
+        Type returnType,
         MethodSignature signature)
     {
         this.receiver = receiver;
         this.methodName = methodName;
         this.arguments = arguments;
+        this.returnType = returnType;
         this.signature = signature;
     }
     
@@ -121,7 +134,7 @@ public class MethodCallNode implements ExpressionNode {
 
     @Override
     public Type getType() {
-        return signature.getReturnType();
+        return returnType;
     }
 
     public MethodSignature signature() {
@@ -139,59 +152,43 @@ public class MethodCallNode implements ExpressionNode {
             transformer.transformReceiver(receiver),
             transformer.transformMethodName(signature()),
             transformer.transformExpressions(arguments),
+            transformer.transform(returnType),
             transformer.transform(signature));
     }
 
     @Override
     public String toString() {
-        return "MethodCallNode(receiver=" + receiver + ", methodName="
-               + methodName + ", arguments=" + arguments + ", signature=" + signature
-               + ")";
+        return "MethodCallNode(" +
+            "receiver=" + receiver +
+            ", methodName=" + methodName +
+            ", arguments=" + arguments +
+            ", returnType=" + returnType +
+            ", signature=" + signature +
+            ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MethodCallNode that = (MethodCallNode) o;
+
+        if (!receiver.equals(that.receiver)) return false;
+        if (!methodName.equals(that.methodName)) return false;
+        if (!arguments.equals(that.arguments)) return false;
+        if (!returnType.equals(that.returnType)) return false;
+        return signature.equals(that.signature);
+
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result
-                 + ((arguments == null) ? 0 : arguments.hashCode());
-        result = prime * result
-                 + ((methodName == null) ? 0 : methodName.hashCode());
-        result = prime * result
-                 + ((receiver == null) ? 0 : receiver.hashCode());
-        result = prime * result + ((signature == null) ? 0 : signature.hashCode());
+        int result = receiver.hashCode();
+        result = 31 * result + methodName.hashCode();
+        result = 31 * result + arguments.hashCode();
+        result = 31 * result + returnType.hashCode();
+        result = 31 * result + signature.hashCode();
         return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        MethodCallNode other = (MethodCallNode) obj;
-        if (arguments == null) {
-            if (other.arguments != null)
-                return false;
-        } else if (!arguments.equals(other.arguments))
-            return false;
-        if (methodName == null) {
-            if (other.methodName != null)
-                return false;
-        } else if (!methodName.equals(other.methodName))
-            return false;
-        if (receiver == null) {
-            if (other.receiver != null)
-                return false;
-        } else if (!receiver.equals(other.receiver))
-            return false;
-        if (signature == null) {
-            if (other.signature != null)
-                return false;
-        } else if (!signature.equals(other.signature))
-            return false;
-        return true;
     }
 }

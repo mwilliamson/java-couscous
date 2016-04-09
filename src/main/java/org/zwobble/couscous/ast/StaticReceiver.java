@@ -5,6 +5,10 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public class StaticReceiver implements Receiver {
+    public static Receiver staticReceiver(String type) {
+        return new StaticReceiver(ScalarType.of(type));
+    }
+
     public static Receiver staticReceiver(ScalarType type) {
         return new StaticReceiver(type);
     }

@@ -18,7 +18,6 @@ import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
-import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.OperationNode.operation;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
@@ -210,24 +209,27 @@ public class JavaExpressionReader {
         List<ExpressionNode> arguments = readArguments(
             expression.resolveMethodBinding(),
             expression.arguments());
-        MethodSignature signature = JavaMethods.signature(expression.resolveMethodBinding());
+        Type returnType = typeOf(expression);
+        MethodSignature signature = JavaMethods.signature(expression.resolveMethodBinding().getMethodDeclaration());
 
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         Type receiverType = typeOf(methodBinding.getDeclaringClass());
         if ((Modifier.isStatic(methodBinding.getModifiers()))) {
-            return staticMethodCall(
-                erasure(receiverType),
+            return methodCall(
+                staticReceiver(erasure(receiverType)),
                 methodName,
                 arguments,
+                returnType,
                 signature);
         } else {
             ExpressionNode receiver = expression.getExpression() == null
                 ? thisReference(receiverType)
                 : readExpressionWithoutBoxing(expression.getExpression());
             return methodCall(
-                receiver,
+                instanceReceiver(receiver),
                 methodName,
                 arguments,
+                returnType,
                 signature);
         }
     }

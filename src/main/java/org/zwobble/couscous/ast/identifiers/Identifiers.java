@@ -1,5 +1,7 @@
 package org.zwobble.couscous.ast.identifiers;
 
+import org.zwobble.couscous.types.ScalarType;
+
 public class Identifiers {
     public static final Identifier TOP = new TopIdentifier();
 
@@ -25,5 +27,9 @@ public class Identifiers {
 
     public static Identifier forType(String name) {
         return type(TOP, name);
+    }
+
+    public static Identifier forType(ScalarType type) {
+        return forType(type.getQualifiedName());
     }
 }

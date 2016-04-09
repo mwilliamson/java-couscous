@@ -2,7 +2,9 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
@@ -20,7 +22,9 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.staticField;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.ast.Operations.*;
+import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
@@ -28,6 +32,7 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
 import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.*;
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
+import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ExpressionReadingTests {
@@ -213,24 +218,53 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadMethodCallsWithZeroExpressionsAsVarargs() {
+        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
         assertEquals(
-            staticMethodCall(
-                ScalarType.of("java.util.Arrays"),
+            methodCall(
+                staticReceiver("java.util.Arrays"),
                 "asList",
                 list(array(Types.STRING, list())),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING))),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                signature(
+                    "asList",
+                    list(typeParameter),
+                    list(Types.array(typeParameter)),
+                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Arrays.asList()"));
     }
 
     @Test
     public void canReadMethodCallsWithMultipleExpressionsAsVarargs() {
+        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
         assertEquals(
-            staticMethodCall(
-                ScalarType.of("java.util.Arrays"),
+            methodCall(
+                staticReceiver("java.util.Arrays"),
                 "asList",
                 list(array(Types.STRING, list(literal("one"), literal("two")))),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING))),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                signature(
+                    "asList",
+                    list(typeParameter),
+                    list(Types.array(typeParameter)),
+                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Arrays.asList(\"one\", \"two\")"));
+    }
+
+    @Test
+    public void canReadGenericStaticMethodCalls() {
+        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
+        assertEquals(
+            methodCall(
+                staticReceiver("java.util.Collections"),
+                "emptyList",
+                list(),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                signature(
+                    "emptyList",
+                    list(typeParameter),
+                    list(),
+                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+            readExpression("java.util.List<String>", "java.util.Collections.<String>emptyList()"));
     }
 
     @Test
