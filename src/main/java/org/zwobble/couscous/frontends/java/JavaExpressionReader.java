@@ -215,27 +215,25 @@ public class JavaExpressionReader {
         Type returnType = typeOf(expression);
         MethodSignature signature = JavaMethods.signature(expression.resolveMethodBinding().getMethodDeclaration());
 
+        return methodCall(
+            getReceiver(expression),
+            methodName,
+            typeParameters,
+            arguments,
+            returnType,
+            signature);
+    }
+
+    private Receiver getReceiver(MethodInvocation expression) {
         IMethodBinding methodBinding = expression.resolveMethodBinding();
         Type receiverType = typeOf(methodBinding.getDeclaringClass());
         if ((Modifier.isStatic(methodBinding.getModifiers()))) {
-            return methodCall(
-                staticReceiver(erasure(receiverType)),
-                methodName,
-                typeParameters,
-                arguments,
-                returnType,
-                signature);
+            return staticReceiver(erasure(receiverType));
         } else {
             ExpressionNode receiver = expression.getExpression() == null
                 ? thisReference(receiverType)
                 : readExpressionWithoutBoxing(expression.getExpression());
-            return methodCall(
-                instanceReceiver(receiver),
-                methodName,
-                typeParameters,
-                arguments,
-                returnType,
-                signature);
+            return instanceReceiver(receiver);
         }
     }
 
