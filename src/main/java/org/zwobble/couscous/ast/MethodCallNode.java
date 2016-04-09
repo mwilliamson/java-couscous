@@ -1,9 +1,9 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 
@@ -91,11 +91,23 @@ public class MethodCallNode implements ExpressionNode {
         Type returnType,
         MethodSignature signature)
     {
-        return new MethodCallNode(receiver, methodName, arguments, returnType, signature);
+        return methodCall(receiver, methodName, list(), arguments, returnType, signature);
+    }
+
+    public static MethodCallNode methodCall(
+        Receiver receiver,
+        String methodName,
+        List<Type> typeParameters,
+        List<ExpressionNode> arguments,
+        Type returnType,
+        MethodSignature signature)
+    {
+        return new MethodCallNode(receiver, methodName, typeParameters, arguments, returnType, signature);
     }
     
     private final Receiver receiver;
     private final String methodName;
+    private final List<Type> typeParameters;
     private final List<ExpressionNode> arguments;
     private final Type returnType;
     private final MethodSignature signature;
@@ -103,12 +115,14 @@ public class MethodCallNode implements ExpressionNode {
     private MethodCallNode(
         Receiver receiver,
         String methodName,
+        List<Type> typeParameters,
         List<ExpressionNode> arguments,
         Type returnType,
         MethodSignature signature)
     {
         this.receiver = receiver;
         this.methodName = methodName;
+        this.typeParameters = typeParameters;
         this.arguments = arguments;
         this.returnType = returnType;
         this.signature = signature;
@@ -145,6 +159,7 @@ public class MethodCallNode implements ExpressionNode {
         return new MethodCallNode(
             transformer.transformReceiver(receiver),
             transformer.transformMethodName(signature()),
+            eagerMap(typeParameters, transformer::transform),
             transformer.transformExpressions(arguments),
             transformer.transform(returnType),
             transformer.transform(signature));
@@ -155,6 +170,7 @@ public class MethodCallNode implements ExpressionNode {
         return "MethodCallNode(" +
             "receiver=" + receiver +
             ", methodName=" + methodName +
+            ", typeParameters=" + typeParameters +
             ", arguments=" + arguments +
             ", returnType=" + returnType +
             ", signature=" + signature +
@@ -170,6 +186,7 @@ public class MethodCallNode implements ExpressionNode {
 
         if (!receiver.equals(that.receiver)) return false;
         if (!methodName.equals(that.methodName)) return false;
+        if (!typeParameters.equals(that.typeParameters)) return false;
         if (!arguments.equals(that.arguments)) return false;
         if (!returnType.equals(that.returnType)) return false;
         return signature.equals(that.signature);
@@ -180,6 +197,7 @@ public class MethodCallNode implements ExpressionNode {
     public int hashCode() {
         int result = receiver.hashCode();
         result = 31 * result + methodName.hashCode();
+        result = 31 * result + typeParameters.hashCode();
         result = 31 * result + arguments.hashCode();
         result = 31 * result + returnType.hashCode();
         result = 31 * result + signature.hashCode();
