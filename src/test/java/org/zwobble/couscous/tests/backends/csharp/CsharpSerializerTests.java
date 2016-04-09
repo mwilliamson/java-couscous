@@ -3,9 +3,9 @@ package org.zwobble.couscous.tests.backends.csharp;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifiers;
-import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
 import static org.junit.Assert.assertEquals;
@@ -18,10 +18,12 @@ import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
+import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.MethodSignature.signature;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
@@ -29,6 +31,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
+import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpSerializerTests {
@@ -143,6 +146,18 @@ public class CsharpSerializerTests {
             list(literal(1), literal(2)),
             ScalarType.of("Y")));
         assertEquals("x.y(1, 2)", output);
+    }
+
+    @Test
+    public void methodCallWithTypeParameters() {
+        String output = serialize(methodCall(
+            instanceReceiver(reference(var(TestIds.ANY_ID, "x", ScalarType.of("X")))),
+            "y",
+            list(ScalarType.of("Z")),
+            list(),
+            ScalarType.of("Y"),
+            signature("y", list(typeParameter(Identifiers.method(Identifiers.forType("X"), "y"), "T")), list(), ScalarType.of("Y"))));
+        assertEquals("x.y<Z>()", output);
     }
 
     @Test

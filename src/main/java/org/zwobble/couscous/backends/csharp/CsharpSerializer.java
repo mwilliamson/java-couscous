@@ -220,7 +220,16 @@ public class CsharpSerializer implements NodeVisitor {
         write(methodCall.getReceiver());
         writer.writeSymbol(".");
         writer.writeIdentifier(methodCall.getMethodName());
+        writeTypeParameters(methodCall.getTypeParameters());
         writeArguments(methodCall.getArguments());
+    }
+
+    private void writeTypeParameters(List<Type> typeParameters) {
+        if (!typeParameters.isEmpty()) {
+            writer.writeSymbol("<");
+            writer.writeCommaSeparated(typeParameters, this::writeTypeReference);
+            writer.writeSymbol(">");
+        }
     }
 
     @Override

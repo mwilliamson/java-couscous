@@ -135,6 +135,10 @@ public class MethodCallNode implements ExpressionNode {
     public String getMethodName() {
         return methodName;
     }
+
+    public List<Type> getTypeParameters() {
+        return typeParameters;
+    }
     
     public List<ExpressionNode> getArguments() {
         return arguments;
