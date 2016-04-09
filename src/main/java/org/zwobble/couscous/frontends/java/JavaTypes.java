@@ -2,6 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.Type;
@@ -42,11 +43,8 @@ public class JavaTypes {
         }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
         if (typeBinding.isTypeVariable()) {
-            if (outerClass == null) {
-                // TODO: handle type variables for methods properly
-                outerClass = typeBinding.getDeclaringMethod().getDeclaringClass();
-            }
-            return new TypeParameter(erasure(typeOf(outerClass)), typeBinding.getName());
+            Identifier declaringScope = getDeclaringScope(typeBinding);
+            return new TypeParameter(declaringScope, typeBinding.getName());
         }
         ScalarType rawType = outerClass == null
             ? ScalarType.of(typeBinding.getErasure().getQualifiedName())
@@ -60,6 +58,20 @@ public class JavaTypes {
         } else {
             return rawType;
         }
+    }
+
+    private static Identifier getDeclaringScope(ITypeBinding typeParameter) {
+        if (typeParameter.getDeclaringClass() == null) {
+            IMethodBinding method = typeParameter.getDeclaringMethod();
+            // TODO: disambiguate overloads
+            return identifierForType(method.getDeclaringClass()).extend(method.getName());
+        } else {
+            return identifierForType(typeParameter.getDeclaringClass());
+        }
+    }
+
+    private static Identifier identifierForType(ITypeBinding type) {
+        return Identifier.TOP.extend(erasure(typeOf(type)).getQualifiedName());
     }
 
     static Set<Type> superTypes(TypeDeclaration declaration) {

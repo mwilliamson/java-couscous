@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
@@ -92,8 +93,9 @@ public class JavaReaderTests {
 
         MethodNode method = classNode.getMethods().get(0);
         assertThat(method.getTypeParameters(), contains(isFormalTypeParameter("T")));
-        // TODO: typeParameter should be declared on method, not class
-        assertThat(method.getArguments(), contains(isFormalArgument("value", typeParameter(classNode.getName(), "T"))));
+        assertThat(
+            method.getArguments(),
+            contains(isFormalArgument("value", typeParameter(Identifier.TOP.extend("com.example.Example").extend("identity"), "T"))));
     }
     
     @Test

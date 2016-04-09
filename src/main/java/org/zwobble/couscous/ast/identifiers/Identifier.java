@@ -7,12 +7,17 @@ import java.util.List;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Identifier {
+    // TODO: Should we have two Identifier classes, one for each namespace? (variables and types)
     public static final Identifier TOP = new Identifier(list());
 
     private final List<String> parts;
 
     private Identifier(List<String> parts) {
         this.parts = parts;
+    }
+
+    public List<String> getParts() {
+        return parts;
     }
 
     public Identifier extend(String name) {

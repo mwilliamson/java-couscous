@@ -1,6 +1,7 @@
 package org.zwobble.couscous.interpreter.types;
 
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.interpreter.Arguments;
 import org.zwobble.couscous.interpreter.Environment;
 import org.zwobble.couscous.interpreter.Executor;
@@ -48,7 +49,7 @@ public class UserDefinedInterpreterType implements InterpreterType {
     public Type getType() {
         List<Type> parameters = eagerMap(
             type.getTypeParameters(),
-            parameter -> new TypeParameter(type.getName(), parameter.getName()));
+            parameter -> new TypeParameter(Identifier.TOP.extend(type.getName().getQualifiedName()), parameter.getName()));
         return parameters.isEmpty()
             ? type.getName()
             : parameterizedType(type.getName(), parameters);

@@ -6,6 +6,7 @@ import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.types.*;
 
 import static com.google.common.collect.Iterables.transform;
+import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Names {
@@ -30,7 +31,9 @@ public class Names {
 
             @Override
             public String visit(TypeParameter parameter) {
-                return typeToString(parameter.getDeclaringType()) + "_" + parameter.getName();
+                // TODO
+                Iterable<String> parts = lazyMap(parameter.getDeclaringScope().getParts(), part -> part.replace(".", "_"));
+                return String.join("_", parts) + "_" + parameter.getName();
             }
 
             @Override

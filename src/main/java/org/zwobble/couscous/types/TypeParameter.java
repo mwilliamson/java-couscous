@@ -1,20 +1,22 @@
 package org.zwobble.couscous.types;
 
+import org.zwobble.couscous.ast.identifiers.Identifier;
+
 public class TypeParameter implements Type {
-    public static TypeParameter typeParameter(ScalarType declaringType, String name) {
-        return new TypeParameter(declaringType, name);
+    public static TypeParameter typeParameter(Identifier declaringScope, String name) {
+        return new TypeParameter(declaringScope, name);
     }
 
-    private final ScalarType declaringType;
+    private final Identifier declaringScope;
     private final String name;
 
-    public TypeParameter(ScalarType declaringType, String name) {
-        this.declaringType = declaringType;
+    public TypeParameter(Identifier declaringScope, String name) {
+        this.declaringScope = declaringScope;
         this.name = name;
     }
 
-    public ScalarType getDeclaringType() {
-        return declaringType;
+    public Identifier getDeclaringScope() {
+        return declaringScope;
     }
 
     public String getName() {
@@ -29,7 +31,7 @@ public class TypeParameter implements Type {
     @Override
     public String toString() {
         return "TypeParameter(" +
-            "declaringType=" + declaringType +
+            "declaringScope=" + declaringScope +
             ", name=" + name +
             ')';
     }
@@ -41,14 +43,14 @@ public class TypeParameter implements Type {
 
         TypeParameter that = (TypeParameter) o;
 
-        if (!declaringType.equals(that.declaringType)) return false;
+        if (!declaringScope.equals(that.declaringScope)) return false;
         return name.equals(that.name);
 
     }
 
     @Override
     public int hashCode() {
-        int result = declaringType.hashCode();
+        int result = declaringScope.hashCode();
         result = 31 * result + name.hashCode();
         return result;
     }
