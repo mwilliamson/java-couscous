@@ -135,6 +135,11 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
 
     @Override
+    public T visit(EnumNode enumNode) {
+        return defaultValue;
+    }
+
+    @Override
     public T visit(MethodNode methodNode) {
         return defaultValue;
     }

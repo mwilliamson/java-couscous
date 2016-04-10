@@ -34,4 +34,5 @@ public interface NodeMapper<T> {
     T visit(FieldDeclarationNode declaration);
     T visit(ClassNode classNode);
     T visit(InterfaceNode interfaceNode);
+    T visit(EnumNode enumNode);
 }

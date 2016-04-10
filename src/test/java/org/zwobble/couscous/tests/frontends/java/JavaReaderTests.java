@@ -383,4 +383,14 @@ public class JavaReaderTests {
             .build();
         assertEquals(list(expectedMethod), classNode.getMethods());
     }
+
+    @Test
+    public void canReadEmptyEnum() {
+        String source = "package com.example;" +
+            "public enum Example {}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        EnumNode node = (EnumNode) classes.get(0);
+        assertEquals(ScalarType.of("com.example.Example"), node.getName());
+    }
 }

@@ -164,6 +164,11 @@ public class NodeTransformer {
             public Node visit(InterfaceNode interfaceNode) {
                 return transformInterface(interfaceNode);
             }
+
+            @Override
+            public Node visit(EnumNode enumNode) {
+                return transformEnum(enumNode);
+            }
         });
     }
 
@@ -281,6 +286,10 @@ public class NodeTransformer {
 
     private Node transformInterface(InterfaceNode interfaceNode) {
         return interfaceNode.transform(this);
+    }
+
+    private Node transformEnum(EnumNode enumNode) {
+        return enumNode.transform(this);
     }
 
     public List<AnnotationNode> transformAnnotations(List<AnnotationNode> annotations) {

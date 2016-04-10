@@ -49,6 +49,7 @@ public class ValueObjectTests {
             {ClassNode.class},
             {ConstructorCallNode.class},
             {ConstructorNode.class},
+            {EnumNode.class},
             {ExpressionStatementNode.class},
             {FieldAccessNode.class},
             {FieldDeclarationNode.class},

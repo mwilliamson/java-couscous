@@ -467,6 +467,11 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
+    @Override
+    public void visit(EnumNode enumNode) {
+        throw new UnsupportedOperationException();
+    }
+
     private void writeType(TypeNode node, String keyword, Action writeBody) {
         writer.writeStatement(() -> {
             writer.writeKeyword("namespace");

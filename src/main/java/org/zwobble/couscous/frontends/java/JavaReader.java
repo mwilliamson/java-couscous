@@ -88,12 +88,23 @@ public class JavaReader {
     }
 
     private void readCompilationUnit(CompilationUnit ast) {
-        TypeDeclaration type = (TypeDeclaration)ast.types().get(0);
-        classes.add(readTypeDeclaration(type));
+        AbstractTypeDeclaration type = (AbstractTypeDeclaration) ast.types().get(0);
+        if (type instanceof TypeDeclaration) {
+            classes.add(readTypeDeclaration((TypeDeclaration) type));
+        } else if (type instanceof EnumDeclaration) {
+            classes.add(readEnumDeclaration((EnumDeclaration)type));
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private List<TypeNode> types() {
         return this.classes.build();
+    }
+
+    private TypeNode readEnumDeclaration(EnumDeclaration type) {
+        ScalarType name = (ScalarType) typeOf(type.resolveBinding());
+        return new EnumNode(name);
     }
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {

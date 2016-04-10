@@ -33,4 +33,5 @@ public interface NodeVisitor {
     void visit(FieldDeclarationNode declaration);
     void visit(ClassNode classNode);
     void visit(InterfaceNode interfaceNode);
+    void visit(EnumNode enumNode);
 }

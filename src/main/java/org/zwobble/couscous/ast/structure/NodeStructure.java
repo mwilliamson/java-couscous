@@ -165,6 +165,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(EnumNode enumNode) {
+                return Stream.empty();
+            }
+
+            @Override
             public Stream<Node> visit(MethodNode methodNode) {
                 return concatStreams(
                     methodNode.getAnnotations().stream(),
