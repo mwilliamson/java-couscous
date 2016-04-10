@@ -8,6 +8,7 @@ import org.zwobble.couscous.types.Type;
 import java.util.List;
 import java.util.Set;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -50,7 +51,9 @@ public class EnumNode implements TypeNode {
 
     @Override
     public TypeNode transform(NodeTransformer transformer) {
-        return new EnumNode(transformer.transform(name), values);
+        return new EnumNode(
+            transformer.transform(name),
+            eagerMap(values, transformer::transformFieldName));
     }
 
     @Override
