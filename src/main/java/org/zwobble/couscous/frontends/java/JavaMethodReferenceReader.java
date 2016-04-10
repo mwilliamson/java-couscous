@@ -81,11 +81,23 @@ public class JavaMethodReferenceReader {
                 arguments,
                 type);
         } else {
-            return methodCall(
-                javaReader.readExpressionWithoutBoxing(scope, expression.getExpression()),
-                methodName,
-                arguments,
-                type);
+            Expression left = expression.getExpression();
+            if (left instanceof SimpleName && ((SimpleName) left).resolveBinding().getKind() == IBinding.TYPE) {
+                if (arguments.size() != 1) {
+                    throw new UnsupportedOperationException();
+                }
+                return methodCall(
+                    arguments.get(0),
+                    methodName,
+                    list(),
+                    type);
+            } else {
+                return methodCall(
+                    javaReader.readExpressionWithoutBoxing(scope, left),
+                    methodName,
+                    arguments,
+                    type);
+            }
         }
     }
 }
