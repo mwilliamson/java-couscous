@@ -386,15 +386,21 @@ public class CsharpSerializerTests {
     }
 
     @Test
-    public void classWithTypeParameters() {
+    public void classWithTypeParametersIsSplitIntoStaticAndInstanceClasses() {
         ClassNode classNode = ClassNode.builder("com.example.Example")
             .addTypeParameter("T")
             .addTypeParameter("U")
+            .field("x", ScalarType.of("X"))
+            .staticField("y", ScalarType.of("Y"))
             .build();
 
         String output = serialize(classNode);
 
-        assertEquals("namespace com.example {\n    internal class Example<T, U> {\n    }\n}\n", output);
+        assertEquals(
+            "namespace com.example {" +
+            "\n    internal static class Example {\n        internal static Y y;\n    }\n}" +
+            "\nnamespace com.example {" +
+            "\n    internal class Example<T, U> {\n        internal X x;\n    }\n}\n", output);
     }
 
     @Test

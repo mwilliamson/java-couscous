@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraIterables.lazyFilter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -448,17 +449,41 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ClassNode classNode) {
-        writeType(classNode, "class", () -> {
-            writeAll(classNode.getFields());
-            writeStaticConstructor(classNode);
-            writeConstructor(classNode, classNode.getConstructor());
-            writeAll(classNode.getMethods());
-        });
+        if (classNode.getTypeParameters().isEmpty()) {
+            writeInstanceType(classNode, "class", () -> {
+                writeAll(classNode.getFields());
+                writeStaticConstructor(classNode);
+                writeConstructor(classNode, classNode.getConstructor());
+                writeAll(classNode.getMethods());
+            });
+        } else {
+            writeInNamespace(classNode, () -> {
+                writer.writeStatement(() -> {
+                    writer.writeKeyword("internal");
+                    writer.writeSpace();
+                    writer.writeKeyword("static");
+                    writer.writeSpace();
+                    writer.writeKeyword("class");
+                    writer.writeSpace();
+                    writer.writeIdentifier(classNode.getName().getSimpleName());
+                    writer.startBlock();
+                    writeAll(lazyFilter(classNode.getFields(), field -> field.isStatic()));
+                    writeStaticConstructor(classNode);
+                    writeAll(lazyFilter(classNode.getMethods(), method -> method.isStatic()));
+                    writer.endBlock();
+                });
+            });
+            writeInstanceType(classNode, "class", () -> {
+                writeAll(lazyFilter(classNode.getFields(), field -> !field.isStatic()));
+                writeConstructor(classNode, classNode.getConstructor());
+                writeAll(lazyFilter(classNode.getMethods(), method -> !method.isStatic()));
+            });
+        }
     }
 
     @Override
     public void visit(InterfaceNode interfaceNode) {
-        writeType(interfaceNode, "interface", () -> {
+        writeInstanceType(interfaceNode, "interface", () -> {
             interfaceNode.getMethods().forEach(method -> {
                 writer.writeStatement(() -> {
                     writeSignature(method);
@@ -470,7 +495,7 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(EnumNode enumNode) {
-        writeType(enumNode, "enum", () -> {
+        writeInstanceType(enumNode, "enum", () -> {
             writer.writeStatement(() -> {
                 writer.writeCommaSeparated(
                     enumNode.getValues(),
@@ -479,12 +504,8 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    private void writeType(TypeNode node, String keyword, Action writeBody) {
-        writer.writeStatement(() -> {
-            writer.writeKeyword("namespace");
-            writer.writeSpace();
-            writeQualifiedName(node.getName().getPackage().get());
-            writer.startBlock();
+    private void writeInstanceType(TypeNode node, String keyword, Action writeBody) {
+        writeInNamespace(node, () -> {
             writer.writeStatement(() -> {
                 writer.writeKeyword("internal");
                 writer.writeSpace();
@@ -497,7 +518,20 @@ public class CsharpSerializer implements NodeVisitor {
                 writeBody.run();
                 writer.endBlock();
             });
+        });
+    }
 
+    private void writeInNamespace(TypeNode typeNode, Action writeBody) {
+        writeInNamespace(typeNode.getName().getPackage().get(), writeBody);
+    }
+
+    private void writeInNamespace(String namespace, Action writeBody) {
+        writer.writeStatement(() -> {
+            writer.writeKeyword("namespace");
+            writer.writeSpace();
+            writeQualifiedName(namespace);
+            writer.startBlock();
+            writeBody.run();
             writer.endBlock();
         });
     }
@@ -553,7 +587,7 @@ public class CsharpSerializer implements NodeVisitor {
         writer.endBlock();
     }
 
-    private void writeAll(List<? extends Node> nodes) {
+    private void writeAll(Iterable<? extends Node> nodes) {
         for (Node node : nodes) {
             write(node);
         }

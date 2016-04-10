@@ -86,6 +86,15 @@ public class ExtraIterables {
         return Iterables.concat(list(head), tails);
     }
 
+    public static <T> Iterable<T> lazyFilter(Iterable<T> iterable, java.util.function.Predicate<T> predicate) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return stream(iterable).filter(predicate).iterator();
+            }
+        };
+    }
+
     public static <T, R> Iterable<R> lazyMap(Iterable<T> iterable, Function<T, R> function) {
         return new Iterable<R>() {
             @Override
