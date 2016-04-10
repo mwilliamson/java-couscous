@@ -492,6 +492,23 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void interfaceWithMethodWithTypeParameters() {
+        MethodNode method = MethodNode.staticMethod("nothing")
+            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "T"))
+            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "U"))
+            .returns(ScalarType.of("void"))
+            .build();
+
+        Node node = new ClassNodeBuilder(ScalarType.of("com.example.Example"))
+            .method(method)
+            .buildInterface();
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal interface Example {\n        void nothing<T, U>();\n    }\n}\n", output);
+    }
+
+    @Test
     public void enumWithSimpleValues() {
         Node node = declareEnum(ScalarType.of("com.example.Example"), list("ONE", "TWO"));
 

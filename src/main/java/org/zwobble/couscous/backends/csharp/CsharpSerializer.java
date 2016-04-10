@@ -398,13 +398,17 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeKeyword("static");
                 writer.writeSpace();
             }
-            writeTypeReference(method.getReturnType());
-            writer.writeSpace();
-            writer.writeIdentifier(method.getName());
-            writeFormalTypeParameters(method.getTypeParameters());
-            writeFormalArguments(method.getArguments());
+            writeSignature(method);
             writeBlock(method.getBody().get());
         });
+    }
+
+    private void writeSignature(MethodNode method) {
+        writeTypeReference(method.getReturnType());
+        writer.writeSpace();
+        writer.writeIdentifier(method.getName());
+        writeFormalTypeParameters(method.getTypeParameters());
+        writeFormalArguments(method.getArguments());
     }
 
     private void writeFormalTypeParameters(List<FormalTypeParameterNode> typeParameters) {
@@ -457,10 +461,7 @@ public class CsharpSerializer implements NodeVisitor {
         writeType(interfaceNode, "interface", () -> {
             interfaceNode.getMethods().forEach(method -> {
                 writer.writeStatement(() -> {
-                    writeTypeReference(method.getReturnType());
-                    writer.writeSpace();
-                    writer.writeIdentifier(method.getName());
-                    writeFormalArguments(method.getArguments());
+                    writeSignature(method);
                     writer.writeSymbol(";");
                 });
             });
