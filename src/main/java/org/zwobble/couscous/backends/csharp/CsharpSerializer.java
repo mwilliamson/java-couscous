@@ -469,7 +469,13 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(EnumNode enumNode) {
-        throw new UnsupportedOperationException();
+        writeType(enumNode, "enum", () -> {
+            writer.writeStatement(() -> {
+                writer.writeCommaSeparated(
+                    enumNode.getValues(),
+                    value -> writer.writeIdentifier(value));
+            });
+        });
     }
 
     private void writeType(TypeNode node, String keyword, Action writeBody) {

@@ -13,6 +13,7 @@ import static org.zwobble.couscous.ast.ArrayNode.array;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.EnumNode.declareEnum;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -488,6 +489,15 @@ public class CsharpSerializerTests {
         String output = serialize(node);
 
         assertEquals("namespace com.example {\n    internal interface Example {\n        X get();\n    }\n}\n", output);
+    }
+
+    @Test
+    public void enumWithSimpleValues() {
+        Node node = declareEnum(ScalarType.of("com.example.Example"), list("ONE", "TWO"));
+
+        String output = serialize(node);
+
+        assertEquals("namespace com.example {\n    internal enum Example {\n        ONE, TWO\n    }\n}\n", output);
     }
 
     private String serialize(Node node) {
