@@ -83,13 +83,10 @@ public class JavaMethodReferenceReader {
         } else {
             Expression left = expression.getExpression();
             if (left instanceof SimpleName && ((SimpleName) left).resolveBinding().getKind() == IBinding.TYPE) {
-                if (arguments.size() != 1) {
-                    throw new UnsupportedOperationException();
-                }
                 return methodCall(
                     arguments.get(0),
                     methodName,
-                    list(),
+                    arguments.subList(1, arguments.size()),
                     type);
             } else {
                 return methodCall(

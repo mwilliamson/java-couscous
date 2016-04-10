@@ -48,12 +48,21 @@ public class InnerTypeReadingTests {
     }
 
     @Test
-    public void expressionInstanceMethodReferenceWithStaticReceiverIsReadAsLambda() {
+    public void expressionInstanceMethodReferenceWithStaticReceiverAndNoArgsIsReadAsLambda() {
         assertEquals(
             readTypes(generateMethodSource("void",
                 "java.util.function.Function<String, Integer> function = arg0 -> arg0.length();")),
             readTypes(generateMethodSource("void",
                 "java.util.function.Function<String, Integer> function = String::length;")));
+    }
+
+    @Test
+    public void expressionInstanceMethodReferenceWithStaticReceiverAndSomeArgsIsReadAsLambda() {
+        assertEquals(
+            readTypes(generateMethodSource("void",
+                "java.util.function.BiPredicate<Object, Object> function = (arg0, arg1) -> arg0.equals(arg1);")),
+            readTypes(generateMethodSource("void",
+                "java.util.function.BiPredicate<Object, Object> function = Object::equals;")));
     }
 
     @Test
