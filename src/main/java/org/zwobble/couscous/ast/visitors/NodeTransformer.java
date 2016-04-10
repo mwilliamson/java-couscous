@@ -176,6 +176,7 @@ public class NodeTransformer {
         private Function<ExpressionNode, Optional<ExpressionNode>> transformExpression = expression -> Optional.empty();
         private Function<Type, Type> transformType = type -> type;
         private Function<MethodSignature, String> transformMethodName = MethodSignature::getName;
+        private Function<String, String> transformFieldName = name -> name;
 
         public Builder transformExpression(
             Function<ExpressionNode, Optional<ExpressionNode>> transformExpression)
@@ -196,23 +197,31 @@ public class NodeTransformer {
             return this;
         }
 
+        public Builder transformFieldName(Function<String, String> transformFieldName) {
+            this.transformFieldName = transformFieldName;
+            return this;
+        }
+
         public NodeTransformer build() {
-            return new NodeTransformer(transformExpression, transformType, transformMethodName);
+            return new NodeTransformer(transformExpression, transformType, transformMethodName, transformFieldName);
         }
     }
 
     private final Function<ExpressionNode, Optional<ExpressionNode>> transformExpression;
     private final Function<Type, Type> transformType;
     private final Function<MethodSignature, String> transformMethodName;
+    private final Function<String, String> transformFieldName;
 
     private NodeTransformer(
         Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
         Function<Type, Type> transformType,
-        Function<MethodSignature, String> transformMethodName)
+        Function<MethodSignature, String> transformMethodName,
+        Function<String, String> transformFieldName)
     {
         this.transformExpression = transformExpression;
         this.transformType = transformType;
         this.transformMethodName = transformMethodName;
+        this.transformFieldName = transformFieldName;
     }
 
     public MethodSignature transform(MethodSignature signature) {
@@ -237,6 +246,10 @@ public class NodeTransformer {
 
     public String transformMethodName(MethodSignature signature) {
         return transformMethodName.apply(signature);
+    }
+
+    public String transformFieldName(String name) {
+        return transformFieldName.apply(name);
     }
 
     public ExpressionNode transformExpression(ExpressionNode expression) {

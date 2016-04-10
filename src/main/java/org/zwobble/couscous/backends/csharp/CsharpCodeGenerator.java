@@ -40,6 +40,7 @@ public class CsharpCodeGenerator {
             .transformType(this::transformType)
             .transformExpression(this::transformExpression)
             .transformMethodName(naming::methodName)
+            .transformFieldName(name -> "_" + name)
             .build();
     }
 

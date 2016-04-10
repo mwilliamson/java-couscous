@@ -47,7 +47,7 @@ public class FieldDeclarationNode implements Node {
     public FieldDeclarationNode transform(NodeTransformer transformer) {
         return new FieldDeclarationNode(
             isStatic,
-            name,
+            transformer.transformFieldName(name),
             transformer.transform(type));
     }
 

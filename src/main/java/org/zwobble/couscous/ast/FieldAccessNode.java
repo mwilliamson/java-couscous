@@ -69,7 +69,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     public ExpressionNode transform(NodeTransformer transformer) {
         return new FieldAccessNode(
             transformer.transformReceiver(left),
-            fieldName,
+            transformer.transformFieldName(fieldName),
             transformer.transform(type));
     }
 
