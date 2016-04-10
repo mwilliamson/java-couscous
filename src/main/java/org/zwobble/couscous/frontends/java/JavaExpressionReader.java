@@ -55,70 +55,82 @@ public class JavaExpressionReader {
     }
 
     ExpressionNode readExpressionWithoutBoxing(Expression expression) {
-        switch (expression.getNodeType()) {
-            case ASTNode.BOOLEAN_LITERAL:
-                return readBooleanLiteral((BooleanLiteral)expression);
+        try {
 
-            case ASTNode.NUMBER_LITERAL:
-                return readNumberLiteral((NumberLiteral)expression);
+            switch (expression.getNodeType()) {
+                case ASTNode.BOOLEAN_LITERAL:
+                    return readBooleanLiteral((BooleanLiteral)expression);
 
-            case ASTNode.CHARACTER_LITERAL:
-                return readCharacterLiteral((CharacterLiteral)expression);
+                case ASTNode.NUMBER_LITERAL:
+                    return readNumberLiteral((NumberLiteral)expression);
 
-            case ASTNode.STRING_LITERAL:
-                return readStringLiteral((StringLiteral)expression);
+                case ASTNode.CHARACTER_LITERAL:
+                    return readCharacterLiteral((CharacterLiteral)expression);
 
-            case ASTNode.TYPE_LITERAL:
-                return readTypeLiteral((TypeLiteral)expression);
+                case ASTNode.STRING_LITERAL:
+                    return readStringLiteral((StringLiteral)expression);
 
-            case ASTNode.SIMPLE_NAME:
-                return readSimpleName((SimpleName)expression);
+                case ASTNode.TYPE_LITERAL:
+                    return readTypeLiteral((TypeLiteral)expression);
 
-            case ASTNode.THIS_EXPRESSION:
-                return readThisExpression((ThisExpression)expression);
+                case ASTNode.SIMPLE_NAME:
+                    return readSimpleName((SimpleName)expression);
 
-            case ASTNode.FIELD_ACCESS:
-                return readFieldAccess((FieldAccess)expression);
+                case ASTNode.THIS_EXPRESSION:
+                    return readThisExpression((ThisExpression)expression);
 
-            case ASTNode.QUALIFIED_NAME:
-                return readQualifiedName((QualifiedName)expression);
+                case ASTNode.FIELD_ACCESS:
+                    return readFieldAccess((FieldAccess)expression);
 
-            case ASTNode.METHOD_INVOCATION:
-                return readMethodInvocation((MethodInvocation)expression);
+                case ASTNode.QUALIFIED_NAME:
+                    return readQualifiedName((QualifiedName)expression);
 
-            case ASTNode.CLASS_INSTANCE_CREATION:
-                return readClassInstanceCreation((ClassInstanceCreation)expression);
+                case ASTNode.METHOD_INVOCATION:
+                    return readMethodInvocation((MethodInvocation)expression);
 
-            case ASTNode.LAMBDA_EXPRESSION:
-                return readLambdaExpression((LambdaExpression)expression);
+                case ASTNode.CLASS_INSTANCE_CREATION:
+                    return readClassInstanceCreation((ClassInstanceCreation)expression);
 
-            case ASTNode.EXPRESSION_METHOD_REFERENCE:
-                return readExpressionMethodReference((ExpressionMethodReference)expression);
+                case ASTNode.LAMBDA_EXPRESSION:
+                    return readLambdaExpression((LambdaExpression)expression);
 
-            case ASTNode.CREATION_REFERENCE:
-                return readCreationReference((CreationReference)expression);
+                case ASTNode.EXPRESSION_METHOD_REFERENCE:
+                    return readExpressionMethodReference((ExpressionMethodReference)expression);
 
-            case ASTNode.INFIX_EXPRESSION:
-                return readInfixExpression((InfixExpression)expression);
+                case ASTNode.CREATION_REFERENCE:
+                    return readCreationReference((CreationReference)expression);
 
-            case ASTNode.PREFIX_EXPRESSION:
-                return readPrefixExpression((PrefixExpression)expression);
+                case ASTNode.INFIX_EXPRESSION:
+                    return readInfixExpression((InfixExpression)expression);
 
-            case ASTNode.CONDITIONAL_EXPRESSION:
-                return readConditionalExpression((ConditionalExpression)expression);
+                case ASTNode.PREFIX_EXPRESSION:
+                    return readPrefixExpression((PrefixExpression)expression);
 
-            case ASTNode.ASSIGNMENT:
-                return readAssignment((Assignment)expression);
+                case ASTNode.CONDITIONAL_EXPRESSION:
+                    return readConditionalExpression((ConditionalExpression)expression);
 
-            case ASTNode.CAST_EXPRESSION:
-                return readCastExpression((CastExpression)expression);
+                case ASTNode.ASSIGNMENT:
+                    return readAssignment((Assignment)expression);
 
-            default:
+                case ASTNode.CAST_EXPRESSION:
+                    return readCastExpression((CastExpression)expression);
+
+                default:
+                    throw new RuntimeException(
+                        "Unsupported expression: " + expression.getClass());
+
+            }
+        } catch (Exception exception) {
+            if (exception instanceof ExpressionReadError) {
+                throw exception;
+            } else {
                 CompilationUnit root = (CompilationUnit) expression.getRoot();
-                throw new RuntimeException(
-                    "Unsupported expression: " + expression.getClass() +
-                        "\n" + root.getLineNumber(expression.getStartPosition()) + ":" + root.getColumnNumber(expression.getStartPosition()));
-
+                int lineNumber = root.getLineNumber(expression.getStartPosition());
+                int columnNumber = root.getColumnNumber(expression.getStartPosition());
+                throw new ExpressionReadError(
+                    "Failed to read expression at " + lineNumber + ":" + columnNumber,
+                    exception);
+            }
         }
     }
 
