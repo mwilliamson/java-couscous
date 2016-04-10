@@ -8,7 +8,7 @@ import static org.zwobble.couscous.tests.frontends.java.JavaReading.readTypes;
 
 public class InnerTypeReadingTests {
     @Test
-    public void lambdaWithNoArgumentsAndExpressionBodyIsReadAsAnonymousClassCreation() {
+    public void lambdaWithNoArgumentsAndReturnValueAndExpressionBodyIsReadAsAnonymousClassCreation() {
         assertEquals(
             readTypes(generateMethodSource("void",
                 "java.util.function.IntSupplier supplier = new java.util.function.IntSupplier() {\n" +
@@ -36,6 +36,18 @@ public class InnerTypeReadingTests {
                 "java.util.function.Function<Integer, Integer> function = x -> x;")),
             readTypes(generateMethodSource("void",
                 "java.util.function.Function<Integer, Integer> function = (Integer x) -> x;")));
+    }
+    @Test
+    public void lambdaWithNoReturnValueAndExpressionBodyIsReadAsAnonymousClassCreation() {
+        assertEquals(
+            readTypes(generateMethodSource("void",
+                "java.lang.Runnable runnable = new java.lang.Runnable() {\n" +
+                    "    public void run() {\n" +
+                    "        System.out.println();\n" +
+                    "    }\n" +
+                    "};")),
+            readTypes(generateMethodSource("void",
+                "java.lang.Runnable runnable = () -> System.out.println();")));
     }
 
     @Test

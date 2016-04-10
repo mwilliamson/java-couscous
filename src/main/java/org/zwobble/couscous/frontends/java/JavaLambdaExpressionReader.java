@@ -1,14 +1,17 @@
 package org.zwobble.couscous.frontends.java;
 
 import org.eclipse.jdt.core.dom.*;
+import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.FormalArgumentNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
@@ -50,7 +53,12 @@ public class JavaLambdaExpressionReader {
             return reader.readStatements(scope, statements, Optional.of(returnType));
         } else {
             Expression body = (Expression) expression.getBody();
-            return list(returns(reader.readExpression(scope, returnType, body)));
+            ExpressionNode value = reader.readExpression(scope, returnType, body);
+            if (returnType.equals(Types.VOID)) {
+                return list(expressionStatement(value));
+            } else {
+                return list(returns(value));
+            }
         }
     }
 }
