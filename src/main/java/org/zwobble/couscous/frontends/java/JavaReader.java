@@ -104,7 +104,9 @@ public class JavaReader {
 
     private TypeNode readEnumDeclaration(EnumDeclaration type) {
         ScalarType name = (ScalarType) typeOf(type.resolveBinding());
-        return new EnumNode(name);
+        @SuppressWarnings("unchecked")
+        List<EnumConstantDeclaration> values = type.enumConstants();
+        return new EnumNode(name, eagerMap(values, declaration -> declaration.getName().getIdentifier()));
     }
 
     private TypeNode readTypeDeclaration(TypeDeclaration type) {

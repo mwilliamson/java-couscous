@@ -393,4 +393,15 @@ public class JavaReaderTests {
         EnumNode node = (EnumNode) classes.get(0);
         assertEquals(ScalarType.of("com.example.Example"), node.getName());
     }
+
+    @Test
+    public void canReadEnumWithMembers() {
+        String source = "package com.example;" +
+            "public enum Example { ONE, TWO }";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        EnumNode node = (EnumNode) classes.get(0);
+        assertEquals(ScalarType.of("com.example.Example"), node.getName());
+        assertEquals(list("ONE", "TWO"), node.getValues());
+    }
 }

@@ -12,19 +12,25 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class EnumNode implements TypeNode {
-    public static EnumNode declareEnum(ScalarType name) {
-        return new EnumNode(name);
+    public static EnumNode declareEnum(ScalarType name, List<String> values) {
+        return new EnumNode(name, values);
     }
 
     private final ScalarType name;
+    private final List<String> values;
 
-    public EnumNode(ScalarType name) {
+    public EnumNode(ScalarType name, List<String> values) {
         this.name = name;
+        this.values = values;
     }
 
     @Override
     public ScalarType getName() {
         return name;
+    }
+
+    public List<String> getValues() {
+        return values;
     }
 
     @Override
@@ -44,19 +50,20 @@ public class EnumNode implements TypeNode {
 
     @Override
     public TypeNode transform(NodeTransformer transformer) {
-        return new EnumNode(transformer.transform(name));
+        return new EnumNode(transformer.transform(name), values);
+    }
+
+    @Override
+    public <T> T accept(NodeMapper<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override
     public String toString() {
         return "EnumNode(" +
             "name=" + name +
+            ", values=" + values +
             ')';
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override
@@ -66,12 +73,15 @@ public class EnumNode implements TypeNode {
 
         EnumNode enumNode = (EnumNode) o;
 
-        return name.equals(enumNode.name);
+        if (!name.equals(enumNode.name)) return false;
+        return values.equals(enumNode.values);
 
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        int result = name.hashCode();
+        result = 31 * result + values.hashCode();
+        return result;
     }
 }
