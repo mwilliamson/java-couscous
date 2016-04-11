@@ -260,9 +260,7 @@ public class JavaExpressionReader {
         if (declaringClass.isAnonymous()) {
             GeneratedClosure closure =
                 javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
-            return constructorCall(
-                closure.getType(),
-                concat(captureArguments(closure), arguments));
+            return closure.generateConstructor(arguments);
         } else if (declaringClass.isNested() && !Modifier.isStatic(declaringClass.getModifiers())) {
             if (expression.getExpression() == null) {
                 Type type = typeOf(declaringClass);
@@ -282,27 +280,17 @@ public class JavaExpressionReader {
 
     private ExpressionNode readLambdaExpression(LambdaExpression expression) {
         GeneratedClosure closure = javaReader.readLambda(scope, expression);
-        return constructorCall(
-            closure.getType(),
-            captureArguments(closure).asList());
+        return closure.generateConstructor();
     }
 
     private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
         GeneratedClosure closure = javaReader.readExpressionMethodReference(scope, expression);
-        return constructorCall(
-            closure.getType(),
-            captureArguments(closure).asList());
+        return closure.generateConstructor();
     }
 
     private ExpressionNode readCreationReference(CreationReference expression) {
         GeneratedClosure closure = javaReader.readCreationReference(scope, expression);
-        return constructorCall(
-            closure.getType(),
-            captureArguments(closure).asList());
-    }
-
-    private InsertionOrderSet<? extends ExpressionNode> captureArguments(GeneratedClosure closure) {
-        return closure.getCaptures();
+        return closure.generateConstructor();
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

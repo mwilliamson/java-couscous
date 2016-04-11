@@ -31,7 +31,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
-import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
@@ -379,13 +378,10 @@ public class JavaReader {
                     node.getConstructor().getArguments(),
                     // TODO: use scope of outer class
                     argument -> scope.formalArgument(argument.getName(), argument.getType()));
-                List<ExpressionNode> constructorArguments = ExtraLists.concat(
-                    closure.getCaptures(),
-                    lazyMap(methodArguments, argument -> reference(argument)));
                 MethodNode method = MethodNode.builder("create_" + typeDeclaration.getName().getIdentifier())
                     .arguments(methodArguments)
                     .returns(type)
-                    .statement(returns(constructorCall(type, constructorArguments)))
+                    .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
                     .build();
                 body.addMethod(method);
                 return closure.getClassNode();
