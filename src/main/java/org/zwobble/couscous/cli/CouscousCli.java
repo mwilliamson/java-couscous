@@ -35,7 +35,7 @@ public class CouscousCli {
             configuration.get(FILES).asArray().values(),
             JsonValue::asString);
 
-        Backend backend = backend(backendName, outputDirectory);
+        Backend backend = backend(backendName, outputDirectory, configuration);
 
         JavaFrontend frontend = new JavaFrontend();
         try {
@@ -48,12 +48,12 @@ public class CouscousCli {
         }
     }
 
-    private static Backend backend(String backend, String output) {
+    private static Backend backend(String backend, String output, JsonObject configuration) {
         switch (backend) {
             case "python":
                 return new PythonBackend(path(output), "_couscous");
             case "csharp":
-                return new CsharpBackend(path(output), "_Couscous");
+                return new CsharpBackend(path(output), configuration.get("namespace").asString());
             default:
                 throw new RuntimeException("Unrecognised backend: " + backend);
         }
