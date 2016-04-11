@@ -48,7 +48,8 @@ public class CsharpBackend implements Backend {
 
     private String readRuntimeFile(String runtimeFile) {
         try {
-            return Resources.toString(Resources.getResource("csharp/runtime/" + runtimeFile), StandardCharsets.UTF_8);
+            return Resources.toString(Resources.getResource("csharp/runtime/" + runtimeFile), StandardCharsets.UTF_8)
+                .replace("namespace Couscous", "namespace " + namespace);
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }

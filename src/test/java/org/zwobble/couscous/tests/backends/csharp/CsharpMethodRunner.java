@@ -33,7 +33,7 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.values.PrimitiveValues.value;
 
 public class CsharpMethodRunner implements MethodRunner {
-    private static final String NAMESPACE = "Couscous";
+    static final String NAMESPACE = "ExampleProject.Couscous";
 
     @Override
     public PrimitiveValue runMethod(List<TypeNode> classNodes, ScalarType className, String methodName, List<PrimitiveValue> arguments, Type returnType) {
@@ -108,7 +108,7 @@ public class CsharpMethodRunner implements MethodRunner {
                 path -> path.toString()));
     }
 
-    private static final String NAMESPACE_PREFIX = "Couscous.";
+    private static final String NAMESPACE_PREFIX = NAMESPACE + ".";
 
     private static PrimitiveValue readPrimitive(String output) {
         String[] lines = output.split("[\\r\\n]+");
