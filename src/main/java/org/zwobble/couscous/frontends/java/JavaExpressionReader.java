@@ -6,7 +6,6 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
-import org.zwobble.couscous.util.InsertionOrderSet;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +26,8 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.frontends.java.JavaOperators.readOperator;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
 import static org.zwobble.couscous.types.Types.erasure;
-import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.Fold.foldLeft;
 
 public class JavaExpressionReader {

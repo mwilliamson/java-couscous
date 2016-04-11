@@ -169,6 +169,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void anonymousClassesWithTypeCapture() throws Exception {
+        assertEquals(
+            value("Hello"),
+            execTestProgram(
+                "anonymous-class-type-capture",
+                ScalarType.of("com.example.AnonymousClass"),
+                "value",
+                list(),
+                Types.STRING));
+    }
+
+    @Test
     public void lambdasWithoutCapture() throws Exception {
         assertEquals(
             value(42),

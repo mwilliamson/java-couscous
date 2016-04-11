@@ -1,5 +1,7 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
+import org.junit.Ignore;
+import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
 import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
@@ -16,6 +18,11 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToCsharpTests extends CompilerTests {
+    @Test
+    @Ignore("WIP")
+    public void anonymousClassesWithTypeCapture() throws Exception {
+    }
+
     protected PrimitiveValue execProgram(
         Path directory,
         ScalarType type,

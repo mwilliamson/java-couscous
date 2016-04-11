@@ -24,6 +24,11 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 public class JavaToInterpreterTests extends CompilerTests {
     @Test
     @Ignore("WIP")
+    public void anonymousClassesWithTypeCapture() throws Exception {
+    }
+
+    @Test
+    @Ignore("WIP")
     public void forEach() throws Exception {
     }
 
