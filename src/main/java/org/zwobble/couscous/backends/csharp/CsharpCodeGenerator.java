@@ -23,6 +23,7 @@ public class CsharpCodeGenerator {
         .put(Types.INT, ScalarType.of("int"))
         .put(Types.STRING, ScalarType.of("string"))
         .put(Types.BOOLEAN, ScalarType.of("bool"))
+        .put(Types.BOXED_BOOLEAN, ScalarType.of("bool"))
         .put(Types.CLASS, ScalarType.of("System.Type"))
         .put(Types.VOID, ScalarType.of("void"))
         .build();
