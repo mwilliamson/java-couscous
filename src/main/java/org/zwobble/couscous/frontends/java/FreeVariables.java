@@ -1,10 +1,10 @@
 package org.zwobble.couscous.frontends.java;
 
+import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.types.*;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,42 +12,65 @@ import java.util.stream.Stream;
 
 import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraIterables.iterable;
+import static org.zwobble.couscous.util.ExtraIterables.lazyFlatMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
-    public static Set<TypeParameter> findFreeTypeParameters(Node node) {
+    public static Set<TypeParameter> findFreeTypeParameters(Node root) {
         // TODO: this assumes that *all* type parameters are free, which is often but not always true in inner types
-        Set<TypeParameter> freeTypeParameters = new HashSet<>();
-
-        NodeTransformer.builder().transformType(type -> {
-            type.accept(new Type.Visitor<Void>() {
+        Iterable<Type> types = iterable(() -> descendantNodesAndSelf(root)
+            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<Type>>(Stream.empty()) {
                 @Override
-                public Void visit(ScalarType type) {
-                    return null;
+                public Stream<Type> visit(FieldDeclarationNode declaration) {
+                    return Stream.of(declaration.getType());
                 }
 
                 @Override
-                public Void visit(TypeParameter parameter) {
-                    freeTypeParameters.add(parameter);
-                    return null;
+                public Stream<Type> visit(LocalVariableDeclarationNode localVariableDeclaration) {
+                    return Stream.of(localVariableDeclaration.getType());
                 }
 
                 @Override
-                public Void visit(ParameterizedType type) {
-                    type.getParameters().forEach(parameter -> parameter.accept(this));
-                    return null;
+                public Stream<Type> visit(MethodNode methodNode) {
+                    return Stream.concat(
+                        methodNode.getArguments().stream().map(argument -> argument.getType()),
+                        Stream.of(methodNode.getReturnType()));
                 }
 
                 @Override
-                public Void visit(BoundTypeParameter type) {
-                    type.getValue().accept(this);
-                    return null;
+                public Stream<Type> visit(ConstructorCallNode call) {
+                    return Stream.of(call.getType());
                 }
-            });
-            return type;
-        }).build().transform(node);
 
-        return freeTypeParameters;
+                @Override
+                public Stream<Type> visit(MethodCallNode methodCall) {
+                    return methodCall.getTypeParameters().stream();
+                }
+            })));
+
+        return ImmutableSet.copyOf(lazyFlatMap(types, type -> type.accept(new Type.Visitor<Iterable<TypeParameter>>() {
+            @Override
+            public Iterable<TypeParameter> visit(ScalarType type) {
+                return list();
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(TypeParameter parameter) {
+                return list(parameter);
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(ParameterizedType type) {
+                return lazyFlatMap(type.getParameters(), parameter -> parameter.accept(this));
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(BoundTypeParameter type) {
+                return type.getValue().accept(this);
+            }
+        })));
     }
 
     public static List<ReferenceNode> findFreeVariables(List<? extends Node> body) {
