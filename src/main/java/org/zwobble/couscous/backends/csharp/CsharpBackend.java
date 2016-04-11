@@ -22,7 +22,7 @@ public class CsharpBackend implements Backend {
         "java/util/Arrays.cs",
         // TODO: implement Iterable/Iterator in Java
         "java/lang/Iterable.cs",
-        "java/lang/Iterator.cs");
+        "java/util/Iterator.cs");
 
     private final Path directoryPath;
     private final String namespace;

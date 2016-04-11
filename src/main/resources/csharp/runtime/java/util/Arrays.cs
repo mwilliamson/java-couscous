@@ -12,12 +12,12 @@ namespace Couscous.java.util {
             this.values = values;
         }
         
-        public java.lang.Iterator<T> iterator() {
+        public java.util.Iterator<T> iterator() {
             return new _ArrayIterator<T>(values);
         }
     }
     
-    internal class _ArrayIterator<T> : java.lang.Iterator<T> {
+    internal class _ArrayIterator<T> : java.util.Iterator<T> {
         private readonly T[] values;
         private int nextIndex;
         

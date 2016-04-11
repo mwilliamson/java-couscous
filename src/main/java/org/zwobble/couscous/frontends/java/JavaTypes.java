@@ -143,6 +143,6 @@ public class JavaTypes {
     }
 
     public static Type iterator(Type elementType) {
-        return parameterizedType(ScalarType.of("java.lang.Iterator"), list(elementType));
+        return parameterizedType(ScalarType.of("java.util.Iterator"), list(elementType));
     }
 }
