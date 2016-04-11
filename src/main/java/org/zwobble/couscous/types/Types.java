@@ -1,7 +1,9 @@
 package org.zwobble.couscous.types;
 
+import java.util.List;
 import java.util.Map;
 
+import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -15,6 +17,14 @@ public class Types {
     public static final ScalarType BOXED_INT = ScalarType.of("java.lang.Integer");
     public static final ScalarType BOXED_BOOLEAN = ScalarType.of("java.lang.Boolean");
     public static final ScalarType ARRAY = ScalarType.of("array");
+
+    public static Type addTypeParameters(ScalarType rawType, List<Type> typeParameters) {
+        if (typeParameters.isEmpty()) {
+            return rawType;
+        } else {
+            return parameterizedType(rawType, typeParameters);
+        }
+    }
 
     public static Type array(Type elementType) {
         return new ParameterizedType(ARRAY, list(elementType));

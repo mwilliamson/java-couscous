@@ -11,7 +11,7 @@ import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.util.InsertionOrderSet;
@@ -40,6 +40,7 @@ import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
+import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeTypeParameters;
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
@@ -257,6 +258,9 @@ public class JavaReader {
         Scope scope,
         ClassNode classNode
     ) {
+        InsertionOrderSet<org.zwobble.couscous.types.TypeParameter> freeTypeParameters = InsertionOrderSet.copyOf(
+            findFreeTypeParameters(classNode));
+
         InsertionOrderSet<ReferenceNode> freeVariables = InsertionOrderSet.copyOf(Iterables.filter(
             findFreeVariables(ExtraLists.concat(
                 classNode.getFields(),
@@ -278,14 +282,15 @@ public class JavaReader {
 
         ClassNode generatedClass = new ClassNode(
             classNode.getName(),
-            classNode.getTypeParameters(),
+            // TODO: generate fresh type parameter and replace in body
+            ExtraLists.concat(lazyMap(freeTypeParameters, parameter -> formalTypeParameter(parameter)), classNode.getTypeParameters()),
             classNode.getSuperTypes(),
             fields,
             list(),
             buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
             eagerMap(classNode.getMethods(), method ->
                 method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))));
-        return new GeneratedClosure(generatedClass, freeVariables);
+        return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
     }
 
     private boolean isThisReference(ScalarType name, ReferenceNode reference) {
