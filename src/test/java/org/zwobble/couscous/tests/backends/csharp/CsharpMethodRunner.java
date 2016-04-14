@@ -39,7 +39,7 @@ public class CsharpMethodRunner implements MethodRunner {
     public PrimitiveValue runMethod(List<TypeNode> classNodes, ScalarType className, String methodName, List<PrimitiveValue> arguments, Type returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
-            Backend compiler = new CsharpBackend(directoryPath, NAMESPACE);
+            Backend compiler = new CsharpBackend(directoryPath.resolve("Program.cs"), NAMESPACE);
             try {
                 compiler.compile(classNodes);
                 return runFunction(directoryPath, className, methodName, arguments, returnType);

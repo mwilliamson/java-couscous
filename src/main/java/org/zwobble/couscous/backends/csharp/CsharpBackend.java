@@ -24,19 +24,19 @@ public class CsharpBackend implements Backend {
         "java/lang/Iterable.cs",
         "java/util/Iterator.cs");
 
-    private final Path directoryPath;
+    private final Path outputFilePath;
     private final String namespace;
 
-    public CsharpBackend(Path directoryPath, String namespace) {
-        this.directoryPath = directoryPath;
+    public CsharpBackend(Path outputFilePath, String namespace) {
+        this.outputFilePath = outputFilePath;
         this.namespace = namespace;
     }
 
     @Override
     public void compile(List<TypeNode> classes) throws IOException {
-        directoryPath.toFile().mkdirs();
+        outputFilePath.getParent().toFile().mkdirs();
         Files.write(
-            directoryPath.resolve("Program.cs"),
+            outputFilePath,
             Iterables.<String>concat(
                 transform(
                     classes,

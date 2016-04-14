@@ -27,7 +27,7 @@ public class JavaToCsharpTests extends CompilerTests {
         try {
             CouscousCompiler compiler = new CouscousCompiler(
                 new JavaFrontend(),
-                new CsharpBackend(directoryPath, CsharpMethodRunner.NAMESPACE));
+                new CsharpBackend(directoryPath.resolve("Program.cs"), CsharpMethodRunner.NAMESPACE));
             compiler.compileDirectory(list(directory), directory);
             return CsharpMethodRunner.runFunction(directoryPath, type, methodName, arguments, returnType);
         } finally {
