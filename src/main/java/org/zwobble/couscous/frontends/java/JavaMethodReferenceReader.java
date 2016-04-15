@@ -82,7 +82,7 @@ public class JavaMethodReferenceReader {
                 type);
         } else {
             Expression left = expression.getExpression();
-            if (left instanceof SimpleName && ((SimpleName) left).resolveBinding().getKind() == IBinding.TYPE) {
+            if (left instanceof Name && ((Name) left).resolveBinding().getKind() == IBinding.TYPE) {
                 return methodCall(
                     arguments.get(0),
                     methodName,
