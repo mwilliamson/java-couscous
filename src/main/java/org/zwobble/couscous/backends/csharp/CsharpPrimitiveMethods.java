@@ -87,6 +87,17 @@ public class CsharpPrimitiveMethods {
 
             .build();
 
+    private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_STRING_METHODS =
+        ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
+
+            .put("join", arguments -> staticMethodCall(
+                ScalarType.of("java.lang.String"),
+                "join",
+                arguments,
+                Types.STRING))
+
+            .build();
+
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INTERNAL_METHODS =
         ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
 
@@ -97,6 +108,7 @@ public class CsharpPrimitiveMethods {
     private static final Map<ScalarType, Map<String, PrimitiveStaticMethodGenerator>> STATIC_METHODS =
         ImmutableMap.<ScalarType, Map<String, PrimitiveStaticMethodGenerator>>builder()
             .put(Types.BOXED_INT, STATIC_INT_METHODS)
+            .put(Types.STRING, STATIC_STRING_METHODS)
             .put(InternalCouscousValue.REF, STATIC_INTERNAL_METHODS)
             .build();
 
