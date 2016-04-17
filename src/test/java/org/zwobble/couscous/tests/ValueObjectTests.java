@@ -69,6 +69,7 @@ public class ValueObjectTests {
             {StaticReceiver.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
+            {ThrowNode.class},
             {TypeCoercionNode.class},
             {TypeParameter.class},
             {ScalarType.class},

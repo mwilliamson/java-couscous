@@ -96,6 +96,11 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     }
 
     @Override
+    public Optional<InterpreterValue> visit(ThrowNode throwNode) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public Optional<InterpreterValue> visit(ExpressionStatementNode expressionStatement) {
         eval(environment, expressionStatement.getExpression());
         return Optional.empty();

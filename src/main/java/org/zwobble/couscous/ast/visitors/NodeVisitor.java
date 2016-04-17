@@ -20,6 +20,7 @@ public interface NodeVisitor {
     void visit(StaticReceiver receiver);
 
     void visit(ReturnNode returnNode);
+    void visit(ThrowNode throwNode);
     void visit(ExpressionStatementNode expressionStatement);
     void visit(LocalVariableDeclarationNode localVariableDeclaration);
     void visit(IfStatementNode ifStatement);

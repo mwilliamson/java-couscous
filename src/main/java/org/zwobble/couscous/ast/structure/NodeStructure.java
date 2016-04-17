@@ -112,6 +112,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(ThrowNode throwNode) {
+                return Stream.of(throwNode.getValue());
+            }
+
+            @Override
             public Stream<Node> visit(ExpressionStatementNode expressionStatement) {
                 return Stream.of(expressionStatement.getExpression());
             }

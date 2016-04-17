@@ -16,6 +16,11 @@ public interface StatementNode extends Node {
             }
 
             @Override
+            public T visit(ThrowNode throwNode) {
+                return visitor.visit(throwNode);
+            }
+
+            @Override
             public T visit(ExpressionStatementNode expressionStatement) {
                 return visitor.visit(expressionStatement);
             }

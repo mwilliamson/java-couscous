@@ -97,6 +97,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(ThrowNode throwNode) {
+                visitor.visit(throwNode);
+                return null;
+            }
+
+            @Override
             public Void visit(ExpressionStatementNode expressionStatement) {
                 visitor.visit(expressionStatement);
                 return null;

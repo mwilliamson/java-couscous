@@ -244,6 +244,11 @@ public class PythonCodeGenerator {
         }
 
         @Override
+        public PythonStatementNode visit(ThrowNode throwNode) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
                 AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();

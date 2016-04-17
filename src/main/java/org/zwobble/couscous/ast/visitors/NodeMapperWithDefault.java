@@ -83,7 +83,12 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     public T visit(ReturnNode returnNode) {
         return defaultValue;
     }
-    
+
+    @Override
+    public T visit(ThrowNode throwNode) {
+        return defaultValue;
+    }
+
     @Override
     public T visit(ExpressionStatementNode expressionStatement) {
         return defaultValue;

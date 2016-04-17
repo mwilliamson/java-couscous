@@ -20,6 +20,7 @@ public interface NodeMapper<T> {
     T visit(StaticReceiver receiver);
 
     T visit(ReturnNode returnNode);
+    T visit(ThrowNode throwNode);
     T visit(ExpressionStatementNode expressionStatement);
     T visit(LocalVariableDeclarationNode localVariableDeclaration);
     T visit(IfStatementNode ifStatement);

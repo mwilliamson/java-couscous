@@ -310,6 +310,11 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     @Override
+    public void visit(ThrowNode throwNode) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void visit(ExpressionStatementNode expressionStatement) {
         writer.writeStatement(() -> {
             write(expressionStatement.getExpression());

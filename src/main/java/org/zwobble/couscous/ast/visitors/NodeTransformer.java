@@ -106,6 +106,11 @@ public class NodeTransformer {
             }
 
             @Override
+            public Node visit(ThrowNode throwNode) {
+                return transformStatement(throwNode);
+            }
+
+            @Override
             public Node visit(ExpressionStatementNode expressionStatement) {
                 return transformStatement(expressionStatement);
             }
