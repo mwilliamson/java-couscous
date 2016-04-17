@@ -16,6 +16,7 @@ import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
 import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
+import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
@@ -27,6 +28,7 @@ import static org.zwobble.couscous.ast.Operations.boxInt;
 import static org.zwobble.couscous.ast.Operations.integerAdd;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.ThrowNode.throwNode;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -100,6 +102,14 @@ public class JavaReaderTests {
         assertThat(
             method.getArguments(),
             contains(isFormalArgument("value",  typeParameter(expectedMethodIdentifier, "T"))));
+    }
+
+    @Test
+    public void canReadThrowStatements() {
+        assertEquals(
+            throwNode(
+                constructorCall(ScalarType.of("java.lang.RuntimeException"), list())),
+            readStatement("void", "throw new RuntimeException();"));
     }
     
     @Test

@@ -49,6 +49,9 @@ class JavaStatementReader {
             case ASTNode.RETURN_STATEMENT:
                 return list(readReturnStatement((ReturnStatement)statement));
 
+            case ASTNode.THROW_STATEMENT:
+                return list(readThrowStatement((ThrowStatement)statement));
+
             case ASTNode.EXPRESSION_STATEMENT:
                 return list(readExpressionStatement((ExpressionStatement)statement));
 
@@ -85,6 +88,10 @@ class JavaStatementReader {
 
     private StatementNode readReturnStatement(ReturnStatement statement) {
         return ReturnNode.returns(readExpression(returnType.get(), statement.getExpression()));
+    }
+
+    private StatementNode readThrowStatement(ThrowStatement statement) {
+        return ThrowNode.throwNode(readExpressionWithoutBoxing(statement.getExpression()));
     }
 
     private StatementNode readExpressionStatement(ExpressionStatement statement) {
