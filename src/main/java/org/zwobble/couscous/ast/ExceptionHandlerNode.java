@@ -5,30 +5,38 @@ import org.zwobble.couscous.types.Type;
 import java.util.List;
 
 public class ExceptionHandlerNode {
-    public static ExceptionHandlerNode exceptionhandler(Type type, List<StatementNode> body) {
-        return new ExceptionHandlerNode(type, body);
+    public static ExceptionHandlerNode exceptionhandler(VariableDeclaration declaration, List<StatementNode> body) {
+        return new ExceptionHandlerNode(declaration, body);
     }
 
-    private final Type type;
+    private final VariableDeclaration declaration;
     private final List<StatementNode> body;
 
-    public ExceptionHandlerNode(Type type, List<StatementNode> body) {
-        this.type = type;
+    public ExceptionHandlerNode(VariableDeclaration declaration, List<StatementNode> body) {
+        this.declaration = declaration;
         this.body = body;
     }
 
-    public Type getExceptionType() {
-        return type;
+    public VariableDeclaration getDeclaration() {
+        return declaration;
     }
 
     public List<StatementNode> getBody() {
         return body;
     }
 
+    public Type getExceptionType() {
+        return declaration.getType();
+    }
+
+    public String getExceptionName() {
+        return declaration.getName();
+    }
+
     @Override
     public String toString() {
         return "ExceptionHandlerNode(" +
-            "type=" + type +
+            "declaration=" + declaration +
             ", body=" + body +
             ')';
     }
@@ -40,14 +48,14 @@ public class ExceptionHandlerNode {
 
         ExceptionHandlerNode that = (ExceptionHandlerNode) o;
 
-        if (!type.equals(that.type)) return false;
+        if (!declaration.equals(that.declaration)) return false;
         return body.equals(that.body);
 
     }
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
+        int result = declaration.hashCode();
         result = 31 * result + body.hashCode();
         return result;
     }

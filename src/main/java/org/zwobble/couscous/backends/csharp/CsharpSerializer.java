@@ -385,7 +385,21 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(TryNode tryStatement) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("try");
+            writeBlock(tryStatement.getBody());
+            for (ExceptionHandlerNode handler : tryStatement.getExceptionHandlers()) {
+                writer.writeSpace();
+                writer.writeKeyword("catch");
+                writer.writeSpace();
+                writer.writeSymbol("(");
+                writeTypeReference(handler.getExceptionType());
+                writer.writeSpace();
+                writer.writeIdentifier(handler.getExceptionName());
+                writer.writeSymbol(")");
+                writeBlock(handler.getBody());
+            }
+        });
     }
 
     @Override

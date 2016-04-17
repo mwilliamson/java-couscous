@@ -14,6 +14,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.EnumNode.declareEnum;
+import static org.zwobble.couscous.ast.ExceptionHandlerNode.exceptionhandler;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -30,6 +31,7 @@ import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.ThrowNode.throwNode;
+import static org.zwobble.couscous.ast.TryNode.tryStatement;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -297,6 +299,18 @@ public class CsharpSerializerTests {
             literal(true),
             list(returns(literal(1)))));
         assertEquals("while (true) {\n    return 1;\n}\n", output);
+    }
+
+    @Test
+    public void tryStatementCanHaveBodyAndMultipleHandlers() {
+        VariableDeclaration varX = var(TestIds.variable("x"), "x", ScalarType.of("X"));
+        VariableDeclaration varY = var(TestIds.variable("y"), "y", ScalarType.of("Y"));
+        String output = serialize(tryStatement(
+            list(returns(literal(1))),
+            list(
+                exceptionhandler(varX, list(returns(reference(varX)))),
+                exceptionhandler(varY, list(returns(reference(varY)))))));
+        assertEquals("try {\n    return 1;\n} catch (X x) {\n    return x;\n} catch (Y y) {\n    return y;\n}\n", output);
     }
 
     @Test

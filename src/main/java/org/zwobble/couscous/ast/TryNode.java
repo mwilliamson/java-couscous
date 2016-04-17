@@ -38,7 +38,7 @@ public class TryNode implements StatementNode {
         return new TryNode(
             transformer.transformStatements(body),
             eagerMap(exceptionHandlers, handler -> new ExceptionHandlerNode(
-                transformer.transform(handler.getExceptionType()),
+                transformer.transform(handler.getDeclaration()),
                 transformer.transformStatements(handler.getBody()))));
     }
 
