@@ -315,6 +315,15 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void tryStatementCanHaveFinallyBody() {
+        String output = serialize(tryStatement(
+            list(),
+            list(),
+            list(returns(literal(1)))));
+        assertEquals("try {\n} finally {\n    return 1;\n}\n", output);
+    }
+
+    @Test
     public void methodCanHaveVoidReturnType() {
         String output = serialize(MethodNode.staticMethod("nothing")
             .returns(ScalarType.of("void"))

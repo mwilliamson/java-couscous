@@ -399,6 +399,11 @@ public class CsharpSerializer implements NodeVisitor {
                 writer.writeSymbol(")");
                 writeBlock(handler.getBody());
             }
+            if (!tryStatement.getFinallyBody().isEmpty()) {
+                writer.writeSpace();
+                writer.writeKeyword("finally");
+                writeBlock(tryStatement.getFinallyBody());
+            }
         });
     }
 
