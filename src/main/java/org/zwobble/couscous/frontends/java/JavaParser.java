@@ -1,6 +1,5 @@
 package org.zwobble.couscous.frontends.java;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Iterables;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -8,8 +7,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Hashtable;
@@ -51,8 +48,7 @@ public class JavaParser {
             Iterables.toArray(transform(asList(sourcePathArguments), argument -> "UTF-8"), String.class),
             false);
         final byte[] javaFileBytes = Files.readAllBytes(sourcePath);
-        CharBuffer source = Charsets.UTF_8.decode(ByteBuffer.wrap(javaFileBytes));
-        parser.setSource(source.array());
+        parser.setSource(new String(javaFileBytes, "UTF-8").toCharArray());
         return (CompilationUnit)parser.createAST(null);
     }
 }

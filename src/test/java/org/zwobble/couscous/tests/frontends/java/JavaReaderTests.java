@@ -414,4 +414,10 @@ public class JavaReaderTests {
         assertEquals(ScalarType.of("com.example.Example"), node.getName());
         assertEquals(list("ONE", "TWO"), node.getValues());
     }
+
+    @Test
+    public void canReadUnicode() {
+        ExpressionNode expression = readExpression("String", "\"π\"");
+        assertEquals(literal("π"), expression);
+    }
 }
