@@ -277,6 +277,11 @@ public class PythonCodeGenerator {
                 generateExpression(whileLoop.getCondition()),
                 generateStatements(whileLoop.getBody()));
         }
+
+        @Override
+        public PythonStatementNode visit(TryNode tryStatement) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     public static PythonExpressionNode generateExpression(ExpressionNode expression) {

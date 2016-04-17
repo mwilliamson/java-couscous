@@ -384,6 +384,11 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     @Override
+    public void visit(TryNode tryStatement) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void visit(FormalTypeParameterNode parameter) {
         writer.writeIdentifier(parameter.getName());
     }

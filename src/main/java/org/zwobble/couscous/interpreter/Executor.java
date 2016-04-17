@@ -132,6 +132,11 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         return Optional.empty();
     }
 
+    @Override
+    public Optional<InterpreterValue> visit(TryNode tryStatement) {
+        throw new UnsupportedOperationException();
+    }
+
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {
         for (StatementNode statement : statements) {
             Optional<InterpreterValue> result = exec(environment, statement);

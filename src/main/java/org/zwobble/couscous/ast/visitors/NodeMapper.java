@@ -25,7 +25,7 @@ public interface NodeMapper<T> {
     T visit(LocalVariableDeclarationNode localVariableDeclaration);
     T visit(IfStatementNode ifStatement);
     T visit(WhileNode whileLoop);
-
+    T visit(TryNode tryStatement);
 
     T visit(FormalTypeParameterNode parameter);
     T visit(FormalArgumentNode formalArgumentNode);

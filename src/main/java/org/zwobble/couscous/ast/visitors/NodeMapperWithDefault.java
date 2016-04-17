@@ -110,6 +110,11 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
 
     @Override
+    public T visit(TryNode tryStatement) {
+        return defaultValue;
+    }
+
+    @Override
     public T visit(FormalTypeParameterNode parameter) {
         return defaultValue;
     }

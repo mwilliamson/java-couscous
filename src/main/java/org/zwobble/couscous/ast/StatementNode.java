@@ -39,6 +39,11 @@ public interface StatementNode extends Node {
             public T visit(WhileNode whileLoop) {
                 return visitor.visit(whileLoop);
             }
+
+            @Override
+            public T visit(TryNode tryStatement) {
+                return visitor.visit(tryStatement);
+            }
         });
     }
 

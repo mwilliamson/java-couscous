@@ -9,5 +9,5 @@ public interface StatementNodeMapper<T> {
     T visit(LocalVariableDeclarationNode localVariableDeclaration);
     T visit(IfStatementNode ifStatement);
     T visit(WhileNode whileLoop);
-
+    T visit(TryNode tryStatement);
 }

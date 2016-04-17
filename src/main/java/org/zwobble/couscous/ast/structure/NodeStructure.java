@@ -142,6 +142,13 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(TryNode tryStatement) {
+                return Stream.concat(
+                    tryStatement.getBody().stream(),
+                    tryStatement.getExceptionHandlers().stream().flatMap(handler -> handler.getBody().stream()));
+            }
+
+            @Override
             public Stream<? extends Node> visit(FormalTypeParameterNode parameter) {
                 return Stream.empty();
             }

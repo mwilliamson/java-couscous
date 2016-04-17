@@ -25,6 +25,7 @@ public interface NodeVisitor {
     void visit(LocalVariableDeclarationNode localVariableDeclaration);
     void visit(IfStatementNode ifStatement);
     void visit(WhileNode whileLoop);
+    void visit(TryNode tryStatement);
 
     void visit(FormalTypeParameterNode parameter);
     void visit(FormalArgumentNode formalArgumentNode);

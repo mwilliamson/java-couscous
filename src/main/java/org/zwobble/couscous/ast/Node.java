@@ -127,6 +127,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(TryNode tryStatement) {
+                visitor.visit(tryStatement);
+                return null;
+            }
+
+            @Override
             public Void visit(FormalTypeParameterNode parameter) {
                 visitor.visit(parameter);
                 return null;
