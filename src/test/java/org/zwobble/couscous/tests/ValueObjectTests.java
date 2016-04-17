@@ -12,8 +12,8 @@ import org.zwobble.couscous.util.ExtraArrays;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.StringValue;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
@@ -123,7 +123,7 @@ public class ValueObjectTests {
     
     private static Stream<Object> generateInstancesWithSlightDifference(Class<?> clazz) {
         Class<?>[] fieldTypes = fieldTypes(clazz);
-        Method constructor = findStaticConstructor(clazz);
+        Constructor<?> constructor = findConstructor(clazz);
         
         return IntStream.range(0, fieldTypes.length)
             .mapToObj(index -> {
@@ -133,7 +133,7 @@ public class ValueObjectTests {
                         argumentIndex == index ? generateSecondInstance(fieldType) : generateFirstInstance(fieldType))
                     .toArray(Object[]::new);
                 try {
-                    return constructor.invoke(null, arguments);
+                    return constructor.newInstance(arguments);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -233,10 +233,10 @@ public class ValueObjectTests {
     private static GeneratedValue generateValue(Class<?> type, Function<Class<?>, Object> generate) {
         try {
             Class<?>[] fieldTypes = fieldTypes(type);
-            Method constructor = findStaticConstructor(type);
+            Constructor<?> constructor = findConstructor(type);
             Object[] arguments = ExtraArrays.map(fieldTypes, fieldType -> generate.apply(fieldType))
                 .toArray(Object[]::new);
-            Object instance = constructor.invoke(null, arguments);
+            Object instance = constructor.newInstance(arguments);
             return new GeneratedValue(instance, arguments);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -251,17 +251,14 @@ public class ValueObjectTests {
             .toArray(Class<?>[]::new);
     }
     
-    private static Method findStaticConstructor(Class<?> type) {
+    private static Constructor<?> findConstructor(Class<?> type) {
         Class<?>[] fieldTypes = fieldTypes(type);
-        return stream(type.getDeclaredMethods())
-            .filter(method -> isStaticConstructor(type, fieldTypes, method))
+        Constructor<?> constructor = stream(type.getDeclaredConstructors())
+            .filter(method -> asList(fieldTypes).equals(asList(method.getParameterTypes())))
             .findAny()
-            .orElseThrow(() -> new RuntimeException("Could not find static constructor for " + type));
-    }
-    
-    private static boolean isStaticConstructor(Class<?> type, Class<?>[] fieldTypes, Method method) {
-        return method.getReturnType().isAssignableFrom(type) &&
-            asList(fieldTypes).equals(asList(method.getParameterTypes()));
+            .orElseThrow(() -> new RuntimeException("Could not find constructor for " + type));
+        constructor.setAccessible(true);
+        return constructor;
     }
 
     private static class GeneratedValue {
