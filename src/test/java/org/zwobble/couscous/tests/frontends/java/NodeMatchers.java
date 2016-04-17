@@ -77,4 +77,8 @@ public class NodeMatchers {
             hasFeature("exception name", ExceptionHandlerNode::getExceptionName, equalTo(name)),
             hasFeature("body", ExceptionHandlerNode::getBody, equalTo(body)));
     }
+
+    public static Matcher<TryNode> hasFinally(StatementNode... statements) {
+        return hasFeature("finally clause", TryNode::getFinallyBody, contains(statements));
+    }
 }

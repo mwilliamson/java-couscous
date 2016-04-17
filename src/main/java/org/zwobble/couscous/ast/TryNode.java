@@ -8,16 +8,26 @@ import java.util.List;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class TryNode implements StatementNode {
-    public static TryNode tryStatement(List<StatementNode> body, List<ExceptionHandlerNode> exceptionHandlers) {
-        return new TryNode(body, exceptionHandlers);
+    public static TryNode tryStatement(
+        List<StatementNode> body,
+        List<ExceptionHandlerNode> exceptionHandlers,
+        List<StatementNode> finallyBody)
+    {
+        return new TryNode(body, exceptionHandlers, finallyBody);
     }
 
     private final List<StatementNode> body;
     private final List<ExceptionHandlerNode> exceptionHandlers;
+    private final List<StatementNode> finallyBody;
 
-    public TryNode(List<StatementNode> body, List<ExceptionHandlerNode> exceptionHandlers) {
+    public TryNode(
+        List<StatementNode> body,
+        List<ExceptionHandlerNode> exceptionHandlers,
+        List<StatementNode> finallyBody)
+    {
         this.body = body;
         this.exceptionHandlers = exceptionHandlers;
+        this.finallyBody = finallyBody;
     }
 
     public List<StatementNode> getBody() {
@@ -26,6 +36,10 @@ public class TryNode implements StatementNode {
 
     public List<ExceptionHandlerNode> getExceptionHandlers() {
         return exceptionHandlers;
+    }
+
+    public List<StatementNode> getFinallyBody() {
+        return finallyBody;
     }
 
     @Override
@@ -39,7 +53,7 @@ public class TryNode implements StatementNode {
             transformer.transformStatements(body),
             eagerMap(exceptionHandlers, handler -> new ExceptionHandlerNode(
                 transformer.transform(handler.getDeclaration()),
-                transformer.transformStatements(handler.getBody()))));
+                transformer.transformStatements(handler.getBody()))), finallyBody);
     }
 
     @Override

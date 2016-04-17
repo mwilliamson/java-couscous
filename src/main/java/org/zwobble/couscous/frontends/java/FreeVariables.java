@@ -95,6 +95,10 @@ public class FreeVariables {
     private static Stream<VariableDeclaration> findDeclarations(Node root) {
         Stream<VariableNode> declarations = descendantNodesAndSelf(root).flatMap(node ->
             toStream(tryCast(VariableNode.class, node)));
-        return declarations.map(VariableNode::getDeclaration);
+        Stream<TryNode> tryStatements = descendantNodesAndSelf(root).flatMap(node -> toStream(tryCast(TryNode.class, node)));
+        Stream<ExceptionHandlerNode> handlers = tryStatements.flatMap(statement -> statement.getExceptionHandlers().stream());
+        return Stream.concat(
+            declarations.map(VariableNode::getDeclaration),
+            handlers.map(ExceptionHandlerNode::getDeclaration));
     }
 }

@@ -170,7 +170,8 @@ class JavaStatementReader {
         List<CatchClause> catchClauses = statement.catchClauses();
         return list(tryStatement(
             readStatement(statement.getBody()),
-            eagerMap(catchClauses, this::readCatchClause)));
+            eagerMap(catchClauses, this::readCatchClause),
+            statement.getFinally() == null ? list() : readStatement(statement.getFinally())));
     }
 
     private ExceptionHandlerNode readCatchClause(CatchClause clause) {

@@ -192,13 +192,22 @@ public class JavaReaderTests {
     }
 
     @Test
-    public void canReadTryStatements() {
+    public void canReadTryStatementsWithCatchClauses() {
         assertThat(
             readStatement("int", "try { return 1; } catch (Exception exception) { return 2; }"),
             isTryStatement(
                 hasTryBody(list(returns(literal(1)))),
                 hasExceptionHandlers(
                     isExceptionHandler(ScalarType.of("java.lang.Exception"), "exception", list(returns(literal(2)))))));
+    }
+
+    @Test
+    public void canReadTryStatementsWithFinallyClauses() {
+        assertThat(
+            readStatement("int", "try { return 1; } finally { return 2; }"),
+            isTryStatement(
+                hasTryBody(list(returns(literal(1)))),
+                hasFinally(returns(literal(2)))));
     }
     
     @Test

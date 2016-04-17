@@ -309,7 +309,8 @@ public class CsharpSerializerTests {
             list(returns(literal(1))),
             list(
                 exceptionHandler(varX, list(returns(reference(varX)))),
-                exceptionHandler(varY, list(returns(reference(varY)))))));
+                exceptionHandler(varY, list(returns(reference(varY))))),
+            list()));
         assertEquals("try {\n    return 1;\n} catch (X x) {\n    return x;\n} catch (Y y) {\n    return y;\n}\n", output);
     }
 
