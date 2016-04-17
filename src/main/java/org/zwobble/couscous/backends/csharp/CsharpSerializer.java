@@ -311,7 +311,12 @@ public class CsharpSerializer implements NodeVisitor {
 
     @Override
     public void visit(ThrowNode throwNode) {
-        throw new UnsupportedOperationException();
+        writer.writeStatement(() -> {
+            writer.writeKeyword("throw");
+            writer.writeSpace();
+            write(throwNode.getValue());
+            writer.writeSymbol(";");
+        });
     }
 
     @Override

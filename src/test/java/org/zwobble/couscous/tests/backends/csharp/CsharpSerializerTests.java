@@ -29,6 +29,7 @@ import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
+import static org.zwobble.couscous.ast.ThrowNode.throwNode;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -226,6 +227,12 @@ public class CsharpSerializerTests {
     public void noValueIsSpecifiedWhenReturningUnit() {
         String output = serialize(returns(LiteralNode.UNIT));
         assertEquals("return;\n", output);
+    }
+
+    @Test
+    public void throwStatementIncludesValue() {
+        String output = serialize(throwNode(reference(var(TestIds.ANY_ID, "x", ScalarType.of("X")))));
+        assertEquals("throw x;\n", output);
     }
 
     @Test
