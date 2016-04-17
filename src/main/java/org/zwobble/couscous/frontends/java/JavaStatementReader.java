@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.tryFind;
+import static org.zwobble.couscous.ast.ExceptionHandlerNode.exceptionHandler;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
+import static org.zwobble.couscous.ast.TryNode.tryStatement;
 import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -72,6 +74,9 @@ class JavaStatementReader {
 
             case ASTNode.SWITCH_STATEMENT:
                 return readSwitchStatement((SwitchStatement)statement);
+
+            case ASTNode.TRY_STATEMENT:
+                return readTryStatement((TryStatement)statement);
 
             default:
                 throw new RuntimeException("Unsupported statement: " + statement.getClass());
@@ -158,6 +163,20 @@ class JavaStatementReader {
     private static boolean isEndOfCase(Statement statement) {
         // TODO: do this on transformed nodes instead?
         return statement.getNodeType() == ASTNode.RETURN_STATEMENT;
+    }
+
+    private List<StatementNode> readTryStatement(TryStatement statement) {
+        @SuppressWarnings("unchecked")
+        List<CatchClause> catchClauses = statement.catchClauses();
+        return list(tryStatement(
+            readStatement(statement.getBody()),
+            eagerMap(catchClauses, this::readCatchClause)));
+    }
+
+    private ExceptionHandlerNode readCatchClause(CatchClause clause) {
+        return exceptionHandler(
+            JavaVariableDeclarationReader.read(scope, clause.getException()),
+            readStatement(clause.getBody()));
     }
 
     private List<StatementNode> readStatements(Iterable<Statement> statements) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.sugar.Lambda.lambda;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
@@ -35,7 +36,7 @@ public class JavaLambdaExpressionReader {
 
     private FormalArgumentNode readLambdaExpressionParameter(Scope scope, Object parameter) {
         if (parameter instanceof SingleVariableDeclaration) {
-            return JavaVariableDeclarationReader.read(scope, (SingleVariableDeclaration) parameter);
+            return formalArg(JavaVariableDeclarationReader.read(scope, (SingleVariableDeclaration) parameter));
         } else {
             VariableDeclarationFragment fragment = (VariableDeclarationFragment)parameter;
             return scope.formalArgument(

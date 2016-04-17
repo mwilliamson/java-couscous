@@ -33,8 +33,7 @@ import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
-import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isFormalArgument;
-import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.isFormalTypeParameter;
+import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.*;
 import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
@@ -190,6 +189,16 @@ public class JavaReaderTests {
                 "String _couscous_tmp_0 = \"one\";" +
                 "if (_couscous_tmp_0.equals(\"one\")) { return 0; } return 1;"),
             readStatements("int", "switch (\"one\") { case \"one\": return 0; } return 1;"));
+    }
+
+    @Test
+    public void canReadTryStatements() {
+        assertThat(
+            readStatement("int", "try { return 1; } catch (Exception exception) { return 2; }"),
+            isTryStatement(
+                hasTryBody(list(returns(literal(1)))),
+                hasExceptionHandlers(
+                    isExceptionHandler(ScalarType.of("java.lang.Exception"), "exception", list(returns(literal(2)))))));
     }
     
     @Test

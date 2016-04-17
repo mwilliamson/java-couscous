@@ -34,6 +34,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorNode.constructor;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
+import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -469,7 +470,7 @@ public class JavaReader {
     private List<FormalArgumentNode> readFormalArguments(Scope scope, MethodDeclaration method) {
         @SuppressWarnings("unchecked")
         List<SingleVariableDeclaration> parameters = method.parameters();
-        return eagerMap(parameters, parameter -> JavaVariableDeclarationReader.read(scope, parameter));
+        return eagerMap(parameters, parameter -> formalArg(JavaVariableDeclarationReader.read(scope, parameter)));
     }
 
     private Optional<List<StatementNode>> readBody(Scope scope, MethodDeclaration method, Optional<Type> returnType) {

@@ -5,7 +5,7 @@ import org.zwobble.couscous.types.Type;
 import java.util.List;
 
 public class ExceptionHandlerNode {
-    public static ExceptionHandlerNode exceptionhandler(VariableDeclaration declaration, List<StatementNode> body) {
+    public static ExceptionHandlerNode exceptionHandler(VariableDeclaration declaration, List<StatementNode> body) {
         return new ExceptionHandlerNode(declaration, body);
     }
 

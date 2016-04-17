@@ -14,7 +14,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assign;
 import static org.zwobble.couscous.ast.CastNode.cast;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.EnumNode.declareEnum;
-import static org.zwobble.couscous.ast.ExceptionHandlerNode.exceptionhandler;
+import static org.zwobble.couscous.ast.ExceptionHandlerNode.exceptionHandler;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
@@ -308,8 +308,8 @@ public class CsharpSerializerTests {
         String output = serialize(tryStatement(
             list(returns(literal(1))),
             list(
-                exceptionhandler(varX, list(returns(reference(varX)))),
-                exceptionhandler(varY, list(returns(reference(varY)))))));
+                exceptionHandler(varX, list(returns(reference(varX)))),
+                exceptionHandler(varY, list(returns(reference(varY)))))));
         assertEquals("try {\n    return 1;\n} catch (X x) {\n    return x;\n} catch (Y y) {\n    return y;\n}\n", output);
     }
 

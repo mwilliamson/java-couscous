@@ -5,7 +5,10 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.Type;
 
+import java.util.List;
+
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.hasFeature;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.isInstance;
@@ -52,5 +55,26 @@ public class NodeMatchers {
 
     public static Matcher<ExpressionNode> expressionHasType(Type type) {
         return hasFeature("type", ExpressionNode::getType, equalTo(type));
+    }
+
+    @SafeVarargs
+    public static Matcher<StatementNode> isTryStatement(Matcher<? super TryNode>... matchers) {
+        return isInstance(TryNode.class, allOf(matchers));
+    }
+
+    public static Matcher<TryNode> hasTryBody(List<StatementNode> statements) {
+        return hasFeature("body", TryNode::getBody, equalTo(statements));
+    }
+
+    @SafeVarargs
+    public static Matcher<TryNode> hasExceptionHandlers(Matcher<ExceptionHandlerNode>... handlers) {
+        return hasFeature("exception handlers", TryNode::getExceptionHandlers, contains(handlers));
+    }
+
+    public static Matcher<ExceptionHandlerNode> isExceptionHandler(Type type, String name, List<StatementNode> body) {
+        return allOf(
+            hasFeature("exception type", ExceptionHandlerNode::getExceptionType, equalTo(type)),
+            hasFeature("exception name", ExceptionHandlerNode::getExceptionName, equalTo(name)),
+            hasFeature("body", ExceptionHandlerNode::getBody, equalTo(body)));
     }
 }

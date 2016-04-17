@@ -97,7 +97,7 @@ public class Scope {
         return VariableReferenceNode.reference(variable);
     }
 
-    private VariableDeclaration generateVariable(String key, String name, Type type) {
+    public VariableDeclaration generateVariable(String key, String name, Type type) {
         if (variablesByKey.containsKey(key)) {
             throw new IllegalArgumentException(key + " is already mapped");
         }
