@@ -10,6 +10,7 @@ import org.zwobble.couscous.types.Types;
 import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -23,12 +24,14 @@ import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParamet
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.Operations.boxInt;
 import static org.zwobble.couscous.ast.Operations.integerAdd;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.ThrowNode.throwNode;
+import static org.zwobble.couscous.ast.TryNode.tryStatement;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
@@ -209,7 +212,31 @@ public class JavaReaderTests {
                 hasTryBody(list(returns(literal(1)))),
                 hasFinally(returns(literal(2)))));
     }
-    
+
+    @Test
+    public void canReadTryWithResourceWithoutOtherClauses() {
+        ScalarType type = ScalarType.of("java.io.ByteArrayOutputStream");
+        Identifier identifier = Identifiers.variable(
+            Identifiers.method(
+                Identifiers.type(Identifiers.TOP, "com.example.Example"),
+                "main"
+            ),
+            "closeable"
+        );
+        LocalVariableDeclarationNode expectedResource = localVariableDeclaration(identifier, "closeable", type, constructorCall(type, list()));
+        assertThat(
+            readStatements("int", "try(java.io.ByteArrayOutputStream closeable = new java.io.ByteArrayOutputStream()) { return 1; }"),
+            equalTo(list(
+                expectedResource,
+                tryStatement(
+                    list(returns(literal(1))),
+                    list(),
+                    list(expressionStatement(methodCall(reference(expectedResource), "close", list(), Types.VOID)))
+                )
+            ))
+        );
+    }
+
     @Test
     public void canDeclareConstructor() {
         ClassNode classNode = readClass(

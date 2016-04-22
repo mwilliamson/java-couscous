@@ -76,7 +76,7 @@ public class JavaReading {
     }
 
     static String generateMethodSource(String returnType, String statementsSource) {
-        return "public static " + returnType + " main() {" +
+        return "public static " + returnType + " main() throws Exception {" +
             statementsSource +
             "}";
     }

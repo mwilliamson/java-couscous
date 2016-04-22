@@ -58,6 +58,11 @@ public class NodeMatchers {
     }
 
     @SafeVarargs
+    public static Matcher<StatementNode> isLocalVariableDeclaration(Matcher<? super LocalVariableDeclarationNode>... matchers) {
+        return isInstance(LocalVariableDeclarationNode.class, allOf(matchers));
+    }
+
+    @SafeVarargs
     public static Matcher<StatementNode> isTryStatement(Matcher<? super TryNode>... matchers) {
         return isInstance(TryNode.class, allOf(matchers));
     }

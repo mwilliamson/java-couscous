@@ -1,5 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
+import com.google.common.collect.Lists;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
@@ -167,11 +168,24 @@ class JavaStatementReader {
 
     private List<StatementNode> readTryStatement(TryStatement statement) {
         @SuppressWarnings("unchecked")
-        List<CatchClause> catchClauses = statement.catchClauses();
-        return list(tryStatement(
-            readStatement(statement.getBody()),
-            eagerMap(catchClauses, this::readCatchClause),
-            statement.getFinally() == null ? list() : readStatement(statement.getFinally())));
+        List<VariableDeclarationExpression> resources = statement.resources();
+        List<LocalVariableDeclarationNode> resourceDeclarations = eagerFlatMap(resources, this::readVariableDeclarationExpression);
+        List<StatementNode> body = readStatement(statement.getBody());
+        for (LocalVariableDeclarationNode resource : Lists.reverse(resourceDeclarations)) {
+            body = list(
+                resource,
+                tryStatement(body, list(), list(expressionStatement(methodCall(reference(resource), "close", list(), Types.VOID))))
+            );
+        }
+        @SuppressWarnings("unchecked")
+        List<CatchClause> javaCatchClauses = statement.catchClauses();
+        List<ExceptionHandlerNode> catchClauses = eagerMap(javaCatchClauses, this::readCatchClause);
+        List<StatementNode> finallyBody = statement.getFinally() == null ? list() : readStatement(statement.getFinally());
+        if (catchClauses.isEmpty() && finallyBody.isEmpty()) {
+            return body;
+        } else {
+            return list(tryStatement(body, catchClauses, finallyBody));
+        }
     }
 
     private ExceptionHandlerNode readCatchClause(CatchClause clause) {
@@ -191,18 +205,16 @@ class JavaStatementReader {
     }
 
     private List<StatementNode> readForStatement(ForStatement statement) {
-        List javaInitialisers = statement.initializers();
+        @SuppressWarnings("unchecked")
+        List<VariableDeclarationExpression> javaInitialisers = statement.initializers();
         if (javaInitialisers.size() != 1) {
             throw new UnsupportedOperationException();
         }
-        VariableDeclarationExpression javaDeclaration = (VariableDeclarationExpression) javaInitialisers.get(0);
-        @SuppressWarnings("unchecked")
-        List<VariableDeclarationFragment> fragments = javaDeclaration.fragments();
         @SuppressWarnings("unchecked")
         List<Expression> updaters = statement.updaters();
 
         return append(
-            readDeclarationFragments(fragments, typeOf(javaDeclaration.getType())),
+            readVariableDeclarationExpression(javaInitialisers.get(0)),
             whileLoop(
                 readExpression(Types.BOOLEAN, statement.getExpression()),
                 concat(
@@ -232,10 +244,16 @@ class JavaStatementReader {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = statement.fragments();
         Type type = typeOf(statement.getType());
-        return readDeclarationFragments(fragments, type);
+        return (List)readDeclarationFragments(fragments, type);
     }
 
-    private List<StatementNode> readDeclarationFragments(
+    private List<LocalVariableDeclarationNode> readVariableDeclarationExpression(VariableDeclarationExpression expression) {
+        @SuppressWarnings("unchecked")
+        List<VariableDeclarationFragment> fragments = expression.fragments();
+        return readDeclarationFragments(fragments, typeOf(expression.getType()));
+    }
+
+    private List<LocalVariableDeclarationNode> readDeclarationFragments(
         List<VariableDeclarationFragment> fragments,
         Type type
     ) {

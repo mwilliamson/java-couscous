@@ -33,7 +33,7 @@ public class ExtraLists {
         return concat(list(value), list);
     }
 
-    public static <T> List<T> append(List<T> list, T value) {
+    public static <T> List<T> append(List<? extends T> list, T value) {
         return Stream.concat(list.stream(), Stream.of(value)).collect(Collectors.toList());
     }
 
