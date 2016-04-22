@@ -1,6 +1,5 @@
 package org.zwobble.couscous.tests;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
@@ -158,7 +157,6 @@ public abstract class CompilerTests {
     }
 
     @Test
-    @Ignore("WIP")
     public void anonymousClassesWithThisReference() throws Exception {
         assertEquals(
             value(42),

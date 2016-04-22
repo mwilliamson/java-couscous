@@ -37,7 +37,7 @@ public class JavaTypes {
 
     static Type typeOf(ITypeBinding typeBinding) {
         if (typeBinding.isAnonymous()) {
-            throw new RuntimeException("Cannot get type of anonymous type binding");
+            return new AnonymousType(typeBinding.getKey());
         }
         if (typeBinding.isArray()) {
             return Types.array(typeOf(typeBinding.getElementType()));

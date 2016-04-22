@@ -49,6 +49,7 @@ import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraMaps.map;
 
 public class JavaReader {
     public static List<TypeNode> readClassesFromFiles(List<Path> sourcePaths, List<Path> sourceFiles) throws IOException {
@@ -183,6 +184,7 @@ public class JavaReader {
             overrides(functionalInterfaceMethod));
 
         return new AnonymousClass(
+            Optional.empty(),
             superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
             list(),
             list(method));
@@ -233,6 +235,7 @@ public class JavaReader {
         Scope scope = outerScope.enterClass(className);
         TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations());
         AnonymousClass anonymousClass = new AnonymousClass(
+            Optional.of((AnonymousType) typeOf(declaration.resolveBinding())),
             superTypes(declaration),
             bodyDeclarations.getFields(),
             bodyDeclarations.getMethods());
@@ -305,14 +308,22 @@ public class JavaReader {
         ScalarType className,
         AnonymousClass anonymousClass
     ) {
-        return classWithCapture(scope, ClassNode.declareClass(
+        ClassNode classNode = ClassNode.declareClass(
             className,
             list(),
             anonymousClass.getSuperTypes(),
             anonymousClass.getFields(),
             list(),
             ConstructorNode.DEFAULT,
-            anonymousClass.getMethods()));
+            anonymousClass.getMethods());
+        if (anonymousClass.getType().isPresent()) {
+            NodeTransformer nodeTransformer = NodeTransformer.replaceExpressions(map(
+                thisReference(anonymousClass.getType().get()),
+                thisReference(className)
+            ));
+            classNode = classNode.transform(nodeTransformer);
+        }
+        return classWithCapture(scope, classNode);
     }
 
     private FieldDeclarationNode fieldForCapture(ReferenceNode freeVariable) {
