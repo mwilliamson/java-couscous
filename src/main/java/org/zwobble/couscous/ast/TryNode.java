@@ -61,6 +61,7 @@ public class TryNode implements StatementNode {
         return "TryNode(" +
             "body=" + body +
             ", exceptionHandlers=" + exceptionHandlers +
+            ", finallyBody=" + finallyBody +
             ')';
     }
 
@@ -72,14 +73,15 @@ public class TryNode implements StatementNode {
         TryNode tryNode = (TryNode) o;
 
         if (!body.equals(tryNode.body)) return false;
-        return exceptionHandlers.equals(tryNode.exceptionHandlers);
-
+        if (!exceptionHandlers.equals(tryNode.exceptionHandlers)) return false;
+        return finallyBody.equals(tryNode.finallyBody);
     }
 
     @Override
     public int hashCode() {
         int result = body.hashCode();
         result = 31 * result + exceptionHandlers.hashCode();
+        result = 31 * result + finallyBody.hashCode();
         return result;
     }
 }
