@@ -1,8 +1,10 @@
 ## TODO
 
-* Do we need capture of type parameters (both class and method)?
+* Fix this references for anonymous types
 
-* Do this references work for anonymous classes?
+* Try with resources
+
+* Remove all direct runtime support
 
 * Type names for generics
 
