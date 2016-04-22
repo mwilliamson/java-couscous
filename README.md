@@ -1,9 +1,5 @@
 ## TODO
 
-* Fix this references for anonymous types
-
-* Try with resources
-
 * Remove all direct runtime support
 
 * Type names for generics
