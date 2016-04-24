@@ -18,7 +18,6 @@ public class CsharpBackend implements Backend {
     private static final List<String> RUNTIME_FILES = ImmutableList.of(
         "java/lang/Integer.cs",
         "java/lang/Object.cs",
-        "java/lang/String.cs",
         "java/util/Arrays.cs",
         // TODO: implement Iterable/Iterator in Java
         "java/lang/Iterable.cs",
