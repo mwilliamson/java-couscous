@@ -7,7 +7,6 @@ import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.TypeNode;
-import org.zwobble.couscous.backends.csharp.CsharpBackend;
 import org.zwobble.couscous.backends.csharp.CsharpCodeGenerator;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
@@ -39,7 +38,7 @@ public class CsharpMethodRunner implements MethodRunner {
     public PrimitiveValue runMethod(List<TypeNode> classNodes, ScalarType className, String methodName, List<PrimitiveValue> arguments, Type returnType) {
         try {
             Path directoryPath = Files.createTempDirectory(null);
-            Backend compiler = new CsharpBackend(directoryPath.resolve("Program.cs"), NAMESPACE);
+            Backend compiler = new CsharpTestBackend(directoryPath, NAMESPACE);
             try {
                 compiler.compile(classNodes);
                 return runFunction(directoryPath, className, methodName, arguments, returnType);
