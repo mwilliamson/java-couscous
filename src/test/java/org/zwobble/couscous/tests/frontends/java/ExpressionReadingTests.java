@@ -47,6 +47,11 @@ public class ExpressionReadingTests {
     }
 
     @Test
+    public void canReadParenthesizedExpression() {
+        assertEquals(literal(42), readIntExpression("(42)"));
+    }
+
+    @Test
     public void canReadThisReference() {
         assertEquals(
             thisReference(ScalarType.of("com.example.Example")),

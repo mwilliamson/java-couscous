@@ -73,6 +73,9 @@ public class JavaExpressionReader {
                 case ASTNode.TYPE_LITERAL:
                     return readTypeLiteral((TypeLiteral)expression);
 
+                case ASTNode.PARENTHESIZED_EXPRESSION:
+                    return readParenthesizedExpression((ParenthesizedExpression)expression);
+
                 case ASTNode.SIMPLE_NAME:
                     return readSimpleName((SimpleName)expression);
 
@@ -153,6 +156,10 @@ public class JavaExpressionReader {
 
     private ExpressionNode readTypeLiteral(TypeLiteral expression) {
         return literal(erasure(typeOf(expression.getType())));
+    }
+
+    private ExpressionNode readParenthesizedExpression(ParenthesizedExpression expression) {
+        return readExpressionWithoutBoxing(expression.getExpression());
     }
 
     private ExpressionNode readSimpleName(SimpleName expression) {
