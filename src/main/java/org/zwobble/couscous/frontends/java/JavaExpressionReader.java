@@ -317,7 +317,11 @@ public class JavaExpressionReader {
         ITypeBinding[] parameterTypes = method.getParameterTypes();
         return IntStream.range(0, parameterTypes.length)
             .mapToObj(index -> {
-                if (method.isVarargs() && index == parameterTypes.length - 1) {
+                boolean isVarargs =
+                    method.isVarargs() &&
+                    index == parameterTypes.length - 1 &&
+                    (javaArguments.size() != parameterTypes.length || !javaArguments.get(index).resolveTypeBinding().isEqualTo(parameterTypes[index]));
+                if (isVarargs) {
                     Type elementType = typeOf(parameterTypes[index].getElementType());
                     List<ExpressionNode> elements = IntStream.range(index, javaArguments.size())
                         .mapToObj(argumentIndex -> readExpression(elementType, javaArguments.get(argumentIndex)))

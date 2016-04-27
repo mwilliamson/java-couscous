@@ -268,6 +268,24 @@ public class ExpressionReadingTests {
     }
 
     @Test
+    public void canReadMethodCallsWithArrayAsVarargs() {
+        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
+        assertEquals(
+            methodCall(
+                staticReceiver("java.util.Arrays"),
+                "asList",
+                list(Types.STRING),
+                list(array(Types.STRING, list())),
+                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                signature(
+                    "asList",
+                    list(typeParameter),
+                    list(Types.array(typeParameter)),
+                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+            readExpression("java.util.List<String>", "java.util.Arrays.asList(new String[]{})"));
+    }
+
+    @Test
     public void canReadGenericStaticMethodCallsWithExplicitTypeParameters() {
         TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
         assertEquals(
