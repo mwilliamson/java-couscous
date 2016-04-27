@@ -47,6 +47,16 @@ public class ExpressionReadingTests {
     }
 
     @Test
+    public void canReadEmptyArray() {
+        assertEquals(array(Types.INT, list()), readExpression("int[]", "new int[]{}"));
+    }
+
+    @Test
+    public void canReadArrayWithElements() {
+        assertEquals(array(Types.INT, list(literal(42), literal(5))), readExpression("int[]", "new int[]{42, 5}"));
+    }
+
+    @Test
     public void canReadParenthesizedExpression() {
         assertEquals(literal(42), readIntExpression("(42)"));
     }

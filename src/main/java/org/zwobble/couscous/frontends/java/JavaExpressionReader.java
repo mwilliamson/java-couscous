@@ -73,6 +73,9 @@ public class JavaExpressionReader {
                 case ASTNode.TYPE_LITERAL:
                     return readTypeLiteral((TypeLiteral)expression);
 
+                case ASTNode.ARRAY_CREATION:
+                    return readArrayCreation((ArrayCreation)expression);
+
                 case ASTNode.PARENTHESIZED_EXPRESSION:
                     return readParenthesizedExpression((ParenthesizedExpression)expression);
 
@@ -156,6 +159,16 @@ public class JavaExpressionReader {
 
     private ExpressionNode readTypeLiteral(TypeLiteral expression) {
         return literal(erasure(typeOf(expression.getType())));
+    }
+
+    private ExpressionNode readArrayCreation(ArrayCreation expression) {
+        if (expression.getType().getDimensions() != 1) {
+            throw new UnsupportedOperationException();
+        }
+        Type elementType = typeOf(expression.getType().getElementType());
+        @SuppressWarnings("unchecked")
+        List<Expression> expressions = expression.getInitializer().expressions();
+        return array(elementType, eagerMap(expressions, element -> readExpression(elementType, element)));
     }
 
     private ExpressionNode readParenthesizedExpression(ParenthesizedExpression expression) {
