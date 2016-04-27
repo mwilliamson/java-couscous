@@ -43,6 +43,12 @@ import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class JavaReaderTests {
     @Test
+    public void canReadReturnWithoutValue() {
+        StatementNode statement = readStatement("void", "return;");
+        assertEquals(statement, returns(LiteralNode.UNIT));
+    }
+
+    @Test
     public void canDeclareAndReferenceLocalVariables() {
         List<StatementNode> statements = readStatements("int", "int x = 4; return x;");
         

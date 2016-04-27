@@ -93,7 +93,10 @@ class JavaStatementReader {
     }
 
     private StatementNode readReturnStatement(ReturnStatement statement) {
-        return ReturnNode.returns(readExpression(returnType.get(), statement.getExpression()));
+        ExpressionNode value = statement.getExpression() == null
+            ? LiteralNode.UNIT
+            : readExpression(returnType.get(), statement.getExpression());
+        return ReturnNode.returns(value);
     }
 
     private StatementNode readThrowStatement(ThrowStatement statement) {
