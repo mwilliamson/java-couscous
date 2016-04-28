@@ -26,6 +26,8 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.MethodSignature.signature;
+import static org.zwobble.couscous.ast.Operations.integerAdd;
+import static org.zwobble.couscous.ast.Operations.integerMultiply;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
@@ -189,8 +191,14 @@ public class CsharpSerializerTests {
 
     @Test
     public void infixOperation() {
-        String output = serialize(Operations.integerAdd(literal(1), literal(2)));
+        String output = serialize(integerAdd(literal(1), literal(2)));
         assertEquals("1 + 2", output);
+    }
+
+    @Test
+    public void infixOperationIsBracketedWhenNecessary() {
+        assertEquals("1 + 2 * 3", serialize(integerAdd(literal(1), integerMultiply(literal(2), literal(3)))));
+        assertEquals("(1 + 2) * 3", serialize(integerMultiply(integerAdd(literal(1), literal(2)), literal(3))));
     }
 
     @Test
