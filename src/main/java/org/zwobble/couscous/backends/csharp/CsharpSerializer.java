@@ -305,6 +305,8 @@ public class CsharpSerializer implements NodeVisitor {
             if (!returnNode.getValue().getType().equals(Types.VOID)) {
                 writer.writeSpace();
                 write(returnNode.getValue());
+            } else if (!returnNode.getValue().equals(LiteralNode.UNIT)) {
+                throw new UnsupportedOperationException();
             }
             writer.writeSymbol(";");
         });
