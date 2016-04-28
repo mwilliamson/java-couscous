@@ -94,4 +94,13 @@ public class InnerTypeReadingTests {
             readTypes(generateMethodSource("void",
                 "Integer x = 0; java.util.function.Supplier<String> function = x::toString;")));
     }
+
+    @Test
+    public void expressionMethodReferenceReturningVoidIsReadAsLambda() {
+        assertEquals(
+            readTypes(generateMethodSource("void",
+                "java.util.function.Consumer<String> function = arg0 -> System.out.println(arg0);")),
+            readTypes(generateMethodSource("void",
+                "java.util.function.Consumer<String> function = System.out::println;")));
+    }
 }

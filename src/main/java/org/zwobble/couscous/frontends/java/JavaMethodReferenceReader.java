@@ -2,9 +2,7 @@ package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.dom.*;
-import org.zwobble.couscous.ast.ExpressionNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.VariableReferenceNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -13,6 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
+import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -52,9 +51,12 @@ public class JavaMethodReferenceReader {
         List<FormalArgumentNode> formalArguments = formalArguments(scope, functionalInterfaceMethod);
         List<ExpressionNode> arguments = eagerMap(formalArguments, VariableReferenceNode::reference);
 
-        return lambda(
-            formalArguments,
-            list(returns(coerce(generateValue.apply(arguments), typeOf(functionalInterfaceMethod.getReturnType())))));
+        ExpressionNode value = generateValue.apply(arguments);
+        Type type = typeOf(functionalInterfaceMethod.getReturnType());
+        List<StatementNode> body = type.equals(Types.VOID)
+            ? list(expressionStatement(value))
+            : list(returns(coerce(value, type)));
+        return lambda(formalArguments, body);
     }
 
     private List<FormalArgumentNode> formalArguments(Scope scope, IMethodBinding functionalInterfaceMethod) {
