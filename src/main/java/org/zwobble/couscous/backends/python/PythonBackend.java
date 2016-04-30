@@ -40,7 +40,7 @@ public class PythonBackend implements Backend {
             String path = relativePathForModule(runtimeFile);
             writeModule(
                 runtimeFile,
-                Resources.toString(Resources.getResource("python/runtime/" + path), StandardCharsets.UTF_8));
+                Resources.toString(Resources.getResource("org/zwobble/couscous/backends/python/runtime/" + path), StandardCharsets.UTF_8));
         }
     }
     
