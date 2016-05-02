@@ -21,6 +21,7 @@ public class CsharpCodeGenerator {
 
     private final static Map<ScalarType, ScalarType> PRIMITIVES = ImmutableMap.<ScalarType, ScalarType>builder()
         .put(Types.INT, ScalarType.of("int"))
+        .put(Types.BOXED_INT, ScalarType.of("int"))
         .put(Types.STRING, ScalarType.of("string"))
         .put(Types.CHAR, ScalarType.of("char"))
         .put(Types.BOOLEAN, ScalarType.of("bool"))
