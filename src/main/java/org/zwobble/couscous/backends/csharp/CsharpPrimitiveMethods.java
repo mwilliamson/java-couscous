@@ -77,6 +77,12 @@ public class CsharpPrimitiveMethods {
     private static final Map<String, PrimitiveStaticMethodGenerator> STATIC_INT_METHODS =
         ImmutableMap.<String, PrimitiveStaticMethodGenerator>builder()
 
+            .put("toString", arguments -> methodCall(
+                arguments.get(0),
+                "ToString",
+                list(),
+                Types.STRING))
+
             .put("parseInt", arguments -> staticMethodCall(
                 ScalarType.of("int"),
                 "Parse",
