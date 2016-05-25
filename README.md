@@ -1,3 +1,37 @@
+# Couscous
+
+Convert Java source code to other languages. C# and Python currently supported.
+
+## Usage
+
+1. Build the JAR:
+
+    ```
+    mvn package -Dmaven.test.skip=true
+    ```
+
+2. Create a file called `couscous.json`:
+
+    ```
+    {
+      "backend": "csharp",
+      "sourcepath": [
+        "src/main/java"
+      ],
+      "files": [
+        "src/main/java/com/example",
+      ],
+      "output": "dotnet/Example/generated.cs",
+      "namespace": "Example"
+    }
+    ```
+
+3. In the directory containing `couscous.json`:
+
+    ```
+    java -jar path/to/couscous.jar
+    ```
+
 ## TODO
 
 * Multiple constructors
