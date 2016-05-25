@@ -58,6 +58,9 @@ Convert Java source code to other languages. C# and Python currently supported.
         }
     }
     ```
+    
+    Couscous provides very little runtime support: in this case, an
+    implementation of `System.out.println(String)` will need to be written.
 
 ## TODO
 
