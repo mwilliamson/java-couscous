@@ -3,7 +3,7 @@ package org.zwobble.couscous.ast.identifiers;
 import org.zwobble.couscous.types.ScalarType;
 
 public class Identifiers {
-    public static final Identifier TOP = new TopIdentifier();
+    public static final Identifier TOP = TopIdentifier.INSTANCE;
 
     public static Identifier type(Identifier identifier, String name) {
         return extend(identifier, name, IdentifierType.TYPE);
