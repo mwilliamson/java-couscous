@@ -1,0 +1,11 @@
+{
+  "backend": "csharp",
+  "sourcepath": [
+    "src/main/java"
+  ],
+  "files": [
+    "src/main/java"
+  ],
+  "output": "dotnet/generated.cs",
+  "namespace": "Example"
+}

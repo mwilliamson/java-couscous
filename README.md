@@ -2,15 +2,30 @@
 
 Convert Java source code to other languages. C# and Python currently supported.
 
-## Usage
+## Hello world: Java to C#
 
-1. Build the JAR:
+1.  Build the JAR:
 
     ```
     mvn package -Dmaven.test.skip=true
     ```
 
-2. Create a file called `couscous.json`:
+2.  Create a Java source file:
+
+    ```java
+    package com.example;
+
+    public class Example {
+        public static void main() {
+            System.out.println("Hello world");
+        }
+    }
+    ```
+    
+    Assuming the normal Maven layout,
+    this file should be at `src/main/java/com/example/Example.java`.
+
+3.  Create a file called `couscous.json`:
 
     ```
     {
@@ -21,15 +36,27 @@ Convert Java source code to other languages. C# and Python currently supported.
       "files": [
         "src/main/java/com/example",
       ],
-      "output": "dotnet/Example/generated.cs",
+      "output": "dotnet/generated.cs",
       "namespace": "Example"
     }
     ```
 
-3. In the directory containing `couscous.json`:
+4.  In the directory containing `couscous.json`:
 
     ```
     java -jar path/to/couscous.jar
+    ```
+    
+    This should generate the file `dotnet/generated.cs`, which looks something like:
+    
+    ```csharp
+    namespace Example.com.example {
+        internal class Example {
+            public static void main() {
+                (Example.java.lang.System._out).println("Hello world");
+            }
+        }
+    }
     ```
 
 ## TODO
