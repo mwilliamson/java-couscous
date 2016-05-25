@@ -12,4 +12,9 @@ public class TopIdentifier implements Identifier {
     public Iterable<IdentifierPart> getParts() {
         return list();
     }
+
+    @Override
+    public String toString() {
+        return "TOP";
+    }
 }
