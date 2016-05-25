@@ -17,6 +17,7 @@ import java.util.Set;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
+import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
@@ -142,7 +143,10 @@ public class JavaTypes {
         return parameterizedType(ScalarType.of("java.lang.Iterable"), list(elementType));
     }
 
+    private static final ScalarType RAW_ITERATOR = ScalarType.of("java.util.Iterator");
+    public static TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifiers.type(Identifiers.TOP, RAW_ITERATOR.getQualifiedName()), "T");
+
     public static Type iterator(Type elementType) {
-        return parameterizedType(ScalarType.of("java.util.Iterator"), list(elementType));
+        return parameterizedType(RAW_ITERATOR, list(elementType));
     }
 }

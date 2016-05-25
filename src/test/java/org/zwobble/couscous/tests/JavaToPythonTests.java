@@ -1,12 +1,10 @@
 package org.zwobble.couscous.tests;
 
-import org.junit.Ignore;
-import org.junit.Test;
 import org.zwobble.couscous.CouscousCompiler;
-import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.frontends.java.JavaFrontend;
 import org.zwobble.couscous.tests.backends.python.PythonMethodRunner;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
@@ -18,11 +16,6 @@ import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaToPythonTests extends CompilerTests {
-    @Test
-    @Ignore("WIP")
-    public void forEach() throws Exception {
-    }
-
     protected PrimitiveValue execProgram(
             Path directory,
             ScalarType type,

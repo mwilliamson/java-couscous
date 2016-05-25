@@ -23,6 +23,7 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.types.BoundTypeParameter.boundTypeParameter;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.Fold.foldRight;
 import static org.zwobble.couscous.util.Tails.tail;
@@ -234,7 +235,7 @@ class JavaStatementReader {
         LocalVariableDeclarationNode iterator = scope.temporaryVariable(iteratorValue);
 
         ExpressionNode hasNext = methodCall(reference(iterator), "hasNext", list(), Types.BOOLEAN);
-        ExpressionNode next = methodCall(reference(iterator), "next", list(), elementType);
+        ExpressionNode next = methodCall(reference(iterator), "next", list(), boundTypeParameter(JavaTypes.ITERATOR_TYPE_PARAMETER, elementType));
         IVariableBinding parameterBinding = parameter.resolveBinding();
         WhileNode loop = whileLoop(hasNext, cons(
             scope.localVariable(parameterBinding.getKey(), parameterBinding.getName(), elementType, next),
