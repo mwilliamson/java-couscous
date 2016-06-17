@@ -22,6 +22,8 @@ public class PythonBackend implements Backend {
         "java.lang.Integer",
         "java.lang.String",
         "java.util.Arrays",
+        "java.util.Iterator",
+        "java.util.List",
         "_couscous");
     
     private final Path root;

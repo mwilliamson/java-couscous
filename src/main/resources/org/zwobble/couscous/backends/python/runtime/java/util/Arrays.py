@@ -1,25 +1,38 @@
+from ..._couscous import couscous_type, signature, Array
+from .Iterator import Iterator
+from .List import List
+
+
+@couscous_type
 class Arrays(object):
-    def asList__array__List(array):
+    @staticmethod
+    @signature(Array, List)
+    def asList(array):
         return ListAdapter(array)
 
 
+@couscous_type
 class ListAdapter(object):
     def __init__(self, elements):
         self._elements = elements
     
-    def iterator__Iterator(self):
+    @signature(Iterator)
+    def iterator(self):
         return ListIterator(self._elements)
 
 
+@couscous_type
 class ListIterator(object):
     def __init__(self, elements):
         self._elements = elements
         self._next_index = 0
     
-    def hasNext__boolean(self):
+    @signature(bool)
+    def hasNext(self):
         return self._next_index < len(self._elements)
     
-    def next__java_util_Iterator_T(self):
+    @signature(Iterator.T)
+    def next(self):
         value = self._elements[self._next_index]
         self._next_index += 1
         return value
