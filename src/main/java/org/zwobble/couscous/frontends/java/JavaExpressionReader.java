@@ -19,6 +19,7 @@ import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.OperationNode.operation;
+import static org.zwobble.couscous.ast.Operations.instanceOf;
 import static org.zwobble.couscous.ast.Operations.not;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -108,6 +109,9 @@ public class JavaExpressionReader {
 
                 case ASTNode.INFIX_EXPRESSION:
                     return readInfixExpression((InfixExpression)expression);
+
+                case ASTNode.INSTANCEOF_EXPRESSION:
+                    return readInstanceofExpression((InstanceofExpression)expression);
 
                 case ASTNode.PREFIX_EXPRESSION:
                     return readPrefixExpression((PrefixExpression)expression);
@@ -374,6 +378,12 @@ public class JavaExpressionReader {
 
     private static boolean isPrimitive(Type type) {
         return type.equals(Types.BOOLEAN) || type.equals(Types.INT);
+    }
+
+    private ExpressionNode readInstanceofExpression(InstanceofExpression expression) {
+        return instanceOf(
+            readExpressionWithoutBoxing(expression.getLeftOperand()),
+            (ScalarType)typeOf(expression.getRightOperand()));
     }
 
     private ExpressionNode readPrefixExpression(PrefixExpression expression) {

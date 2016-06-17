@@ -1,8 +1,10 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.InternalCouscousValue;
 
+import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.util.ExtraLists.list;
@@ -90,4 +92,7 @@ public class Operations {
         return typeCoercion(value, Types.INT);
     }
 
+    public static ExpressionNode instanceOf(ExpressionNode value, ScalarType type) {
+        return booleanOperation(Operator.INSTANCE_OF, value, literal(type));
+    }
 }

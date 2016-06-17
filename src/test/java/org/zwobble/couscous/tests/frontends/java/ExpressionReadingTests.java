@@ -351,6 +351,12 @@ public class ExpressionReadingTests {
                 constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
                 constructorCall(ScalarType.of("java.lang.Object"), emptyList()))),
             readBooleanExpression("new Object() != new Object()"));
+
+        assertEquals(
+            instanceOf(
+                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
+                ScalarType.of("java.lang.Object")),
+            readBooleanExpression("new Object() instanceof Object"));
     }
 
     @Test

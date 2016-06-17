@@ -16,7 +16,9 @@ public enum Operator {
     GREATER_THAN(">", true, OperatorType.INFIX),
     GREATER_THAN_OR_EQUAL(">=", true, OperatorType.INFIX),
     LESS_THAN("<", true, OperatorType.INFIX),
-    LESS_THAN_OR_EQUAL("<=", true, OperatorType.INFIX);
+    LESS_THAN_OR_EQUAL("<=", true, OperatorType.INFIX),
+
+    INSTANCE_OF("instanceof", true, OperatorType.INFIX);
 
     private final String symbol;
     private final boolean isBoolean;
