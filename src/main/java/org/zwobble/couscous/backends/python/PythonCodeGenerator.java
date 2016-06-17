@@ -369,6 +369,12 @@ public class PythonCodeGenerator {
         }
 
         @Override
+        public PythonExpressionNode visit(InstanceOfNode instanceOf) {
+            // TODO:
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
             return pythonAttributeAccess(generateReceiver(fieldAccess.getLeft()), fieldAccess.getFieldName());
         }

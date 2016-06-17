@@ -82,6 +82,11 @@ public class NodeStructure {
             }
 
             @Override
+            public Stream<? extends Node> visit(InstanceOfNode instanceOf) {
+                return Stream.of(instanceOf.getLeft());
+            }
+
+            @Override
             public Stream<Node> visit(FieldAccessNode fieldAccess) {
                 return Stream.of(fieldAccess.getLeft());
             }

@@ -76,6 +76,11 @@ public class NodeTransformer {
             }
 
             @Override
+            public Node visit(InstanceOfNode instanceOf) {
+                return transformExpression(instanceOf);
+            }
+
+            @Override
             public Node visit(FieldAccessNode fieldAccess) {
                 return transformExpression(fieldAccess);
             }

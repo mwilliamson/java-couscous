@@ -121,6 +121,12 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     }
 
     @Override
+    public InterpreterValue visit(InstanceOfNode instanceOf) {
+        // TODO:
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
         ReceiverValue left = evalReceiver(fieldAccess.getLeft());
         return left.getField(fieldAccess.getFieldName());

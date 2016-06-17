@@ -61,6 +61,12 @@ public interface Node {
             }
 
             @Override
+            public Void visit(InstanceOfNode instanceOf) {
+                visitor.visit(instanceOf);
+                return null;
+            }
+
+            @Override
             public Void visit(FieldAccessNode fieldAccess) {
                 visitor.visit(fieldAccess);
                 return null;

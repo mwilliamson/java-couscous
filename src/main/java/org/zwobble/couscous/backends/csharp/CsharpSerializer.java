@@ -261,6 +261,15 @@ public class CsharpSerializer implements NodeVisitor {
         }
     }
 
+    @Override
+    public void visit(InstanceOfNode instanceOf) {
+        writeParenthesized(instanceOf.getLeft(), instanceOf);
+        writer.writeSpace();
+        writer.writeKeyword("is");
+        writer.writeSpace();
+        writeTypeReference(instanceOf.getRight());
+    }
+
     private void writeArguments(List<? extends ExpressionNode> arguments) {
         writer.writeSymbol("(");
         writer.writeCommaSeparated(arguments, this::write);
@@ -760,6 +769,11 @@ public class CsharpSerializer implements NodeVisitor {
                     default:
                         throw new UnsupportedOperationException();
                 }
+            }
+
+            @Override
+            public Integer visit(InstanceOfNode instanceOf) {
+                return 9;
             }
 
             @Override

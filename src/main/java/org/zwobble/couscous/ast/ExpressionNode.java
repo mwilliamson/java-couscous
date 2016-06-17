@@ -58,6 +58,11 @@ public interface ExpressionNode extends Node {
             }
 
             @Override
+            public T visit(InstanceOfNode instanceOf) {
+                return visitor.visit(instanceOf);
+            }
+
+            @Override
             public T visit(FieldAccessNode fieldAccess) {
                 return visitor.visit(fieldAccess);
             }

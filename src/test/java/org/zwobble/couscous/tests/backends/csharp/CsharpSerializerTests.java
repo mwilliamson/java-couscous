@@ -26,9 +26,7 @@ import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariabl
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
 import static org.zwobble.couscous.ast.MethodSignature.signature;
-import static org.zwobble.couscous.ast.Operations.integerAdd;
-import static org.zwobble.couscous.ast.Operations.integerMultiply;
-import static org.zwobble.couscous.ast.Operations.not;
+import static org.zwobble.couscous.ast.Operations.*;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.TernaryConditionalNode.ternaryConditional;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -193,6 +191,14 @@ public class CsharpSerializerTests {
     public void infixOperation() {
         String output = serialize(integerAdd(literal(1), literal(2)));
         assertEquals("1 + 2", output);
+    }
+
+    @Test
+    public void instanceOfIsWrittenUsingIsOperator() {
+        String output = serialize(instanceOf(
+            reference(var(TestIds.ANY_ID, "x", Types.OBJECT)),
+            ScalarType.of("X")));
+        assertEquals("x is X", output);
     }
 
     @Test

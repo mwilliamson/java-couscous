@@ -12,6 +12,7 @@ public interface NodeVisitor {
     void visit(MethodCallNode methodCall);
     void visit(ConstructorCallNode call);
     void visit(OperationNode operation);
+    void visit(InstanceOfNode instanceOf);
     void visit(FieldAccessNode fieldAccess);
     void visit(TypeCoercionNode typeCoercion);
     void visit(CastNode cast);

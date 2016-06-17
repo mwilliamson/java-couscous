@@ -55,6 +55,11 @@ public class NodeMapperWithDefault<T> implements NodeMapper<T> {
     }
 
     @Override
+    public T visit(InstanceOfNode instanceOf) {
+        return defaultValue;
+    }
+
+    @Override
     public T visit(FieldAccessNode fieldAccess) {
         return defaultValue;
     }
