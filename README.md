@@ -64,6 +64,10 @@ Convert Java source code to other languages. C# and Python currently supported.
 
 ## TODO
 
+* Put for-loops and similar into their own block. Otherwise, for instance,
+  two for-loops in the same scope using the same name for their loop
+  variable will cause a variable re-definition in C#.
+
 * Multiple constructors
 
 * Remove all direct runtime support
