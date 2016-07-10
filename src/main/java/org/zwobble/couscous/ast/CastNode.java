@@ -33,6 +33,11 @@ public class CastNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.CAST;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(expression);
     }

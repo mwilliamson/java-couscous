@@ -6,7 +6,7 @@ import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 public interface StatementNode extends Node {
     <T> T accept(StatementNodeMapper<T> visitor);
-    
+
     @Override
     default <T> T accept(NodeMapper<T> visitor) {
         return accept(new StatementNodeMapper<T>() {

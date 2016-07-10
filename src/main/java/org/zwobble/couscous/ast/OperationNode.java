@@ -52,6 +52,11 @@ public class OperationNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.OPERATION;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return arguments;
     }

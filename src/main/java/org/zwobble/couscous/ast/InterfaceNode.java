@@ -71,6 +71,11 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.INTERFACE;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return methods;
     }

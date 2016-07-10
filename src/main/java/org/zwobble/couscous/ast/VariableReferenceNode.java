@@ -51,6 +51,11 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
     }
 
     @Override
+    public int type() {
+        return NodeTypes.VARIABLE_REFERENCE;
+    }
+
+    @Override
     public Iterable<Node> childNodes() {
         return ExtraIterables.empty();
     }

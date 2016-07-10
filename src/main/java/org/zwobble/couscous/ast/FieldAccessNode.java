@@ -67,6 +67,11 @@ public class FieldAccessNode implements AssignableExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.FIELD_ACCESS;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(left);
     }

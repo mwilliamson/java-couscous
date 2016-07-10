@@ -31,6 +31,11 @@ public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.THIS_REFERENCE;
+    }
+
+    @Override
     public Iterable<Node> childNodes() {
         return ExtraIterables.empty();
     }

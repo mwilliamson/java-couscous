@@ -35,6 +35,11 @@ public class StaticReceiver implements Receiver {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.STATIC_RECEIVER;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.empty();
     }

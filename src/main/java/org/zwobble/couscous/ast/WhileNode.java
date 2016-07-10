@@ -34,6 +34,11 @@ public class WhileNode implements StatementNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.WHILE;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.lazyCons(condition, body);
     }

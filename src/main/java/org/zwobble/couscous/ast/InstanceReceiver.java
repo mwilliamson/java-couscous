@@ -25,6 +25,11 @@ public class InstanceReceiver implements Receiver {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.INSTANCE_RECEIVER;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(expression);
     }

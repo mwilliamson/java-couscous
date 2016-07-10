@@ -35,6 +35,11 @@ public class InstanceOfNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.INSTANCE_OF;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(left);
     }

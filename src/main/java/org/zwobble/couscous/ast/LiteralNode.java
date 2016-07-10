@@ -60,6 +60,11 @@ public class LiteralNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.LITERAL;
+    }
+
+    @Override
     public Iterable<Node> childNodes() {
         return ExtraIterables.empty();
     }

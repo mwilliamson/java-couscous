@@ -46,6 +46,11 @@ public class IfStatementNode implements StatementNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.IF_STATEMENT;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return Iterables.concat(ExtraIterables.of(condition), trueBranch, falseBranch);
     }

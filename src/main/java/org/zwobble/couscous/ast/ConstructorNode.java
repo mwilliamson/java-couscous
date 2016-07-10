@@ -40,6 +40,11 @@ public class ConstructorNode implements Node {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.CONSTRUCTOR;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return Iterables.concat(arguments, body);
     }

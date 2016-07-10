@@ -47,6 +47,11 @@ public class AssignmentNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.ASSIGNMENT;
+    }
+
+    @Override
     public Iterable<Node> childNodes() {
         return ExtraIterables.of(value, target);
     }

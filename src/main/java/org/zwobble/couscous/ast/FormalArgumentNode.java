@@ -34,6 +34,11 @@ public class FormalArgumentNode implements VariableNode, Node {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.FORMAL_ARGUMENT;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.empty();
     }

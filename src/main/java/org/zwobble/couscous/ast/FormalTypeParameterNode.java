@@ -30,6 +30,11 @@ public class FormalTypeParameterNode implements Node {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.FORMAL_TYPE_PARAMETER;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.empty();
     }

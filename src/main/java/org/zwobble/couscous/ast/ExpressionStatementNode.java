@@ -25,6 +25,11 @@ public class ExpressionStatementNode implements StatementNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.EXPRESSION_STATEMENT;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(expression);
     }

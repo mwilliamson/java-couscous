@@ -50,6 +50,11 @@ public class TryNode implements StatementNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.TRY;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return Iterables.concat(
             body,

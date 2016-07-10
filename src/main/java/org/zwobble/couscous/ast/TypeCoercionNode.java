@@ -43,6 +43,11 @@ public class TypeCoercionNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.TYPE_COERCION;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(expression);
     }

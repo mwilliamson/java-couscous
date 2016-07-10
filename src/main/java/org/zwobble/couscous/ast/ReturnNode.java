@@ -25,6 +25,11 @@ public class ReturnNode implements StatementNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.RETURN;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(value);
     }

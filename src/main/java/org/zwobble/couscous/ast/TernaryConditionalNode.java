@@ -44,6 +44,11 @@ public class TernaryConditionalNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.TERNARY_CONDITIONAL;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(condition, ifTrue, ifFalse);
     }

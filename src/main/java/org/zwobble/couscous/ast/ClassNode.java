@@ -98,6 +98,11 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.CLASS;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return Iterables.concat(
             ExtraIterables.of(constructor),

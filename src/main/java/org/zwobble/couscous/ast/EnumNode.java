@@ -51,6 +51,11 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.ENUM;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.empty();
     }

@@ -46,6 +46,11 @@ public class FieldDeclarationNode implements Node {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.FIELD_DECLARATION;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.empty();
     }

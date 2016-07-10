@@ -39,6 +39,11 @@ public class ArrayNode implements ExpressionNode {
     }
 
     @Override
+    public int type() {
+        return NodeTypes.ARRAY;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return elements;
     }

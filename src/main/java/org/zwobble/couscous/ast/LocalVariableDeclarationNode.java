@@ -56,6 +56,11 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     }
 
     @Override
+    public int type() {
+        return NodeTypes.LOCAL_VARIABLE_DECLARATION;
+    }
+
+    @Override
     public Iterable<? extends Node> childNodes() {
         return ExtraIterables.of(initialValue);
     }
