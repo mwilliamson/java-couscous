@@ -1,10 +1,12 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraIterables.lazyFlatMap;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class TryNode implements StatementNode {
@@ -45,6 +47,15 @@ public class TryNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return Iterables.concat(
+            body,
+            lazyFlatMap(exceptionHandlers, handler -> handler.getBody()),
+            finallyBody
+        );
     }
 
     @Override

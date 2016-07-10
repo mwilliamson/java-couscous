@@ -1,5 +1,6 @@
 package org.zwobble.couscous.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import java.util.Iterator;
@@ -82,7 +83,7 @@ public class ExtraIterables {
         return Iterables.concat(head, list(tail));
     }
 
-    public static <T> Iterable<T> lazyCons(T head, Iterable<T> tails) {
+    public static <T> Iterable<T> lazyCons(T head, Iterable<? extends T> tails) {
         return Iterables.concat(list(head), tails);
     }
 
@@ -133,5 +134,21 @@ public class ExtraIterables {
                 return stream.get().iterator();
             }
         };
+    }
+
+    public static <T> Iterable<T> empty() {
+        return ImmutableList.of();
+    }
+
+    public static <T> Iterable<T> of(T e1) {
+        return ImmutableList.of(e1);
+    }
+
+    public static <T> Iterable<T> of(T e1, T e2) {
+        return ImmutableList.of(e1, e2);
+    }
+
+    public static <T> Iterable<T> of(T e1, T e2, T e3) {
+        return ImmutableList.of(e1, e2, e3);
     }
 }

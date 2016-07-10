@@ -71,6 +71,11 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
+    public Iterable<? extends Node> childNodes() {
+        return methods;
+    }
+
+    @Override
     public InterfaceNode transform(NodeTransformer transformer) {
         return new InterfaceNode(
             transformer.transform(name),

@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class AnnotationNode implements Node {
     public static AnnotationNode annotation(Type type) {
@@ -22,6 +23,11 @@ public class AnnotationNode implements Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     public AnnotationNode transform(NodeTransformer transformer) {

@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class InstanceOfNode implements ExpressionNode {
     private final ExpressionNode left;
@@ -31,6 +32,11 @@ public class InstanceOfNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.of(left);
     }
 
     @Override

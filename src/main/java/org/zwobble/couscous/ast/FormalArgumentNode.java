@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class FormalArgumentNode implements VariableNode, Node {
     public static FormalArgumentNode formalArg(VariableDeclaration declaration) {
@@ -30,6 +31,11 @@ public class FormalArgumentNode implements VariableNode, Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     public FormalArgumentNode transform(NodeTransformer transformer) {

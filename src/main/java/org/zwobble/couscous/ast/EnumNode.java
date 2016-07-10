@@ -4,6 +4,7 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,11 @@ public class EnumNode implements TypeNode {
     @Override
     public List<MethodNode> getMethods() {
         return list();
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class InstanceReceiver implements Receiver {
     public static Receiver instanceReceiver(ExpressionNode expression) {
@@ -21,6 +22,11 @@ public class InstanceReceiver implements Receiver {
     @Override
     public <T> T accept(Mapper<T> visitor) {
         return visitor.visit(expression);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.of(expression);
     }
 
     @Override

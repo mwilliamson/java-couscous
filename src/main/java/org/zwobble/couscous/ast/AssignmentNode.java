@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -43,6 +44,11 @@ public class AssignmentNode implements ExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<Node> childNodes() {
+        return ExtraIterables.of(value, target);
     }
 
     @Override

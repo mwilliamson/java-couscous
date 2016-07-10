@@ -5,6 +5,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class VariableReferenceNode implements AssignableExpressionNode, ReferenceNode {
     public static VariableReferenceNode reference(VariableNode variable) {
@@ -47,6 +48,11 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     @Override

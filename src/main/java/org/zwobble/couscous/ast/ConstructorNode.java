@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -36,6 +37,11 @@ public class ConstructorNode implements Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return Iterables.concat(arguments, body);
     }
 
     public ConstructorNode transform(NodeTransformer transformer) {

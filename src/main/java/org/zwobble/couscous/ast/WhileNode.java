@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import com.google.common.base.Objects;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import java.util.List;
 
@@ -30,6 +31,11 @@ public class WhileNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.lazyCons(condition, body);
     }
 
     @Override

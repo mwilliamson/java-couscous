@@ -5,6 +5,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
@@ -63,6 +64,11 @@ public class FieldAccessNode implements AssignableExpressionNode {
     @Override
     public <T> T accept(ExpressionNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.of(left);
     }
 
     @Override

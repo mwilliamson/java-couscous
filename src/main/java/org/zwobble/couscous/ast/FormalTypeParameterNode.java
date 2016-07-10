@@ -4,6 +4,7 @@ import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.TypeParameter;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class FormalTypeParameterNode implements Node {
     public static FormalTypeParameterNode formalTypeParameter(Identifier declaringScope, String name) {
@@ -26,6 +27,11 @@ public class FormalTypeParameterNode implements Node {
 
     public String getName() {
         return type.getName();
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     public FormalTypeParameterNode transform(NodeTransformer transformer) {

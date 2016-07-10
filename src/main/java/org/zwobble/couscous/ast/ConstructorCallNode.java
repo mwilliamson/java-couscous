@@ -40,6 +40,11 @@ public class ConstructorCallNode implements ExpressionNode {
     }
 
     @Override
+    public Iterable<? extends Node> childNodes() {
+        return arguments;
+    }
+
+    @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new ConstructorCallNode(
             transformer.transform(type),

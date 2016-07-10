@@ -1,6 +1,7 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.Type;
@@ -191,6 +192,15 @@ public class MethodNode implements Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return Iterables.concat(
+            annotations,
+            arguments,
+            body.orElse(ImmutableList.of())
+        );
     }
 
     public MethodNode transform(NodeTransformer transformer) {

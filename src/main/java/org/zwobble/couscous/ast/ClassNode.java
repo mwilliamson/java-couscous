@@ -1,9 +1,11 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.util.ExtraIterables;
 
 import java.util.List;
 import java.util.Set;
@@ -93,6 +95,15 @@ public class ClassNode implements TypeNode {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return Iterables.concat(
+            ExtraIterables.of(constructor),
+            fields,
+            methods
+        );
     }
 
     @Override

@@ -39,6 +39,11 @@ public class ArrayNode implements ExpressionNode {
     }
 
     @Override
+    public Iterable<? extends Node> childNodes() {
+        return elements;
+    }
+
+    @Override
     public ExpressionNode transform(NodeTransformer transformer) {
         return new ArrayNode(
             transformer.transform(elementType),

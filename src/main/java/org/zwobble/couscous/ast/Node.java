@@ -4,6 +4,8 @@ import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeVisitor;
 
 public interface Node {
+    Iterable<? extends Node> childNodes();
+
     default void accept(NodeVisitor visitor) {
         accept(new NodeMapper<Void>() {
             @Override

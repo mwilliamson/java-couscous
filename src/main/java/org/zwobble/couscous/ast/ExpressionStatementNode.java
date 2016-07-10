@@ -2,6 +2,7 @@ package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class ExpressionStatementNode implements StatementNode {
     public static ExpressionStatementNode expressionStatement(ExpressionNode expression) {
@@ -21,6 +22,11 @@ public class ExpressionStatementNode implements StatementNode {
     @Override
     public <T> T accept(StatementNodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.of(expression);
     }
 
     @Override

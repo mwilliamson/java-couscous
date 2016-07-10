@@ -3,6 +3,7 @@ package org.zwobble.couscous.ast;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.util.ExtraIterables;
 
 public class FieldDeclarationNode implements Node {
     public static FieldDeclarationNode field(String name, Type type) {
@@ -42,6 +43,11 @@ public class FieldDeclarationNode implements Node {
     @Override
     public <T> T accept(NodeMapper<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Iterable<? extends Node> childNodes() {
+        return ExtraIterables.empty();
     }
 
     public FieldDeclarationNode transform(NodeTransformer transformer) {
