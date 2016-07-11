@@ -29,7 +29,7 @@ public class ExtraMaps {
     }
 
     public static <T, K, V> Map<K, V> toMap(Iterable<K> keys, Iterable<V> values) {
-        return toMap(ExtraIterables.map(keys, values, ExtraMaps::entry));
+        return toMap(ExtraIterables.lazyMap(keys, values, ExtraMaps::entry));
     }
 
     public static <T, K, V> Map<K, V> toMap(Iterable<Map.Entry<K, V>> entries) {

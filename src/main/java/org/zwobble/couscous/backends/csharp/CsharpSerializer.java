@@ -2,8 +2,8 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
 import org.zwobble.couscous.ast.visitors.NodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.util.Action;
@@ -11,13 +11,14 @@ import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraIterables.lazyFilter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
-public class CsharpSerializer implements NodeVisitor {
+public class CsharpSerializer {
     private static final Set<String> RESERVED_TYPE_IDENTIFIERS = set(
         "bool",
         "byte",
@@ -126,16 +127,19 @@ public class CsharpSerializer implements NodeVisitor {
     }
 
     private final SourceCodeWriter writer;
+    private final Consumer<Node> write;
 
     private CsharpSerializer(SourceCodeWriter writer) {
         this.writer = writer;
+        this.write = WRITE_BUILDER.instantiate(this);
     }
+
+    private static final DynamicNodeVisitor<CsharpSerializer> WRITE_BUILDER = DynamicNodeVisitor.build(CsharpSerializer.class, "visit");
 
     private void write(Node node) {
-        node.accept(this);
+        write.accept(node);
     }
 
-    @Override
     public void visit(LiteralNode literal) {
         literal.getValue().accept(new PrimitiveValue.Visitor<Void>() {
             @Override
@@ -172,17 +176,14 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(VariableReferenceNode variableReference) {
         writer.writeIdentifier(variableReference.getReferent().getName());
     }
 
-    @Override
     public void visit(ThisReferenceNode reference) {
         writer.writeKeyword("this");
     }
 
-    @Override
     public void visit(ArrayNode array) {
         writer.writeKeyword("new");
         writer.writeSpace();
@@ -195,7 +196,6 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeSymbol("}");
     }
 
-    @Override
     public void visit(AssignmentNode assignment) {
         write(assignment.getTarget());
         writer.writeSpace();
@@ -204,7 +204,6 @@ public class CsharpSerializer implements NodeVisitor {
         writeParenthesized(assignment.getValue(), assignment);
     }
 
-    @Override
     public void visit(TernaryConditionalNode ternaryConditional) {
         writeParenthesized(ternaryConditional.getCondition(), ternaryConditional);
         writer.writeSpace();
@@ -217,7 +216,6 @@ public class CsharpSerializer implements NodeVisitor {
         writeParenthesized(ternaryConditional.getIfFalse(), ternaryConditional);
     }
 
-    @Override
     public void visit(MethodCallNode methodCall) {
         writeParenthesized(methodCall.getReceiver(), methodCall);
         writer.writeSymbol(".");
@@ -234,7 +232,6 @@ public class CsharpSerializer implements NodeVisitor {
         }
     }
 
-    @Override
     public void visit(ConstructorCallNode call) {
         writer.writeKeyword("new");
         writer.writeSpace();
@@ -242,7 +239,6 @@ public class CsharpSerializer implements NodeVisitor {
         writeArguments(call.getArguments());
     }
 
-    @Override
     public void visit(OperationNode operation) {
         switch (operation.getOperatorType()) {
             case PREFIX:
@@ -261,7 +257,6 @@ public class CsharpSerializer implements NodeVisitor {
         }
     }
 
-    @Override
     public void visit(InstanceOfNode instanceOf) {
         writeParenthesized(instanceOf.getLeft(), instanceOf);
         writer.writeSpace();
@@ -276,19 +271,16 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeSymbol(")");
     }
 
-    @Override
     public void visit(FieldAccessNode fieldAccess) {
         writeParenthesized(fieldAccess.getLeft(), fieldAccess);
         writer.writeSymbol(".");
         writer.writeIdentifier(fieldAccess.getFieldName());
     }
 
-    @Override
     public void visit(TypeCoercionNode typeCoercion) {
         write(typeCoercion.getExpression());
     }
 
-    @Override
     public void visit(CastNode cast) {
         writer.writeSymbol("(");
         writeTypeReference(cast.getType());
@@ -297,17 +289,14 @@ public class CsharpSerializer implements NodeVisitor {
         writeParenthesized(cast.getExpression(), cast);
     }
 
-    @Override
     public void visit(InstanceReceiver receiver) {
         write(receiver.getExpression());
     }
 
-    @Override
     public void visit(StaticReceiver receiver) {
         writeTypeReference(receiver.getType());
     }
 
-    @Override
     public void visit(ReturnNode returnNode) {
         writer.writeStatement(() -> {
             writer.writeKeyword("return");
@@ -321,7 +310,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(ThrowNode throwNode) {
         writer.writeStatement(() -> {
             writer.writeKeyword("throw");
@@ -331,7 +319,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(ExpressionStatementNode expressionStatement) {
         writer.writeStatement(() -> {
             write(expressionStatement.getExpression());
@@ -339,7 +326,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(LocalVariableDeclarationNode localVariableDeclaration) {
         writer.writeStatement(() -> {
             writeTypeReference(localVariableDeclaration.getType());
@@ -353,7 +339,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(IfStatementNode ifStatement) {
         writer.writeStatement(() -> {
             writeIfContent(ifStatement);
@@ -382,7 +367,6 @@ public class CsharpSerializer implements NodeVisitor {
         }
     }
 
-    @Override
     public void visit(WhileNode whileLoop) {
         writer.writeStatement(() -> {
             writer.writeKeyword("while");
@@ -395,7 +379,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(TryNode tryStatement) {
         writer.writeStatement(() -> {
             writer.writeKeyword("try");
@@ -419,24 +402,20 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(FormalTypeParameterNode parameter) {
         writer.writeIdentifier(parameter.getName());
     }
 
-    @Override
     public void visit(FormalArgumentNode argument) {
         writeTypeReference(argument.getType());
         writer.writeSpace();
         writer.writeIdentifier(argument.getName());
     }
 
-    @Override
     public void visit(AnnotationNode annotation) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void visit(MethodNode method) {
         writer.writeStatement(() -> {
             writer.writeKeyword("public");
@@ -472,12 +451,10 @@ public class CsharpSerializer implements NodeVisitor {
         writer.writeSymbol(")");
     }
 
-    @Override
     public void visit(ConstructorNode constructorNode) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public void visit(FieldDeclarationNode declaration) {
         writer.writeStatement(() -> {
             writer.writeKeyword("internal");
@@ -493,7 +470,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(ClassNode classNode) {
         if (classNode.getTypeParameters().isEmpty()) {
             writeInstanceType(classNode, "class", () -> {
@@ -527,7 +503,6 @@ public class CsharpSerializer implements NodeVisitor {
         }
     }
 
-    @Override
     public void visit(InterfaceNode interfaceNode) {
         writeInstanceType(interfaceNode, "interface", () -> {
             interfaceNode.getMethods().forEach(method -> {
@@ -539,7 +514,6 @@ public class CsharpSerializer implements NodeVisitor {
         });
     }
 
-    @Override
     public void visit(EnumNode enumNode) {
         writeInstanceType(enumNode, "enum", () -> {
             writer.writeStatement(() -> {

@@ -26,7 +26,7 @@ public class ExtraIterables {
         }
     }
 
-    public static <T1, T2, R> Iterable<R> map(Iterable<T1> iterable1, Iterable<T2> iterable2, BiFunction<T1, T2, R> function) {
+    public static <T1, T2, R> Iterable<R> lazyMap(Iterable<T1> iterable1, Iterable<T2> iterable2, BiFunction<T1, T2, R> function) {
         return new Iterable<R>() {
             @Override
             public Iterator<R> iterator() {
