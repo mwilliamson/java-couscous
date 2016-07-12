@@ -9,7 +9,6 @@ import net.bytebuddy.dynamic.scaffold.InstrumentedType;
 import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
-import net.bytebuddy.implementation.bytecode.StackSize;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
@@ -17,11 +16,13 @@ import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 import net.bytebuddy.implementation.bytecode.member.MethodVariableAccess;
 import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
-import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
+import org.zwobble.couscous.util.asm.StackManipulationFrame;
+import org.zwobble.couscous.util.asm.StackManipulationLabel;
+import org.zwobble.couscous.util.asm.StackManipulationLookupTable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,6 +40,7 @@ public class DynamicNodeVisitor<T> {
             asList(clazz.getMethods()),
             method -> isVisitMethod(methodName, method)
         );
+        Label literalLabel = new Label();
 
         Class<? extends Consumer> visitor = new ByteBuddy()
             .subclass(Consumer.class)
@@ -101,30 +103,16 @@ public class DynamicNodeVisitor<T> {
                                 .filter(ElementMatchers.named("type").and(ElementMatchers.takesArguments(0)))
                                 .getOnly();
                             StackManipulation.Size size = new StackManipulation.Compound(
-                                // Switch???
                                 MethodVariableAccess.REFERENCE.loadOffset(1),
                                 MethodInvocation.invoke(typeMethod),
-                                new StackManipulation() {
-                                    @Override
-                                    public boolean isValid() {
-                                        return true;
-                                    }
+                                new StackManipulationLookupTable(
+                                    defaultLabel,
+                                    new int[]{NodeTypes.LITERAL},
+                                    new Label[]{literalLabel}
+                                ),
 
-                                    @Override
-                                    public Size apply(MethodVisitor methodVisitor, Context implementationContext) {
-                                        Label literalLabel = new Label();
-                                        methodVisitor.visitLookupSwitchInsn(
-                                            defaultLabel,
-                                            new int[]{NodeTypes.LITERAL},
-                                            new Label[]{literalLabel}
-                                        );
-
-                                        methodVisitor.visitLabel(literalLabel);
-                                        methodVisitor.visitFrame(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]);
-
-                                        return StackSize.SINGLE.toDecreasingSize();
-                                    }
-                                },
+                                new StackManipulationLabel(literalLabel),
+                                StackManipulationFrame.SAME,
                                 MethodVariableAccess.REFERENCE.loadOffset(0),
                                 FieldAccess.forField(target.getInstrumentedType()
                                     .getDeclaredFields()
@@ -137,20 +125,8 @@ public class DynamicNodeVisitor<T> {
                                     .filter(ElementMatchers.named(methodName).and(ElementMatchers.takesArguments(LiteralNode.class)))
                                     .getOnly()),
 
-                                new StackManipulation() {
-                                    @Override
-                                    public boolean isValid() {
-                                        return true;
-                                    }
-
-                                    @Override
-                                    public Size apply(MethodVisitor methodVisitor, Context implementationContext) {
-                                        methodVisitor.visitLabel(defaultLabel);
-                                        methodVisitor.visitFrame(Opcodes.F_SAME, 0, new Object[0], 0, new Object[0]);
-                                        return StackSize.ZERO.toIncreasingSize();
-                                    }
-                                },
-
+                                new StackManipulationLabel(defaultLabel),
+                                StackManipulationFrame.SAME,
                                 MethodReturn.VOID
                             ).apply(methodVisitor, context);
                             return new Size(size.getMaximalSize(), instrumentedMethod.getStackSize());
