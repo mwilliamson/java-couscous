@@ -17,12 +17,9 @@ import net.bytebuddy.implementation.bytecode.member.MethodVariableAccess;
 import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.matcher.ElementMatchers;
-import org.zwobble.couscous.ast.LiteralNode;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
-import org.zwobble.couscous.util.asm.StackManipulationFrame;
-import org.zwobble.couscous.util.asm.StackManipulationLabel;
-import org.zwobble.couscous.util.asm.StackManipulationLookupTable;
+import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,6 +30,7 @@ import static java.util.Arrays.asList;
 import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class DynamicNodeVisitor<T> {
     public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
@@ -96,8 +94,6 @@ public class DynamicNodeVisitor<T> {
                     return new ByteCodeAppender() {
                         @Override
                         public Size apply(MethodVisitor methodVisitor, Context context, MethodDescription instrumentedMethod) {
-                            Label defaultLabel = new Label();
-
                             MethodDescription typeMethod = new TypeDescription.ForLoadedType(Node.class)
                                 .getDeclaredMethods()
                                 .filter(ElementMatchers.named("type").and(ElementMatchers.takesArguments(0)))
@@ -105,29 +101,27 @@ public class DynamicNodeVisitor<T> {
                             StackManipulation.Size size = new StackManipulation.Compound(
                                 MethodVariableAccess.REFERENCE.loadOffset(1),
                                 MethodInvocation.invoke(typeMethod),
-                                new StackManipulationLookupTable(
-                                    defaultLabel,
-                                    new int[]{NodeTypes.LITERAL},
-                                    new Label[]{literalLabel}
-                                ),
-
-                                new StackManipulationLabel(literalLabel),
-                                StackManipulationFrame.SAME,
-                                MethodVariableAccess.REFERENCE.loadOffset(0),
-                                FieldAccess.forField(target.getInstrumentedType()
-                                    .getDeclaredFields()
-                                    .filter(ElementMatchers.named("visitor"))
-                                    .getOnly()).getter(),
-                                MethodVariableAccess.REFERENCE.loadOffset(1),
-                                TypeCasting.to(new TypeDescription.ForLoadedType(LiteralNode.class)),
-                                MethodInvocation.invoke(new TypeDescription.ForLoadedType(clazz)
-                                    .getDeclaredMethods()
-                                    .filter(ElementMatchers.named(methodName).and(ElementMatchers.takesArguments(LiteralNode.class)))
-                                    .getOnly()),
-
-                                new StackManipulationLabel(defaultLabel),
-                                StackManipulationFrame.SAME,
-                                MethodReturn.VOID
+                                new StackManipulationSwitch(
+                                    // TODO: raise exception in default case
+                                    MethodReturn.VOID,
+                                    eagerMap(visitMethods, method -> {
+                                        Class<?> nodeClass = method.getParameterTypes()[0];
+                                        return StackManipulationSwitch.switchCase(
+                                            NodeTypes.forClass(nodeClass),
+                                            new StackManipulation.Compound(
+                                                MethodVariableAccess.REFERENCE.loadOffset(0),
+                                                FieldAccess.forField(target.getInstrumentedType()
+                                                    .getDeclaredFields()
+                                                    .filter(ElementMatchers.named("visitor"))
+                                                    .getOnly()).getter(),
+                                                MethodVariableAccess.REFERENCE.loadOffset(1),
+                                                TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
+                                                MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
+                                                MethodReturn.VOID
+                                            )
+                                        );
+                                    })
+                                )
                             ).apply(methodVisitor, context);
                             return new Size(size.getMaximalSize(), instrumentedMethod.getStackSize());
                         }

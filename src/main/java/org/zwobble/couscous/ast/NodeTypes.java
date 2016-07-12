@@ -1,5 +1,9 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.collect.ImmutableMap;
+
+import java.util.Map;
+
 public class NodeTypes {
     public static final int ANNOTATION = 10000;
     public static final int ARRAY = 10001;
@@ -35,5 +39,48 @@ public class NodeTypes {
     public static final int WHILE = 10030;
 
     private NodeTypes() {
+    }
+
+    private static final Map<Class<? extends Node>, Integer> NODE_TYPES = ImmutableMap.<Class<? extends Node>, Integer>builder()
+        .put(AnnotationNode.class, ANNOTATION)
+        .put(ArrayNode.class, ARRAY)
+        .put(AssignmentNode.class, ASSIGNMENT)
+        .put(CastNode.class, CAST)
+        .put(ClassNode.class, CLASS)
+        .put(ConstructorCallNode.class, CONSTRUCTOR_CALL)
+        .put(ConstructorNode.class, CONSTRUCTOR)
+        .put(EnumNode.class, ENUM)
+        //.put(ExceptionHandlerNode.class, EXCEPTION_HANDLER)
+        .put(ExpressionStatementNode.class, EXPRESSION_STATEMENT)
+        .put(FieldAccessNode.class, FIELD_ACCESS)
+        .put(FieldDeclarationNode.class, FIELD_DECLARATION)
+        .put(FormalArgumentNode.class, FORMAL_ARGUMENT)
+        .put(FormalTypeParameterNode.class, FORMAL_TYPE_PARAMETER)
+        .put(IfStatementNode.class, IF_STATEMENT)
+        .put(InstanceOfNode.class, INSTANCE_OF)
+        .put(InstanceReceiver.class, INSTANCE_RECEIVER)
+        .put(InterfaceNode.class, INTERFACE)
+        .put(LiteralNode.class, LITERAL)
+        .put(LocalVariableDeclarationNode.class, LOCAL_VARIABLE_DECLARATION)
+        .put(MethodCallNode.class, METHOD_CALL)
+        .put(MethodNode.class, METHOD)
+        .put(OperationNode.class, OPERATION)
+        .put(ReturnNode.class, RETURN)
+        .put(StaticReceiver.class, STATIC_RECEIVER)
+        .put(TernaryConditionalNode.class, TERNARY_CONDITIONAL)
+        .put(ThisReferenceNode.class, THIS_REFERENCE)
+        .put(ThrowNode.class, THROW)
+        .put(TryNode.class, TRY)
+        .put(TypeCoercionNode.class, TYPE_COERCION)
+        .put(VariableReferenceNode.class, VARIABLE_REFERENCE)
+        .put(WhileNode.class, WHILE)
+        .build();
+
+    public static int forClass(Class<?> nodeClass) {
+        if (NODE_TYPES.containsKey(nodeClass)) {
+            return NODE_TYPES.get(nodeClass);
+        } else {
+            throw new UnsupportedOperationException("Unknown node class: " + nodeClass);
+        }
     }
 }
