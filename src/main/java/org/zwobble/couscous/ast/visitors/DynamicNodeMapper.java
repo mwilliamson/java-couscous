@@ -1,29 +1,26 @@
 package org.zwobble.couscous.ast.visitors;
 
-import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 import org.zwobble.couscous.ast.Node;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
-public class DynamicNodeMapper<T, R> {
-    public static <T, R> DynamicNodeMapper<T, R> build(Class<T> clazz, Class<R> returnType, String methodName) {
-        return build(clazz, new TypeDescription.ForLoadedType(returnType), methodName);
-    }
+import static org.zwobble.couscous.util.ExtraMaps.entry;
 
-    public static <T, R> DynamicNodeMapper<T, R> build(Class<T> clazz, TypeDescription returnType, String methodName) {
-        return new DynamicNodeMapper<>(
-            DynamicNodeVisitor.buildClassSupplier(clazz, Function.class, methodName, MethodReturn.REFERENCE)
-        );
-    }
+public class DynamicNodeMapper {
+    private static final Map<Map.Entry<Class<?>, String>, Function<?, Function>> VISITOR_BUILDERS
+        = new HashMap<>();
 
-    private final Function<T, Function> visitor;
-
-    public DynamicNodeMapper(Function<T, Function> visitor) {
-        this.visitor = visitor;
-    }
-
-    public Function<Node, R> instantiate(T instance) {
-        return visitor.apply(instance);
+    // TODO: check return type -- at the very least, check the methods are consistent.
+    public static <T, R> Function<Node, R> instantiate(T visitor, String methodName) {
+        Map.Entry<Class<?>, String> key = entry(visitor.getClass(), methodName);
+        Function builder = VISITOR_BUILDERS.get(key);
+        if (builder == null) {
+            builder = DynamicNodeVisitor.buildClassSupplier(visitor.getClass(), Function.class, methodName, MethodReturn.REFERENCE);
+            VISITOR_BUILDERS.put(key, builder);
+        }
+        return (Function<Node, R>) builder.apply(visitor);
     }
 }

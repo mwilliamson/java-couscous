@@ -1,7 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
-import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.types.*;
@@ -20,14 +19,10 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
-    private static final Function<Node, Stream<Type>> findFreeTypeParameters =
-        DynamicNodeMapper.<FindReferencedTypes, Stream<Type>>build(
-            FindReferencedTypes.class,
-            new TypeDescription.ForLoadedType(Stream.class),
-            "visit"
-        ).instantiate(new FindReferencedTypes());
-
     public static class FindReferencedTypes {
+        private static final Function<Node, Stream<Type>> VISITOR =
+            DynamicNodeMapper.instantiate(new FindReferencedTypes(), "visit");
+
         public Stream<Type> visit(Node node) {
             return Stream.empty();
         }
@@ -58,7 +53,7 @@ public class FreeVariables {
     public static Set<TypeParameter> findFreeTypeParameters(Node root) {
         // TODO: this assumes that *all* type parameters are free, which is often but not always true in inner types
         Iterable<Type> types = iterable(() -> descendantNodesAndSelf(root)
-            .flatMap(findFreeTypeParameters));
+            .flatMap(FindReferencedTypes.VISITOR));
 
         return ImmutableSet.copyOf(lazyFlatMap(types, type -> type.accept(new Type.Visitor<Iterable<TypeParameter>>() {
             @Override

@@ -1,6 +1,5 @@
 package org.zwobble.couscous.interpreter;
 
-import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
@@ -65,17 +64,13 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
         return body.stream()
             .flatMap(statement -> descendantNodesAndSelf(statement, node -> node instanceof StatementNode))
-            .flatMap(findDirectDeclarations);
+            .flatMap(FindDirectDeclarations.VISITOR);
     }
 
-    private static final Function<Node, Stream<VariableNode>> findDirectDeclarations =
-        DynamicNodeMapper.<FindDirectDeclarations, Stream<VariableNode>>build(
-            FindDirectDeclarations.class,
-            new TypeDescription.ForLoadedType(Stream.class),
-            "visit"
-        ).instantiate(new FindDirectDeclarations());
-
     public static class FindDirectDeclarations {
+        private static final Function<Node, Stream<VariableNode>> VISITOR =
+            DynamicNodeMapper.instantiate(new FindDirectDeclarations(), "visit");
+
         public Stream<VariableNode> visit(Node node) {
             return Stream.empty();
         }

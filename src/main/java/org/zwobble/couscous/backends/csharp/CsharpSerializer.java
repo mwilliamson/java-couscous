@@ -132,10 +132,8 @@ public class CsharpSerializer {
 
     private CsharpSerializer(SourceCodeWriter writer) {
         this.writer = writer;
-        this.write = WRITE_BUILDER.instantiate(this);
+        this.write = DynamicNodeVisitor.instantiate(this, "visit");
     }
-
-    private static final DynamicNodeVisitor<CsharpSerializer> WRITE_BUILDER = DynamicNodeVisitor.build(CsharpSerializer.class, "visit");
 
     private void write(Node node) {
         write.accept(node);
@@ -675,13 +673,14 @@ public class CsharpSerializer {
         }
     }
 
-    private static final Function<Node, Integer> precedence = DynamicNodeMapper.build(
-        Precedence.class,
-        Integer.class,
-        "visit"
-    ).instantiate(new Precedence());
+    private static int precedence(Node node) {
+        return Precedence.OF.apply(node);
+    }
 
     public static class Precedence {
+        private final static Function<Node, Integer> OF =
+            DynamicNodeMapper.instantiate(new Precedence(), "visit");
+
         public Integer visit(LiteralNode literal) {
             return Integer.MAX_VALUE;
         }
@@ -769,9 +768,5 @@ public class CsharpSerializer {
         public Integer visit(Node node) {
             return 0;
         }
-    }
-
-    private static int precedence(Node node) {
-        return precedence.apply(node);
     }
 }

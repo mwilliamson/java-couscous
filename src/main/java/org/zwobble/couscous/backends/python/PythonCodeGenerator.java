@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
@@ -114,17 +113,14 @@ public class PythonCodeGenerator {
 
     private static Set<ScalarType> findReferencedClasses(TypeNode classNode) {
         return NodeStructure.descendantNodes(classNode)
-            .flatMap(findDirectlyReferencedClasses)
+            .flatMap(FindDirectlyReferencedClasses.VISITOR)
             .collect(Collectors.toSet());
     }
 
-    private static final Function<Node, Stream<ScalarType>> findDirectlyReferencedClasses =
-        DynamicNodeMapper.<FindDirectlyReferencedClasses, Stream<ScalarType>>build(
-            FindDirectlyReferencedClasses.class,
-            new TypeDescription.ForLoadedType(Stream.class),
-            "visit"
-        ).instantiate(new FindDirectlyReferencedClasses());
     public static class FindDirectlyReferencedClasses {
+        private static final Function<Node, Stream<ScalarType>> VISITOR =
+            DynamicNodeMapper.instantiate(new FindDirectlyReferencedClasses(), "visit");
+
         public Stream<ScalarType> visit(Node node) {
             return Stream.empty();
         }

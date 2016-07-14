@@ -25,9 +25,7 @@ import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 import org.zwobble.couscous.util.asm.TypeDescriptions;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,6 +34,7 @@ import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraMaps.entry;
 
 /**
  * Dynamically generate a method to dispatch methods based on node type.
@@ -82,10 +81,18 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
  *   (which affects which node types later stages are required to handle).
  * </p>
  */
-public class DynamicNodeVisitor<T> {
-    public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
-        Function<T, Consumer> builder = buildClassSupplier(clazz, Consumer.class, methodName, MethodReturn.VOID);
-        return new DynamicNodeVisitor<>(builder);
+public class DynamicNodeVisitor {
+    private static final Map<Map.Entry<Class<?>, String>, Function<?, Consumer>> VISITOR_BUILDERS
+        = new HashMap<>();
+
+    public static <T> Consumer<Node> instantiate(T visitor, String methodName) {
+        Map.Entry<Class<?>, String> key = entry(visitor.getClass(), methodName);
+        Function builder = VISITOR_BUILDERS.get(key);
+        if (builder == null) {
+            builder = buildClassSupplier(visitor.getClass(), Consumer.class, methodName, MethodReturn.VOID);
+            VISITOR_BUILDERS.put(key, builder);
+        }
+        return (Consumer<Node>) builder.apply(visitor);
     }
 
     public static <T> BiConsumer<Node, T> visitor(Class<T> clazz) {
@@ -98,7 +105,7 @@ public class DynamicNodeVisitor<T> {
         return (node, visitor) -> classSupplier.apply(visitor).accept(node);
     }
 
-    public static <T, F> Function<T, F> buildClassSupplier(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
+    static <T, F> Function<T, F> buildClassSupplier(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
         Class<? extends F> visitorClass = buildClass(clazz, function, methodName, methodReturn);
 
         try {
@@ -207,15 +214,5 @@ public class DynamicNodeVisitor<T> {
             method.getParameterCount() == 1 &&
             Node.class.isAssignableFrom(method.getParameterTypes()[0]) &&
             !method.getParameterTypes()[0].equals(Node.class);
-    }
-
-    private final Function<T, Consumer> visitor;
-
-    private DynamicNodeVisitor(Function<T, Consumer> visitor) {
-        this.visitor = visitor;
-    }
-
-    public Consumer<Node> instantiate(T instance) {
-        return visitor.apply(instance);
     }
 }
