@@ -48,7 +48,7 @@ public class CsharpCodeGenerator {
     }
 
     private Node generateCode(Node node) {
-        return nodeTransformer.transform(node);
+        return node.transform(nodeTransformer);
     }
 
     private Type transformType(Type type) {
