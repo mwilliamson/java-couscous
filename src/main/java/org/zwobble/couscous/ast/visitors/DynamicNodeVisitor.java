@@ -5,6 +5,7 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.FieldManifestation;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.implementation.Implementation;
 import net.bytebuddy.implementation.bytecode.Duplication;
 import net.bytebuddy.implementation.bytecode.StackManipulation;
 import net.bytebuddy.implementation.bytecode.Throw;
@@ -17,6 +18,7 @@ import net.bytebuddy.implementation.bytecode.member.MethodVariableAccess;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
+import org.zwobble.couscous.util.ExtraIterables;
 import org.zwobble.couscous.util.asm.Implementations;
 import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 import org.zwobble.couscous.util.asm.TypeDescriptions;
@@ -24,6 +26,7 @@ import org.zwobble.couscous.util.asm.TypeDescriptions;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
@@ -77,13 +80,30 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
  */
 public class DynamicNodeVisitor<T> {
     public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
+        return build(clazz, methodName, MethodReturn.VOID);
+    }
+
+    public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName, MethodReturn methodReturn) {
+        Class<? extends Consumer> visitor = buildClass(clazz, Consumer.class, methodName, methodReturn);
+        return new DynamicNodeVisitor<T>(clazz, visitor);
+    }
+
+    public static <T, F> Class<? extends F> buildClass(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
         List<Method> visitMethods = eagerFilter(
             asList(clazz.getMethods()),
             method -> isVisitMethod(methodName, method)
         );
 
-        Class<? extends Consumer> visitor = new ByteBuddy()
-            .subclass(Consumer.class)
+        Optional<Method> defaultMethod = ExtraIterables.find(
+            asList(clazz.getMethods()),
+            method ->
+                method.getName().equals(methodName) &&
+                method.getParameterCount() == 1 &&
+                method.getParameterTypes()[0].equals(Node.class)
+        );
+
+        return new ByteBuddy()
+            .subclass(function)
 
             .defineField("visitor", clazz, Visibility.PRIVATE, FieldManifestation.FINAL)
 
@@ -103,31 +123,27 @@ public class DynamicNodeVisitor<T> {
                 MethodReturn.VOID
             )))
 
-            .method(ElementMatchers.named("accept"))
+            .method(ElementMatchers.isAbstract())
             .intercept(Implementations.stackManipulation(target -> {
                 MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "type");
                 return new StackManipulation.Compound(
                     MethodVariableAccess.REFERENCE.loadOffset(1),
                     MethodInvocation.invoke(typeMethod),
                     new StackManipulationSwitch(
-                        new StackManipulation.Compound(
-                            TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
-                            Duplication.SINGLE,
-                            MethodInvocation.invoke(TypeDescriptions.findConstructor(UnsupportedOperationException.class)),
-                            Throw.INSTANCE
-                        ),
+                        defaultMethod
+                            .map(defaultMethodValue ->
+                                delegateToMethod(target, defaultMethodValue, Node.class, methodReturn))
+                            .orElseGet(() -> new StackManipulation.Compound(
+                                TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
+                                Duplication.SINGLE,
+                                MethodInvocation.invoke(TypeDescriptions.findConstructor(UnsupportedOperationException.class)),
+                                Throw.INSTANCE
+                            )),
                         eagerMap(visitMethods, method -> {
                             Class<?> nodeClass = method.getParameterTypes()[0];
                             return StackManipulationSwitch.switchCase(
                                 NodeTypes.forClass(nodeClass),
-                                new StackManipulation.Compound(
-                                    MethodVariableAccess.REFERENCE.loadOffset(0),
-                                    FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).getter(),
-                                    MethodVariableAccess.REFERENCE.loadOffset(1),
-                                    TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
-                                    MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
-                                    MethodReturn.VOID
-                                )
+                                delegateToMethod(target, method, nodeClass, methodReturn)
                             );
                         })
                     )
@@ -136,15 +152,25 @@ public class DynamicNodeVisitor<T> {
             .make()
             .load(DynamicNodeVisitor.class.getClassLoader())
             .getLoaded();
+    }
 
-        return new DynamicNodeVisitor<T>(clazz, visitor);
+    private static StackManipulation.Compound delegateToMethod(Implementation.Target target, Method method, Class<?> nodeClass, MethodReturn methodReturn) {
+        return new StackManipulation.Compound(
+            MethodVariableAccess.REFERENCE.loadOffset(0),
+            FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).getter(),
+            MethodVariableAccess.REFERENCE.loadOffset(1),
+            TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
+            MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
+            methodReturn
+        );
     }
 
     private static boolean isVisitMethod(String methodName, Method method) {
         return
             method.getName().equals(methodName) &&
             method.getParameterCount() == 1 &&
-            Node.class.isAssignableFrom(method.getParameterTypes()[0]);
+            Node.class.isAssignableFrom(method.getParameterTypes()[0]) &&
+            !method.getParameterTypes()[0].equals(Node.class);
     }
 
     private final Class<T> clazz;
