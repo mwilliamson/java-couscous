@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.Iterables;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
@@ -90,11 +89,6 @@ public class ClassNode implements TypeNode {
     
     public String getSimpleName() {
         return name.getSimpleName();
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

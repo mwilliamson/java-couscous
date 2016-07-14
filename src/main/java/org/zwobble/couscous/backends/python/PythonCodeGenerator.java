@@ -4,10 +4,11 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
+import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
@@ -19,6 +20,7 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.TypeValue;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -112,36 +114,44 @@ public class PythonCodeGenerator {
 
     private static Set<ScalarType> findReferencedClasses(TypeNode classNode) {
         return NodeStructure.descendantNodes(classNode)
-            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<ScalarType>>(Stream.empty()) {
-                @Override
-                public Stream<ScalarType> visit(StaticReceiver receiver) {
-                    return Stream.of(receiver.getType());
-                }
-
-                @Override
-                public Stream<ScalarType> visit(ConstructorCallNode call) {
-                    return Stream.of(erasure(call.getType()));
-                }
-
-                @Override
-                public Stream<ScalarType> visit(TypeCoercionNode typeCoercion) {
-                    if (isIntegerBox(typeCoercion)) {
-                        return Stream.of(Types.BOXED_INT);
-                    } else {
-                        return Stream.empty();
-                    }
-                }
-
-                @Override
-                public Stream<ScalarType> visit(LiteralNode literal) {
-                    if (literal.getValue() instanceof TypeValue) {
-                        return Stream.of(((TypeValue)literal.getValue()).getValue());
-                    } else {
-                        return Stream.empty();
-                    }
-                }
-            }))
+            .flatMap(findDirectlyReferencedClasses)
             .collect(Collectors.toSet());
+    }
+
+    private static final Function<Node, Stream<ScalarType>> findDirectlyReferencedClasses =
+        DynamicNodeMapper.<FindDirectlyReferencedClasses, Stream<ScalarType>>build(
+            FindDirectlyReferencedClasses.class,
+            new TypeDescription.ForLoadedType(Stream.class),
+            "visit"
+        ).instantiate(new FindDirectlyReferencedClasses());
+    public static class FindDirectlyReferencedClasses {
+        public Stream<ScalarType> visit(Node node) {
+            return Stream.empty();
+        }
+
+        public Stream<ScalarType> visit(StaticReceiver receiver) {
+            return Stream.of(receiver.getType());
+        }
+
+        public Stream<ScalarType> visit(ConstructorCallNode call) {
+            return Stream.of(erasure(call.getType()));
+        }
+
+        public Stream<ScalarType> visit(TypeCoercionNode typeCoercion) {
+            if (isIntegerBox(typeCoercion)) {
+                return Stream.of(Types.BOXED_INT);
+            } else {
+                return Stream.empty();
+            }
+        }
+
+        public Stream<ScalarType> visit(LiteralNode literal) {
+            if (literal.getValue() instanceof TypeValue) {
+                return Stream.of(((TypeValue)literal.getValue()).getValue());
+            } else {
+                return Stream.empty();
+            }
+        }
     }
 
     public static PythonExpressionNode generateCode(PrimitiveValue value) {

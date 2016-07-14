@@ -1,8 +1,7 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraIterables;
 
 public class FieldDeclarationNode implements Node {
@@ -38,11 +37,6 @@ public class FieldDeclarationNode implements Node {
     
     public Type getType() {
         return type;
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

@@ -1,9 +1,8 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.List;
 import java.util.Set;
@@ -53,11 +52,6 @@ public class InterfaceNode implements TypeNode {
     @Override
     public List<MethodNode> getMethods() {
         return methods;
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

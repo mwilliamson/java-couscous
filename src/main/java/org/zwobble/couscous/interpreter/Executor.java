@@ -1,13 +1,15 @@
 package org.zwobble.couscous.interpreter;
 
+import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
+import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
@@ -63,12 +65,24 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
     private static Stream<VariableNode> findDeclarations(List<StatementNode> body) {
         return body.stream()
             .flatMap(statement -> descendantNodesAndSelf(statement, node -> node instanceof StatementNode))
-            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<VariableNode>>(Stream.empty()) {
-                @Override
-                public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
-                    return Stream.of(localVariableDeclaration);
-                }
-            }));
+            .flatMap(findDirectDeclarations);
+    }
+
+    private static final Function<Node, Stream<VariableNode>> findDirectDeclarations =
+        DynamicNodeMapper.<FindDirectDeclarations, Stream<VariableNode>>build(
+            FindDirectDeclarations.class,
+            new TypeDescription.ForLoadedType(Stream.class),
+            "visit"
+        ).instantiate(new FindDirectDeclarations());
+
+    public static class FindDirectDeclarations {
+        public Stream<VariableNode> visit(Node node) {
+            return Stream.empty();
+        }
+
+        public Stream<VariableNode> visit(LocalVariableDeclarationNode localVariableDeclaration) {
+            return Stream.of(localVariableDeclaration);
+        }
     }
 
     public static Optional<InterpreterValue> exec(Environment environment, Iterable<StatementNode> statements) {

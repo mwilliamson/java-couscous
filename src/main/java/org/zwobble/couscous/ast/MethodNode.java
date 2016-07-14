@@ -2,7 +2,6 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -187,11 +186,6 @@ public class MethodNode implements Node {
 
     public MethodNode mapBody(Function<List<StatementNode>, List<StatementNode>> function) {
         return new MethodNode(annotations, isStatic, name, typeParameters, arguments, returnType, body.map(function), overrides);
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

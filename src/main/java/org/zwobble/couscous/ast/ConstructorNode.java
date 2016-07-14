@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.Iterables;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 import java.util.Collections;
@@ -32,11 +31,6 @@ public class ConstructorNode implements Node {
     
     public List<StatementNode> getBody() {
         return body;
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

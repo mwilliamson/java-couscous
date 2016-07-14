@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.util.ExtraIterables;
@@ -41,11 +40,6 @@ public class FormalTypeParameterNode implements Node {
 
     public FormalTypeParameterNode transform(NodeTransformer transformer) {
         return new FormalTypeParameterNode(transformer.transform(type));
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

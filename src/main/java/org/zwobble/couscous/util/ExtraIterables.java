@@ -4,8 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -94,6 +96,15 @@ public class ExtraIterables {
                 return stream(iterable).filter(predicate).iterator();
             }
         };
+    }
+
+    public static <T> Optional<T> find(Iterable<T> iterable, Predicate<T> predicate) {
+        for (T element : iterable) {
+            if (predicate.test(element)) {
+                return Optional.of(element);
+            }
+        }
+        return Optional.empty();
     }
 
     public static <T, R> Iterable<R> lazyMap(Iterable<T> iterable, Function<T, R> function) {

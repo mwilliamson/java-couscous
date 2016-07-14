@@ -1,6 +1,5 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
@@ -65,11 +64,6 @@ public class EnumNode implements TypeNode {
         return new EnumNode(
             transformer.transform(name),
             eagerMap(values, transformer::transformFieldName));
-    }
-
-    @Override
-    public <T> T accept(NodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

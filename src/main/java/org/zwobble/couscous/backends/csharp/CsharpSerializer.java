@@ -2,8 +2,8 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
-import org.zwobble.couscous.ast.visitors.NodeMapper;
 import org.zwobble.couscous.backends.SourceCodeWriter;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.util.Action;
@@ -12,6 +12,7 @@ import org.zwobble.couscous.values.PrimitiveValue;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraIterables.lazyFilter;
@@ -674,186 +675,103 @@ public class CsharpSerializer {
         }
     }
 
-    private int precedence(Node node) {
-        return node.accept(new NodeMapper<Integer>() {
-            @Override
-            public Integer visit(LiteralNode literal) {
-                return Integer.MAX_VALUE;
-            }
+    private static final Function<Node, Integer> precedence = DynamicNodeMapper.build(
+        Precedence.class,
+        Integer.class,
+        "visit"
+    ).instantiate(new Precedence());
 
-            @Override
-            public Integer visit(VariableReferenceNode variableReference) {
-                return Integer.MAX_VALUE;
-            }
+    public static class Precedence {
+        public Integer visit(LiteralNode literal) {
+            return Integer.MAX_VALUE;
+        }
 
-            @Override
-            public Integer visit(ThisReferenceNode reference) {
-                return Integer.MAX_VALUE;
-            }
+        public Integer visit(VariableReferenceNode variableReference) {
+            return Integer.MAX_VALUE;
+        }
 
-            @Override
-            public Integer visit(ArrayNode array) {
-                return Integer.MAX_VALUE;
-            }
+        public Integer visit(ThisReferenceNode reference) {
+            return Integer.MAX_VALUE;
+        }
 
-            @Override
-            public Integer visit(AssignmentNode assignment) {
-                return 1;
-            }
+        public Integer visit(ArrayNode array) {
+            return Integer.MAX_VALUE;
+        }
 
-            @Override
-            public Integer visit(TernaryConditionalNode ternaryConditional) {
-                return 2;
-            }
+        public Integer visit(AssignmentNode assignment) {
+            return 1;
+        }
 
-            @Override
-            public Integer visit(MethodCallNode methodCall) {
-                return 15;
-            }
+        public Integer visit(TernaryConditionalNode ternaryConditional) {
+            return 2;
+        }
 
-            @Override
-            public Integer visit(ConstructorCallNode call) {
-                return 13;
-            }
+        public Integer visit(MethodCallNode methodCall) {
+            return 15;
+        }
 
-            @Override
-            public Integer visit(OperationNode operation) {
-                switch (operation.getOperator()) {
-                    case BOOLEAN_NOT:
-                        return 14;
-                    case MULTIPLY:
-                    case DIVIDE:
-                    case MOD:
-                        return 12;
-                    case ADD:
-                    case SUBTRACT:
-                        return 11;
-                    case LESS_THAN:
-                    case LESS_THAN_OR_EQUAL:
-                    case GREATER_THAN:
-                    case GREATER_THAN_OR_EQUAL:
-                        return 9;
-                    case EQUALS:
-                    case NOT_EQUALS:
-                        return 8;
-                    case BOOLEAN_AND:
-                        return 4;
-                    case BOOLEAN_OR:
-                        return 3;
-                    default:
-                        throw new UnsupportedOperationException();
-                }
-            }
+        public Integer visit(ConstructorCallNode call) {
+            return 13;
+        }
 
-            @Override
-            public Integer visit(InstanceOfNode instanceOf) {
-                return 9;
+        public Integer visit(OperationNode operation) {
+            switch (operation.getOperator()) {
+                case BOOLEAN_NOT:
+                    return 14;
+                case MULTIPLY:
+                case DIVIDE:
+                case MOD:
+                    return 12;
+                case ADD:
+                case SUBTRACT:
+                    return 11;
+                case LESS_THAN:
+                case LESS_THAN_OR_EQUAL:
+                case GREATER_THAN:
+                case GREATER_THAN_OR_EQUAL:
+                    return 9;
+                case EQUALS:
+                case NOT_EQUALS:
+                    return 8;
+                case BOOLEAN_AND:
+                    return 4;
+                case BOOLEAN_OR:
+                    return 3;
+                default:
+                    throw new UnsupportedOperationException();
             }
+        }
 
-            @Override
-            public Integer visit(FieldAccessNode fieldAccess) {
-                return 15;
-            }
+        public Integer visit(InstanceOfNode instanceOf) {
+            return 9;
+        }
 
-            @Override
-            public Integer visit(TypeCoercionNode typeCoercion) {
-                return precedence(typeCoercion.getExpression());
-            }
+        public Integer visit(FieldAccessNode fieldAccess) {
+            return 15;
+        }
 
-            @Override
-            public Integer visit(CastNode cast) {
-                return 13;
-            }
+        public Integer visit(TypeCoercionNode typeCoercion) {
+            return precedence(typeCoercion.getExpression());
+        }
 
-            @Override
-            public Integer visit(InstanceReceiver receiver) {
-                return precedence(receiver.getExpression());
-            }
+        public Integer visit(CastNode cast) {
+            return 13;
+        }
 
-            @Override
-            public Integer visit(StaticReceiver receiver) {
-                return Integer.MAX_VALUE;
-            }
+        public Integer visit(InstanceReceiver receiver) {
+            return precedence(receiver.getExpression());
+        }
 
-            @Override
-            public Integer visit(ReturnNode returnNode) {
-                return 0;
-            }
+        public Integer visit(StaticReceiver receiver) {
+            return Integer.MAX_VALUE;
+        }
 
-            @Override
-            public Integer visit(ThrowNode throwNode) {
-                return 0;
-            }
+        public Integer visit(Node node) {
+            return 0;
+        }
+    }
 
-            @Override
-            public Integer visit(ExpressionStatementNode expressionStatement) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(LocalVariableDeclarationNode localVariableDeclaration) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(IfStatementNode ifStatement) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(WhileNode whileLoop) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(TryNode tryStatement) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(FormalTypeParameterNode parameter) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(FormalArgumentNode formalArgumentNode) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(AnnotationNode annotation) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(MethodNode methodNode) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(ConstructorNode constructorNode) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(FieldDeclarationNode declaration) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(ClassNode classNode) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(InterfaceNode interfaceNode) {
-                return 0;
-            }
-
-            @Override
-            public Integer visit(EnumNode enumNode) {
-                return 0;
-            }
-        });
+    private static int precedence(Node node) {
+        return precedence.apply(node);
     }
 }

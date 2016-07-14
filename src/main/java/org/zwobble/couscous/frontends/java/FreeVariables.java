@@ -1,12 +1,14 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableSet;
+import net.bytebuddy.description.type.TypeDescription;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.NodeMapperWithDefault;
+import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.types.*;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,37 +20,45 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
+    private static final Function<Node, Stream<Type>> findFreeTypeParameters =
+        DynamicNodeMapper.<FindReferencedTypes, Stream<Type>>build(
+            FindReferencedTypes.class,
+            new TypeDescription.ForLoadedType(Stream.class),
+            "visit"
+        ).instantiate(new FindReferencedTypes());
+
+    public static class FindReferencedTypes {
+        public Stream<Type> visit(Node node) {
+            return Stream.empty();
+        }
+
+        public Stream<Type> visit(FieldDeclarationNode declaration) {
+            return Stream.of(declaration.getType());
+        }
+
+        public Stream<Type> visit(LocalVariableDeclarationNode localVariableDeclaration) {
+            return Stream.of(localVariableDeclaration.getType());
+        }
+
+        public Stream<Type> visit(MethodNode methodNode) {
+            return Stream.concat(
+                methodNode.getArguments().stream().map(argument -> argument.getType()),
+                Stream.of(methodNode.getReturnType()));
+        }
+
+        public Stream<Type> visit(ConstructorCallNode call) {
+            return Stream.of(call.getType());
+        }
+
+        public Stream<Type> visit(MethodCallNode methodCall) {
+            return methodCall.getTypeParameters().stream();
+        }
+    }
+
     public static Set<TypeParameter> findFreeTypeParameters(Node root) {
         // TODO: this assumes that *all* type parameters are free, which is often but not always true in inner types
         Iterable<Type> types = iterable(() -> descendantNodesAndSelf(root)
-            .flatMap(node -> node.accept(new NodeMapperWithDefault<Stream<Type>>(Stream.empty()) {
-                @Override
-                public Stream<Type> visit(FieldDeclarationNode declaration) {
-                    return Stream.of(declaration.getType());
-                }
-
-                @Override
-                public Stream<Type> visit(LocalVariableDeclarationNode localVariableDeclaration) {
-                    return Stream.of(localVariableDeclaration.getType());
-                }
-
-                @Override
-                public Stream<Type> visit(MethodNode methodNode) {
-                    return Stream.concat(
-                        methodNode.getArguments().stream().map(argument -> argument.getType()),
-                        Stream.of(methodNode.getReturnType()));
-                }
-
-                @Override
-                public Stream<Type> visit(ConstructorCallNode call) {
-                    return Stream.of(call.getType());
-                }
-
-                @Override
-                public Stream<Type> visit(MethodCallNode methodCall) {
-                    return methodCall.getTypeParameters().stream();
-                }
-            })));
+            .flatMap(findFreeTypeParameters));
 
         return ImmutableSet.copyOf(lazyFlatMap(types, type -> type.accept(new Type.Visitor<Iterable<TypeParameter>>() {
             @Override
