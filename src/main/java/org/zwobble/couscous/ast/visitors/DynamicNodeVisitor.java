@@ -5,18 +5,19 @@ import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.FieldManifestation;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.scaffold.InstrumentedType;
-import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.implementation.bytecode.*;
+import net.bytebuddy.implementation.bytecode.Duplication;
+import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.Throw;
+import net.bytebuddy.implementation.bytecode.TypeCreation;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 import net.bytebuddy.implementation.bytecode.member.MethodVariableAccess;
-import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
+import org.zwobble.couscous.util.asm.Implementations;
 import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 import org.zwobble.couscous.util.asm.TypeDescriptions;
 
@@ -88,80 +89,50 @@ public class DynamicNodeVisitor<T> {
 
             .defineConstructor(Visibility.PUBLIC)
             .withParameters(clazz)
-            .intercept(new Implementation() {
-                @Override
-                public InstrumentedType prepare(InstrumentedType instrumentedType) {
-                    return instrumentedType;
-                }
+            .intercept(Implementations.stackManipulation(target -> new StackManipulation.Compound(
+                // this()
+                MethodVariableAccess.REFERENCE.loadOffset(0),
+                MethodInvocation.invoke(TypeDescriptions.findConstructor(Object.class)),
 
-                @Override
-                public ByteCodeAppender appender(Target implementationTarget) {
-                    return new ByteCodeAppender() {
-                        @Override
-                        public Size apply(MethodVisitor methodVisitor, Context implementationContext, MethodDescription instrumentedMethod) {
-                            StackManipulation.Size size = new StackManipulation.Compound(
-                                // this()
-                                MethodVariableAccess.REFERENCE.loadOffset(0),
-                                MethodInvocation.invoke(TypeDescriptions.findConstructor(Object.class)),
+                // this.visitor = visitor
+                MethodVariableAccess.REFERENCE.loadOffset(0),
+                MethodVariableAccess.REFERENCE.loadOffset(1),
+                FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).putter(),
 
-                                // this.visitor = visitor
-                                MethodVariableAccess.REFERENCE.loadOffset(0),
-                                MethodVariableAccess.REFERENCE.loadOffset(1),
-                                FieldAccess.forField(TypeDescriptions.findField(implementationTarget, "visitor")).putter(),
-
-                                // return
-                                MethodReturn.VOID
-                            ).apply(methodVisitor, implementationContext);
-                            return new Size(size.getMaximalSize(), instrumentedMethod.getStackSize());
-                        }
-                    };
-                }
-            })
+                // return
+                MethodReturn.VOID
+            )))
 
             .method(ElementMatchers.named("accept"))
-            .intercept(new Implementation() {
-                @Override
-                public InstrumentedType prepare(InstrumentedType instrumentedType) {
-                    return instrumentedType;
-                }
-
-                @Override
-                public ByteCodeAppender appender(Target target) {
-                    return new ByteCodeAppender() {
-                        @Override
-                        public Size apply(MethodVisitor methodVisitor, Context context, MethodDescription instrumentedMethod) {
-                            MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "type");
-                            StackManipulation.Size size = new StackManipulation.Compound(
-                                MethodVariableAccess.REFERENCE.loadOffset(1),
-                                MethodInvocation.invoke(typeMethod),
-                                new StackManipulationSwitch(
-                                    new StackManipulation.Compound(
-                                        TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
-                                        Duplication.SINGLE,
-                                        MethodInvocation.invoke(TypeDescriptions.findConstructor(UnsupportedOperationException.class)),
-                                        Throw.INSTANCE
-                                    ),
-                                    eagerMap(visitMethods, method -> {
-                                        Class<?> nodeClass = method.getParameterTypes()[0];
-                                        return StackManipulationSwitch.switchCase(
-                                            NodeTypes.forClass(nodeClass),
-                                            new StackManipulation.Compound(
-                                                MethodVariableAccess.REFERENCE.loadOffset(0),
-                                                FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).getter(),
-                                                MethodVariableAccess.REFERENCE.loadOffset(1),
-                                                TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
-                                                MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
-                                                MethodReturn.VOID
-                                            )
-                                        );
-                                    })
+            .intercept(Implementations.stackManipulation(target -> {
+                MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "type");
+                return new StackManipulation.Compound(
+                    MethodVariableAccess.REFERENCE.loadOffset(1),
+                    MethodInvocation.invoke(typeMethod),
+                    new StackManipulationSwitch(
+                        new StackManipulation.Compound(
+                            TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
+                            Duplication.SINGLE,
+                            MethodInvocation.invoke(TypeDescriptions.findConstructor(UnsupportedOperationException.class)),
+                            Throw.INSTANCE
+                        ),
+                        eagerMap(visitMethods, method -> {
+                            Class<?> nodeClass = method.getParameterTypes()[0];
+                            return StackManipulationSwitch.switchCase(
+                                NodeTypes.forClass(nodeClass),
+                                new StackManipulation.Compound(
+                                    MethodVariableAccess.REFERENCE.loadOffset(0),
+                                    FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).getter(),
+                                    MethodVariableAccess.REFERENCE.loadOffset(1),
+                                    TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
+                                    MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
+                                    MethodReturn.VOID
                                 )
-                            ).apply(methodVisitor, context);
-                            return new Size(size.getMaximalSize(), instrumentedMethod.getStackSize());
-                        }
-                    };
-                }
-            })
+                            );
+                        })
+                    )
+                );
+            }))
             .make()
             .load(DynamicNodeVisitor.class.getClassLoader())
             .getLoaded();
