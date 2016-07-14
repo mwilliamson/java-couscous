@@ -18,4 +18,8 @@ public class ExtraSets {
     public static <T> Set<T> set(T... values) {
         return ImmutableSet.copyOf(values);
     }
+
+    public static <T> Set<T> copyOf(Iterable<T> iterable) {
+        return ImmutableSet.copyOf(iterable);
+    }
 }

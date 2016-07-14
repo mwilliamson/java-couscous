@@ -19,6 +19,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
 import org.zwobble.couscous.util.ExtraIterables;
+import org.zwobble.couscous.util.ExtraSets;
 import org.zwobble.couscous.util.asm.Implementations;
 import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 import org.zwobble.couscous.util.asm.TypeDescriptions;
@@ -26,10 +27,13 @@ import org.zwobble.couscous.util.asm.TypeDescriptions;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
+import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
@@ -82,6 +86,16 @@ public class DynamicNodeVisitor<T> {
     public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
         Function<T, Consumer> builder = buildClassSupplier(clazz, Consumer.class, methodName, MethodReturn.VOID);
         return new DynamicNodeVisitor<>(builder);
+    }
+
+    public static <T> BiConsumer<Node, T> visitor(Class<T> clazz) {
+        Set<String> methodNames = ExtraSets.copyOf(lazyMap(asList(clazz.getDeclaredMethods()), Method::getName));
+        if (methodNames.size() != 1) {
+            throw new UnsupportedOperationException("Multiple method names");
+        }
+        String methodName = methodNames.iterator().next();
+        Function<T, Consumer> classSupplier = buildClassSupplier(clazz, Consumer.class, methodName, MethodReturn.VOID);
+        return (node, visitor) -> classSupplier.apply(visitor).accept(node);
     }
 
     public static <T, F> Function<T, F> buildClassSupplier(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {

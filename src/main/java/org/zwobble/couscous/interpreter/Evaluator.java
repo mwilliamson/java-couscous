@@ -12,6 +12,7 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.Types.erasure;
@@ -66,29 +67,26 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     @Override
     public InterpreterValue visit(AssignmentNode assignment) {
         InterpreterValue value = eval(assignment.getValue());
-        assignVisitor.instantiate(new Assign(value)).accept(assignment.getTarget());
+        AssignableExpressionVisitor.visit.accept(assignment.getTarget(), new AssignableExpressionVisitor() {
+            @Override
+            public void visit(FieldAccessNode fieldAccess) {
+                ReceiverValue left = evalReceiver(fieldAccess.getLeft());
+                left.setField(fieldAccess.getFieldName(), value);
+            }
+
+            @Override
+            public void visit(VariableReferenceNode reference) {
+                environment.put(reference.getReferentId(), value);
+            }
+        });
         return value;
     }
 
-    private static final DynamicNodeVisitor<Assign> assignVisitor = DynamicNodeVisitor.build(
-        Assign.class, "visit"
-    );
+    public interface AssignableExpressionVisitor {
+        BiConsumer<Node, AssignableExpressionVisitor> visit = DynamicNodeVisitor.visitor(AssignableExpressionVisitor.class);
 
-    public class Assign {
-        private final InterpreterValue value;
-
-        private Assign(InterpreterValue value) {
-            this.value = value;
-        }
-
-        public void visit(FieldAccessNode fieldAccess) {
-            ReceiverValue left = evalReceiver(fieldAccess.getLeft());
-            left.setField(fieldAccess.getFieldName(), value);
-        }
-
-        public void visit(VariableReferenceNode reference) {
-            environment.put(reference.getReferentId(), value);
-        }
+        void visit(VariableReferenceNode node);
+        void visit(FieldAccessNode node);
     }
     
     @Override
