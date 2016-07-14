@@ -14,7 +14,6 @@ import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
 import net.bytebuddy.implementation.bytecode.member.MethodReturn;
 import net.bytebuddy.implementation.bytecode.member.MethodVariableAccess;
-import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.Node;
@@ -83,7 +82,6 @@ public class DynamicNodeVisitor<T> {
             asList(clazz.getMethods()),
             method -> isVisitMethod(methodName, method)
         );
-        Label literalLabel = new Label();
 
         Class<? extends Consumer> visitor = new ByteBuddy()
             .subclass(Consumer.class)
