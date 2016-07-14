@@ -18,6 +18,7 @@ import net.bytebuddy.matcher.ElementMatchers;
 import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.NodeTypes;
 import org.zwobble.couscous.util.asm.StackManipulationSwitch;
+import org.zwobble.couscous.util.asm.TypeDescriptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,8 +26,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.util.Arrays.asList;
-import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
-import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
@@ -103,17 +102,12 @@ public class DynamicNodeVisitor<T> {
                             StackManipulation.Size size = new StackManipulation.Compound(
                                 // this()
                                 MethodVariableAccess.REFERENCE.loadOffset(0),
-                                MethodInvocation.invoke(new TypeDescription.ForLoadedType(Object.class)
-                                    .getDeclaredMethods()
-                                    .filter(isConstructor().and(takesArguments(0))).getOnly()),
+                                MethodInvocation.invoke(TypeDescriptions.findConstructor(Object.class)),
 
                                 // this.visitor = visitor
                                 MethodVariableAccess.REFERENCE.loadOffset(0),
                                 MethodVariableAccess.REFERENCE.loadOffset(1),
-                                FieldAccess.forField(implementationTarget.getInstrumentedType()
-                                    .getDeclaredFields()
-                                    .filter(ElementMatchers.named("visitor"))
-                                    .getOnly()).putter(),
+                                FieldAccess.forField(TypeDescriptions.findField(implementationTarget, "visitor")).putter(),
 
                                 // return
                                 MethodReturn.VOID
@@ -136,10 +130,7 @@ public class DynamicNodeVisitor<T> {
                     return new ByteCodeAppender() {
                         @Override
                         public Size apply(MethodVisitor methodVisitor, Context context, MethodDescription instrumentedMethod) {
-                            MethodDescription typeMethod = new TypeDescription.ForLoadedType(Node.class)
-                                .getDeclaredMethods()
-                                .filter(ElementMatchers.named("type").and(ElementMatchers.takesArguments(0)))
-                                .getOnly();
+                            MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "type");
                             StackManipulation.Size size = new StackManipulation.Compound(
                                 MethodVariableAccess.REFERENCE.loadOffset(1),
                                 MethodInvocation.invoke(typeMethod),
@@ -147,10 +138,7 @@ public class DynamicNodeVisitor<T> {
                                     new StackManipulation.Compound(
                                         TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
                                         Duplication.SINGLE,
-                                        MethodInvocation.invoke(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)
-                                            .getDeclaredMethods()
-                                            .filter(ElementMatchers.isDefaultConstructor())
-                                            .getOnly()),
+                                        MethodInvocation.invoke(TypeDescriptions.findConstructor(UnsupportedOperationException.class)),
                                         Throw.INSTANCE
                                     ),
                                     eagerMap(visitMethods, method -> {
@@ -159,10 +147,7 @@ public class DynamicNodeVisitor<T> {
                                             NodeTypes.forClass(nodeClass),
                                             new StackManipulation.Compound(
                                                 MethodVariableAccess.REFERENCE.loadOffset(0),
-                                                FieldAccess.forField(target.getInstrumentedType()
-                                                    .getDeclaredFields()
-                                                    .filter(ElementMatchers.named("visitor"))
-                                                    .getOnly()).getter(),
+                                                FieldAccess.forField(TypeDescriptions.findField(target, "visitor")).getter(),
                                                 MethodVariableAccess.REFERENCE.loadOffset(1),
                                                 TypeCasting.to(new TypeDescription.ForLoadedType(nodeClass)),
                                                 MethodInvocation.invoke(new MethodDescription.ForLoadedMethod(method)),
