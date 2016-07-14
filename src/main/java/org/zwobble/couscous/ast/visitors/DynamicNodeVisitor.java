@@ -23,11 +23,11 @@ import org.zwobble.couscous.util.asm.Implementations;
 import org.zwobble.couscous.util.asm.StackManipulationSwitch;
 import org.zwobble.couscous.util.asm.TypeDescriptions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraLists.eagerFilter;
@@ -80,13 +80,37 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
  */
 public class DynamicNodeVisitor<T> {
     public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
-        return new DynamicNodeVisitor<>(
-            clazz,
-            buildClass(clazz, Consumer.class, methodName, MethodReturn.VOID)
-        );
+        Function<T, Consumer> builder = buildClassSupplier(clazz, Consumer.class, methodName, MethodReturn.VOID);
+        return new DynamicNodeVisitor<>(builder);
     }
 
-    public static <T, F> Class<? extends F> buildClass(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
+    public static <T, F> Function<T, F> buildClassSupplier(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
+        Class<? extends F> visitorClass = buildClass(clazz, function, methodName, methodReturn);
+
+        try {
+            return new ByteBuddy()
+                .subclass(Function.class)
+
+                .method(ElementMatchers.isAbstract())
+                .intercept(Implementations.stackManipulation(target -> new StackManipulation.Compound(
+                    TypeCreation.of(new TypeDescription.ForLoadedType(visitorClass)),
+                    Duplication.SINGLE,
+                    MethodVariableAccess.REFERENCE.loadOffset(1),
+                    TypeCasting.to(new TypeDescription.ForLoadedType(clazz)),
+                    MethodInvocation.invoke(TypeDescriptions.findConstructor(visitorClass, clazz)),
+                    MethodReturn.REFERENCE
+                )))
+
+                .make()
+                .load(DynamicNodeVisitor.class.getClassLoader())
+                .getLoaded()
+                .newInstance();
+        } catch (InstantiationException | IllegalAccessException exception) {
+            throw new RuntimeException(exception);
+        }
+    }
+
+    private static <T, F> Class<? extends F> buildClass(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
         List<Method> visitMethods = eagerFilter(
             asList(clazz.getMethods()),
             method -> isVisitMethod(methodName, method)
@@ -171,19 +195,13 @@ public class DynamicNodeVisitor<T> {
             !method.getParameterTypes()[0].equals(Node.class);
     }
 
-    private final Class<T> clazz;
-    private final Class<? extends Consumer> visitor;
+    private final Function<T, Consumer> visitor;
 
-    public DynamicNodeVisitor(Class<T> clazz, Class<? extends Consumer> visitor) {
-        this.clazz = clazz;
+    private DynamicNodeVisitor(Function<T, Consumer> visitor) {
         this.visitor = visitor;
     }
 
     public Consumer<Node> instantiate(T instance) {
-        try {
-            return visitor.getConstructor(clazz).newInstance(instance);
-        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException exception) {
-            throw new RuntimeException(exception);
-        }
+        return visitor.apply(instance);
     }
 }
