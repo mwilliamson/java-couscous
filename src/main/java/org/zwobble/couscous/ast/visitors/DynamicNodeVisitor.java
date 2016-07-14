@@ -7,8 +7,7 @@ import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.scaffold.InstrumentedType;
 import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.implementation.bytecode.ByteCodeAppender;
-import net.bytebuddy.implementation.bytecode.StackManipulation;
+import net.bytebuddy.implementation.bytecode.*;
 import net.bytebuddy.implementation.bytecode.assign.TypeCasting;
 import net.bytebuddy.implementation.bytecode.member.FieldAccess;
 import net.bytebuddy.implementation.bytecode.member.MethodInvocation;
@@ -145,8 +144,15 @@ public class DynamicNodeVisitor<T> {
                                 MethodVariableAccess.REFERENCE.loadOffset(1),
                                 MethodInvocation.invoke(typeMethod),
                                 new StackManipulationSwitch(
-                                    // TODO: raise exception in default case
-                                    MethodReturn.VOID,
+                                    new StackManipulation.Compound(
+                                        TypeCreation.of(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)),
+                                        Duplication.SINGLE,
+                                        MethodInvocation.invoke(new TypeDescription.ForLoadedType(UnsupportedOperationException.class)
+                                            .getDeclaredMethods()
+                                            .filter(ElementMatchers.isDefaultConstructor())
+                                            .getOnly()),
+                                        Throw.INSTANCE
+                                    ),
                                     eagerMap(visitMethods, method -> {
                                         Class<?> nodeClass = method.getParameterTypes()[0];
                                         return StackManipulationSwitch.switchCase(
