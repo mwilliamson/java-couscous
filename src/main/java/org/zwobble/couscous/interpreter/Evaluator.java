@@ -1,7 +1,7 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.visitors.AssignableExpressionNodeVisitor;
+import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.errors.InvalidCast;
@@ -66,19 +66,29 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     @Override
     public InterpreterValue visit(AssignmentNode assignment) {
         InterpreterValue value = eval(assignment.getValue());
-        assignment.getTarget().accept(new AssignableExpressionNodeVisitor(){
-            @Override
-            public void visit(FieldAccessNode fieldAccess) {
-                ReceiverValue left = evalReceiver(fieldAccess.getLeft());
-                left.setField(fieldAccess.getFieldName(), value);
-            }
-            
-            @Override
-            public void visit(VariableReferenceNode reference) {
-                environment.put(reference.getReferentId(), value);
-            }
-        });
+        assignVisitor.instantiate(new Assign(value)).accept(assignment.getTarget());
         return value;
+    }
+
+    private static final DynamicNodeVisitor<Assign> assignVisitor = DynamicNodeVisitor.build(
+        Assign.class, "visit"
+    );
+
+    public class Assign {
+        private final InterpreterValue value;
+
+        private Assign(InterpreterValue value) {
+            this.value = value;
+        }
+
+        public void visit(FieldAccessNode fieldAccess) {
+            ReceiverValue left = evalReceiver(fieldAccess.getLeft());
+            left.setField(fieldAccess.getFieldName(), value);
+        }
+
+        public void visit(VariableReferenceNode reference) {
+            environment.put(reference.getReferentId(), value);
+        }
     }
     
     @Override
