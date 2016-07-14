@@ -80,12 +80,10 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
  */
 public class DynamicNodeVisitor<T> {
     public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName) {
-        return build(clazz, methodName, MethodReturn.VOID);
-    }
-
-    public static <T> DynamicNodeVisitor<T> build(Class<T> clazz, String methodName, MethodReturn methodReturn) {
-        Class<? extends Consumer> visitor = buildClass(clazz, Consumer.class, methodName, methodReturn);
-        return new DynamicNodeVisitor<T>(clazz, visitor);
+        return new DynamicNodeVisitor<>(
+            clazz,
+            buildClass(clazz, Consumer.class, methodName, MethodReturn.VOID)
+        );
     }
 
     public static <T, F> Class<? extends F> buildClass(Class<T> clazz, Class<F> function, String methodName, MethodReturn methodReturn) {
