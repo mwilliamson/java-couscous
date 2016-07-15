@@ -33,8 +33,8 @@ public class ExtraLists {
         return concat(list(value), list);
     }
 
-    public static <T> List<T> append(List<? extends T> list, T value) {
-        return Stream.concat(list.stream(), Stream.of(value)).collect(Collectors.toList());
+    public static <T> List<T> append(Iterable<? extends T> iterable, T value) {
+        return Stream.concat(ExtraIterables.stream(iterable), Stream.of(value)).collect(Collectors.toList());
     }
 
     public static <T> List<T> concat(Iterable<? extends T> first, Iterable<? extends T> second) {

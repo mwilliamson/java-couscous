@@ -3,7 +3,6 @@ package org.zwobble.couscous.frontends.java;
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.types.ParameterizedType;
 import org.zwobble.couscous.types.Type;
@@ -66,14 +65,14 @@ public class JavaTypes {
         if (typeParameter.getDeclaringClass() == null) {
             IMethodBinding method = typeParameter.getDeclaringMethod();
             // TODO: disambiguate overloads
-            return Identifiers.method(identifierForType(method.getDeclaringClass()), method.getName());
+            return identifierForType(method.getDeclaringClass()).method(method.getName());
         } else {
             return identifierForType(typeParameter.getDeclaringClass());
         }
     }
 
     private static Identifier identifierForType(ITypeBinding type) {
-        return Identifiers.forType(erasure(typeOf(type)).getQualifiedName());
+        return Identifier.forType(erasure(typeOf(type)).getQualifiedName());
     }
 
     static Set<Type> superTypes(TypeDeclaration declaration) {
@@ -144,7 +143,7 @@ public class JavaTypes {
     }
 
     private static final ScalarType RAW_ITERATOR = ScalarType.of("java.util.Iterator");
-    public static TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifiers.type(Identifiers.TOP, RAW_ITERATOR.getQualifiedName()), "T");
+    public static TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifier.TOP.type(RAW_ITERATOR.getQualifiedName()), "T");
 
     public static Type iterator(Type elementType) {
         return parameterizedType(RAW_ITERATOR, list(elementType));

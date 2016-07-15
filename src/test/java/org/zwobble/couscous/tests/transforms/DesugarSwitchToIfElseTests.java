@@ -3,7 +3,7 @@ package org.zwobble.couscous.tests.transforms;
 import org.junit.Test;
 import org.zwobble.couscous.ast.Operations;
 import org.zwobble.couscous.ast.VariableDeclaration;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.frontends.java.Scope;
 import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
@@ -24,7 +24,7 @@ public class DesugarSwitchToIfElseTests {
     @Test
     public void switchStatementWithoutFallThroughIsReadAsIfElseStatement() {
         VariableDeclaration tmp = var(
-            Identifiers.variable(Identifiers.TOP, "_couscous_tmp_0"),
+            Identifier.TOP.variable("_couscous_tmp_0"),
             "_couscous_tmp_0",
             Types.STRING
         );
@@ -62,7 +62,7 @@ public class DesugarSwitchToIfElseTests {
     @Test
     public void switchStatementWithoutDefaultIsReadAsIfStatementWithoutElseStatement() {
         VariableDeclaration tmp = var(
-            Identifiers.variable(Identifiers.TOP, "_couscous_tmp_0"),
+            Identifier.TOP.variable("_couscous_tmp_0"),
             "_couscous_tmp_0",
             Types.STRING
         );
@@ -90,7 +90,7 @@ public class DesugarSwitchToIfElseTests {
     @Test
     public void casesCanFallthrough() {
         VariableDeclaration tmp = var(
-            Identifiers.variable(Identifiers.TOP, "_couscous_tmp_0"),
+            Identifier.TOP.variable("_couscous_tmp_0"),
             "_couscous_tmp_0",
             Types.STRING
         );

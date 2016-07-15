@@ -2,7 +2,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
@@ -168,7 +168,7 @@ public class CsharpSerializerTests {
             list(ScalarType.of("Z")),
             list(),
             ScalarType.of("Y"),
-            signature("y", list(typeParameter(Identifiers.method(Identifiers.forType("X"), "y"), "T")), list(), ScalarType.of("Y"))));
+            signature("y", list(typeParameter(Identifier.forType("X").method("y"), "T")), list(), ScalarType.of("Y"))));
         assertEquals("x.y<Z>()", output);
     }
 
@@ -413,8 +413,8 @@ public class CsharpSerializerTests {
     @Test
     public void methodWithTypeParameters() {
         MethodNode methodNode = MethodNode.staticMethod("nothing")
-            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "T"))
-            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "U"))
+            .typeParameter(formalTypeParameter(Identifier.forType("com.Example.example").method("nothing"), "T"))
+            .typeParameter(formalTypeParameter(Identifier.forType("com.Example.example").method("nothing"), "U"))
             .returns(ScalarType.of("void"))
             .build();
 
@@ -568,8 +568,8 @@ public class CsharpSerializerTests {
     @Test
     public void interfaceWithMethodWithTypeParameters() {
         MethodNode method = MethodNode.staticMethod("nothing")
-            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "T"))
-            .typeParameter(formalTypeParameter(Identifiers.method(Identifiers.forType("com.Example.example"), "nothing"), "U"))
+            .typeParameter(formalTypeParameter(Identifier.forType("com.Example.example").method("nothing"), "T"))
+            .typeParameter(formalTypeParameter(Identifier.forType("com.Example.example").method("nothing"), "U"))
             .returns(ScalarType.of("void"))
             .build();
 

@@ -3,7 +3,6 @@ package org.zwobble.couscous.ast;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -41,7 +40,7 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder addTypeParameter(String name) {
-        this.typeParameters.add(formalTypeParameter(Identifiers.forType(this.name.getQualifiedName()), name));
+        this.typeParameters.add(formalTypeParameter(Identifier.forType(this.name.getQualifiedName()), name));
         return this;
     }
 

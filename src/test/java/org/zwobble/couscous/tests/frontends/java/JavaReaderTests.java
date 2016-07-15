@@ -3,7 +3,6 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
@@ -104,8 +103,8 @@ public class JavaReaderTests {
 
         MethodNode method = classNode.getMethods().get(0);
 
-        Identifier classIdentifier = Identifiers.forType("com.example.Example");
-        Identifier expectedMethodIdentifier = Identifiers.method(classIdentifier, "identity");
+        Identifier classIdentifier = Identifier.forType("com.example.Example");
+        Identifier expectedMethodIdentifier = classIdentifier.method("identity");
         assertThat(method.getTypeParameters(), contains(isFormalTypeParameter(expectedMethodIdentifier, "T")));
         assertThat(
             method.getArguments(),
@@ -215,13 +214,7 @@ public class JavaReaderTests {
     @Test
     public void canReadTryWithResourceWithoutOtherClauses() {
         ScalarType type = ScalarType.of("java.io.ByteArrayOutputStream");
-        Identifier identifier = Identifiers.variable(
-            Identifiers.method(
-                Identifiers.type(Identifiers.TOP, "com.example.Example"),
-                "main"
-            ),
-            "closeable"
-        );
+        Identifier identifier = Identifier.TOP.type("com.example.Example").method("main").variable("closeable");
         LocalVariableDeclarationNode expectedResource = localVariableDeclaration(identifier, "closeable", type, constructorCall(type, list()));
         assertThat(
             readStatements("int", "try(java.io.ByteArrayOutputStream closeable = new java.io.ByteArrayOutputStream()) { return 1; }"),
@@ -395,7 +388,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         ClassNode classNode = (ClassNode) classes.get(0);
         assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter(Identifiers.forType("com.example.Example"), "T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(Identifier.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
     @Test
@@ -406,7 +399,7 @@ public class JavaReaderTests {
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
         assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
-        assertEquals(list(formalTypeParameter(Identifiers.forType("com.example.Example"), "T")), classNode.getTypeParameters());
+        assertEquals(list(formalTypeParameter(Identifier.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
     @Test

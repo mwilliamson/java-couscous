@@ -2,7 +2,6 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.NaturalNumbers;
@@ -11,7 +10,7 @@ import java.util.*;
 
 public class Scope {
     public static Scope create() {
-        return new Scope(new HashMap<>(), new HashSet<>(), Identifiers.TOP, NaturalNumbers.INSTANCE.iterator());
+        return new Scope(new HashMap<>(), new HashSet<>(), Identifier.TOP, NaturalNumbers.INSTANCE.iterator());
     }
 
     private final Map<String, VariableDeclaration> variablesByKey;
@@ -36,16 +35,16 @@ public class Scope {
     }
 
     public Scope enterClass(ScalarType className) {
-        return enter(Identifiers.type(identifier, className.getQualifiedName()));
+        return enter(identifier.type(className.getQualifiedName()));
     }
 
     public Scope enterConstructor() {
-        return enter(Identifiers.constructor(identifier));
+        return enter(identifier.constructor());
     }
 
     public Scope enterMethod(String name) {
         // TODO: distinguish overloads
-        return enter(Identifiers.method(identifier, name));
+        return enter(identifier.method(name));
     }
 
     private Scope enter(Identifier newIdentifier) {
@@ -112,10 +111,10 @@ public class Scope {
     }
 
     private Identifier generateVariableIdentifier(String name) {
-        Identifier identifier = Identifiers.variable(this.identifier, name);
+        Identifier identifier = this.identifier.variable(name);
         int index = 0;
         while (identifiers.contains(identifier)) {
-            identifier = Identifiers.variable(this.identifier, name + "_" + index);
+            identifier = this.identifier.variable(name + "_" + index);
             index++;
         }
         identifiers.add(identifier);

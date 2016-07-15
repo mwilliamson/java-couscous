@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.zwobble.couscous.ast.MethodSignature;
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
 
@@ -63,8 +62,6 @@ class JavaMethods {
 
     private static Identifier identifierFor(IMethodBinding method) {
         // TODO: disambiguate overloads
-        return Identifiers.method(
-            Identifiers.forType(erasure(typeOf(method.getDeclaringClass()))),
-            method.getName());
+        return Identifier.forType(erasure(typeOf(method.getDeclaringClass()))).method(method.getName());
     }
 }

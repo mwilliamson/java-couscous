@@ -2,7 +2,7 @@ package org.zwobble.couscous.tests.frontends.java;
 
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
-import org.zwobble.couscous.ast.identifiers.Identifiers;
+import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.types.Types;
@@ -233,7 +233,7 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadMethodCallsWithZeroExpressionsAsVarargs() {
-        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
+        TypeParameter typeParameter = typeParameter(Identifier.forType("java.util.Arrays").method("asList"), "T");
         assertEquals(
             methodCall(
                 staticReceiver("java.util.Arrays"),
@@ -251,7 +251,7 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadMethodCallsWithMultipleExpressionsAsVarargs() {
-        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
+        TypeParameter typeParameter = typeParameter(Identifier.forType("java.util.Arrays").method("asList"), "T");
         assertEquals(
             methodCall(
                 staticReceiver("java.util.Arrays"),
@@ -269,7 +269,7 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadMethodCallsWithArrayAsVarargs() {
-        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Arrays"), "asList"), "T");
+        TypeParameter typeParameter = typeParameter(Identifier.forType("java.util.Arrays").method("asList"), "T");
         assertEquals(
             methodCall(
                 staticReceiver("java.util.Arrays"),
@@ -287,7 +287,7 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadGenericStaticMethodCallsWithExplicitTypeParameters() {
-        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
+        TypeParameter typeParameter = typeParameter(Identifier.forType("java.util.Collections").method("emptyList"), "T");
         assertEquals(
             methodCall(
                 staticReceiver("java.util.Collections"),
@@ -305,7 +305,7 @@ public class ExpressionReadingTests {
 
     @Test
     public void canReadGenericStaticMethodCallsWithImplicitTypeParameters() {
-        TypeParameter typeParameter = typeParameter(Identifiers.method(Identifiers.forType("java.util.Collections"), "emptyList"), "T");
+        TypeParameter typeParameter = typeParameter(Identifier.forType("java.util.Collections").method("emptyList"), "T");
         assertEquals(
             methodCall(
                 staticReceiver("java.util.Collections"),
