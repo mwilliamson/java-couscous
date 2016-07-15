@@ -1,9 +1,7 @@
 package org.zwobble.couscous.ast.visitors;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
@@ -14,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
+import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class NodeTransformer {
@@ -233,10 +233,10 @@ public class NodeTransformer {
     }
 
     private <T> Set<T> transformSet(Set<T> values, Function<T, T> function) {
-        return ImmutableSet.copyOf(Iterables.transform(values, function));
+        return ImmutableSet.copyOf(lazyMap(values, function));
     }
 
     private <T> List<T> transformList(List<? extends T> values, Function<T, T> function) {
-        return ImmutableList.copyOf(Iterables.transform(values, function));
+        return ImmutableList.copyOf(lazyMap(values, function));
     }
 }

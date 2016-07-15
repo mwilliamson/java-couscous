@@ -110,7 +110,7 @@ public class ExtraIterables {
         return Optional.empty();
     }
 
-    public static <T, R> Iterable<R> lazyMap(Iterable<T> iterable, Function<T, R> function) {
+    public static <T, R> Iterable<R> lazyMap(Iterable<? extends T> iterable, Function<T, R> function) {
         return new Iterable<R>() {
             @Override
             public Iterator<R> iterator() {
@@ -119,7 +119,7 @@ public class ExtraIterables {
         };
     }
 
-    private static <T, R> Iterator<R> map(Iterator<T> iterator, Function<T, R> function) {
+    private static <T, R> Iterator<R> map(Iterator<? extends T> iterator, Function<T, R> function) {
         return new Iterator<R>() {
             @Override
             public boolean hasNext() {
