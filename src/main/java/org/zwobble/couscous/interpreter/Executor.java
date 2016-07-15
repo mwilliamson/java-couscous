@@ -2,12 +2,12 @@ package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.UnitInterpreterValue;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -16,7 +16,7 @@ import static org.zwobble.couscous.interpreter.Evaluator.eval;
 import static org.zwobble.couscous.interpreter.Evaluator.evalCondition;
 import static org.zwobble.couscous.util.ExtraIterables.forEach;
 
-public class Executor implements StatementNodeMapper<Optional<InterpreterValue>> {
+public class Executor {
     public static InterpreterValue callMethod(
         Environment environment,
         MethodNode method,
@@ -90,39 +90,34 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         return Optional.empty();
     }
 
+
     public static Optional<InterpreterValue> exec(Environment environment, StatementNode statement) {
-        return statement.accept(new Executor(environment));
+        return EXEC.apply(statement, new Executor(environment));
     }
+
+    private static final BiFunction<Node, Executor, Optional<InterpreterValue>> EXEC = DynamicNodeMapper.visitor(Executor.class, "visit");
+
     private final Environment environment;
 
     private Executor(Environment environment) {
         this.environment = environment;
     }
 
-    @Override
     public Optional<InterpreterValue> visit(ReturnNode returnNode) {
         return Optional.of(eval(environment, returnNode.getValue()));
     }
 
-    @Override
-    public Optional<InterpreterValue> visit(ThrowNode throwNode) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Optional<InterpreterValue> visit(ExpressionStatementNode expressionStatement) {
         eval(environment, expressionStatement.getExpression());
         return Optional.empty();
     }
 
-    @Override
     public Optional<InterpreterValue> visit(LocalVariableDeclarationNode localVariableDeclaration) {
         final org.zwobble.couscous.interpreter.values.InterpreterValue value = eval(environment, localVariableDeclaration.getInitialValue());
         environment.put(localVariableDeclaration, value);
         return Optional.empty();
     }
 
-    @Override
     public Optional<InterpreterValue> visit(IfStatementNode ifStatement) {
         List<StatementNode> body = evalCondition(environment, ifStatement.getCondition())
             ? ifStatement.getTrueBranch()
@@ -130,7 +125,6 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
         return exec(body);
     }
 
-    @Override
     public Optional<InterpreterValue> visit(WhileNode whileLoop) {
         while (evalCondition(environment, whileLoop.getCondition())) {
             Optional<InterpreterValue> result = exec(whileLoop.getBody());
@@ -139,11 +133,6 @@ public class Executor implements StatementNodeMapper<Optional<InterpreterValue>>
             }
         }
         return Optional.empty();
-    }
-
-    @Override
-    public Optional<InterpreterValue> visit(TryNode tryStatement) {
-        throw new UnsupportedOperationException();
     }
 
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {

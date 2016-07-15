@@ -2,7 +2,6 @@ package org.zwobble.couscous.ast;
 
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 
 import java.util.List;
 
@@ -42,11 +41,6 @@ public class TryNode implements StatementNode {
 
     public List<StatementNode> getFinallyBody() {
         return finallyBody;
-    }
-
-    @Override
-    public <T> T accept(StatementNodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

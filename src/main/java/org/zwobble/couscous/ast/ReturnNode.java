@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.util.ExtraIterables;
 
 public class ReturnNode implements StatementNode {
@@ -19,11 +18,6 @@ public class ReturnNode implements StatementNode {
         return value;
     }
     
-    @Override
-    public <T> T accept(StatementNodeMapper<T> visitor) {
-        return visitor.visit(this);
-    }
-
     @Override
     public int type() {
         return NodeTypes.RETURN;

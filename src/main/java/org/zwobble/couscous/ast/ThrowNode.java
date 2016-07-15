@@ -1,7 +1,6 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.util.ExtraIterables;
 
 public class ThrowNode implements StatementNode {
@@ -17,11 +16,6 @@ public class ThrowNode implements StatementNode {
 
     public ExpressionNode getValue() {
         return value;
-    }
-
-    @Override
-    public <T> T accept(StatementNodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

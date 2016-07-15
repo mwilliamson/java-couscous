@@ -1,9 +1,8 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraIterables;
 
 import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
@@ -50,11 +49,6 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
         return declaration.getType();
     }
     
-    @Override
-    public <T> T accept(StatementNodeMapper<T> visitor) {
-        return visitor.visit(this);
-    }
-
     @Override
     public int type() {
         return NodeTypes.LOCAL_VARIABLE_DECLARATION;

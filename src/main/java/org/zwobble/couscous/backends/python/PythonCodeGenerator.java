@@ -8,7 +8,6 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
-import org.zwobble.couscous.ast.visitors.StatementNodeMapper;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.types.ScalarType;
@@ -240,21 +239,16 @@ public class PythonCodeGenerator {
     }
 
     private static PythonStatementNode generateStatement(StatementNode statement) {
-        return statement.accept(new StatementGenerator());
+        return StatementGenerator.VISITOR.apply(statement);
     }
 
-    private static class StatementGenerator implements StatementNodeMapper<PythonStatementNode> {
-        @Override
+    public static class StatementGenerator {
+        private static final Function<Node, PythonStatementNode> VISITOR = DynamicNodeMapper.instantiate(new StatementGenerator(), "visit");
+
         public PythonStatementNode visit(ReturnNode returnNode) {
             return pythonReturn(generateExpression(returnNode.getValue()));
         }
 
-        @Override
-        public PythonStatementNode visit(ThrowNode throwNode) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
                 AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();
@@ -264,12 +258,10 @@ public class PythonCodeGenerator {
             }
         }
 
-        @Override
         public PythonStatementNode visit(LocalVariableDeclarationNode declaration) {
             return pythonAssignment(pythonVariableReference(declaration.getDeclaration().getName()), generateExpression(declaration.getInitialValue()));
         }
 
-        @Override
         public PythonStatementNode visit(IfStatementNode ifStatement) {
             return pythonIfStatement(
                 generateExpression(ifStatement.getCondition()),
@@ -277,16 +269,10 @@ public class PythonCodeGenerator {
                 generateStatements(ifStatement.getFalseBranch()));
         }
 
-        @Override
         public PythonStatementNode visit(WhileNode whileLoop) {
             return pythonWhile(
                 generateExpression(whileLoop.getCondition()),
                 generateStatements(whileLoop.getBody()));
-        }
-
-        @Override
-        public PythonStatementNode visit(TryNode tryStatement) {
-            throw new UnsupportedOperationException();
         }
     }
 
