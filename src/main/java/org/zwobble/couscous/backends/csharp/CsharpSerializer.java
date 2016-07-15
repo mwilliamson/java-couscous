@@ -2,6 +2,8 @@ package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
+import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
@@ -364,6 +366,36 @@ public class CsharpSerializer {
                 writeBlock(ifStatement.getFalseBranch());
             }
         }
+    }
+
+    public void visit(SwitchNode switchNode) {
+        writer.writeStatement(() -> {
+            writer.writeKeyword("switch");
+            writer.writeSpace();
+            writer.writeSymbol("(");
+            write(switchNode.getValue());
+            writer.writeSymbol(")");
+            writer.startBlock();
+            switchNode.getCases().forEach(this::visit);
+            writer.endBlock();
+        });
+    }
+
+    private void visit(SwitchCaseNode switchCase) {
+        writer.writeStatement(() -> {
+            if (switchCase.getValue().isPresent()) {
+                writer.writeKeyword("case");
+                writer.writeSpace();
+                write(switchCase.getValue().get());
+            } else {
+                writer.writeKeyword("default");
+            }
+            writer.writeSymbol(":");
+        });
+        writer.indent();
+        writeAll(switchCase.getStatements());
+        writer.dedent();
+
     }
 
     public void visit(WhileNode whileLoop) {

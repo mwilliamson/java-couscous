@@ -7,8 +7,6 @@ import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.Receiver;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.naming.Naming;
-import org.zwobble.couscous.frontends.java.Scope;
-import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 import org.zwobble.couscous.types.*;
 
 import java.util.Map;
@@ -50,9 +48,7 @@ public class CsharpCodeGenerator {
     }
 
     private Node generateCode(Node node) {
-        return node
-            .transform(DesugarSwitchToIfElse.transformer(Scope.create()))
-            .transform(nodeTransformer);
+        return node.transform(nodeTransformer);
     }
 
     private Type transformType(Type type) {

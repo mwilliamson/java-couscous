@@ -1,6 +1,8 @@
 package org.zwobble.couscous.ast;
 
 import com.google.common.collect.ImmutableMap;
+import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
+import org.zwobble.couscous.ast.sugar.SwitchNode;
 
 import java.util.Map;
 
@@ -69,6 +71,8 @@ public class NodeTypes {
         .put(OperationNode.class, OPERATION)
         .put(ReturnNode.class, RETURN)
         .put(StaticReceiver.class, STATIC_RECEIVER)
+        .put(SwitchNode.class, SWITCH)
+        .put(SwitchCaseNode.class, SWITCH_CASE)
         .put(TernaryConditionalNode.class, TERNARY_CONDITIONAL)
         .put(ThisReferenceNode.class, THIS_REFERENCE)
         .put(ThrowNode.class, THROW)

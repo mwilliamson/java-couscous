@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifiers;
+import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.TestIds;
 import org.zwobble.couscous.types.ScalarType;
@@ -35,6 +36,7 @@ import static org.zwobble.couscous.ast.TryNode.tryStatement;
 import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
+import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
 import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -305,6 +307,21 @@ public class CsharpSerializerTests {
                 list(returns(literal(2))),
                 list(returns(literal(3)))))));
         assertEquals("if (true) {\n    return 1;\n} else if (false) {\n    return 2;\n} else {\n    return 3;\n}\n", output);
+    }
+
+    @Test
+    public void switchStatement() {
+        Node node = new SwitchNode(
+            literal(1),
+            list(
+                switchCase(literal(1), list(returns(literal(10)))),
+                switchCase(list(returns(literal(0))))
+            )
+        );
+
+        String output = serialize(node);
+
+        assertEquals("switch (1) {\n    case 1:\n        return 10;\n    default:\n        return 0;\n}\n", output);
     }
 
     @Test

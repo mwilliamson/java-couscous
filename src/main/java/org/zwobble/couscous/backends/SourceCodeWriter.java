@@ -69,13 +69,21 @@ public class SourceCodeWriter {
 
     public void startBlock() {
         runAction(blockStart);
-        depth++;
+        indent();
         builder.append("\n");
     }
 
     public void endBlock() {
-        depth--;
+        dedent();
         runAction(blockEnd);
+    }
+
+    public void indent() {
+        depth++;
+    }
+
+    public void dedent() {
+        depth--;
     }
 
     public void writeStatement(Action action) {
