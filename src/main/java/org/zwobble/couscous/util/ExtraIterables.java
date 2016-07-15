@@ -2,8 +2,11 @@ package org.zwobble.couscous.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -161,5 +164,41 @@ public class ExtraIterables {
 
     public static <T> Iterable<T> of(T e1, T e2, T e3) {
         return ImmutableList.of(e1, e2, e3);
+    }
+
+    public static <T> Iterable<T> iterable(Optional<T> optional) {
+        if (optional.isPresent()) {
+            return of(optional.get());
+        } else {
+            return empty();
+        }
+    }
+
+    public static <T> Iterable<T> takeUntil(Iterable<T> iterable, Predicate<T> predicate) {
+        return new Iterable<T>() {
+            @Override
+            public Iterator<T> iterator() {
+                return takeUntil(iterable.iterator(), predicate);
+            }
+        };
+    }
+
+    public static <T> Iterator<T> takeUntil(Iterator<T> iterator, Predicate<T> predicate) {
+        PeekingIterator<T> peekingIterator = Iterators.peekingIterator(iterator);
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return peekingIterator.hasNext() && !predicate.test(peekingIterator.peek());
+            }
+
+            @Override
+            public T next() {
+                if (hasNext()) {
+                    return peekingIterator.next();
+                } else {
+                    throw new NoSuchElementException();
+                }
+            }
+        };
     }
 }

@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class NodeTransformer {
     public static NodeTransformer replaceExpressions(Map<ExpressionNode, ExpressionNode> replacements) {
@@ -29,6 +29,7 @@ public class NodeTransformer {
     }
 
     public static class Builder {
+        private Function<StatementNode, Optional<List<StatementNode>>> transformStatement = statement -> Optional.empty();
         private Function<ExpressionNode, Optional<ExpressionNode>> transformExpression = expression -> Optional.empty();
         private Function<Type, Type> transformType = type -> type;
         private Function<MethodSignature, String> transformMethodName = MethodSignature::getName;
@@ -38,6 +39,13 @@ public class NodeTransformer {
             Function<ExpressionNode, Optional<ExpressionNode>> transformExpression)
         {
             this.transformExpression = transformExpression;
+            return this;
+        }
+
+        public Builder transformStatement(
+            Function<StatementNode, Optional<List<StatementNode>>> transformStatement)
+        {
+            this.transformStatement = transformStatement;
             return this;
         }
 
@@ -59,22 +67,31 @@ public class NodeTransformer {
         }
 
         public NodeTransformer build() {
-            return new NodeTransformer(transformExpression, transformType, transformMethodName, transformFieldName);
+            return new NodeTransformer(
+                transformExpression,
+                transformStatement,
+                transformType,
+                transformMethodName,
+                transformFieldName
+            );
         }
     }
 
     private final Function<ExpressionNode, Optional<ExpressionNode>> transformExpression;
+    private final Function<StatementNode, Optional<List<StatementNode>>> transformStatement;
     private final Function<Type, Type> transformType;
     private final Function<MethodSignature, String> transformMethodName;
     private final Function<String, String> transformFieldName;
 
     private NodeTransformer(
         Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
+        Function<StatementNode, Optional<List<StatementNode>>> transformStatement,
         Function<Type, Type> transformType,
         Function<MethodSignature, String> transformMethodName,
         Function<String, String> transformFieldName)
     {
         this.transformExpression = transformExpression;
+        this.transformStatement = transformStatement;
         this.transformType = transformType;
         this.transformMethodName = transformMethodName;
         this.transformFieldName = transformFieldName;
@@ -121,8 +138,9 @@ public class NodeTransformer {
         return VariableDeclaration.var(declaration.getId(), declaration.getName(), transform(declaration.getType()));
     }
 
-    public final StatementNode transformStatement(StatementNode statement) {
-        return statement.transform(this);
+    public final Iterable<StatementNode> transformStatement(StatementNode statement) {
+        return transformStatement.apply(statement)
+            .orElseGet(() -> list(statement.transform(this)));
     }
 
     public FormalTypeParameterNode transformFormalTypeParameter(FormalTypeParameterNode typeParameter) {
@@ -178,7 +196,7 @@ public class NodeTransformer {
     }
 
     public List<StatementNode> transformStatements(List<StatementNode> body) {
-        return transformList(body, this::transformStatement);
+        return eagerFlatMap(body, this::transformStatement);
     }
 
     public List<ExpressionNode> transformExpressions(List<? extends ExpressionNode> expressions) {

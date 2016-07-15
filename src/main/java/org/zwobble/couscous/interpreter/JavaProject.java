@@ -2,11 +2,13 @@ package org.zwobble.couscous.interpreter;
 
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.frontends.java.Scope;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.interpreter.types.UserDefinedInterpreterType;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
+import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 
 import java.util.List;
 
@@ -22,7 +24,10 @@ public class JavaProject {
     }
 
     public static Project of(List<TypeNode> classNodes) {
-        Iterable<InterpreterType> concreteTypes = Iterables.transform(classNodes, UserDefinedInterpreterType::new);
+        Iterable<InterpreterType> concreteTypes = Iterables.transform(
+            classNodes,
+            classNode -> new UserDefinedInterpreterType(classNode.transform(DesugarSwitchToIfElse.transformer(Scope.create())))
+        );
         return builder()
                 .addClasses(concreteTypes)
                 .build();

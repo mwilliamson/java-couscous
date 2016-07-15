@@ -146,7 +146,7 @@ public abstract class BackendMethodTests {
             .statement(returns(reference(x)));
         assertEquals(value(1), runMethod(method));
     }
-    
+
     protected PrimitiveValue runMethod(MethodNode.Builder methodBuilder, PrimitiveValue... arguments) {
         MethodNode method = methodBuilder.build();
         String className = "com.example.Program";

@@ -289,6 +289,30 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void switchStatements() throws Exception {
+        switchStatementTest("simpleReturn", "one", 1);
+        switchStatementTest("simpleReturn", "zero", 0);
+
+        switchStatementTest("simpleFallthroughReturn", "one", 1);
+        switchStatementTest("simpleFallthroughReturn", "two", 1);
+        switchStatementTest("simpleFallthroughReturn", "zero", 0);
+
+        switchStatementTest("noDefaultReturn", "one", 1);
+        switchStatementTest("noDefaultReturn", "zero", 0);
+    }
+
+    private void switchStatementTest(String methodName, String input, int expected) throws Exception {
+        assertEquals(
+            value(expected),
+            execTestProgram(
+                "switch-statements",
+                ScalarType.of("com.example.SwitchStatements"),
+                methodName,
+                list(value(input)),
+                Types.INT));
+    }
+
+    @Test
     public void stringAdd() throws Exception {
         assertEquals(value("42"), evalExpression(Types.STRING, "\"4\" + \"2\""));
     }

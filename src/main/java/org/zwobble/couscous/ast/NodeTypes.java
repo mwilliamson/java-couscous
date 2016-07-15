@@ -30,6 +30,8 @@ public class NodeTypes {
     public static final int OPERATION = 10021;
     public static final int RETURN = 10022;
     public static final int STATIC_RECEIVER = 10023;
+    public static final int SWITCH = 10032;
+    public static final int SWITCH_CASE = 10033;
     public static final int TERNARY_CONDITIONAL = 10024;
     public static final int THIS_REFERENCE = 10025;
     public static final int THROW = 10026;

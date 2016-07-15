@@ -143,4 +143,8 @@ public class ExtraLists {
             this.exception = exception;
         }
     }
+
+    public static <T> List<T> copyOf(Iterable<T> iterable) {
+        return ImmutableList.copyOf(iterable);
+    }
 }

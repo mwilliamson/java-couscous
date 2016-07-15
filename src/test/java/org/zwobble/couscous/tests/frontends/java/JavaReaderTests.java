@@ -179,25 +179,18 @@ public class JavaReaderTests {
     }
 
     @Test
-    public void switchStatementWithoutFallThroughIsReadAsIfElseStatement() {
-        assertEquals(
-            readStatements(
-                "int",
-                "String _couscous_tmp_0 = \"one\";" +
-                "if (_couscous_tmp_0.equals(\"one\")) { return 0; }" +
-                "else if (_couscous_tmp_0.equals(\"two\")) { return 0; }" +
-                "else { return 1; }"),
-            readStatements("int", "switch (\"one\") { case \"one\": case \"two\": return 0; default: return 1; }"));
-    }
-
-    @Test
-    public void switchStatementWithoutDefaultIsReadAsIfStatementWithoutElseStatement() {
-        assertEquals(
-            readStatements(
-                "int",
-                "String _couscous_tmp_0 = \"one\";" +
-                "if (_couscous_tmp_0.equals(\"one\")) { return 0; } return 1;"),
-            readStatements("int", "switch (\"one\") { case \"one\": return 0; } return 1;"));
+    public void canReadSwitchStatements() {
+        assertThat(
+            readStatement("int", "switch (\"one\") { case \"one\": case \"two\": return 0; default: return 1; }"),
+            isSwitch(
+                hasSwitchValue(equalTo(literal("one"))),
+                hasSwitchCases(
+                    isCase(literal("one"), list()),
+                    isCase(literal("two"), list(returns(literal(0)))),
+                    isDefaultCase(list(returns(literal(1))))
+                )
+            )
+        );
     }
 
     @Test

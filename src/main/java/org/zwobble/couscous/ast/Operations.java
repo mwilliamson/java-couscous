@@ -4,7 +4,9 @@ import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.InternalCouscousValue;
 
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.MethodCallNode.staticMethodCall;
+import static org.zwobble.couscous.ast.TypeCoercionNode.coerce;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -93,5 +95,9 @@ public class Operations {
 
     public static ExpressionNode instanceOf(ExpressionNode value, ScalarType type) {
         return new InstanceOfNode(value, type);
+    }
+
+    public static ExpressionNode methodEquals(ExpressionNode left, ExpressionNode right) {
+        return methodCall(left, "equals", list(coerce(right, Types.OBJECT)), Types.BOOLEAN);
     }
 }

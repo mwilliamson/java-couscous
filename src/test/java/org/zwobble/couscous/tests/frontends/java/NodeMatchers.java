@@ -3,13 +3,15 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.hamcrest.Matcher;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
+import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.types.Type;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
+import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.*;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.hasFeature;
 import static org.zwobble.couscous.tests.util.ExtraMatchers.isInstance;
 
@@ -85,5 +87,34 @@ public class NodeMatchers {
 
     public static Matcher<TryNode> hasFinally(StatementNode... statements) {
         return hasFeature("finally clause", TryNode::getFinallyBody, contains(statements));
+    }
+
+    @SafeVarargs
+    public static Matcher<StatementNode> isSwitch(Matcher<SwitchNode>... matchers) {
+        return isInstance(SwitchNode.class, allOf(matchers));
+    }
+
+    public static Matcher<SwitchNode> hasSwitchValue(Matcher<ExpressionNode> matcher) {
+        return hasFeature("switch value", SwitchNode::getValue, matcher);
+    }
+
+    @SafeVarargs
+    public static Matcher<SwitchNode> hasSwitchCases(Matcher<SwitchCaseNode>... matchers) {
+        return hasFeature("switch cases", SwitchNode::getCases, contains(asList(matchers)));
+    }
+
+    public static Matcher<SwitchCaseNode> isCase(ExpressionNode value, List<StatementNode> statements) {
+        return isCase(Optional.of(value), statements);
+    }
+
+    public static Matcher<SwitchCaseNode> isDefaultCase(List<StatementNode> statements) {
+        return isCase(Optional.empty(), statements);
+    }
+
+    private static Matcher<SwitchCaseNode> isCase(Optional<ExpressionNode> value, List<StatementNode> statements) {
+        return allOf(
+            hasFeature("value", SwitchCaseNode::getValue, equalTo(value)),
+            hasFeature("statements", SwitchCaseNode::getStatements, equalTo(statements))
+        );
     }
 }
