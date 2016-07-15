@@ -9,6 +9,7 @@ public interface PrimitiveValue {
 
     interface Visitor<T> {
         T visitInteger(int value);
+        T visitChar(char value);
         T visitString(String value);
         T visitBoolean(boolean value);
         T visitUnit();

@@ -14,6 +14,10 @@ public class PrimitiveValues {
     public static PrimitiveValue value(int value) {
         return new IntegerValue(value);
     }
+
+    public static PrimitiveValue value(char value) {
+        return new CharValue(value);
+    }
     
     public static PrimitiveValue value(boolean value) {
         return value ? TRUE : FALSE;

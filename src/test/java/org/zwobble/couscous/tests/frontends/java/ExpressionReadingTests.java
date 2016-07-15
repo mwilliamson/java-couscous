@@ -42,7 +42,7 @@ public class ExpressionReadingTests {
         assertEquals(literal(true), readBooleanExpression("true"));
         assertEquals(literal(false), readBooleanExpression("false"));
         assertEquals(literal(42), readIntExpression("42"));
-        assertEquals(literal('h'), readIntExpression("'h'"));
+        assertEquals(literal('h'), readExpression("char", "'h'"));
         assertEquals(literal(Types.STRING), readExpression("Class<String>", "String.class"));
     }
 

@@ -160,6 +160,12 @@ public class CsharpSerializer {
             }
 
             @Override
+            public Void visitChar(char value) {
+                writer.writeChar(value);
+                return null;
+            }
+
+            @Override
             public Void visitString(String value) {
                 writer.writeStringLiteral(value);
                 return null;

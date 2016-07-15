@@ -24,6 +24,12 @@ public class InterpreterValues {
             }
 
             @Override
+            public InterpreterValue visitChar(char value) {
+                // TODO:
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public InterpreterValue visitString(String value) {
                 return StringInterpreterValue.of(value);
             }

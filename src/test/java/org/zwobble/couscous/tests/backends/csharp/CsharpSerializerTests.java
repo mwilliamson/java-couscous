@@ -57,6 +57,12 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void charLiteralsUseSingleQuotes() {
+        assertEquals("'b'", serialize(literal('b')));
+        assertEquals("'\\''", serialize(literal('\'')));
+    }
+
+    @Test
     public void stringLiteralsUseDoubleQuotes() {
         String output = serialize(literal("blah"));
         assertEquals("\"blah\"", output);

@@ -161,6 +161,12 @@ public class PythonCodeGenerator {
             }
 
             @Override
+            public PythonExpressionNode visitChar(char value) {
+                // TODO:
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
             public PythonExpressionNode visitString(String value) {
                 return pythonStringLiteral(value);
             }

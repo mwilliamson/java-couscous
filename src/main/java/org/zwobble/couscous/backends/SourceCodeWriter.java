@@ -37,6 +37,14 @@ public class SourceCodeWriter {
         builder.append(value);
     }
 
+    public void writeChar(char value) {
+        builder.append("'");
+        if (value == '\'') {
+            builder.append("\\");
+        }
+        builder.append(value).append("'");
+    }
+
     public void writeStringLiteral(String value) {
         builder.append("\"");
         builder.append(value

@@ -20,6 +20,10 @@ public class LiteralNode implements ExpressionNode {
     public static LiteralNode literal(String value) {
         return literal(value(value));
     }
+
+    public static LiteralNode literal(char value) {
+        return literal(value(value));
+    }
     
     public static LiteralNode literal(int value) {
         return literal(value(value));
