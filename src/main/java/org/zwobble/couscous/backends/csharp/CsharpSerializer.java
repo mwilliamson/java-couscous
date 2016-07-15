@@ -7,6 +7,8 @@ import org.zwobble.couscous.ast.sugar.SwitchNode;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
 import org.zwobble.couscous.backends.SourceCodeWriter;
+import org.zwobble.couscous.backends.csharp.primitives.PrimitiveInstanceMethodCall;
+import org.zwobble.couscous.backends.csharp.primitives.PrimitiveStaticMethodCall;
 import org.zwobble.couscous.types.*;
 import org.zwobble.couscous.util.Action;
 import org.zwobble.couscous.values.PrimitiveValue;
@@ -139,6 +141,14 @@ public class CsharpSerializer {
 
     private void write(Node node) {
         write.accept(node);
+    }
+
+    public void visit(PrimitiveStaticMethodCall expression) {
+        write(expression.generate());
+    }
+
+    public void visit(PrimitiveInstanceMethodCall expression) {
+        write(expression.generate());
     }
 
     public void visit(LiteralNode literal) {

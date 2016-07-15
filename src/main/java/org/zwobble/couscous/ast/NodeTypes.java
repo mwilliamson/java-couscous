@@ -3,6 +3,9 @@ package org.zwobble.couscous.ast;
 import com.google.common.collect.ImmutableMap;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
 import org.zwobble.couscous.ast.sugar.SwitchNode;
+import org.zwobble.couscous.backends.csharp.CsharpNodeTypes;
+import org.zwobble.couscous.backends.csharp.primitives.PrimitiveInstanceMethodCall;
+import org.zwobble.couscous.backends.csharp.primitives.PrimitiveStaticMethodCall;
 
 import java.util.Map;
 
@@ -80,6 +83,8 @@ public class NodeTypes {
         .put(TypeCoercionNode.class, TYPE_COERCION)
         .put(VariableReferenceNode.class, VARIABLE_REFERENCE)
         .put(WhileNode.class, WHILE)
+        .put(PrimitiveInstanceMethodCall.class, CsharpNodeTypes.PRIMITIVE_INSTANCE_METHOD_CALL)
+        .put(PrimitiveStaticMethodCall.class, CsharpNodeTypes.PRIMITIVE_STATIC_METHOD_CALL)
         .build();
 
     public static int forClass(Class<?> nodeClass) {

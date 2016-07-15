@@ -126,8 +126,8 @@ public class NodeTransformer {
     }
 
     public ExpressionNode transformExpression(ExpressionNode expression) {
-        return transformExpression.apply(expression)
-            .orElseGet(() -> expression.transform(this));
+        ExpressionNode transformed = expression.transform(this);
+        return transformExpression.apply(transformed).orElse(transformed);
     }
 
     public Receiver transformReceiver(Receiver receiver) {
@@ -139,8 +139,8 @@ public class NodeTransformer {
     }
 
     public final Iterable<StatementNode> transformStatement(StatementNode statement) {
-        return transformStatement.apply(statement)
-            .orElseGet(() -> list(statement.transform(this)));
+        StatementNode transformed = statement.transform(this);
+        return transformStatement.apply(transformed).orElseGet(() -> list(transformed));
     }
 
     public FormalTypeParameterNode transformFormalTypeParameter(FormalTypeParameterNode typeParameter) {
