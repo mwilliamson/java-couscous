@@ -3,7 +3,6 @@ package org.zwobble.couscous.interpreter;
 import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.frontends.java.Scope;
 import org.zwobble.couscous.interpreter.types.InterpreterType;
 import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.interpreter.types.UserDefinedInterpreterType;
@@ -25,7 +24,7 @@ public class JavaProject {
     }
 
     public static Project of(List<TypeNode> classNodes) {
-        NodeTransformer transformer = DesugarSwitchToIfElse.transformer(Scope.create());
+        NodeTransformer transformer = DesugarSwitchToIfElse.transformer();
         Iterable<InterpreterType> concreteTypes = Iterables.transform(
             classNodes,
             classNode -> new UserDefinedInterpreterType(transformer.transformTypeDeclaration(classNode))

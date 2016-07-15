@@ -10,28 +10,41 @@ import java.util.*;
 
 public class Scope {
     public static Scope create() {
-        return new Scope(new HashMap<>(), new HashSet<>(), Identifier.TOP, NaturalNumbers.INSTANCE.iterator());
+        return new Scope(
+            new HashMap<>(),
+            new HashSet<>(),
+            Identifier.TOP,
+            "_couscous_tmp_",
+            NaturalNumbers.INSTANCE.iterator()
+        );
     }
 
     private final Map<String, VariableDeclaration> variablesByKey;
     private final Set<Identifier> identifiers;
     private final Identifier identifier;
+    private final String temporaryPrefix;
     private final Iterator<Integer> temporaryCounter;
 
     private Scope(
         Map<String, VariableDeclaration> variablesByKey,
         Set<Identifier> identifiers,
         Identifier identifier,
+        String temporaryPrefix,
         Iterator<Integer> temporaryCounter)
     {
         this.variablesByKey = variablesByKey;
         this.identifiers = identifiers;
         this.identifier = identifier;
+        this.temporaryPrefix = temporaryPrefix;
         this.temporaryCounter = temporaryCounter;
     }
 
     public Identifier getIdentifier() {
         return identifier;
+    }
+
+    public Scope temporaryPrefix(String temporaryPrefix) {
+        return new Scope(variablesByKey, identifiers, identifier, temporaryPrefix, temporaryCounter);
     }
 
     public Scope enterClass(ScalarType className) {
@@ -48,7 +61,7 @@ public class Scope {
     }
 
     private Scope enter(Identifier newIdentifier) {
-        return new Scope(variablesByKey, identifiers, newIdentifier, temporaryCounter);
+        return new Scope(variablesByKey, identifiers, newIdentifier, temporaryPrefix, temporaryCounter);
     }
 
     public FormalArgumentNode formalArgument(String name, Type type) {
@@ -85,7 +98,7 @@ public class Scope {
     }
 
     public LocalVariableDeclarationNode temporaryVariable(Type type, ExpressionNode initialValue) {
-        return localVariable("_couscous_tmp_" + temporaryCounter.next(), type, initialValue);
+        return localVariable(temporaryPrefix + temporaryCounter.next(), type, initialValue);
     }
 
     public ExpressionNode reference(String key) {

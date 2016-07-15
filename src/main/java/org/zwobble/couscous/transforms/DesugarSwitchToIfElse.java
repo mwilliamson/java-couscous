@@ -28,7 +28,8 @@ import static org.zwobble.couscous.util.UpToAndIncludingIterable.upToAndIncludin
 public class DesugarSwitchToIfElse {
     // TODO: ensure globally unique IDs, and locally unique variable names
 
-    public static NodeTransformer transformer(Scope scope) {
+    public static NodeTransformer transformer() {
+        Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_switch_to_if");
         return NodeTransformer.builder()
             .transformStatement(statement -> {
                 if (statement.type() == NodeTypes.SWITCH) {
