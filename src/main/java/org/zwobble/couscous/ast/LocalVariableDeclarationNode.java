@@ -60,7 +60,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new LocalVariableDeclarationNode(
             transformer.transform(declaration),
             transformer.transformExpression(initialValue));

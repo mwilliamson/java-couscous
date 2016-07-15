@@ -44,7 +44,7 @@ public class ConstructorCallNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new ConstructorCallNode(
             transformer.transform(type),
             transformer.transformExpressions(arguments));

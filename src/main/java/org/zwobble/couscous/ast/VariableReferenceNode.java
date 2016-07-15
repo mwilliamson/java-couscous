@@ -49,7 +49,7 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new VariableReferenceNode(transformer.transform(referent));
     }
 

@@ -7,6 +7,7 @@ import com.google.common.collect.Iterators;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.frontends.java.Scope;
@@ -59,7 +60,8 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(TypeNode sugaredTypeNode) {
-        TypeNode typeNode = sugaredTypeNode.transform(DesugarSwitchToIfElse.transformer(Scope.create()));
+        NodeTransformer switchTransformer = DesugarSwitchToIfElse.transformer(Scope.create());
+        TypeNode typeNode = switchTransformer.transformTypeDeclaration(sugaredTypeNode);
 
         Iterator<PythonImportNode> imports = generateImports(typeNode).iterator();
 

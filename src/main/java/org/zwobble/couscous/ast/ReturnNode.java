@@ -29,7 +29,7 @@ public class ReturnNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new ReturnNode(transformer.transformExpression(value));
     }
 

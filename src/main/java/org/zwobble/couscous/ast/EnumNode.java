@@ -60,7 +60,7 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
-    public TypeNode transform(NodeTransformer transformer) {
+    public TypeNode transformSubtree(NodeTransformer transformer) {
         return new EnumNode(
             transformer.transform(name),
             eagerMap(values, transformer::transformFieldName));

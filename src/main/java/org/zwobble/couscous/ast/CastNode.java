@@ -37,7 +37,7 @@ public class CastNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new CastNode(transformer.transformExpression(expression), transformer.transform(type));
     }
 

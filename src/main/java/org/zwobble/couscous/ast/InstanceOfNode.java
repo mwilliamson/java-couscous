@@ -39,7 +39,7 @@ public class InstanceOfNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new InstanceOfNode(
             transformer.transformExpression(left),
             transformer.transform(right));

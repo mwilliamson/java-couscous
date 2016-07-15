@@ -51,7 +51,7 @@ public class AssignmentNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new AssignmentNode(
             (AssignableExpressionNode) transformer.transformExpression(target),
             transformer.transformExpression(value));

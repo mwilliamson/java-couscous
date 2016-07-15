@@ -29,7 +29,7 @@ public class ExpressionStatementNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new ExpressionStatementNode(transformer.transformExpression(expression));
     }
 

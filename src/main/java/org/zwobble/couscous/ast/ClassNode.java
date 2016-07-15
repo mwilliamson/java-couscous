@@ -106,7 +106,7 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
-    public ClassNode transform(NodeTransformer transformer) {
+    public ClassNode transformSubtree(NodeTransformer transformer) {
         return new ClassNode(
             transformer.transform(name),
             transformer.transformFormalTypeParameters(typeParameters),

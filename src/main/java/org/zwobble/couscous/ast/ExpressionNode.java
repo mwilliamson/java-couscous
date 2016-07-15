@@ -5,5 +5,5 @@ import org.zwobble.couscous.types.Type;
 
 public interface ExpressionNode extends Node {
     Type getType();
-    ExpressionNode transform(NodeTransformer transformer);
+    ExpressionNode transformSubtree(NodeTransformer transformer);
 }

@@ -37,7 +37,7 @@ public class PrimitiveInstanceMethodCall implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new PrimitiveInstanceMethodCall(
             method,
             transformer.transformExpression(receiver),

@@ -39,7 +39,7 @@ public class StaticReceiver implements Receiver {
     }
 
     @Override
-    public Receiver transform(NodeTransformer transformer) {
+    public Receiver transformSubtree(NodeTransformer transformer) {
         return new StaticReceiver(transformer.transform(type));
     }
 

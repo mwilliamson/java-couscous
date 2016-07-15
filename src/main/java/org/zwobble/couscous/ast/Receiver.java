@@ -5,7 +5,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
 public interface Receiver extends Node {
     <T> T accept(Mapper<T> mapper);
-    Receiver transform(NodeTransformer transformer);
+    Receiver transformSubtree(NodeTransformer transformer);
 
     interface Mapper<T> {
         T visit(ExpressionNode receiver);

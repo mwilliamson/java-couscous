@@ -202,7 +202,7 @@ public class MethodNode implements Node {
         );
     }
 
-    public MethodNode transform(NodeTransformer transformer) {
+    public MethodNode transformSubtree(NodeTransformer transformer) {
         return new MethodNode(
             transformer.transformAnnotations(annotations),
             isStatic,

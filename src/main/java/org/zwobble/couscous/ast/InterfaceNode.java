@@ -75,7 +75,7 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
-    public InterfaceNode transform(NodeTransformer transformer) {
+    public InterfaceNode transformSubtree(NodeTransformer transformer) {
         return new InterfaceNode(
             transformer.transform(name),
             transformer.transformFormalTypeParameters(typeParameters),

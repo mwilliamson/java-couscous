@@ -29,7 +29,7 @@ public class AnnotationNode implements Node {
         return ExtraIterables.empty();
     }
 
-    public AnnotationNode transform(NodeTransformer transformer) {
+    public AnnotationNode transformSubtree(NodeTransformer transformer) {
         return new AnnotationNode(transformer.transform(type));
     }
 

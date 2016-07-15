@@ -199,7 +199,7 @@ public class JavaReader {
             Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
             freeVariable -> captureAccess(className, freeVariable));
         NodeTransformer transformer = NodeTransformer.replaceExpressions(replacements);
-        return eagerMap(body, statement -> statement.transform(transformer));
+        return eagerFlatMap(body, transformer::transformStatement);
     }
 
     private ConstructorNode buildConstructor(
@@ -321,7 +321,7 @@ public class JavaReader {
                 thisReference(anonymousClass.getType().get()),
                 thisReference(className)
             ));
-            classNode = classNode.transform(nodeTransformer);
+            classNode = nodeTransformer.transformClass(classNode);
         }
         return classWithCapture(scope, classNode);
     }

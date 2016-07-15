@@ -70,7 +70,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new FieldAccessNode(
             transformer.transformReceiver(left),
             transformer.transformFieldName(fieldName),

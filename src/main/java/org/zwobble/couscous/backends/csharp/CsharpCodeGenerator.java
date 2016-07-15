@@ -42,7 +42,7 @@ public class CsharpCodeGenerator {
     }
 
     private Node generateCode(Node node) {
-        return node.transform(CsharpPrimitiveMethods.TRANSFORMER).transform(nodeTransformer);
+        return nodeTransformer.transform(CsharpPrimitiveMethods.TRANSFORMER.transform(node));
     }
 
     private Type transformType(Type type) {

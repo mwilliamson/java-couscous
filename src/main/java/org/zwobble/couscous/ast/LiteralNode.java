@@ -68,7 +68,7 @@ public class LiteralNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new LiteralNode(transformValue(transformer), transformer.transform(type));
     }
 

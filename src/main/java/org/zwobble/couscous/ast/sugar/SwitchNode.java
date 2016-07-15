@@ -39,10 +39,10 @@ public class SwitchNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new SwitchNode(
             transformer.transformExpression(value),
-            eagerMap(cases, caseNode -> caseNode.transform(transformer))
+            eagerMap(cases, caseNode -> caseNode.transformSubtree(transformer))
         );
     }
 }

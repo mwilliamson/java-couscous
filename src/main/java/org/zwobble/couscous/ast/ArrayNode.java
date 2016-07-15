@@ -43,7 +43,7 @@ public class ArrayNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new ArrayNode(
             transformer.transform(elementType),
             transformer.transformExpressions(elements));

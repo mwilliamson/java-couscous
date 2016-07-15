@@ -50,7 +50,7 @@ public class IfStatementNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new IfStatementNode(
             transformer.transformExpression(condition),
             transformer.transformStatements(trueBranch),

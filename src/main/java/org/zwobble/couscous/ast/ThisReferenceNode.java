@@ -35,7 +35,7 @@ public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new ThisReferenceNode(transformer.transform(type));
     }
 

@@ -34,7 +34,7 @@ public class InstanceReceiver implements Receiver {
     }
 
     @Override
-    public Receiver transform(NodeTransformer transformer) {
+    public Receiver transformSubtree(NodeTransformer transformer) {
         return new InstanceReceiver(transformer.transformExpression(expression));
     }
 

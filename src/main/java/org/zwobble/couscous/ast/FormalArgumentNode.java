@@ -37,7 +37,7 @@ public class FormalArgumentNode implements VariableNode, Node {
         return ExtraIterables.empty();
     }
 
-    public FormalArgumentNode transform(NodeTransformer transformer) {
+    public FormalArgumentNode transformSubtree(NodeTransformer transformer) {
         return new FormalArgumentNode(transformer.transform(declaration));
     }
 

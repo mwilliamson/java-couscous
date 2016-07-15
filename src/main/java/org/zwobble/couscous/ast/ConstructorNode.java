@@ -43,7 +43,7 @@ public class ConstructorNode implements Node {
         return Iterables.concat(arguments, body);
     }
 
-    public ConstructorNode transform(NodeTransformer transformer) {
+    public ConstructorNode transformSubtree(NodeTransformer transformer) {
         return new ConstructorNode(
             transformer.transformFormalArguments(arguments),
             transformer.transformStatements(body));

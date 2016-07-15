@@ -56,7 +56,7 @@ public class OperationNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new OperationNode(
             operator,
             transformer.transformExpressions(arguments),

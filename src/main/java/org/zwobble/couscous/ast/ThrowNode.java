@@ -29,7 +29,7 @@ public class ThrowNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new ThrowNode(transformer.transformExpression(value));
     }
 

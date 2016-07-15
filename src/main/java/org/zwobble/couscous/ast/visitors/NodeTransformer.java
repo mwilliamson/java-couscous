@@ -8,6 +8,7 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
+import org.zwobble.couscous.util.ExtraLists;
 
 import java.util.List;
 import java.util.Map;
@@ -97,6 +98,22 @@ public class NodeTransformer {
         this.transformFieldName = transformFieldName;
     }
 
+    public Node transform(Node node) {
+        if (node instanceof ExpressionNode) {
+            return transformExpression((ExpressionNode) node);
+        } else if (node instanceof StatementNode) {
+            List<StatementNode> statements = ExtraLists.copyOf(transformStatement((StatementNode) node));
+            if (statements.size() != 1) {
+                throw new UnsupportedOperationException("TODO: add support for compound statements");
+            }
+            return statements.get(0);
+        } else if (node instanceof TypeNode) {
+            return transformTypeDeclaration((TypeNode) node);
+        } else {
+            return node.transformSubtree(this);
+        }
+    }
+
     public MethodSignature transform(MethodSignature signature) {
         return new MethodSignature(
             transformMethodName(signature),
@@ -126,12 +143,12 @@ public class NodeTransformer {
     }
 
     public ExpressionNode transformExpression(ExpressionNode expression) {
-        ExpressionNode transformed = expression.transform(this);
+        ExpressionNode transformed = expression.transformSubtree(this);
         return transformExpression.apply(transformed).orElse(transformed);
     }
 
     public Receiver transformReceiver(Receiver receiver) {
-        return receiver.transform(this);
+        return receiver.transformSubtree(this);
     }
 
     public VariableDeclaration transform(VariableDeclaration declaration) {
@@ -139,44 +156,48 @@ public class NodeTransformer {
     }
 
     public final Iterable<StatementNode> transformStatement(StatementNode statement) {
-        StatementNode transformed = statement.transform(this);
+        StatementNode transformed = statement.transformSubtree(this);
         return transformStatement.apply(transformed).orElseGet(() -> list(transformed));
     }
 
     public FormalTypeParameterNode transformFormalTypeParameter(FormalTypeParameterNode typeParameter) {
-        return typeParameter.transform(this);
+        return typeParameter.transformSubtree(this);
     }
 
     public FormalArgumentNode transformFormalArgument(FormalArgumentNode formalArgumentNode) {
-        return formalArgumentNode.transform(this);
+        return formalArgumentNode.transformSubtree(this);
     }
 
     public AnnotationNode transformAnnotation(AnnotationNode annotation) {
-        return annotation.transform(this);
+        return annotation.transformSubtree(this);
     }
 
     public MethodNode transformMethod(MethodNode method) {
-        return method.transform(this);
+        return method.transformSubtree(this);
     }
 
     public ConstructorNode transformConstructor(ConstructorNode constructor) {
-        return constructor.transform(this);
+        return constructor.transformSubtree(this);
     }
 
     public FieldDeclarationNode transformField(FieldDeclarationNode field) {
-        return field.transform(this);
+        return field.transformSubtree(this);
+    }
+
+    public TypeNode transformTypeDeclaration(TypeNode typeNode) {
+        return typeNode.transformSubtree(this);
     }
 
     public ClassNode transformClass(ClassNode classNode) {
-        return classNode.transform(this);
+        return classNode.transformSubtree(this);
     }
 
     private Node transformInterface(InterfaceNode interfaceNode) {
-        return interfaceNode.transform(this);
+        return interfaceNode.transformSubtree(this);
     }
 
     private Node transformEnum(EnumNode enumNode) {
-        return enumNode.transform(this);
+        return enumNode.transformSubtree(this);
     }
 
     public List<AnnotationNode> transformAnnotations(List<AnnotationNode> annotations) {

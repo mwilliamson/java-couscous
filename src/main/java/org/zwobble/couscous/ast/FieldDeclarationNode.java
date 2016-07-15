@@ -49,7 +49,7 @@ public class FieldDeclarationNode implements Node {
         return ExtraIterables.empty();
     }
 
-    public FieldDeclarationNode transform(NodeTransformer transformer) {
+    public FieldDeclarationNode transformSubtree(NodeTransformer transformer) {
         return new FieldDeclarationNode(
             isStatic,
             transformer.transformFieldName(name),

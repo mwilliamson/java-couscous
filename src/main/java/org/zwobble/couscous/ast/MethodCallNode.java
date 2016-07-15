@@ -164,7 +164,7 @@ public class MethodCallNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new MethodCallNode(
             transformer.transformReceiver(receiver),
             transformer.transformMethodName(signature()),

@@ -47,7 +47,7 @@ public class TypeCoercionNode implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new TypeCoercionNode(
             transformer.transformExpression(expression),
             transformer.transform(type));

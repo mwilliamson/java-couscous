@@ -33,7 +33,7 @@ public class PrimitiveStaticMethodCall implements ExpressionNode {
     }
 
     @Override
-    public ExpressionNode transform(NodeTransformer transformer) {
+    public ExpressionNode transformSubtree(NodeTransformer transformer) {
         return new PrimitiveStaticMethodCall(
             method,
             transformer.transformExpressions(arguments)

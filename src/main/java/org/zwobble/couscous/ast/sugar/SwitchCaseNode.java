@@ -58,7 +58,7 @@ public class SwitchCaseNode implements Node {
     }
 
     @Override
-    public SwitchCaseNode transform(NodeTransformer transformer) {
+    public SwitchCaseNode transformSubtree(NodeTransformer transformer) {
         return new SwitchCaseNode(
             value.map(transformer::transformExpression),
             transformer.transformStatements(statements)

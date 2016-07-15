@@ -38,7 +38,7 @@ public class FormalTypeParameterNode implements Node {
         return ExtraIterables.empty();
     }
 
-    public FormalTypeParameterNode transform(NodeTransformer transformer) {
+    public FormalTypeParameterNode transformSubtree(NodeTransformer transformer) {
         return new FormalTypeParameterNode(transformer.transform(type));
     }
 

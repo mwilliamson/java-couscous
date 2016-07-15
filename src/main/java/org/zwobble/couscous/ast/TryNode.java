@@ -58,7 +58,7 @@ public class TryNode implements StatementNode {
     }
 
     @Override
-    public StatementNode transform(NodeTransformer transformer) {
+    public StatementNode transformSubtree(NodeTransformer transformer) {
         return new TryNode(
             transformer.transformStatements(body),
             eagerMap(exceptionHandlers, handler -> new ExceptionHandlerNode(
