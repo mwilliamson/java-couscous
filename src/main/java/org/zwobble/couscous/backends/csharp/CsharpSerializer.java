@@ -110,7 +110,7 @@ public class CsharpSerializer {
             "while");
         builder.addAll(RESERVED_TYPE_IDENTIFIERS);
         RESERVED_IDENTIFIERS = builder.build();
-    } ;
+    }
 
     public static String serialize(Node node) {
         SourceCodeWriter writer = new SourceCodeWriter(
