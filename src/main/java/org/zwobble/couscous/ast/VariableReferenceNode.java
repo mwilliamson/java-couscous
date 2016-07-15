@@ -1,9 +1,8 @@
 package org.zwobble.couscous.ast;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraIterables;
 
 public class VariableReferenceNode implements AssignableExpressionNode, ReferenceNode {
@@ -25,11 +24,6 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
         return referent;
     }
     
-    @Override
-    public <T> T accept(ExpressionNodeMapper<T> visitor) {
-        return visitor.visit(this);
-    }
-
     public Identifier getReferentId() {
         return referent.getId();
     }

@@ -1,6 +1,5 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -31,11 +30,6 @@ public class ArrayNode implements ExpressionNode {
     @Override
     public Type getType() {
         return Types.array(elementType);
-    }
-
-    @Override
-    public <T> T accept(ExpressionNodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

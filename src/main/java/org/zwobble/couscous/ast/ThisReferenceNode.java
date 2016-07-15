@@ -1,8 +1,7 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraIterables;
 
 public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
@@ -20,11 +19,6 @@ public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
         return type;
     }
     
-    @Override
-    public <T> T accept(ExpressionNodeMapper<T> visitor) {
-        return visitor.visit(this);
-    }
-
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);

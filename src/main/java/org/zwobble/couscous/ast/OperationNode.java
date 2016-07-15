@@ -1,8 +1,7 @@
 package org.zwobble.couscous.ast;
 
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 
@@ -44,11 +43,6 @@ public class OperationNode implements ExpressionNode {
     @Override
     public Type getType() {
         return type;
-    }
-
-    @Override
-    public <T> T accept(ExpressionNodeMapper<T> visitor) {
-        return visitor.visit(this);
     }
 
     @Override

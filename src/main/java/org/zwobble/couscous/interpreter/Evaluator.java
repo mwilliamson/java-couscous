@@ -1,8 +1,8 @@
 package org.zwobble.couscous.interpreter;
 
 import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.DynamicNodeVisitor;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.interpreter.errors.ConditionMustBeBoolean;
 import org.zwobble.couscous.interpreter.errors.InvalidCast;
 import org.zwobble.couscous.interpreter.values.*;
@@ -13,6 +13,7 @@ import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.types.Types.erasure;
@@ -20,7 +21,7 @@ import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
-public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
+public class Evaluator {
     public static InterpreterValue eval(Environment environment, ExpressionNode expression) {
         return new Evaluator(environment).eval(expression);
     }
@@ -28,6 +29,8 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     public static boolean evalCondition(Environment environment, ExpressionNode expression) {
         return new Evaluator(environment).evalCondition(expression);
     }
+
+    private static final BiFunction<Node, Evaluator, InterpreterValue> EVAL = DynamicNodeMapper.visitor(Evaluator.class, "visit");
     
     private final Environment environment;
     
@@ -36,20 +39,17 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
     }
     
     public InterpreterValue eval(ExpressionNode expression) {
-        return expression.accept(this);
+        return EVAL.apply(expression, this);
     }
     
-    @Override
     public InterpreterValue visit(LiteralNode literal) {
         return InterpreterValues.value(literal.getValue());
     }
     
-    @Override
     public InterpreterValue visit(VariableReferenceNode variableReference) {
         return environment.get(variableReference.getReferentId());
     }
     
-    @Override
     public InterpreterValue visit(ThisReferenceNode reference) {
         InterpreterValue thisValue = environment.getThis().get();
         // TODO: add a test for this
@@ -57,14 +57,12 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return thisValue;
     }
 
-    @Override
     public InterpreterValue visit(ArrayNode array) {
         return new ArrayInterpreterValue(
             array.getElementType(),
             eagerMap(array.getElements(), this::eval));
     }
 
-    @Override
     public InterpreterValue visit(AssignmentNode assignment) {
         InterpreterValue value = eval(assignment.getValue());
         AssignableExpressionVisitor.visit.accept(assignment.getTarget(), new AssignableExpressionVisitor() {
@@ -89,7 +87,6 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         void visit(FieldAccessNode node);
     }
     
-    @Override
     public InterpreterValue visit(TernaryConditionalNode ternaryConditional) {
         boolean condition = evalCondition(ternaryConditional.getCondition());
         ExpressionNode branch = condition ? ternaryConditional.getIfTrue() : ternaryConditional.getIfFalse();
@@ -104,7 +101,6 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return ((BooleanInterpreterValue)value).getValue();
     }
 
-    @Override
     public InterpreterValue visit(MethodCallNode methodCall) {
         List<InterpreterValue> arguments = evalArguments(methodCall.getArguments());
         MethodSignature signature = methodCall.signature();
@@ -113,7 +109,6 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
             .callMethod(environment, signature.generic(), new Arguments(list(), arguments));
     }
     
-    @Override
     public InterpreterValue visit(ConstructorCallNode call) {
         StaticReceiverValue clazz = environment.findClass(erasure(call.getType()));
         List<InterpreterValue> arguments = evalArguments(call.getArguments());
@@ -123,24 +118,15 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         return clazz.callConstructor(environment, new Arguments(typeParameters, arguments));
     }
 
-    @Override
     public InterpreterValue visit(OperationNode operation) {
         return eval(operation.desugar());
     }
 
-    @Override
-    public InterpreterValue visit(InstanceOfNode instanceOf) {
-        // TODO:
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public InterpreterValue visit(FieldAccessNode fieldAccess) {
         ReceiverValue left = evalReceiver(fieldAccess.getLeft());
         return left.getField(fieldAccess.getFieldName());
     }
 
-    @Override
     public InterpreterValue visit(TypeCoercionNode typeCoercion) {
         // TODO: check that the type coercion is valid
         // TODO: boxing booleans
@@ -154,7 +140,6 @@ public class Evaluator implements ExpressionNodeMapper<InterpreterValue> {
         }
     }
 
-    @Override
     public InterpreterValue visit(CastNode cast) {
         InterpreterValue value = eval(cast.getExpression());
         if (!InterpreterTypes.isSubType(cast.getType(), value.getType())) {

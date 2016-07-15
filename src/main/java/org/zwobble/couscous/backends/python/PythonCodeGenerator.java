@@ -7,7 +7,6 @@ import com.google.common.collect.Iterators;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
-import org.zwobble.couscous.ast.visitors.ExpressionNodeMapper;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
 import org.zwobble.couscous.types.ScalarType;
@@ -252,7 +251,7 @@ public class PythonCodeGenerator {
         public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
                 AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();
-                return pythonAssignment(assignment.getTarget().accept(EXPRESSION_GENERATOR), generateExpression(assignment.getValue()));
+                return pythonAssignment(generateExpression(assignment.getTarget()), generateExpression(assignment.getValue()));
             } else {
                 return pythonExpressionStatement(generateExpression(expressionStatement.getExpression()));
             }
@@ -277,7 +276,7 @@ public class PythonCodeGenerator {
     }
 
     public static PythonExpressionNode generateExpression(ExpressionNode expression) {
-        return expression.accept(EXPRESSION_GENERATOR);
+        return ExpressionGenerator.VISITOR.apply(expression);
     }
 
     private static List<PythonExpressionNode> generateExpressions(Iterable<? extends ExpressionNode> expressions) {
@@ -285,40 +284,32 @@ public class PythonCodeGenerator {
     }
     private static final ExpressionGenerator EXPRESSION_GENERATOR = new ExpressionGenerator();
 
-    private static class ExpressionGenerator implements ExpressionNodeMapper<PythonExpressionNode> {
-        @Override
+    public static class ExpressionGenerator {
+        private static final Function<Node, PythonExpressionNode> VISITOR =
+            DynamicNodeMapper.instantiate(new ExpressionGenerator(), "visit");
+
         public PythonExpressionNode visit(LiteralNode literal) {
             return generateCode(literal.getValue());
         }
 
-        @Override
         public PythonVariableReferenceNode visit(VariableReferenceNode variableReference) {
             return pythonVariableReference(variableReference.getReferent().getName());
         }
 
-        @Override
         public PythonExpressionNode visit(ThisReferenceNode reference) {
             return pythonVariableReference("self");
         }
 
-        @Override
         public PythonExpressionNode visit(ArrayNode array) {
             return pythonList(eagerMap(
                 array.getElements(),
                 PythonCodeGenerator::generateExpression));
         }
 
-        @Override
-        public PythonExpressionNode visit(AssignmentNode assignment) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public PythonExpressionNode visit(TernaryConditionalNode ternaryConditional) {
             return pythonConditionalExpression(generateExpression(ternaryConditional.getCondition()), generateExpression(ternaryConditional.getIfTrue()), generateExpression(ternaryConditional.getIfFalse()));
         }
 
-        @Override
         public PythonExpressionNode visit(MethodCallNode methodCall) {
             PythonExpressionNode receiver = generateReceiver(methodCall.getReceiver());
             List<PythonExpressionNode> arguments = generateExpressions(methodCall.getArguments());
@@ -347,7 +338,6 @@ public class PythonCodeGenerator {
             });
         }
 
-        @Override
         public PythonExpressionNode visit(ConstructorCallNode call) {
             final Type className = call.getType();
             final org.zwobble.couscous.backends.python.ast.PythonVariableReferenceNode classReference = typeReference(className);
@@ -355,23 +345,14 @@ public class PythonCodeGenerator {
             return pythonCall(classReference, arguments);
         }
 
-        @Override
         public PythonExpressionNode visit(OperationNode operation) {
             return generateExpression(operation.desugar());
         }
 
-        @Override
-        public PythonExpressionNode visit(InstanceOfNode instanceOf) {
-            // TODO:
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public PythonExpressionNode visit(FieldAccessNode fieldAccess) {
             return pythonAttributeAccess(generateReceiver(fieldAccess.getLeft()), fieldAccess.getFieldName());
         }
 
-        @Override
         public PythonExpressionNode visit(TypeCoercionNode typeCoercion) {
             PythonExpressionNode value = generateExpression(typeCoercion.getExpression());
             if (isIntegerBox(typeCoercion)) {
@@ -386,7 +367,6 @@ public class PythonCodeGenerator {
             }
         }
 
-        @Override
         public PythonExpressionNode visit(CastNode cast) {
             // TODO: implement this properly
             // Can't test this properly (i.e. in one test, rather than one per backend)
