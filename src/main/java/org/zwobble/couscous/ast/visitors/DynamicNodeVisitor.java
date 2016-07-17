@@ -39,7 +39,7 @@ import static org.zwobble.couscous.util.ExtraMaps.entry;
 /**
  * Dynamically generate a method to dispatch methods based on node type.
  *
- * <p>For instance, let's say you've defined two methods in a class:</p>
+ * <p>For instance, let's say you've defined two methods in a class called {@code NodeWriter}:</p>
  *
  * <blockquote><pre>
  *     void visit(LiteralNode);
@@ -49,7 +49,7 @@ import static org.zwobble.couscous.util.ExtraMaps.entry;
  * Calling:
  *
  * <blockquote><pre>
- *     DynamicNodeVisitor.build(NodeWriter.class, "visit").instantiate(nodeWriter)
+ *     DynamicNodeVisitor.instantiate(nodeWriter, "visit")
  * </pre></blockquote>
  *
  * will generate a function accepting a node equivalent to:
@@ -68,8 +68,10 @@ import static org.zwobble.couscous.util.ExtraMaps.entry;
  * </pre></blockquote>
  *
  * <p>
- *   Note that {@code build} is comparatively expensive,
- *   so should normally be called once separately from {@code instantiate}.
+ *   {@code visit} methods are found by performing reflection on the run-time type
+ *   of the value passed to {@code instantiate()}. To use reflection on a super-type,
+ *   or to avoid repeating the cost of looking up the generated code for that type,
+ *   use {@code visitor()} instead of {@code instantiate()}.
  * </p>
  *
  * <p>
