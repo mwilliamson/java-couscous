@@ -194,7 +194,7 @@ public class PythonCodeGenerator {
     private static PythonFunctionDefinitionNode generateConstructor(ConstructorNode constructor) {
         Iterable<String> explicitArgumentNames = transform(constructor.getArguments(), argument -> argument.getName());
         Iterable<String> argumentNames = Iterables.concat(list("self"), explicitArgumentNames);
-        List<PythonStatementNode> pythonBody = constructor.getBody().stream().map(PythonCodeGenerator::generateStatement).collect(Collectors.toList());
+        List<PythonStatementNode> pythonBody = generateStatements(constructor.getBody());
         return pythonFunctionDefinition("__init__", ImmutableList.copyOf(argumentNames), new PythonBlock(pythonBody));
     }
 
@@ -245,46 +245,51 @@ public class PythonCodeGenerator {
     }
 
     private static List<PythonStatementNode> generateStatements(List<StatementNode> statements) {
-        return statements.stream()
-            .map(PythonCodeGenerator::generateStatement)
-            .collect(Collectors.toList());
+        return eagerFlatMap(statements, PythonCodeGenerator::generateStatement);
     }
 
-    private static PythonStatementNode generateStatement(StatementNode statement) {
+    private static List<PythonStatementNode> generateStatement(StatementNode statement) {
         return StatementGenerator.VISITOR.apply(statement);
     }
 
     public static class StatementGenerator {
-        private static final Function<Node, PythonStatementNode> VISITOR = DynamicNodeMapper.instantiate(new StatementGenerator(), "visit");
+        private static final Function<Node, List<PythonStatementNode>> VISITOR = DynamicNodeMapper.instantiate(new StatementGenerator(), "visit");
 
-        public PythonStatementNode visit(ReturnNode returnNode) {
-            return pythonReturn(generateExpression(returnNode.getValue()));
+        public List<PythonStatementNode> visit(ReturnNode returnNode) {
+            return list(pythonReturn(generateExpression(returnNode.getValue())));
         }
 
-        public PythonStatementNode visit(ExpressionStatementNode expressionStatement) {
+        public List<PythonStatementNode> visit(ExpressionStatementNode expressionStatement) {
             if (expressionStatement.getExpression() instanceof AssignmentNode) {
                 AssignmentNode assignment = (AssignmentNode)expressionStatement.getExpression();
-                return pythonAssignment(generateExpression(assignment.getTarget()), generateExpression(assignment.getValue()));
+                return list(pythonAssignment(generateExpression(assignment.getTarget()), generateExpression(assignment.getValue())));
             } else {
-                return pythonExpressionStatement(generateExpression(expressionStatement.getExpression()));
+                return list(pythonExpressionStatement(generateExpression(expressionStatement.getExpression())));
             }
         }
 
-        public PythonStatementNode visit(LocalVariableDeclarationNode declaration) {
-            return pythonAssignment(pythonVariableReference(declaration.getDeclaration().getName()), generateExpression(declaration.getInitialValue()));
+        public List<PythonStatementNode> visit(LocalVariableDeclarationNode declaration) {
+            return list(pythonAssignment(pythonVariableReference(declaration.getDeclaration().getName()), generateExpression(declaration.getInitialValue())));
         }
 
-        public PythonStatementNode visit(IfStatementNode ifStatement) {
-            return pythonIfStatement(
+        public List<PythonStatementNode> visit(IfStatementNode ifStatement) {
+            return list(pythonIfStatement(
                 generateExpression(ifStatement.getCondition()),
                 generateStatements(ifStatement.getTrueBranch()),
-                generateStatements(ifStatement.getFalseBranch()));
+                generateStatements(ifStatement.getFalseBranch())
+            ));
         }
 
-        public PythonStatementNode visit(WhileNode whileLoop) {
-            return pythonWhile(
+        public List<PythonStatementNode> visit(WhileNode whileLoop) {
+            return list(pythonWhile(
                 generateExpression(whileLoop.getCondition()),
-                generateStatements(whileLoop.getBody()));
+                generateStatements(whileLoop.getBody())
+            ));
+        }
+
+        public List<PythonStatementNode> visit(StatementBlockNode block) {
+            // TODO: this doesn't handle separate variables in different blocks with the same name properly
+            return generateStatements(block.getStatements());
         }
     }
 

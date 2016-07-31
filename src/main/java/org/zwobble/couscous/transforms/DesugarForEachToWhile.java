@@ -44,6 +44,6 @@ public class DesugarForEachToWhile {
             forEach.getStatements()
         ));
 
-        return list(iterator, loop);
+        return list(new StatementBlockNode(list(iterator, loop)));
     }
 }
