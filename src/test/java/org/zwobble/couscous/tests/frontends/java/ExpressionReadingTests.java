@@ -33,6 +33,7 @@ import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
 import static org.zwobble.couscous.tests.frontends.java.NodeMatchers.*;
 import static org.zwobble.couscous.types.ParameterizedType.parameterizedType;
 import static org.zwobble.couscous.types.TypeParameter.typeParameter;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ExpressionReadingTests {
@@ -335,7 +336,7 @@ public class ExpressionReadingTests {
             "java.util.Objects.toString(42)");
         assertEquals(
             typeCoercion(literal(42), Types.OBJECT),
-            expression.getArguments().get(0));
+            only(expression.getArguments()));
     }
 
     @Test
@@ -465,7 +466,7 @@ public class ExpressionReadingTests {
                 "    return name = \"blah\";" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
+        ReturnNode returnNode = (ReturnNode) only(only(classNode.getMethods()).getBody().get());
         assertEquals(
             assign(
                 fieldAccess(
@@ -484,7 +485,7 @@ public class ExpressionReadingTests {
                 "    return value = 4;" +
                 "}");
 
-        ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
+        ReturnNode returnNode = (ReturnNode) only(only(classNode.getMethods()).getBody().get());
         assertEquals(
             assign(
                 fieldAccess(

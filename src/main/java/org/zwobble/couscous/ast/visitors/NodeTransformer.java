@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class NodeTransformer {
@@ -103,10 +104,7 @@ public class NodeTransformer {
             return transformExpression((ExpressionNode) node);
         } else if (node instanceof StatementNode) {
             List<StatementNode> statements = ExtraLists.copyOf(transformStatement((StatementNode) node));
-            if (statements.size() != 1) {
-                throw new UnsupportedOperationException("TODO: add support for compound statements");
-            }
-            return statements.get(0);
+            return only(statements, () -> new UnsupportedOperationException("TODO: add support for compound statements"));
         } else if (node instanceof TypeNode) {
             return transformTypeDeclaration((TypeNode) node);
         } else {

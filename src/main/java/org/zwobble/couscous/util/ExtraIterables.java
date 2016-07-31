@@ -211,4 +211,14 @@ public class ExtraIterables {
             return value;
         }
     }
+
+    public static <T> T only(Iterable<T> iterable, Supplier<RuntimeException> orElse) {
+        Iterator<T> iterator = iterable.iterator();
+        T value = iterator.next();
+        if (iterator.hasNext()) {
+            throw orElse.get();
+        } else {
+            return value;
+        }
+    }
 }

@@ -7,9 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.tests.util.ExtraFiles.deleteRecursively;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaReading {
@@ -20,7 +19,8 @@ public class JavaReading {
                 "}";
 
         ClassNode classNode = readClass(javaClass);
-        ReturnNode returnStatement = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
+        MethodNode method = only(classNode.getMethods());
+        ReturnNode returnStatement = (ReturnNode) only(method.getBody().get());
         return returnStatement.getValue();
     }
 
@@ -38,20 +38,18 @@ public class JavaReading {
     }
 
     static StatementNode readStatement(String returnType, String statementSource) {
-        // TODO: use only()
-        return readStatements(returnType, statementSource).get(0);
+        return only(readStatements(returnType, statementSource));
     }
 
     static List<StatementNode> readStatements(String returnType, String statementsSource) {
         String javaClass = generateMethodSource(returnType, statementsSource);
         ClassNode classNode = readClass(javaClass);
-        return classNode.getMethods().get(0).getBody().get();
+        return only(classNode.getMethods()).getBody().get();
     }
 
     static ClassNode readClass(String classBody) {
         List<TypeNode> classes = readTypes(classBody);
-        assertThat(classes, hasSize(1));
-        return (ClassNode)classes.get(0);
+        return (ClassNode) only(classes);
     }
 
     static List<TypeNode> readTypes(String classBody) {
