@@ -143,7 +143,7 @@ public class JavaTypes {
     }
 
     private static final ScalarType RAW_ITERATOR = ScalarType.of("java.util.Iterator");
-    public static TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifier.TOP.type(RAW_ITERATOR.getQualifiedName()), "T");
+    public static final TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifier.TOP.type(RAW_ITERATOR.getQualifiedName()), "T");
 
     public static Type iterator(Type elementType) {
         return parameterizedType(RAW_ITERATOR, list(elementType));
