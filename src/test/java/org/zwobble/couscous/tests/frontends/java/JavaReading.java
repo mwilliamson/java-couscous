@@ -38,6 +38,7 @@ public class JavaReading {
     }
 
     static StatementNode readStatement(String returnType, String statementSource) {
+        // TODO: use only()
         return readStatements(returnType, statementSource).get(0);
     }
 

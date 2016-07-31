@@ -8,6 +8,7 @@ import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.interpreter.types.UserDefinedInterpreterType;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
+import org.zwobble.couscous.transforms.DesugarForToWhile;
 import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 
 import java.util.List;
@@ -24,10 +25,11 @@ public class JavaProject {
     }
 
     public static Project of(List<TypeNode> classNodes) {
-        NodeTransformer transformer = DesugarSwitchToIfElse.transformer();
+        NodeTransformer switchTransformer = DesugarSwitchToIfElse.transformer();
+        NodeTransformer forTransformer = DesugarForToWhile.transformer();
         Iterable<InterpreterType> concreteTypes = Iterables.transform(
             classNodes,
-            classNode -> new UserDefinedInterpreterType(transformer.transformTypeDeclaration(classNode))
+            classNode -> new UserDefinedInterpreterType(forTransformer.transformTypeDeclaration(switchTransformer.transformTypeDeclaration(classNode)))
         );
         return builder()
                 .addClasses(concreteTypes)

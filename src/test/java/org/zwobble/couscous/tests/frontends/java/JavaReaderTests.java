@@ -166,17 +166,17 @@ public class JavaReaderTests {
 
     @Test
     public void canReadForLoops() {
-        List<StatementNode> statements = readStatements("int", "for (int x = 0; true; ++x) { return 1; }");
-        LocalVariableDeclarationNode declaration = (LocalVariableDeclarationNode) statements.get(0);
+        StatementNode statement = readStatement("int", "for (int x = 0; true; ++x) { return 1; }");
+        VariableDeclaration loopVariable = var(MAIN_IDENTIFIER.variable("x"), "x", Types.INT);
         assertEquals(
-            list(
-                localVariableDeclaration(declaration.getDeclaration(), literal(0)),
-                whileLoop(
-                    literal(true),
-                    list(
-                        returns(literal(1)),
-                        expressionStatement(assign(declaration, integerAdd(reference(declaration), literal(1))))))),
-            statements);
+            new ForNode(
+                list(localVariableDeclaration(loopVariable, literal(0))),
+                literal(true),
+                list(assign(reference(loopVariable), integerAdd(reference(loopVariable), literal(1)))),
+                list(returns(literal(1)))
+            ),
+            statement
+        );
     }
 
     @Test

@@ -216,7 +216,7 @@ public class NodeTransformer {
         return transformList(methods, this::transformMethod);
     }
 
-    public List<StatementNode> transformStatements(List<StatementNode> body) {
+    public List<StatementNode> transformStatements(List<? extends StatementNode> body) {
         return eagerFlatMap(body, this::transformStatement);
     }
 

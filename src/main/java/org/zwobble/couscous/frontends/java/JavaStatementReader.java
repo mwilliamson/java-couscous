@@ -20,6 +20,7 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraIterables.takeUntil;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.Tails.tail;
@@ -180,19 +181,15 @@ class JavaStatementReader {
     private List<StatementNode> readForStatement(ForStatement statement) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationExpression> javaInitialisers = statement.initializers();
-        if (javaInitialisers.size() != 1) {
-            throw new UnsupportedOperationException();
-        }
         @SuppressWarnings("unchecked")
         List<Expression> updaters = statement.updaters();
 
-        return append(
-            readVariableDeclarationExpression(javaInitialisers.get(0)),
-            whileLoop(
-                readExpression(Types.BOOLEAN, statement.getExpression()),
-                concat(
-                    readBody(statement.getBody()),
-                    eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));
+        return list(new ForNode(
+            readVariableDeclarationExpression(only(javaInitialisers)),
+            readExpression(Types.BOOLEAN, statement.getExpression()),
+            eagerMap(updaters, this::readExpressionWithoutBoxing),
+            readBody(statement.getBody())
+        ));
     }
 
     private List<StatementNode> readEnhancedForStatement(EnhancedForStatement statement) {
