@@ -4,7 +4,6 @@ import org.zwobble.couscous.ast.ForNode;
 import org.zwobble.couscous.ast.NodeTypes;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.frontends.java.Scope;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,11 +16,10 @@ import static org.zwobble.couscous.util.ExtraLists.concat;
 
 public class DesugarForToWhile {
     public static NodeTransformer transformer() {
-        Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_for_to_while");
         return NodeTransformer.builder()
             .transformStatement(statement -> {
                 if (statement.type() == NodeTypes.FOR) {
-                    return Optional.of(desugar(scope, ((ForNode) statement)));
+                    return Optional.of(desugar(((ForNode) statement)));
                 } else {
                     return Optional.empty();
                 }
@@ -29,7 +27,7 @@ public class DesugarForToWhile {
             .build();
     }
 
-    public static List<StatementNode> desugar(Scope scope, ForNode forNode) {
+    public static List<StatementNode> desugar(ForNode forNode) {
         return append(
             forNode.getInitializers(),
             whileLoop(
