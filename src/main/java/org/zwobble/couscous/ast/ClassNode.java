@@ -112,7 +112,6 @@ public class ClassNode implements TypeNode {
             transformer.transformFormalTypeParameters(typeParameters),
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
-            // TODO: transform
             transformer.transformStatements(staticConstructor),
             transformer.transformConstructor(constructor),
             transformer.transformMethods(methods));
