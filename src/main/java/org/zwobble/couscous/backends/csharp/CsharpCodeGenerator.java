@@ -5,6 +5,7 @@ import org.zwobble.couscous.ast.Node;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.csharp.primitives.CsharpPrimitiveMethods;
 import org.zwobble.couscous.backends.naming.Naming;
+import org.zwobble.couscous.transforms.DesugarForEachToWhile;
 import org.zwobble.couscous.types.*;
 
 import java.util.Map;
@@ -42,7 +43,13 @@ public class CsharpCodeGenerator {
     }
 
     private Node generateCode(Node node) {
-        return nodeTransformer.transform(CsharpPrimitiveMethods.TRANSFORMER.transform(node));
+        return nodeTransformer.transform(
+            CsharpPrimitiveMethods.TRANSFORMER.transform(
+                DesugarForEachToWhile.transformer().transform(
+                    node
+                )
+            )
+        );
     }
 
     private Type transformType(Type type) {

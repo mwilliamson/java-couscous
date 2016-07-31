@@ -10,6 +10,7 @@ import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
+import org.zwobble.couscous.transforms.DesugarForEachToWhile;
 import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
@@ -60,7 +61,8 @@ import static org.zwobble.couscous.util.ExtraLists.*;
 public class PythonCodeGenerator {
     public static PythonModuleNode generateCode(TypeNode sugaredTypeNode) {
         NodeTransformer switchTransformer = DesugarSwitchToIfElse.transformer();
-        TypeNode typeNode = switchTransformer.transformTypeDeclaration(sugaredTypeNode);
+        NodeTransformer forEachTransformer = DesugarForEachToWhile.transformer();
+        TypeNode typeNode = forEachTransformer.transformTypeDeclaration(switchTransformer.transformTypeDeclaration(sugaredTypeNode));
 
         Iterator<PythonImportNode> imports = generateImports(typeNode).iterator();
 

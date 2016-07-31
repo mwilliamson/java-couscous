@@ -44,6 +44,7 @@ public class NodeTypes {
     public static final int TYPE_COERCION = 10028;
     public static final int VARIABLE_REFERENCE = 10029;
     public static final int WHILE = 10030;
+    public static final int FOR_EACH = 10034;
 
     private NodeTypes() {
     }
@@ -83,6 +84,7 @@ public class NodeTypes {
         .put(TypeCoercionNode.class, TYPE_COERCION)
         .put(VariableReferenceNode.class, VARIABLE_REFERENCE)
         .put(WhileNode.class, WHILE)
+        .put(ForEachNode.class, FOR_EACH)
         .put(PrimitiveInstanceMethodCall.class, CsharpNodeTypes.PRIMITIVE_INSTANCE_METHOD_CALL)
         .put(PrimitiveStaticMethodCall.class, CsharpNodeTypes.PRIMITIVE_STATIC_METHOD_CALL)
         .build();

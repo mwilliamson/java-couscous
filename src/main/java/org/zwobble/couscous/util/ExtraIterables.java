@@ -201,4 +201,14 @@ public class ExtraIterables {
             }
         };
     }
+
+    public static <T> T only(Iterable<T> iterable) {
+        Iterator<T> iterator = iterable.iterator();
+        T value = iterator.next();
+        if (iterator.hasNext()) {
+            throw new RuntimeException("iterable had more than one element");
+        } else {
+            return value;
+        }
+    }
 }

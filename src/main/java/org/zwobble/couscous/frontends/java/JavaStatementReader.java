@@ -21,7 +21,6 @@ import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.ast.sugar.SwitchCaseNode.switchCase;
 import static org.zwobble.couscous.frontends.java.JavaTypes.typeOf;
-import static org.zwobble.couscous.types.BoundTypeParameter.boundTypeParameter;
 import static org.zwobble.couscous.util.ExtraIterables.takeUntil;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.Tails.tail;
@@ -203,17 +202,14 @@ class JavaStatementReader {
         Type elementType = typeOf(parameter.getType());
 
         ExpressionNode iterableValue = readExpression(JavaTypes.iterable(elementType), statement.getExpression());
-        ExpressionNode iteratorValue = methodCall(iterableValue, "iterator", list(), JavaTypes.iterator(elementType));
-        LocalVariableDeclarationNode iterator = scope.temporaryVariable(iteratorValue);
-
-        ExpressionNode hasNext = methodCall(reference(iterator), "hasNext", list(), Types.BOOLEAN);
-        ExpressionNode next = methodCall(reference(iterator), "next", list(), boundTypeParameter(JavaTypes.ITERATOR_TYPE_PARAMETER, elementType));
         IVariableBinding parameterBinding = parameter.resolveBinding();
-        WhileNode loop = whileLoop(hasNext, cons(
-            scope.localVariable(parameterBinding.getKey(), parameterBinding.getName(), elementType, next),
-            readStatement(statement.getBody())));
 
-        return list(iterator, loop);
+        ForEachNode node = new ForEachNode(
+            scope.generateVariable(parameterBinding.getKey(), parameterBinding.getName(), elementType),
+            iterableValue,
+            readStatement(statement.getBody())
+        );
+        return list(node);
     }
 
     private List<StatementNode> readVariableDeclarationStatement(VariableDeclarationStatement statement) {

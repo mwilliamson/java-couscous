@@ -3,14 +3,13 @@ package org.zwobble.couscous.tests.frontends.java;
 import org.junit.Test;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.identifiers.Identifier;
+import org.zwobble.couscous.frontends.java.JavaTypes;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.zwobble.couscous.ast.AnnotationNode.annotation;
@@ -32,6 +31,7 @@ import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.ThrowNode.throwNode;
 import static org.zwobble.couscous.ast.TryNode.tryStatement;
 import static org.zwobble.couscous.ast.TypeCoercionNode.typeCoercion;
+import static org.zwobble.couscous.ast.VariableDeclaration.var;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.tests.frontends.java.JavaReading.*;
@@ -175,6 +175,27 @@ public class JavaReaderTests {
                         returns(literal(1)),
                         expressionStatement(assign(declaration, integerAdd(reference(declaration), literal(1))))))),
             statements);
+    }
+
+    @Test
+    public void canReadForEachLoops() {
+        List<StatementNode> statements = new JavaStatementSourceReader()
+            .returns("String")
+            .addVariable("iterable", "java.lang.Iterable<String>")
+            .readStatement("for (String x : iterable) { return x; } return \"\";");
+
+        VariableDeclaration expectedTarget = var(Identifier.TOP.type("com.example.Example").method("main").variable("x"), "x", Types.STRING);
+        assertEquals(
+            list(
+                new ForEachNode(
+                    expectedTarget,
+                    reference(var(Identifier.TOP.type("com.example.Example").method("main").variable("iterable"), "iterable", JavaTypes.iterable(Types.STRING))),
+                    list(returns(reference(expectedTarget)))
+                ),
+                returns(literal(""))
+            ),
+            statements
+        );
     }
 
     @Test
