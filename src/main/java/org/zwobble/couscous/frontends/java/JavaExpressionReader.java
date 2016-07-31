@@ -153,7 +153,6 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readCharacterLiteral(CharacterLiteral expression) {
-        // TODO: handle characters properly
         return literal(expression.charValue());
     }
 
