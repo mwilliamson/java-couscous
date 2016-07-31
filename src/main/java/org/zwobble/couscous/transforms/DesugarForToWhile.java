@@ -2,6 +2,7 @@ package org.zwobble.couscous.transforms;
 
 import org.zwobble.couscous.ast.ForNode;
 import org.zwobble.couscous.ast.NodeTypes;
+import org.zwobble.couscous.ast.StatementBlockNode;
 import org.zwobble.couscous.ast.StatementNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 
@@ -13,6 +14,7 @@ import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.append;
 import static org.zwobble.couscous.util.ExtraLists.concat;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class DesugarForToWhile {
     public static NodeTransformer transformer() {
@@ -28,7 +30,7 @@ public class DesugarForToWhile {
     }
 
     public static List<StatementNode> desugar(ForNode forNode) {
-        return append(
+        List<StatementNode> statements = append(
             forNode.getInitializers(),
             whileLoop(
                 forNode.getCondition(),
@@ -38,5 +40,6 @@ public class DesugarForToWhile {
                 )
             )
         );
+        return list(new StatementBlockNode(statements));
     }
 }

@@ -135,6 +135,10 @@ public class Executor {
         return Optional.empty();
     }
 
+    public Optional<InterpreterValue> visit(StatementBlockNode block) {
+        return exec(block.getStatements());
+    }
+
     private Optional<InterpreterValue> exec(List<StatementNode> statements) {
         for (StatementNode statement : statements) {
             Optional<InterpreterValue> result = exec(environment, statement);
