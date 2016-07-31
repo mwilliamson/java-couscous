@@ -339,6 +339,15 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void statementBlockPrintsStatementsSurroundedByCurlyBraces() {
+        String output = serialize(new StatementBlockNode(list(
+            returns(literal(1))
+        )));
+        // TODO: remove leading space
+        assertEquals(" {\n    return 1;\n}\n", output);
+    }
+
+    @Test
     public void tryStatementCanHaveBodyAndMultipleHandlers() {
         VariableDeclaration varX = var(TestIds.variable("x"), "x", ScalarType.of("X"));
         VariableDeclaration varY = var(TestIds.variable("y"), "y", ScalarType.of("Y"));

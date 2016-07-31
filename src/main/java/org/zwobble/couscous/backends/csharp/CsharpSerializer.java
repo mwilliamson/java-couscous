@@ -426,6 +426,12 @@ public class CsharpSerializer {
         });
     }
 
+    public void visit(StatementBlockNode block) {
+        writer.writeStatement(() -> {
+            writeBlock(block.getStatements());
+        });
+    }
+
     public void visit(TryNode tryStatement) {
         writer.writeStatement(() -> {
             writer.writeKeyword("try");

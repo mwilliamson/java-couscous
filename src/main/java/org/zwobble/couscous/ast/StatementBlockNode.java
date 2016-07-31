@@ -11,6 +11,10 @@ public class StatementBlockNode implements StatementNode {
         this.statements = statements;
     }
 
+    public List<StatementNode> getStatements() {
+        return statements;
+    }
+
     @Override
     public int type() {
         return NodeTypes.STATEMENT_BLOCK;
