@@ -8,7 +8,6 @@ import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -20,15 +19,7 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 public class DesugarForEachToFor {
     public static NodeTransformer transformer() {
         Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_foreach_to_for");
-        return NodeTransformer.builder()
-            .transformStatement(statement -> {
-                if (statement.type() == NodeTypes.FOR_EACH) {
-                    return Optional.of(desugar(scope, ((ForEachNode) statement)));
-                } else {
-                    return Optional.empty();
-                }
-            })
-            .build();
+        return DesugarStatement.<ForEachNode>transformer(NodeTypes.FOR_EACH, node -> desugar(scope, node));
     }
 
     public static List<StatementNode> desugar(Scope scope, ForEachNode forEach) {

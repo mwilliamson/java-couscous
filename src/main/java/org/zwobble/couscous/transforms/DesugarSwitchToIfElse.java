@@ -11,7 +11,6 @@ import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.util.ExtraLists;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.google.common.collect.Iterables.tryFind;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
@@ -30,15 +29,7 @@ public class DesugarSwitchToIfElse {
 
     public static NodeTransformer transformer() {
         Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_switch_to_if");
-        return NodeTransformer.builder()
-            .transformStatement(statement -> {
-                if (statement.type() == NodeTypes.SWITCH) {
-                    return Optional.of(desugar(scope, ((SwitchNode) statement)));
-                } else {
-                    return Optional.empty();
-                }
-            })
-            .build();
+        return DesugarStatement.<SwitchNode>transformer(NodeTypes.SWITCH, node -> desugar(scope, node));
     }
 
     public static List<StatementNode> desugar(Scope scope, SwitchNode switchNode) {
