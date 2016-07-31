@@ -108,14 +108,21 @@ public class ExtraLists {
         Iterable<T2> iterable2,
         BiFunction<T1, T2, R> function)
     {
-        // TODO: error handling when iterables are different lengths
         Iterator<T1> iterator1 = iterable1.iterator();
         Iterator<T2> iterator2 = iterable2.iterator();
 
         ImmutableList.Builder<R> result = ImmutableList.builder();
 
-        while (iterator1.hasNext()) {
+        while (iterator1.hasNext() && iterator2.hasNext()) {
             result.add(function.apply(iterator1.next(), iterator2.next()));
+        }
+
+        if (iterator1.hasNext()) {
+            throw new RuntimeException("iterable1 longer than iterable2");
+        }
+
+        if (iterator2.hasNext()) {
+            throw new RuntimeException("iterable2 longer than iterable1");
         }
 
         return result.build();
