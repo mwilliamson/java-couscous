@@ -13,14 +13,13 @@ import java.util.Optional;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.ast.WhileNode.whileLoop;
 import static org.zwobble.couscous.types.BoundTypeParameter.boundTypeParameter;
 import static org.zwobble.couscous.util.ExtraLists.cons;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
-public class DesugarForEachToWhile {
+public class DesugarForEachToFor {
     public static NodeTransformer transformer() {
-        Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_foreach_to_while");
+        Scope scope = Scope.create().temporaryPrefix("_couscous_desugar_foreach_to_for");
         return NodeTransformer.builder()
             .transformStatement(statement -> {
                 if (statement.type() == NodeTypes.FOR_EACH) {
@@ -39,11 +38,16 @@ public class DesugarForEachToWhile {
 
         ExpressionNode hasNext = methodCall(reference(iterator), "hasNext", list(), Types.BOOLEAN);
         ExpressionNode next = methodCall(reference(iterator), "next", list(), boundTypeParameter(JavaTypes.ITERATOR_TYPE_PARAMETER, elementType));
-        WhileNode loop = whileLoop(hasNext, cons(
-            localVariableDeclaration(forEach.getTarget(), next),
-            forEach.getStatements()
-        ));
+        ForNode loop = new ForNode(
+            list(iterator),
+            hasNext,
+            list(),
+            cons(
+                localVariableDeclaration(forEach.getTarget(), next),
+                forEach.getStatements()
+            )
+        );
 
-        return list(new StatementBlockNode(list(iterator, loop)));
+        return list(loop);
     }
 }
