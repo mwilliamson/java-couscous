@@ -367,7 +367,7 @@ public class JavaReader {
             tryCast(Initializer.class, declaration)
                 .ifPresent(initializer -> body.addInitializer(
                     Modifier.isStatic(initializer.getModifiers()),
-                    readStatement(scope, initializer.getBody())));
+                    readStatementBody(scope, initializer.getBody())));
 
             tryCast(FieldDeclaration.class, declaration)
                 .ifPresent(field -> readField(body, scope, type, field));
@@ -492,6 +492,11 @@ public class JavaReader {
             List<Statement> statements = method.getBody().statements();
             return Optional.of(readStatements(scope, statements, returnType));
         }
+    }
+
+    List<StatementNode> readStatementBody(Scope scope, Statement statement) {
+        JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), Optional.empty());
+        return statementReader.readBody(statement);
     }
 
     List<StatementNode> readStatement(Scope scope, Statement statement) {

@@ -251,6 +251,18 @@ public class JavaReaderTests {
     }
 
     @Test
+    public void canReadStatementBlocks() {
+        List<StatementNode> statements = new JavaStatementSourceReader()
+            .returns("int")
+            .readStatement("{ return 0; }");
+
+        assertEquals(
+            list(new StatementBlockNode(list(returns(literal(0))))),
+            statements
+        );
+    }
+
+    @Test
     public void canDeclareConstructor() {
         ClassNode classNode = readClass(
             "private final String name;" +

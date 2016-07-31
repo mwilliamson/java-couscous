@@ -10,7 +10,6 @@ import org.zwobble.couscous.types.Types;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.zwobble.couscous.ast.ExceptionHandlerNode.exceptionHandler;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
@@ -83,10 +82,9 @@ class JavaStatementReader {
 
     private List<StatementNode> readBlock(Block block) {
         @SuppressWarnings("unchecked")
-        List<Statement> statements = block.statements();
-        return statements.stream()
-            .flatMap(statement -> readStatement(statement).stream())
-            .collect(Collectors.toList());
+        List<Statement> javaStatements = block.statements();
+        List<StatementNode> statements = eagerFlatMap(javaStatements, this::readStatement);
+        return list(new StatementBlockNode(statements));
     }
 
     private StatementNode readReturnStatement(ReturnStatement statement) {
@@ -107,10 +105,10 @@ class JavaStatementReader {
     private StatementNode readIfStatement(IfStatement statement) {
         List<StatementNode> falseBranch = statement.getElseStatement() == null
             ? list()
-            : readStatement(statement.getElseStatement());
+            : readBody(statement.getElseStatement());
         return ifStatement(
             readExpression(Types.BOOLEAN, statement.getExpression()),
-            readStatement(statement.getThenStatement()),
+            readBody(statement.getThenStatement()),
             falseBranch);
     }
 
@@ -145,7 +143,7 @@ class JavaStatementReader {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationExpression> resources = statement.resources();
         List<LocalVariableDeclarationNode> resourceDeclarations = eagerFlatMap(resources, this::readVariableDeclarationExpression);
-        List<StatementNode> body = readStatement(statement.getBody());
+        List<StatementNode> body = readBody(statement.getBody());
         for (LocalVariableDeclarationNode resource : Lists.reverse(resourceDeclarations)) {
             body = list(
                 resource,
@@ -155,7 +153,7 @@ class JavaStatementReader {
         @SuppressWarnings("unchecked")
         List<CatchClause> javaCatchClauses = statement.catchClauses();
         List<ExceptionHandlerNode> catchClauses = eagerMap(javaCatchClauses, this::readCatchClause);
-        List<StatementNode> finallyBody = statement.getFinally() == null ? list() : readStatement(statement.getFinally());
+        List<StatementNode> finallyBody = statement.getFinally() == null ? list() : readBody(statement.getFinally());
         if (catchClauses.isEmpty() && finallyBody.isEmpty()) {
             return body;
         } else {
@@ -166,7 +164,7 @@ class JavaStatementReader {
     private ExceptionHandlerNode readCatchClause(CatchClause clause) {
         return exceptionHandler(
             JavaVariableDeclarationReader.read(scope, clause.getException()),
-            readStatement(clause.getBody()));
+            readBody(clause.getBody()));
     }
 
     private List<StatementNode> readStatements(Iterable<Statement> statements) {
@@ -176,7 +174,7 @@ class JavaStatementReader {
     private WhileNode readWhileStatement(WhileStatement statement) {
         return whileLoop(
             readExpression(Types.BOOLEAN, statement.getExpression()),
-            readStatement(statement.getBody()));
+            readBody(statement.getBody()));
     }
 
     private List<StatementNode> readForStatement(ForStatement statement) {
@@ -193,7 +191,7 @@ class JavaStatementReader {
             whileLoop(
                 readExpression(Types.BOOLEAN, statement.getExpression()),
                 concat(
-                    readStatement(statement.getBody()),
+                    readBody(statement.getBody()),
                     eagerMap(updaters, updater -> expressionStatement(readExpressionWithoutBoxing(updater))))));
     }
 
@@ -207,7 +205,7 @@ class JavaStatementReader {
         ForEachNode node = new ForEachNode(
             scope.generateVariable(parameterBinding.getKey(), parameterBinding.getName(), elementType),
             iterableValue,
-            readStatement(statement.getBody())
+            readBody(statement.getBody())
         );
         return list(node);
     }
@@ -242,5 +240,14 @@ class JavaStatementReader {
 
     private ExpressionNode readExpression(Type targetType, Expression expression) {
         return expressionReader.readExpression(targetType, expression);
+    }
+
+    List<StatementNode> readBody(Statement statement) {
+        if (statement instanceof Block) {
+            List<Statement> javaStatements = ((Block) statement).statements();
+            return eagerFlatMap(javaStatements, this::readStatement);
+        } else {
+            return readStatement(statement);
+        }
     }
 }
