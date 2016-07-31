@@ -41,6 +41,8 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
 public class JavaReaderTests {
+    private static final Identifier MAIN_IDENTIFIER = Identifier.TOP.type("com.example.Example").method("main");
+
     @Test
     public void canReadReturnWithoutValue() {
         StatementNode statement = readStatement("void", "return;");
@@ -184,12 +186,12 @@ public class JavaReaderTests {
             .addVariable("iterable", "java.lang.Iterable<String>")
             .readStatement("for (String x : iterable) { return x; } return \"\";");
 
-        VariableDeclaration expectedTarget = var(Identifier.TOP.type("com.example.Example").method("main").variable("x"), "x", Types.STRING);
+        VariableDeclaration expectedTarget = var(MAIN_IDENTIFIER.variable("x"), "x", Types.STRING);
         assertEquals(
             list(
                 new ForEachNode(
                     expectedTarget,
-                    reference(var(Identifier.TOP.type("com.example.Example").method("main").variable("iterable"), "iterable", JavaTypes.iterable(Types.STRING))),
+                    reference(var(MAIN_IDENTIFIER.variable("iterable"), "iterable", JavaTypes.iterable(Types.STRING))),
                     list(returns(reference(expectedTarget)))
                 ),
                 returns(literal(""))
@@ -235,7 +237,7 @@ public class JavaReaderTests {
     @Test
     public void canReadTryWithResourceWithoutOtherClauses() {
         ScalarType type = ScalarType.of("java.io.ByteArrayOutputStream");
-        Identifier identifier = Identifier.TOP.type("com.example.Example").method("main").variable("closeable");
+        Identifier identifier = MAIN_IDENTIFIER.variable("closeable");
         LocalVariableDeclarationNode expectedResource = localVariableDeclaration(identifier, "closeable", type, constructorCall(type, list()));
         assertThat(
             readStatements("int", "try(java.io.ByteArrayOutputStream closeable = new java.io.ByteArrayOutputStream()) { return 1; }"),
