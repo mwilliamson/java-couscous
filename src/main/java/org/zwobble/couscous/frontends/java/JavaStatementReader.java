@@ -155,7 +155,7 @@ class JavaStatementReader {
         List<CatchClause> javaCatchClauses = statement.catchClauses();
         List<ExceptionHandlerNode> catchClauses = eagerMap(javaCatchClauses, this::readCatchClause);
         List<StatementNode> finallyBody = statement.getFinally() == null ? list() : readBody(statement.getFinally());
-        if (catchClauses.isEmpty() && finallyBody.isEmpty()) {
+        if (catchClauses.isEmpty() && finallyBody.isEmpty() && !resourceDeclarations.isEmpty()) {
             return body;
         } else {
             return list(tryStatement(body, catchClauses, finallyBody));

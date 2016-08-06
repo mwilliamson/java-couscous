@@ -86,7 +86,10 @@ public class NodeMatchers {
     }
 
     public static Matcher<TryNode> hasFinally(StatementNode... statements) {
-        return hasFeature("finally clause", TryNode::getFinallyBody, contains(statements));
+        Matcher<Iterable<? extends StatementNode>> statementsMatcher = statements.length == 0
+            ? emptyIterable()
+            : contains(statements);
+        return hasFeature("finally clause", TryNode::getFinallyBody, statementsMatcher);
     }
 
     @SafeVarargs

@@ -20,6 +20,7 @@ import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStateme
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
+import static org.zwobble.couscous.ast.LiteralNode.UNIT;
 import static org.zwobble.couscous.ast.LiteralNode.literal;
 import static org.zwobble.couscous.ast.LocalVariableDeclarationNode.localVariableDeclaration;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
@@ -232,6 +233,17 @@ public class JavaReaderTests {
             isTryStatement(
                 hasTryBody(list(returns(literal(1)))),
                 hasFinally(returns(literal(2)))));
+    }
+
+    @Test
+    public void canReadTryWithEmptyFinallyClause() {
+        assertThat(
+            readStatement("void", "try { return; } finally { }"),
+            isTryStatement(
+                hasTryBody(list(returns(UNIT))),
+                hasFinally()
+            )
+        );
     }
 
     @Test
