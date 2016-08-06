@@ -3,6 +3,7 @@ package org.zwobble.couscous.tests.backends.python;
 import com.google.common.base.Joiner;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.ast.MethodSignature;
+import org.zwobble.couscous.tests.util.processes.ExecutionResult;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.types.Type;
@@ -11,7 +12,7 @@ import org.zwobble.couscous.backends.python.PythonBackend;
 import org.zwobble.couscous.backends.python.PythonCodeGenerator;
 import org.zwobble.couscous.backends.python.PythonSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.tests.backends.Processes;
+import org.zwobble.couscous.tests.util.processes.Processes;
 import org.zwobble.couscous.values.PrimitiveValue;
 
 import java.io.IOException;
@@ -62,8 +63,9 @@ public class PythonMethodRunner implements MethodRunner {
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
             "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +
             "print(type(value)); print(value)";
-        String output = Processes.run(list("python3.4", "-c", program), directoryPath);
-        return readPrimitive(output);
+        ExecutionResult result = Processes.run(list("python3.4", "-c", program), directoryPath);
+        result.assertSuccess();
+        return readPrimitive(result.getStdout());
     }
 
     private static final String PACKAGE_PREFIX = "couscous.";

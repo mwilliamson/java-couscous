@@ -1,4 +1,4 @@
-package org.zwobble.couscous.tests.backends;
+package org.zwobble.couscous.tests.util.processes;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
@@ -10,11 +10,11 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class Processes {
-    public static String run(List<String> arguments) throws IOException, InterruptedException {
+    public static ExecutionResult run(List<String> arguments) throws IOException, InterruptedException {
         return run(arguments, null);
     }
 
-    public static String run(List<String> arguments, Path directoryPath) throws IOException, InterruptedException {
+    public static ExecutionResult run(List<String> arguments, Path directoryPath) throws IOException, InterruptedException {
         Process process = new ProcessBuilder(arguments.toArray(new String[arguments.size()]))
             .directory(directoryPath == null ? null : directoryPath.toFile())
             .start();
@@ -22,11 +22,7 @@ public class Processes {
         int exitCode = process.waitFor();
         String output = readString(process.getInputStream()).trim();
         String stderrOutput = readString(process.getErrorStream());
-        if (exitCode != 0) {
-            throw new RuntimeException("stderr was: " + stderrOutput);
-        } else {
-            return output;
-        }
+        return new ExecutionResult(exitCode, output, stderrOutput);
     }
 
     private static String readString(final InputStream stream) throws IOException {

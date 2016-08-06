@@ -1,5 +1,7 @@
 package org.zwobble.couscous.tests.backends.csharp;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Ordering;
@@ -11,7 +13,8 @@ import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.backends.csharp.CsharpCodeGenerator;
 import org.zwobble.couscous.backends.csharp.CsharpSerializer;
 import org.zwobble.couscous.tests.MethodRunner;
-import org.zwobble.couscous.tests.backends.Processes;
+import org.zwobble.couscous.tests.util.processes.ExecutionResult;
+import org.zwobble.couscous.tests.util.processes.Processes;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -19,6 +22,7 @@ import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.values.PrimitiveValue;
 import org.zwobble.couscous.values.PrimitiveValues;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +60,7 @@ public class CsharpMethodRunner implements MethodRunner {
     }
 
     public static PrimitiveValue runFunction(
-        Path directoryPath,
+        Path workingDirectory,
         ScalarType className,
         String methodName,
         List<PrimitiveValue> arguments,
@@ -89,12 +93,11 @@ public class CsharpMethodRunner implements MethodRunner {
             "       " + body +
             "   }" +
             "}";
-        Files.write(directoryPath.resolve("MethodRunnerExample.cs"), list(program));
-        String executablePath = compileFiles(
-            findCsharpFiles(directoryPath),
-            directoryPath
+        Files.write(workingDirectory.resolve("MethodRunnerExample.cs"), list(program));
+        String output = executeSource(
+            findCsharpFiles(workingDirectory),
+            workingDirectory
         );
-        String output = Processes.run(list("mono", executablePath));
         if (isVoid) {
             return PrimitiveValues.UNIT;
         } else {
@@ -102,22 +105,49 @@ public class CsharpMethodRunner implements MethodRunner {
         }
     }
 
-    private static String compileFiles(List<String> paths, Path directoryPath) throws IOException, InterruptedException {
+    private static String executeSource(List<String> paths, Path workingDirectory) throws IOException, InterruptedException {
         // TODO: find cache directory properly
         Path cacheDirectory = Paths.get(System.getProperty("user.home"), ".cache/couscous/tests/csharp");
         String hash = hashFiles(paths);
-        Path cacheExecutable = cacheDirectory.resolve(hash);
-        if (!cacheExecutable.toFile().exists()) {
+        Path cacheResult = cacheDirectory.resolve(hash);
+        if (!cacheResult.toFile().exists()) {
             cacheDirectory.toFile().mkdirs();
-            Processes.run(
-                ExtraLists.concat(
-                    list("mcs", "-out:" + cacheExecutable.toString()),
-                    paths
-                ),
-                directoryPath
-            );
+            String executablePath = compileFiles(paths, workingDirectory);
+            ExecutionResult result = Processes.run(list("mono", executablePath));
+            writeExecuteResult(cacheResult, result);
         }
-        return cacheExecutable.toString();
+        ExecutionResult result = readExecutionResult(cacheResult);
+        result.assertSuccess();
+        return result.getStdout();
+    }
+
+    private static ExecutionResult readExecutionResult(Path path) throws IOException {
+        JsonObject result = Json.parse(new FileReader(path.toFile())).asObject();
+        return new ExecutionResult(
+            result.get("exitCode").asInt(),
+            result.get("stdout").asString(),
+            result.get("stderr").asString()
+        );
+    }
+
+    private static void writeExecuteResult(Path path, ExecutionResult result) throws IOException {
+        JsonObject json = Json.object()
+            .add("exitCode", result.getExitCode())
+            .add("stdout", result.getStdout())
+            .add("stderr", result.getStderr());
+        Files.write(path, list(json.toString()));
+    }
+
+    private static String compileFiles(List<String> paths, Path workingDirectory) throws IOException, InterruptedException {
+        Path executablePath = workingDirectory.resolve("Program.cs");
+        Processes.run(
+            ExtraLists.concat(
+                list("mcs", "-out:" + executablePath),
+                paths
+            ),
+            workingDirectory
+        );
+        return executablePath.toString();
     }
 
     private static String hashFiles(List<String> paths) throws IOException {
