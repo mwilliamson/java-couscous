@@ -2,13 +2,15 @@ package org.zwobble.couscous.backends.csharp.primitives;
 
 import org.zwobble.couscous.ast.ExpressionNode;
 import org.zwobble.couscous.ast.Node;
+import org.zwobble.couscous.ast.NodeTypes;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.backends.csharp.CsharpNodeTypes;
 import org.zwobble.couscous.types.Type;
 
 import java.util.List;
 
 public class PrimitiveStaticMethodCall implements ExpressionNode {
+    private final static int NODE_TYPE = NodeTypes.register(PrimitiveStaticMethodCall.class);
+
     private final PrimitiveStaticMethod method;
     private final List<ExpressionNode> arguments;
 
@@ -24,7 +26,7 @@ public class PrimitiveStaticMethodCall implements ExpressionNode {
 
     @Override
     public int type() {
-        return CsharpNodeTypes.PRIMITIVE_STATIC_METHOD_CALL;
+        return NODE_TYPE;
     }
 
     @Override
