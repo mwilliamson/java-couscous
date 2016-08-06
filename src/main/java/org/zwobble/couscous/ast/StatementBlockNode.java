@@ -16,7 +16,7 @@ public class StatementBlockNode implements StatementNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.STATEMENT_BLOCK;
     }
 

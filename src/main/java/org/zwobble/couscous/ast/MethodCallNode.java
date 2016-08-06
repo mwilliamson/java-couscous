@@ -154,7 +154,7 @@ public class MethodCallNode implements ExpressionNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.METHOD_CALL;
     }
 

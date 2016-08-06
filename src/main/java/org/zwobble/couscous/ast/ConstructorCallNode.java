@@ -34,7 +34,7 @@ public class ConstructorCallNode implements ExpressionNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.CONSTRUCTOR_CALL;
     }
 

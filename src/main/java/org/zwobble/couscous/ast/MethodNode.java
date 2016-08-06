@@ -189,7 +189,7 @@ public class MethodNode implements Node {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.METHOD;
     }
 

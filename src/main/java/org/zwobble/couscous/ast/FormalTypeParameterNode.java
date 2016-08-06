@@ -29,7 +29,7 @@ public class FormalTypeParameterNode implements Node {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.FORMAL_TYPE_PARAMETER;
     }
 

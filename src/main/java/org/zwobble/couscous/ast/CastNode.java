@@ -27,7 +27,7 @@ public class CastNode implements ExpressionNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.CAST;
     }
 

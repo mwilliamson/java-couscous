@@ -33,7 +33,7 @@ public class ArrayNode implements ExpressionNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.ARRAY;
     }
 

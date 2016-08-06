@@ -76,6 +76,6 @@ public class DesugarSwitchToIfElse {
     }
 
     private static boolean isEndOfCase(StatementNode statement) {
-        return statement.type() == NodeTypes.RETURN;
+        return statement.nodeType() == NodeTypes.RETURN;
     }
 }

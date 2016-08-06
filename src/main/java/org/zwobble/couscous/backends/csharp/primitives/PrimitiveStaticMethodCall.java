@@ -25,7 +25,7 @@ public class PrimitiveStaticMethodCall implements ExpressionNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NODE_TYPE;
     }
 

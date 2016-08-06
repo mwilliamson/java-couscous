@@ -29,7 +29,7 @@ public class InstanceOfNode implements ExpressionNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.INSTANCE_OF;
     }
 

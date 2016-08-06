@@ -28,7 +28,7 @@ public class FormalArgumentNode implements VariableNode, Node {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.FORMAL_ARGUMENT;
     }
 

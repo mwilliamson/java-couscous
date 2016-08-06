@@ -19,7 +19,7 @@ public class ReturnNode implements StatementNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.RETURN;
     }
 

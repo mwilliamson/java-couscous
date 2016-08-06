@@ -34,7 +34,7 @@ public class ConstructorNode implements Node {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.CONSTRUCTOR;
     }
 

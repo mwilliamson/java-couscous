@@ -38,7 +38,7 @@ public class TernaryConditionalNode implements ExpressionNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.TERNARY_CONDITIONAL;
     }
 

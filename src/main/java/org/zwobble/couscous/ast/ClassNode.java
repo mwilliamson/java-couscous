@@ -92,7 +92,7 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.CLASS;
     }
 

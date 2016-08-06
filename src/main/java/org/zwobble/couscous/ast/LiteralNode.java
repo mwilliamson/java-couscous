@@ -58,7 +58,7 @@ public class LiteralNode implements ExpressionNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.LITERAL;
     }
 

@@ -19,7 +19,7 @@ public class ExpressionStatementNode implements StatementNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.EXPRESSION_STATEMENT;
     }
 

@@ -170,7 +170,7 @@ public class DynamicNodeVisitor {
 
             .method(ElementMatchers.isAbstract())
             .intercept(Implementations.stackManipulation(target -> {
-                MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "type");
+                MethodDescription typeMethod = TypeDescriptions.findMethod(Node.class, "nodeType");
                 return new StackManipulation.Compound(
                     MethodVariableAccess.REFERENCE.loadOffset(1),
                     MethodInvocation.invoke(typeMethod),

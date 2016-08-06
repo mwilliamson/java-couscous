@@ -19,7 +19,7 @@ public class ThrowNode implements StatementNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.THROW;
     }
 

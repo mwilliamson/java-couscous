@@ -39,7 +39,7 @@ public class VariableReferenceNode implements AssignableExpressionNode, Referenc
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.VARIABLE_REFERENCE;
     }
 

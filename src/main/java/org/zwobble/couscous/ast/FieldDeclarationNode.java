@@ -40,7 +40,7 @@ public class FieldDeclarationNode implements Node {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.FIELD_DECLARATION;
     }
 

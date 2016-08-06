@@ -50,7 +50,7 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.ENUM;
     }
 

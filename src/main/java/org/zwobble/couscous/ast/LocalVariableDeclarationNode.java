@@ -50,7 +50,7 @@ public class LocalVariableDeclarationNode implements VariableNode, StatementNode
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.LOCAL_VARIABLE_DECLARATION;
     }
 

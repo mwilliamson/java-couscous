@@ -60,7 +60,7 @@ public class FieldAccessNode implements AssignableExpressionNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.FIELD_ACCESS;
     }
 

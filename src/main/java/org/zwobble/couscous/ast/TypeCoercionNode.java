@@ -37,7 +37,7 @@ public class TypeCoercionNode implements ExpressionNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.TYPE_COERCION;
     }
 

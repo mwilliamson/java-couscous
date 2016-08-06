@@ -65,7 +65,7 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.INTERFACE;
     }
 

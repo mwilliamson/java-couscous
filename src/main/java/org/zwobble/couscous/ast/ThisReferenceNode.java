@@ -25,7 +25,7 @@ public class ThisReferenceNode implements ExpressionNode, ReferenceNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.THIS_REFERENCE;
     }
 

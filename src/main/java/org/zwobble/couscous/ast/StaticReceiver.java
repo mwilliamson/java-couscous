@@ -29,7 +29,7 @@ public class StaticReceiver implements Receiver {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.STATIC_RECEIVER;
     }
 

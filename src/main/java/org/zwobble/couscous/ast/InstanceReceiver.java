@@ -24,7 +24,7 @@ public class InstanceReceiver implements Receiver {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.INSTANCE_RECEIVER;
     }
 

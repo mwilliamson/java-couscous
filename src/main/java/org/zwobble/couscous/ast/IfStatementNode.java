@@ -40,7 +40,7 @@ public class IfStatementNode implements StatementNode {
     }
     
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.IF_STATEMENT;
     }
 

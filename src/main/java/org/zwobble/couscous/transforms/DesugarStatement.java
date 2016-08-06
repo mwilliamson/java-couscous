@@ -11,7 +11,7 @@ class DesugarStatement {
     static <T extends StatementNode> NodeTransformer transformer(int nodeType, Function<T, List<StatementNode>> desugar) {
         return NodeTransformer.builder()
             .transformStatement(statement -> {
-                if (statement.type() == nodeType) {
+                if (statement.nodeType() == nodeType) {
                     return Optional.of(desugar.apply((T) statement));
                 } else {
                     return Optional.empty();

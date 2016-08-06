@@ -29,7 +29,7 @@ public class ForEachNode implements StatementNode {
     }
 
     @Override
-    public int type() {
+    public int nodeType() {
         return NodeTypes.FOR_EACH;
     }
 
