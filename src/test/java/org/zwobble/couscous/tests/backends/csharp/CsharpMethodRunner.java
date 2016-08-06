@@ -2,6 +2,7 @@ package org.zwobble.couscous.tests.backends.csharp;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Ordering;
 import org.hamcrest.Matchers;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.LiteralNode;
@@ -21,6 +22,10 @@ import org.zwobble.couscous.values.PrimitiveValues;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Formatter;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
@@ -85,17 +90,55 @@ public class CsharpMethodRunner implements MethodRunner {
             "   }" +
             "}";
         Files.write(directoryPath.resolve("MethodRunnerExample.cs"), list(program));
-        Processes.run(
-            ExtraLists.concat(
-                list("mcs", "-out:MethodRunnerExample.exe"),
-                findCsharpFiles(directoryPath)),
-            directoryPath);
-        String output = Processes.run(list("mono", "MethodRunnerExample.exe"), directoryPath);
+        String executablePath = compileFiles(
+            findCsharpFiles(directoryPath),
+            directoryPath
+        );
+        String output = Processes.run(list("mono", executablePath));
         if (isVoid) {
             return PrimitiveValues.UNIT;
         } else {
             return readPrimitive(output);
         }
+    }
+
+    private static String compileFiles(List<String> paths, Path directoryPath) throws IOException, InterruptedException {
+        // TODO: find cache directory properly
+        Path cacheDirectory = Paths.get(System.getProperty("user.home"), ".cache/couscous/tests/csharp");
+        String hash = hashFiles(paths);
+        Path cacheExecutable = cacheDirectory.resolve(hash);
+        if (!cacheExecutable.toFile().exists()) {
+            cacheDirectory.toFile().mkdirs();
+            Processes.run(
+                ExtraLists.concat(
+                    list("mcs", "-out:" + cacheExecutable.toString()),
+                    paths
+                ),
+                directoryPath
+            );
+        }
+        return cacheExecutable.toString();
+    }
+
+    private static String hashFiles(List<String> paths) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            for (String path : Ordering.natural().immutableSortedCopy(paths)) {
+                byte[] bytes = Files.readAllBytes(Paths.get(path));
+                digest.update(bytes);
+            }
+            return bytesToHex(digest.digest());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String bytesToHex(byte[] hash) {
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        return formatter.toString();
     }
 
     private static List<String> findCsharpFiles(Path directoryPath) throws IOException {

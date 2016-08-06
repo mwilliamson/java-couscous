@@ -10,9 +10,13 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class Processes {
+    public static String run(List<String> arguments) throws IOException, InterruptedException {
+        return run(arguments, null);
+    }
+
     public static String run(List<String> arguments, Path directoryPath) throws IOException, InterruptedException {
         Process process = new ProcessBuilder(arguments.toArray(new String[arguments.size()]))
-            .directory(directoryPath.toFile())
+            .directory(directoryPath == null ? null : directoryPath.toFile())
             .start();
 
         int exitCode = process.waitFor();
