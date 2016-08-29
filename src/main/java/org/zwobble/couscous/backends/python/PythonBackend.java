@@ -4,6 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.transforms.DesugarForEachToFor;
+import org.zwobble.couscous.transforms.DesugarForToWhile;
+import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +38,8 @@ public class PythonBackend implements Backend {
     
     @Override
     public void compile(List<TypeNode> classes) throws IOException {
-        for (TypeNode classNode : classes) {
-            compileClass(classNode);
+        for (TypeNode classNode : desugar(classes)) {
+            writeClass(classNode);
         }
         for (String runtimeFile :  RUNTIME_FILES) {
             String path = relativePathForModule(runtimeFile);
@@ -44,7 +48,18 @@ public class PythonBackend implements Backend {
                 Resources.toString(Resources.getResource("org/zwobble/couscous/backends/python/runtime/" + path), StandardCharsets.UTF_8));
         }
     }
-    
+
+    private List<TypeNode> desugar(List<TypeNode> classes) {
+        return NodeTransformer.applyAll(
+            list(
+                DesugarSwitchToIfElse.transformer(),
+                DesugarForEachToFor.transformer(),
+                DesugarForToWhile.transformer()
+            ),
+            classes
+        );
+    }
+
     private Path destinationPathForModule(String moduleName) {
         return root.resolve(packageName).resolve(relativePathForModule(moduleName));
     }
@@ -53,7 +68,7 @@ public class PythonBackend implements Backend {
         return moduleName.replace(".", File.separator) + ".py";
     }
     
-    private void compileClass(TypeNode classNode) throws IOException {
+    private void writeClass(TypeNode classNode) throws IOException {
         writeModule(
             classNode.getName().getQualifiedName(),
             serialize(generateCode(classNode)));

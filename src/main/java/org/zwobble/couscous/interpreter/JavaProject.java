@@ -13,6 +13,8 @@ import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 
 import java.util.List;
 
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class JavaProject {
     private static final InterpreterType OBJECT_TYPE = IntrinsicInterpreterType.classBuilder("java.lang.Object")
         .build();
@@ -28,8 +30,8 @@ public class JavaProject {
         NodeTransformer switchTransformer = DesugarSwitchToIfElse.transformer();
         NodeTransformer forTransformer = DesugarForToWhile.transformer();
         Iterable<InterpreterType> concreteTypes = Iterables.transform(
-            classNodes,
-            classNode -> new UserDefinedInterpreterType(forTransformer.transformTypeDeclaration(switchTransformer.transformTypeDeclaration(classNode)))
+            NodeTransformer.applyAll(list(switchTransformer, forTransformer), classNodes),
+            UserDefinedInterpreterType::new
         );
         return builder()
                 .addClasses(concreteTypes)

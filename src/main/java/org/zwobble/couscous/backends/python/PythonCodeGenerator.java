@@ -7,12 +7,8 @@ import com.google.common.collect.Iterators;
 import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.structure.NodeStructure;
 import org.zwobble.couscous.ast.visitors.DynamicNodeMapper;
-import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.naming.Names;
 import org.zwobble.couscous.backends.python.ast.*;
-import org.zwobble.couscous.transforms.DesugarForEachToFor;
-import org.zwobble.couscous.transforms.DesugarForToWhile;
-import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
@@ -60,16 +56,7 @@ import static org.zwobble.couscous.util.ExtraIterables.*;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class PythonCodeGenerator {
-    public static PythonModuleNode generateCode(TypeNode sugaredTypeNode) {
-        NodeTransformer switchTransformer = DesugarSwitchToIfElse.transformer();
-        NodeTransformer forTransformer = DesugarForToWhile.transformer();
-        NodeTransformer forEachTransformer = DesugarForEachToFor.transformer();
-        TypeNode typeNode = forTransformer.transformTypeDeclaration(
-            forEachTransformer.transformTypeDeclaration(
-                switchTransformer.transformTypeDeclaration(sugaredTypeNode)
-            )
-        );
-
+    public static PythonModuleNode generateCode(TypeNode typeNode) {
         Iterator<PythonImportNode> imports = generateImports(typeNode).iterator();
 
         PythonImportNode internalsImport = pythonImport(
