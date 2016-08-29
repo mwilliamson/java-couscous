@@ -25,7 +25,7 @@ public class NodeTransformer {
     }
 
     public static List<TypeNode> apply(NodeTransformer transformer, List<TypeNode> types) {
-        return eagerMap(types, transformer::transformTypeDeclaration);
+        return eagerFlatMap(types, transformer::transformTypeDeclaration);
     }
 
     public static NodeTransformer replaceExpressions(Map<ExpressionNode, ExpressionNode> replacements) {
@@ -178,8 +178,8 @@ public class NodeTransformer {
         return field.transformSubtree(this);
     }
 
-    public TypeNode transformTypeDeclaration(TypeNode typeNode) {
-        return typeNode.transformSubtree(this);
+    public List<TypeNode> transformTypeDeclaration(TypeNode typeNode) {
+        return list(typeNode.transformSubtree(this));
     }
 
     public ClassNode transformClass(ClassNode classNode) {
