@@ -25,6 +25,7 @@ public class CsharpCodeGenerator {
         .put(Types.BOXED_BOOLEAN, ScalarType.of("bool"))
         .put(Types.CLASS, ScalarType.of("System.Type"))
         .put(Types.VOID, ScalarType.of("void"))
+        .put(Types.ARRAY, Types.ARRAY)
         .build();
 
     private final String namespace;

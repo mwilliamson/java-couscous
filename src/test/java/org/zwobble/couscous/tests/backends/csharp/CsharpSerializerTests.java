@@ -600,6 +600,12 @@ public class CsharpSerializerTests {
         assertEquals("namespace com.example {\n    internal enum Example {\n        ONE, TWO\n    }\n}\n", output);
     }
 
+    @Test
+    public void arrayTypeUsesSquareBrackets() {
+        String output = serialize(formalArg(var(TestIds.ANY_ID, "x", Types.array(ScalarType.of("string")))));
+        assertEquals("string[] x", output);
+    }
+
     private String serialize(Node node) {
         return CsharpSerializer.serialize(node);
     }

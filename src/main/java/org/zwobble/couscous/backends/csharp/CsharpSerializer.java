@@ -20,6 +20,7 @@ import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.zwobble.couscous.util.ExtraIterables.lazyFilter;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraSets.set;
 
@@ -686,12 +687,19 @@ public class CsharpSerializer {
 
             @Override
             public Void visit(ParameterizedType type) {
-                writeTypeReference(type.getRawType());
-                writer.writeSymbol("<");
-                writer.writeCommaSeparated(
-                    type.getParameters(),
-                    parameter -> writeTypeReference(parameter));
-                writer.writeSymbol(">");
+                if (type.getRawType().equals(Types.ARRAY)) {
+                    writeTypeReference(only(type.getParameters()));
+                    writer.writeSymbol("[");
+                    writer.writeSymbol("]");
+                } else {
+                    writeTypeReference(type.getRawType());
+                    writer.writeSymbol("<");
+                    writer.writeCommaSeparated(
+                        type.getParameters(),
+                        parameter -> writeTypeReference(parameter));
+                    writer.writeSymbol(">");
+                }
+
                 return null;
             }
 
