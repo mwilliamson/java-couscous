@@ -127,7 +127,10 @@ public class ClassNodeBuilder {
             name,
             typeParameters.build(),
             superTypes.build(),
-            methods.build());
+            fields.build(),
+            staticConstructor,
+            methods.build()
+        );
     }
 
     public class MethodBuilder<T> {

@@ -115,11 +115,18 @@ public class JavaReader {
         ScalarType name = erasure(typeOf(type.resolveBinding()));
         Scope scope = topScope.enterClass(name);
         List<FormalTypeParameterNode> typeParameters = readTypeParameters(scope.getIdentifier(), type);
-        TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations());
+        TypeDeclarationBody body = readTypeDeclarationBody(scope, name, type.bodyDeclarations(), type.isInterface());
         Set<Type> superTypes = superTypes(type);
         if (type.isInterface()) {
             // TODO: throw exception if other parts of body are declared
-            return InterfaceNode.declareInterface(name, typeParameters, superTypes, body.getMethods());
+            return InterfaceNode.declareInterface(
+                name,
+                typeParameters,
+                superTypes,
+                body.getFields(),
+                body.getStaticConstructor(),
+                body.getMethods()
+            );
         } else {
             return ClassNode.declareClass(
                 name,
@@ -233,7 +240,7 @@ public class JavaReader {
     GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
         ScalarType className = generateAnonymousName(declaration);
         Scope scope = outerScope.enterClass(className);
-        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations());
+        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations(), false);
         AnonymousClass anonymousClass = new AnonymousClass(
             Optional.of((AnonymousType) typeOf(declaration.resolveBinding())),
             superTypes(declaration),
@@ -357,7 +364,7 @@ public class JavaReader {
         return ((AbstractTypeDeclaration)node).resolveBinding();
     }
 
-    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, ScalarType type, List<Object> bodyDeclarations) {
+    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, ScalarType type, List<Object> bodyDeclarations, boolean isInterface) {
         TypeDeclarationBody.Builder body = TypeDeclarationBody.builder();
 
         for (Object declaration : bodyDeclarations) {
@@ -370,7 +377,7 @@ public class JavaReader {
                     readStatementBody(scope, initializer.getBody())));
 
             tryCast(FieldDeclaration.class, declaration)
-                .ifPresent(field -> readField(body, scope, type, field));
+                .ifPresent(field -> readField(body, scope, type, field, isInterface));
 
             tryCast(TypeDeclaration.class, declaration)
                 .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(body, typeDeclaration)));
@@ -406,22 +413,22 @@ public class JavaReader {
             .orElse(typeNode);
     }
 
-    private void readField(TypeDeclarationBody.Builder builder, Scope scope, ScalarType declaringType, FieldDeclaration field) {
+    private void readField(TypeDeclarationBody.Builder builder, Scope scope, ScalarType declaringType, FieldDeclaration field, boolean isInterface) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = field.fragments();
+        boolean isStatic = isInterface || Modifier.isStatic(field.getModifiers());
         Type type = typeOf(field.getType());
         fragments.forEach(fragment -> {
-            builder.field(field(Modifier.isStatic(field.getModifiers()), fragment.getName().getIdentifier(), type));
+            builder.field(field(isStatic, fragment.getName().getIdentifier(), type));
             if (fragment.getInitializer() != null) {
                 ExpressionNode value = readExpression(scope, type, fragment.getInitializer());
                 String name = fragment.getName().getIdentifier();
-                boolean isStatic = Modifier.isStatic(field.getModifiers());
                 Receiver receiver = isStatic
                     ? staticReceiver(declaringType)
                     : instanceReceiver(thisReference(declaringType));
 
                 StatementNode assignment = assignStatement(fieldAccess(receiver, name, type), value);
-                builder.addInitializer(isStatic,assignment);
+                builder.addInitializer(isStatic, assignment);
             }
         });
 

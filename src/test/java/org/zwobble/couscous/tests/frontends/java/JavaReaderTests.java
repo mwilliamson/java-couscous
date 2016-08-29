@@ -18,6 +18,7 @@ import static org.zwobble.couscous.ast.AssignmentNode.assignStatement;
 import static org.zwobble.couscous.ast.ConstructorCallNode.constructorCall;
 import static org.zwobble.couscous.ast.ExpressionStatementNode.expressionStatement;
 import static org.zwobble.couscous.ast.FieldAccessNode.fieldAccess;
+import static org.zwobble.couscous.ast.FieldDeclarationNode.staticField;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.IfStatementNode.ifStatement;
 import static org.zwobble.couscous.ast.LiteralNode.UNIT;
@@ -476,6 +477,28 @@ public class JavaReaderTests {
             .returns(Types.INT)
             .build();
         assertEquals(list(expectedMethod), classNode.getMethods());
+    }
+
+    @Test
+    public void canReadInterfaceWithField() {
+        String source = "package com.example;" +
+            "public interface Example {" +
+            "final int VALUE = 1;" +
+            "}";
+        List<TypeNode> classes = readSource("com/example/Example.java", source);
+        assertThat(classes, hasSize(1));
+        InterfaceNode classNode = (InterfaceNode) classes.get(0);
+
+        assertEquals(list(staticField("VALUE", Types.INT)), classNode.getFields());
+        assertEquals(
+            list(
+                assignStatement(
+                    FieldAccessNode.fieldAccess(ScalarType.of("com.example.Example"), "VALUE", Types.INT),
+                    literal(1)
+                )
+            ),
+            classNode.getStaticConstructor()
+        );
     }
 
     @Test

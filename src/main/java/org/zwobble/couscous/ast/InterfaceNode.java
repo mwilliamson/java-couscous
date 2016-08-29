@@ -12,26 +12,34 @@ public class InterfaceNode implements TypeNode {
         ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
         Set<Type> superTypes,
+        List<FieldDeclarationNode> fields,
+        List<StatementNode> staticConstructor,
         List<MethodNode> methods)
     {
-        return new InterfaceNode(name, typeParameters, superTypes, methods);
+        return new InterfaceNode(name, typeParameters, superTypes, fields, staticConstructor, methods);
     }
 
     private final ScalarType name;
     private final List<FormalTypeParameterNode> typeParameters;
     private final Set<Type> superTypes;
+    private final List<FieldDeclarationNode> fields;
+    private final List<StatementNode> staticConstructor;
     private final List<MethodNode> methods;
 
     private InterfaceNode(
         ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
         Set<Type> superTypes,
-        List<MethodNode> methodNodes)
+        List<FieldDeclarationNode> fields,
+        List<StatementNode> staticConstructor,
+        List<MethodNode> methods)
     {
         this.name = name;
         this.typeParameters = typeParameters;
         this.superTypes = superTypes;
-        methods = methodNodes;
+        this.fields = fields;
+        this.staticConstructor = staticConstructor;
+        this.methods = methods;
     }
 
     @Override
@@ -49,19 +57,17 @@ public class InterfaceNode implements TypeNode {
         return superTypes;
     }
 
-    @Override
-    public List<MethodNode> getMethods() {
-        return methods;
+    public List<FieldDeclarationNode> getFields() {
+        return fields;
+    }
+
+    public List<StatementNode> getStaticConstructor() {
+        return staticConstructor;
     }
 
     @Override
-    public String toString() {
-        return "InterfaceNode(" +
-            "name=" + name +
-            ", typeParameters=" + typeParameters +
-            ", superTypes=" + superTypes +
-            ", methods=" + methods +
-            ')';
+    public List<MethodNode> getMethods() {
+        return methods;
     }
 
     @Override
@@ -80,7 +86,21 @@ public class InterfaceNode implements TypeNode {
             transformer.transform(name),
             transformer.transformFormalTypeParameters(typeParameters),
             transformer.transformTypes(superTypes),
+            transformer.transformFields(fields),
+            transformer.transformStatements(staticConstructor),
             transformer.transformMethods(methods));
+    }
+
+    @Override
+    public String toString() {
+        return "InterfaceNode(" +
+            "name=" + name +
+            ", typeParameters=" + typeParameters +
+            ", superTypes=" + superTypes +
+            ", fields=" + fields +
+            ", staticConstructor=" + staticConstructor +
+            ", methods=" + methods +
+            ')';
     }
 
     @Override
@@ -93,6 +113,8 @@ public class InterfaceNode implements TypeNode {
         if (!name.equals(that.name)) return false;
         if (!typeParameters.equals(that.typeParameters)) return false;
         if (!superTypes.equals(that.superTypes)) return false;
+        if (!fields.equals(that.fields)) return false;
+        if (!staticConstructor.equals(that.staticConstructor)) return false;
         return methods.equals(that.methods);
 
     }
@@ -102,6 +124,8 @@ public class InterfaceNode implements TypeNode {
         int result = name.hashCode();
         result = 31 * result + typeParameters.hashCode();
         result = 31 * result + superTypes.hashCode();
+        result = 31 * result + fields.hashCode();
+        result = 31 * result + staticConstructor.hashCode();
         result = 31 * result + methods.hashCode();
         return result;
     }

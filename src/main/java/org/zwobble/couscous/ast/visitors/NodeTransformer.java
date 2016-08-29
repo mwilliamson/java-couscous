@@ -45,6 +45,7 @@ public class NodeTransformer {
         private Function<Type, Type> transformType = type -> type;
         private Function<MethodSignature, String> transformMethodName = MethodSignature::getName;
         private Function<String, String> transformFieldName = name -> name;
+        private Function<Receiver, Receiver> transformReceiver = receiver -> receiver;
 
         public Builder transformExpression(
             Function<ExpressionNode, Optional<ExpressionNode>> transformExpression)
@@ -77,13 +78,19 @@ public class NodeTransformer {
             return this;
         }
 
+        public Builder transformReceiver(Function<Receiver, Receiver> receiver) {
+            this.transformReceiver = receiver;
+            return this;
+        }
+
         public NodeTransformer build() {
             return new NodeTransformer(
                 transformExpression,
                 transformStatement,
                 transformType,
                 transformMethodName,
-                transformFieldName
+                transformFieldName,
+                transformReceiver
             );
         }
     }
@@ -93,19 +100,22 @@ public class NodeTransformer {
     private final Function<Type, Type> transformType;
     private final Function<MethodSignature, String> transformMethodName;
     private final Function<String, String> transformFieldName;
+    private final Function<Receiver, Receiver> transformReceiver;
 
     private NodeTransformer(
         Function<ExpressionNode, Optional<ExpressionNode>> transformExpression,
         Function<StatementNode, Optional<List<StatementNode>>> transformStatement,
         Function<Type, Type> transformType,
         Function<MethodSignature, String> transformMethodName,
-        Function<String, String> transformFieldName)
+        Function<String, String> transformFieldName,
+        Function<Receiver, Receiver> transformReceiver)
     {
         this.transformExpression = transformExpression;
         this.transformStatement = transformStatement;
         this.transformType = transformType;
         this.transformMethodName = transformMethodName;
         this.transformFieldName = transformFieldName;
+        this.transformReceiver = transformReceiver;
     }
 
     public MethodSignature transform(MethodSignature signature) {
@@ -142,7 +152,7 @@ public class NodeTransformer {
     }
 
     public Receiver transformReceiver(Receiver receiver) {
-        return receiver.transformSubtree(this);
+        return transformReceiver.apply(receiver.transformSubtree(this));
     }
 
     public VariableDeclaration transform(VariableDeclaration declaration) {
