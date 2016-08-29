@@ -6,7 +6,6 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.TypeParameter;
-import org.zwobble.couscous.util.ExtraLists;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
-import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class NodeTransformer {
@@ -108,19 +106,6 @@ public class NodeTransformer {
         this.transformType = transformType;
         this.transformMethodName = transformMethodName;
         this.transformFieldName = transformFieldName;
-    }
-
-    public Node transform(Node node) {
-        if (node instanceof ExpressionNode) {
-            return transformExpression((ExpressionNode) node);
-        } else if (node instanceof StatementNode) {
-            List<StatementNode> statements = ExtraLists.copyOf(transformStatement((StatementNode) node));
-            return only(statements, () -> new UnsupportedOperationException("TODO: add support for compound statements"));
-        } else if (node instanceof TypeNode) {
-            return transformTypeDeclaration((TypeNode) node);
-        } else {
-            return node.transformSubtree(this);
-        }
     }
 
     public MethodSignature transform(MethodSignature signature) {
