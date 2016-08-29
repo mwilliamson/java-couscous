@@ -19,6 +19,17 @@ import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class NodeTransformer {
+    public static List<TypeNode> applyAll(List<NodeTransformer> transformers, List<TypeNode> types) {
+        for (NodeTransformer transformer : transformers) {
+            types = apply(transformer, types);
+        }
+        return types;
+    }
+
+    public static List<TypeNode> apply(NodeTransformer transformer, List<TypeNode> types) {
+        return eagerMap(types, transformer::transformTypeDeclaration);
+    }
+
     public static NodeTransformer replaceExpressions(Map<ExpressionNode, ExpressionNode> replacements) {
         return builder().
             transformExpression(expression ->

@@ -1,7 +1,7 @@
 package org.zwobble.couscous.backends.csharp;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.Node;
+import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.csharp.primitives.CsharpPrimitiveMethods;
 import org.zwobble.couscous.backends.naming.Naming;
@@ -9,9 +9,11 @@ import org.zwobble.couscous.transforms.DesugarForEachToFor;
 import org.zwobble.couscous.transforms.DesugarForToWhile;
 import org.zwobble.couscous.types.*;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class CsharpCodeGenerator {
     public static final Naming NAMING = Naming.noMangling();
@@ -31,8 +33,8 @@ public class CsharpCodeGenerator {
     private final String namespace;
     private final NodeTransformer nodeTransformer;
 
-    public static Node generateCode(Node node, String namespace) {
-        return new CsharpCodeGenerator(NAMING, namespace).generateCode(node);
+    public static List<TypeNode> generateCode(List<TypeNode> types, String namespace) {
+        return new CsharpCodeGenerator(NAMING, namespace).generateCode(types);
     }
 
     private CsharpCodeGenerator(Naming naming, String namespace) {
@@ -44,15 +46,15 @@ public class CsharpCodeGenerator {
             .build();
     }
 
-    private Node generateCode(Node node) {
-        return nodeTransformer.transform(
-            CsharpPrimitiveMethods.TRANSFORMER.transform(
-                DesugarForToWhile.transformer().transform(
-                    DesugarForEachToFor.transformer().transform(
-                        node
-                    )
-                )
-            )
+    private List<TypeNode> generateCode(List<TypeNode> types) {
+        return NodeTransformer.applyAll(
+            list(
+                DesugarForEachToFor.transformer(),
+                DesugarForToWhile.transformer(),
+                CsharpPrimitiveMethods.TRANSFORMER,
+                nodeTransformer
+            ),
+            types
         );
     }
 

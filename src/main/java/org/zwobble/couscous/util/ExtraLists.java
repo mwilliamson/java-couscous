@@ -29,6 +29,10 @@ public class ExtraLists {
         return ImmutableList.of(value1, value2, value3);
     }
 
+    public static <T> List<T> list(T... values) {
+        return ImmutableList.copyOf(values);
+    }
+
     public static <T> List<T> cons(T value, Iterable<T> list) {
         return concat(list(value), list);
     }

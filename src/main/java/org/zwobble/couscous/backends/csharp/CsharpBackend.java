@@ -25,11 +25,8 @@ public class CsharpBackend implements Backend {
         Files.write(
             outputFilePath,
             transform(
-                classes,
-                classNode -> compileClass(classNode)));
+                CsharpCodeGenerator.generateCode(classes, namespace),
+                CsharpSerializer::serialize));
     }
 
-    private String compileClass(TypeNode classNode) {
-        return CsharpSerializer.serialize(CsharpCodeGenerator.generateCode(classNode, namespace));
-    }
 }
