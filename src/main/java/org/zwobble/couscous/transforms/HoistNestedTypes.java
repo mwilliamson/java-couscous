@@ -96,27 +96,31 @@ public class HoistNestedTypes {
         // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
         Scope scope = topScope.enterClass(typeNode.getName());
         return tryCast(ClassNode.class, typeNode)
-            .map(node -> {
+            .flatMap(node -> {
                 // TODO: don't generate closure if not necessary (i.e. it's an explicit or implicit static inner class)
                 GeneratedClosure closure = ClosureGenerator.classWithCapture(scope, node);
 //                Type type = node.getTypeParameters().isEmpty()
 //                    ? typeNode.getName()
 //                    : parameterizedType(typeNode.getName(), eagerMap(node.getTypeParameters()));
-                Type type = typeNode.getName();
-                // TODO: method type parameters
-                List<FormalArgumentNode> methodArguments = eagerMap(
-                    node.getConstructor().getArguments(),
-                    // TODO: use scope of outer class
-                    argument -> scope.formalArgument(argument.getName(), argument.getType()));
-                MethodNode method = MethodNode.builder("create_" + typeNode.getName().getSimpleName())
-                    .arguments(methodArguments)
-                    .returns(type)
-                    .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
-                    .build();
-                return new HoistedType(
-                    closure.getClassNode(),
-                    Optional.of(method)
-                );
+                if (closure.hasCaptures()) {
+                    Type type = typeNode.getName();
+                    // TODO: method type parameters
+                    List<FormalArgumentNode> methodArguments = eagerMap(
+                        node.getConstructor().getArguments(),
+                        // TODO: use scope of outer class
+                        argument -> scope.formalArgument(argument.getName(), argument.getType()));
+                    MethodNode method = MethodNode.builder("create_" + typeNode.getName().getSimpleName())
+                        .arguments(methodArguments)
+                        .returns(type)
+                        .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
+                        .build();
+                    return Optional.of(new HoistedType(
+                        closure.getClassNode(),
+                        Optional.of(method)
+                    ));
+                } else {
+                    return Optional.empty();
+                }
             })
             .orElse(new HoistedType(typeNode, Optional.empty()));
     }

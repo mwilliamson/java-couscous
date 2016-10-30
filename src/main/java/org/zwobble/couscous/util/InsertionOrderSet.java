@@ -20,8 +20,14 @@ public interface InsertionOrderSet<T> extends Iterable<T> {
             public Iterator<T> iterator() {
                 return list.iterator();
             }
+
+            @Override
+            public boolean isEmpty() {
+                return list.isEmpty();
+            }
         };
     }
 
     List<T> asList();
+    boolean isEmpty();
 }
