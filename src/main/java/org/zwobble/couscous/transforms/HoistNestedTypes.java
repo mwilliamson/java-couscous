@@ -29,6 +29,17 @@ public class HoistNestedTypes {
     private final Scope topScope = Scope.create().temporaryPrefix("_couscous_hoist_nested_types");
 
     private List<TypeNode> hoistTypes(List<TypeNode> declarations) {
+        while (true) {
+            List<TypeNode> hoisted = hoistInnerTypes(declarations);
+            if (hoisted.size() == declarations.size()) {
+                return hoisted;
+            } else {
+                declarations = hoisted;
+            }
+        }
+    }
+
+    private List<TypeNode> hoistInnerTypes(List<TypeNode> declarations) {
         List<HoistResult> hoistResults = eagerMap(declarations, declaration -> hoistInnerTypes(declaration));
 
         Iterable<HoistedType> hoistedTypes = lazyFlatMap(hoistResults, hoisted -> hoisted.hoistedTypes);
@@ -126,8 +137,6 @@ public class HoistNestedTypes {
     }
 
     private HoistedType hoistType(TypeNode typeNode) {
-        // TODO: we need to hoist inner types of the inner types, specifically *after* the initial hoist (to make closures easier to generate)
-        // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
         Scope scope = topScope.enterClass(typeNode.getName());
         return tryCast(ClassNode.class, typeNode)
             .flatMap(node -> {

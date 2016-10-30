@@ -133,6 +133,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void innerInnerClasses() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "inner-inner-class",
+                ScalarType.topLevel("com.example.InnerClass"),
+                "run",
+                list(),
+                Types.INT));
+    }
+
+    @Test
     public void canImplementUserDefinedInterface() throws Exception {
         assertEquals(
             value(42),

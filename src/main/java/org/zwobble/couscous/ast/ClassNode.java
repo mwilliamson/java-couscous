@@ -113,9 +113,12 @@ public class ClassNode implements TypeNode {
     @Override
     public Iterable<? extends Node> childNodes() {
         return Iterables.concat(
+            typeParameters,
+            staticConstructor,
             ExtraIterables.of(constructor),
             fields,
-            methods
+            methods,
+            innerTypes
         );
     }
 

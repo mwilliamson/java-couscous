@@ -29,6 +29,7 @@ import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariable
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class ClosureGenerator {
@@ -40,9 +41,7 @@ public class ClosureGenerator {
             findFreeTypeParameters(classNode));
 
         InsertionOrderSet<ReferenceNode> freeVariables = InsertionOrderSet.copyOf(Iterables.filter(
-            findFreeVariables(ExtraLists.concat(
-                classNode.getFields(),
-                classNode.getMethods())),
+            findFreeVariables(ExtraLists.copyOf(classNode.childNodes())),
             // TODO: check this references work correctly in anonymous classes
             variable -> !isThisReference(classNode.getName(), variable)));
         InsertionOrderSet<CapturedVariable> capturedVariables = InsertionOrderSet.copyOf(transform(
@@ -58,6 +57,8 @@ public class ClosureGenerator {
             throw new RuntimeException("Class has unexpected static constructor");
         }
 
+        NodeTransformer transformer = replaceCaptureReferencesTransformer(classNode.getName(), capturedVariables);
+
         ClassNode generatedClass = new ClassNode(
             classNode.getName(),
             // TODO: generate fresh type parameter and replace in body
@@ -67,8 +68,9 @@ public class ClosureGenerator {
             list(),
             buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
             eagerMap(classNode.getMethods(), method ->
-                method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))),
-            list()
+                method.mapBody(body -> transformer.transformStatements(body))),
+            // TODO: should just call replaceCaptureReferences over entire class?
+            eagerMap(classNode.getInnerTypes(), type -> only(transformer.transformTypeDeclaration(type)))
         );
         return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
     }
@@ -95,16 +97,14 @@ public class ClosureGenerator {
         });
     }
 
-    private static List<StatementNode> replaceCaptureReferences(
+    private static NodeTransformer replaceCaptureReferencesTransformer(
         ScalarType className,
-        List<StatementNode> body,
         InsertionOrderSet<CapturedVariable> freeVariables)
     {
         Map<ExpressionNode, ExpressionNode> replacements = Maps.transformValues(
             Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
             freeVariable -> captureAccess(className, freeVariable));
-        NodeTransformer transformer = NodeTransformer.replaceExpressions(replacements);
-        return eagerFlatMap(body, transformer::transformStatement);
+        return NodeTransformer.replaceExpressions(replacements);
     }
 
     private static ConstructorNode buildConstructor(

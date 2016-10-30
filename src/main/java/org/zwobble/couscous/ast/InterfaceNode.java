@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import com.google.common.collect.Iterables;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
@@ -91,7 +92,13 @@ public class InterfaceNode implements TypeNode {
 
     @Override
     public Iterable<? extends Node> childNodes() {
-        return methods;
+        return Iterables.concat(
+            typeParameters,
+            staticConstructor,
+            fields,
+            methods,
+            innerTypes
+        );
     }
 
     @Override
