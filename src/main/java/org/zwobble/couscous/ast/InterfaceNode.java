@@ -92,6 +92,18 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
+    public TypeNode rename(ScalarType name) {
+        return new InterfaceNode(
+            name,
+            typeParameters,
+            superTypes,
+            fields,
+            staticConstructor,
+            methods
+        );
+    }
+
+    @Override
     public String toString() {
         return "InterfaceNode(" +
             "name=" + name +

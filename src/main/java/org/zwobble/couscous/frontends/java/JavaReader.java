@@ -11,7 +11,7 @@ import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.types.*;
+import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.util.InsertionOrderSet;
@@ -37,7 +37,6 @@ import static org.zwobble.couscous.ast.FieldDeclarationNode.field;
 import static org.zwobble.couscous.ast.FormalArgumentNode.formalArg;
 import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
-import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
@@ -135,7 +134,9 @@ public class JavaReader {
                 body.getFields(),
                 body.getStaticConstructor(),
                 body.getConstructor(),
-                body.getMethods());
+                body.getMethods(),
+                body.getInnerTypes()
+            );
         }
     }
 
@@ -300,7 +301,9 @@ public class JavaReader {
             list(),
             buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
             eagerMap(classNode.getMethods(), method ->
-                method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))));
+                method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))),
+            list()
+        );
         return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
     }
 
@@ -322,7 +325,9 @@ public class JavaReader {
             anonymousClass.getFields(),
             list(),
             ConstructorNode.DEFAULT,
-            anonymousClass.getMethods());
+            anonymousClass.getMethods(),
+            list()
+        );
         if (anonymousClass.getType().isPresent()) {
             NodeTransformer nodeTransformer = NodeTransformer.replaceExpressions(map(
                 thisReference(anonymousClass.getType().get()),
@@ -380,37 +385,9 @@ public class JavaReader {
                 .ifPresent(field -> readField(body, scope, type, field, isInterface));
 
             tryCast(TypeDeclaration.class, declaration)
-                .ifPresent(typeDeclaration -> classes.add(readNestedTypeDeclaration(body, typeDeclaration)));
+                .ifPresent(typeDeclaration -> body.addInnerType(readTypeDeclaration(typeDeclaration)));
         }
         return body.build();
-    }
-
-    private TypeNode readNestedTypeDeclaration(TypeDeclarationBody.Builder body, TypeDeclaration typeDeclaration) {
-        TypeNode typeNode = readTypeDeclaration(typeDeclaration);
-        // TODO: can we remove duplication of scope creation with readTypeDeclaration()?
-        Scope scope = topScope.enterClass(typeNode.getName());
-        return tryCast(ClassNode.class, typeNode)
-            .filter(node -> !Modifier.isStatic(typeDeclaration.getModifiers()))
-            .<TypeNode>map(node -> {
-                GeneratedClosure closure = classWithCapture(scope, node);
-//                Type type = node.getTypeParameters().isEmpty()
-//                    ? typeNode.getName()
-//                    : parameterizedType(typeNode.getName(), eagerMap(node.getTypeParameters()));
-                Type type = typeNode.getName();
-                // TODO: method type parameters
-                List<FormalArgumentNode> methodArguments = eagerMap(
-                    node.getConstructor().getArguments(),
-                    // TODO: use scope of outer class
-                    argument -> scope.formalArgument(argument.getName(), argument.getType()));
-                MethodNode method = MethodNode.builder("create_" + typeDeclaration.getName().getIdentifier())
-                    .arguments(methodArguments)
-                    .returns(type)
-                    .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
-                    .build();
-                body.addMethod(method);
-                return closure.getClassNode();
-            })
-            .orElse(typeNode);
     }
 
     private void readField(TypeDeclarationBody.Builder builder, Scope scope, ScalarType declaringType, FieldDeclaration field, boolean isInterface) {

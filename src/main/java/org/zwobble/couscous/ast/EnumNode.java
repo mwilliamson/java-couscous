@@ -67,6 +67,14 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
+    public TypeNode rename(ScalarType name) {
+        return new EnumNode(
+            name,
+            values
+        );
+    }
+
+    @Override
     public String toString() {
         return "EnumNode(" +
             "name=" + name +

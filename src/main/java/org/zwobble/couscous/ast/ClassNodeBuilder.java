@@ -24,6 +24,7 @@ public class ClassNodeBuilder {
     private List<StatementNode> staticConstructor;
     private Optional<ConstructorNode> constructor;
     private final ImmutableList.Builder<MethodNode> methods;
+    private final ImmutableList.Builder<TypeNode> innerTypes;
 
     public ClassNodeBuilder(ScalarType name) {
         this.name = name;
@@ -33,6 +34,7 @@ public class ClassNodeBuilder {
         staticConstructor = list();
         this.constructor = Optional.empty();
         this.methods = ImmutableList.builder();
+        this.innerTypes = ImmutableList.builder();
     }
 
     public ClassNodeBuilder(String name) {
@@ -119,7 +121,9 @@ public class ClassNodeBuilder {
             fields.build(),
             staticConstructor,
             constructor.orElse(ConstructorNode.DEFAULT),
-            methods.build());
+            methods.build(),
+            innerTypes.build()
+        );
     }
 
     public InterfaceNode buildInterface() {

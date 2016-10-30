@@ -13,4 +13,6 @@ public interface TypeNode extends Node {
     Set<Type> getSuperTypes();
     List<MethodNode> getMethods();
     TypeNode transformSubtree(NodeTransformer transformer);
+
+    TypeNode rename(ScalarType name);
 }

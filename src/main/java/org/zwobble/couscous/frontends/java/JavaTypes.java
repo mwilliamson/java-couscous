@@ -47,10 +47,12 @@ public class JavaTypes {
             Identifier declaringScope = getDeclaringScope(typeBinding);
             return new TypeParameter(declaringScope, typeBinding.getName());
         }
-        ScalarType rawType = outerClass == null
-            ? ScalarType.of(typeBinding.getErasure().getQualifiedName())
-            // TODO: test for erasure of inner type name
-            : ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
+        // TODO: tidy-up
+//        ScalarType rawType = outerClass == null
+//            ? ScalarType.of(typeBinding.getErasure().getQualifiedName())
+//            // TODO: test for erasure of inner type name
+//            : ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
+        ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());
         if (typeBinding.isParameterizedType()) {
             List<Type> typeParameters = eagerMap(
                 asList(typeBinding.getTypeArguments()),

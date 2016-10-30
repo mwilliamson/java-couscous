@@ -27,7 +27,8 @@ public class SplitStaticsFromInterface {
                     interfaceNode.getFields(),
                     interfaceNode.getStaticConstructor(),
                     ConstructorNode.DEFAULT,
-                    eagerFilter(interfaceNode.getMethods(), method -> method.isStatic())
+                    eagerFilter(interfaceNode.getMethods(), method -> method.isStatic()),
+                    list()
                 ));
                 result.add(InterfaceNode.declareInterface(
                     interfaceNode.getName(),
