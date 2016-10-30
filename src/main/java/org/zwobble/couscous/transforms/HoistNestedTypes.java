@@ -1,24 +1,25 @@
 package org.zwobble.couscous.transforms;
 
-import org.zwobble.couscous.ast.ClassNode;
-import org.zwobble.couscous.ast.FormalArgumentNode;
-import org.zwobble.couscous.ast.MethodNode;
-import org.zwobble.couscous.ast.TypeNode;
+import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.frontends.java.GeneratedClosure;
 import org.zwobble.couscous.frontends.java.Scope;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.Types;
+import org.zwobble.couscous.util.ExtraSets;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
+import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
+import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
 import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
 import static org.zwobble.couscous.util.Casts.tryCast;
-import static org.zwobble.couscous.util.ExtraIterables.iterable;
-import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
+import static org.zwobble.couscous.util.ExtraIterables.*;
 import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class HoistNestedTypes {
@@ -29,13 +30,47 @@ public class HoistNestedTypes {
     private final Scope topScope = Scope.create().temporaryPrefix("_couscous_hoist_nested_types");
 
     private List<TypeNode> hoistTypes(List<TypeNode> declarations) {
-        Iterable<TypeNode> types = eagerFlatMap(declarations, declaration -> hoistInnerTypes(declaration));
+        List<HoistResult> hoistResults = eagerMap(declarations, declaration -> hoistInnerTypes(declaration));
+
+        Iterable<HoistedType> hoistedTypes = lazyFlatMap(hoistResults, hoisted -> hoisted.hoistedTypes);
+        Set<Type> capturingTypes = ExtraSets.copyOf(
+            lazyMap(
+                lazyFilter(hoistedTypes, hoisted -> hoisted.method.isPresent()),
+                hoistedType -> hoistedType.type.getName()
+            )
+        );
+
+        NodeTransformer constructorCallTransformer = NodeTransformer.builder()
+            .transformExpression(expression -> transformExpression(expression, capturingTypes))
+            .build();
+
+        List<TypeNode> types = eagerFlatMap(
+            hoistResults,
+            result -> cons(
+                addMethods(
+                    only(NodeTransformer.apply(constructorCallTransformer, list(result.outerType.stripInnerTypes()))),
+                    eagerFlatMap(result.hoistedTypes, hoisted -> iterable(hoisted.method))
+                ),
+                lazyMap(result.hoistedTypes, hoisted -> hoisted.type)
+            )
+        );
 
         NodeTransformer referenceTransformer = NodeTransformer.builder()
             .transformType(this::transformType)
             .build();
 
-        return eagerFlatMap(types, referenceTransformer::transformTypeDeclaration);
+        return NodeTransformer.apply(referenceTransformer, types);
+    }
+
+    private Optional<ExpressionNode> transformExpression(ExpressionNode expression, Set<Type> capturingTypes) {
+        return tryCast(ConstructorCallNode.class, expression)
+            .filter(call -> capturingTypes.contains(Types.erasure(call.getType())))
+            .map(call -> methodCall(
+                thisReference(outerType(Types.erasure(call.getType()))),
+                createMethodName(Types.erasure(call.getType())),
+                (List<ExpressionNode>)call.getArguments(),
+                call.getType()
+            ));
     }
 
     private Type transformType(Type type) {
@@ -57,17 +92,20 @@ public class HoistNestedTypes {
             .orElse(false);
     }
 
+    private Type outerType(ScalarType type) {
+        // TODO: implement separate type classes for top-level and inner types
+
+        return ScalarType.of(type.getQualifier().get());
+    }
+
     private static Type hoistedTypeName(ScalarType type) {
         return ScalarType.of(type.getQualifier().get() + "__" + type.getSimpleName());
     }
 
-    private Iterable<TypeNode> hoistInnerTypes(TypeNode declaration) {
-        TypeNode type = declaration.stripInnerTypes();
-        Iterable<HoistedType> hoistedTypes = eagerMap(declaration.getInnerTypes(), this::hoistType);
-
-        return cons(
-            addMethods(type, eagerFlatMap(hoistedTypes, hoisted -> iterable(hoisted.method))),
-            lazyMap(hoistedTypes, hoisted -> hoisted.type)
+    private HoistResult hoistInnerTypes(TypeNode declaration) {
+        return new HoistResult(
+            declaration,
+            eagerMap(declaration.getInnerTypes(), this::hoistType)
         );
     }
 
@@ -103,13 +141,13 @@ public class HoistNestedTypes {
 //                    ? typeNode.getName()
 //                    : parameterizedType(typeNode.getName(), eagerMap(node.getTypeParameters()));
                 if (closure.hasCaptures()) {
-                    Type type = typeNode.getName();
+                    ScalarType type = typeNode.getName();
                     // TODO: method type parameters
                     List<FormalArgumentNode> methodArguments = eagerMap(
                         node.getConstructor().getArguments(),
                         // TODO: use scope of outer class
                         argument -> scope.formalArgument(argument.getName(), argument.getType()));
-                    MethodNode method = MethodNode.builder("create_" + typeNode.getName().getSimpleName())
+                    MethodNode method = MethodNode.builder(createMethodName(type))
                         .arguments(methodArguments)
                         .returns(type)
                         .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
@@ -123,6 +161,20 @@ public class HoistNestedTypes {
                 }
             })
             .orElse(new HoistedType(typeNode, Optional.empty()));
+    }
+
+    private String createMethodName(ScalarType type) {
+        return "create_" + type.getSimpleName();
+    }
+
+    private static class HoistResult {
+        private final TypeNode outerType;
+        private final List<HoistedType> hoistedTypes;
+
+        private HoistResult(TypeNode outerType, List<HoistedType> hoistedTypes) {
+            this.outerType = outerType;
+            this.hoistedTypes = hoistedTypes;
+        }
     }
 
     private static class HoistedType {

@@ -284,20 +284,10 @@ public class JavaExpressionReader {
             GeneratedClosure closure =
                 javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
             return closure.generateConstructor(arguments);
-        } else if (declaringClass.isNested() && !Modifier.isStatic(declaringClass.getModifiers())) {
-            if (expression.getExpression() == null) {
-                Type type = typeOf(declaringClass);
-                return methodCall(
-                    thisReference(typeOf(declaringClass.getDeclaringClass())),
-                    // TODO: remove duplication with JavaReader in name generation
-                    // TODO: handle this when hoisting (i.e. in HoistNestedTypes)
-                    "create_" + declaringClass.getName(),
-                    arguments,
-                    type);
-            } else {
+        } else {
+            if (expression.getExpression() != null) {
                 throw new UnsupportedOperationException();
             }
-        } else {
             return constructorCall(typeOf(expression), arguments);
         }
     }
