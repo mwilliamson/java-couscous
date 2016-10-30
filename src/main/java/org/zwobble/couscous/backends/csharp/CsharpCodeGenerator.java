@@ -7,6 +7,7 @@ import org.zwobble.couscous.backends.csharp.primitives.CsharpPrimitiveMethods;
 import org.zwobble.couscous.backends.naming.Naming;
 import org.zwobble.couscous.transforms.DesugarForEachToFor;
 import org.zwobble.couscous.transforms.DesugarForToWhile;
+import org.zwobble.couscous.transforms.HoistNestedTypes;
 import org.zwobble.couscous.transforms.SplitStaticsFromInterface;
 import org.zwobble.couscous.types.*;
 
@@ -56,7 +57,7 @@ public class CsharpCodeGenerator {
                     CsharpPrimitiveMethods.TRANSFORMER,
                     nodeTransformer
                 ),
-                types
+                HoistNestedTypes.hoist(types)
             )
         );
     }

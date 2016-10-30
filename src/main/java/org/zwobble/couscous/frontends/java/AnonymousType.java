@@ -2,6 +2,8 @@ package org.zwobble.couscous.frontends.java;
 
 import org.zwobble.couscous.types.Type;
 
+import java.util.function.Function;
+
 public class AnonymousType implements Type {
     public static Type anonymousType(String key) {
         return new AnonymousType(key);
@@ -15,6 +17,11 @@ public class AnonymousType implements Type {
 
     @Override
     public <T> T accept(Visitor<T> visitor) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Type transformSubTypes(Function<Type, Type> transform) {
         throw new UnsupportedOperationException();
     }
 

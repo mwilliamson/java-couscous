@@ -158,4 +158,12 @@ public class ExtraLists {
     public static <T> List<T> copyOf(Iterable<T> iterable) {
         return ImmutableList.copyOf(iterable);
     }
+
+    public static <T> T getLast(T[] values) {
+        return values[values.length - 1];
+    }
+
+    public static <T> T getLast(List<T> values) {
+        return values.get(values.size() - 1);
+    }
 }

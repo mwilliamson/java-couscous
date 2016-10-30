@@ -1,6 +1,9 @@
 package org.zwobble.couscous.types;
 
 import java.util.List;
+import java.util.function.Function;
+
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 
 public class ParameterizedType implements Type {
     public static ParameterizedType parameterizedType(ScalarType rawType, List<Type> parameters) {
@@ -26,6 +29,14 @@ public class ParameterizedType implements Type {
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Type transformSubTypes(Function<Type, Type> transform) {
+        return new ParameterizedType(
+            (ScalarType)transform.apply(rawType),
+            eagerMap(parameters, transform)
+        );
     }
 
     @Override

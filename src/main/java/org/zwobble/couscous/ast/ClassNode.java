@@ -9,6 +9,9 @@ import org.zwobble.couscous.util.ExtraIterables;
 import java.util.List;
 import java.util.Set;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class ClassNode implements TypeNode {
     public static ClassNodeBuilder builder(ScalarType name) {
         return new ClassNodeBuilder(name);
@@ -24,9 +27,11 @@ public class ClassNode implements TypeNode {
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
         ConstructorNode constructor,
-        List<MethodNode> methods)
+        List<MethodNode> methods,
+        List<TypeNode> innerTypes
+    )
     {
-        return new ClassNode(name, typeParameters, superTypes, fields, staticConstructor, constructor, methods);
+        return new ClassNode(name, typeParameters, superTypes, fields, staticConstructor, constructor, methods, innerTypes);
     }
     
     private final ScalarType name;
@@ -36,7 +41,8 @@ public class ClassNode implements TypeNode {
     private final List<StatementNode> staticConstructor;
     private final ConstructorNode constructor;
     private final List<MethodNode> methods;
-    
+    private final List<TypeNode> innerTypes;
+
     public ClassNode(
         ScalarType name,
         List<FormalTypeParameterNode> typeParameters,
@@ -44,7 +50,9 @@ public class ClassNode implements TypeNode {
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
         ConstructorNode constructor,
-        List<MethodNode> methodNodes)
+        List<MethodNode> methodNodes,
+        List<TypeNode> innerTypes
+    )
     {
         this.name = name;
         this.typeParameters = typeParameters;
@@ -53,6 +61,7 @@ public class ClassNode implements TypeNode {
         this.staticConstructor = staticConstructor;
         this.constructor = constructor;
         methods = methodNodes;
+        this.innerTypes = innerTypes;
     }
 
     @Override
@@ -86,7 +95,12 @@ public class ClassNode implements TypeNode {
     public List<MethodNode> getMethods() {
         return methods;
     }
-    
+
+    @Override
+    public List<TypeNode> getInnerTypes() {
+        return innerTypes;
+    }
+
     public String getSimpleName() {
         return name.getSimpleName();
     }
@@ -114,7 +128,23 @@ public class ClassNode implements TypeNode {
             transformer.transformFields(fields),
             transformer.transformStatements(staticConstructor),
             transformer.transformConstructor(constructor),
-            transformer.transformMethods(methods));
+            transformer.transformMethods(methods),
+            eagerFlatMap(innerTypes, transformer::transformTypeDeclaration)
+        );
+    }
+
+    @Override
+    public TypeNode stripInnerTypes() {
+        return new ClassNode(
+            name,
+            typeParameters,
+            superTypes,
+            fields,
+            staticConstructor,
+            constructor,
+            methods,
+            list()
+        );
     }
 
     @Override
@@ -127,6 +157,7 @@ public class ClassNode implements TypeNode {
             ", staticConstructor=" + staticConstructor +
             ", constructor=" + constructor +
             ", methods=" + methods +
+            ", innerTypes=" + innerTypes +
             ')';
     }
 
@@ -143,7 +174,8 @@ public class ClassNode implements TypeNode {
         if (!fields.equals(classNode.fields)) return false;
         if (!staticConstructor.equals(classNode.staticConstructor)) return false;
         if (!constructor.equals(classNode.constructor)) return false;
-        return methods.equals(classNode.methods);
+        if (!methods.equals(classNode.methods)) return false;
+        return innerTypes.equals(classNode.innerTypes);
 
     }
 
@@ -156,6 +188,7 @@ public class ClassNode implements TypeNode {
         result = 31 * result + staticConstructor.hashCode();
         result = 31 * result + constructor.hashCode();
         result = 31 * result + methods.hashCode();
+        result = 31 * result + innerTypes.hashCode();
         return result;
     }
 }

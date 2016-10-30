@@ -8,6 +8,7 @@ import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.transforms.DesugarForEachToFor;
 import org.zwobble.couscous.transforms.DesugarForToWhile;
 import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
+import org.zwobble.couscous.transforms.HoistNestedTypes;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,13 +51,15 @@ public class PythonBackend implements Backend {
     }
 
     private List<TypeNode> desugar(List<TypeNode> classes) {
-        return NodeTransformer.applyAll(
-            list(
-                DesugarSwitchToIfElse.transformer(),
-                DesugarForEachToFor.transformer(),
-                DesugarForToWhile.transformer()
-            ),
-            classes
+        return HoistNestedTypes.hoist(
+            NodeTransformer.applyAll(
+                list(
+                    DesugarSwitchToIfElse.transformer(),
+                    DesugarForEachToFor.transformer(),
+                    DesugarForToWhile.transformer()
+                ),
+                classes
+            )
         );
     }
 

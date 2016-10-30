@@ -12,5 +12,7 @@ public interface TypeNode extends Node {
     List<FormalTypeParameterNode> getTypeParameters();
     Set<Type> getSuperTypes();
     List<MethodNode> getMethods();
+    List<TypeNode> getInnerTypes();
     TypeNode transformSubtree(NodeTransformer transformer);
+    TypeNode stripInnerTypes();
 }

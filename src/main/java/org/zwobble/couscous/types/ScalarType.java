@@ -3,6 +3,7 @@ package org.zwobble.couscous.types;
 import com.google.common.base.Strings;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class ScalarType implements Type {
     public static ScalarType of(String qualifiedName) {
@@ -29,7 +30,7 @@ public class ScalarType implements Type {
         return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
     }
 
-    public Optional<String> getPackage() {
+    public Optional<String> getQualifier() {
         int lastDot = qualifiedName.lastIndexOf(".");
         if (lastDot == -1) {
             return Optional.empty();
@@ -72,5 +73,10 @@ public class ScalarType implements Type {
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Type transformSubTypes(Function<Type, Type> transform) {
+        return this;
     }
 }

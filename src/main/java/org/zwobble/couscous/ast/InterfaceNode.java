@@ -7,6 +7,9 @@ import org.zwobble.couscous.types.Type;
 import java.util.List;
 import java.util.Set;
 
+import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
+
 public class InterfaceNode implements TypeNode {
     public static InterfaceNode declareInterface(
         ScalarType name,
@@ -14,9 +17,11 @@ public class InterfaceNode implements TypeNode {
         Set<Type> superTypes,
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
-        List<MethodNode> methods)
+        List<MethodNode> methods,
+        List<TypeNode> innerTypes
+    )
     {
-        return new InterfaceNode(name, typeParameters, superTypes, fields, staticConstructor, methods);
+        return new InterfaceNode(name, typeParameters, superTypes, fields, staticConstructor, methods, innerTypes);
     }
 
     private final ScalarType name;
@@ -25,6 +30,7 @@ public class InterfaceNode implements TypeNode {
     private final List<FieldDeclarationNode> fields;
     private final List<StatementNode> staticConstructor;
     private final List<MethodNode> methods;
+    private final List<TypeNode> innerTypes;
 
     private InterfaceNode(
         ScalarType name,
@@ -32,7 +38,9 @@ public class InterfaceNode implements TypeNode {
         Set<Type> superTypes,
         List<FieldDeclarationNode> fields,
         List<StatementNode> staticConstructor,
-        List<MethodNode> methods)
+        List<MethodNode> methods,
+        List<TypeNode> innerTypes
+    )
     {
         this.name = name;
         this.typeParameters = typeParameters;
@@ -40,6 +48,7 @@ public class InterfaceNode implements TypeNode {
         this.fields = fields;
         this.staticConstructor = staticConstructor;
         this.methods = methods;
+        this.innerTypes = innerTypes;
     }
 
     @Override
@@ -71,6 +80,11 @@ public class InterfaceNode implements TypeNode {
     }
 
     @Override
+    public List<TypeNode> getInnerTypes() {
+        return innerTypes;
+    }
+
+    @Override
     public int nodeType() {
         return NodeTypes.INTERFACE;
     }
@@ -88,7 +102,22 @@ public class InterfaceNode implements TypeNode {
             transformer.transformTypes(superTypes),
             transformer.transformFields(fields),
             transformer.transformStatements(staticConstructor),
-            transformer.transformMethods(methods));
+            transformer.transformMethods(methods),
+            eagerFlatMap(innerTypes, transformer::transformTypeDeclaration)
+        );
+    }
+
+    @Override
+    public TypeNode stripInnerTypes() {
+        return new InterfaceNode(
+            name,
+            typeParameters,
+            superTypes,
+            fields,
+            staticConstructor,
+            methods,
+            list()
+        );
     }
 
     @Override
@@ -100,6 +129,7 @@ public class InterfaceNode implements TypeNode {
             ", fields=" + fields +
             ", staticConstructor=" + staticConstructor +
             ", methods=" + methods +
+            ", innerTypes=" + innerTypes +
             ')';
     }
 
@@ -115,7 +145,8 @@ public class InterfaceNode implements TypeNode {
         if (!superTypes.equals(that.superTypes)) return false;
         if (!fields.equals(that.fields)) return false;
         if (!staticConstructor.equals(that.staticConstructor)) return false;
-        return methods.equals(that.methods);
+        if (!methods.equals(that.methods)) return false;
+        return innerTypes.equals(that.innerTypes);
 
     }
 
@@ -127,6 +158,7 @@ public class InterfaceNode implements TypeNode {
         result = 31 * result + fields.hashCode();
         result = 31 * result + staticConstructor.hashCode();
         result = 31 * result + methods.hashCode();
+        result = 31 * result + innerTypes.hashCode();
         return result;
     }
 }

@@ -19,6 +19,7 @@ public class TypeDeclarationBody {
         private final ImmutableList.Builder<StatementNode> instanceInitializers = ImmutableList.builder();
         private ConstructorNode constructor = ConstructorNode.DEFAULT;
         private final ImmutableList.Builder<MethodNode> methods = ImmutableList.builder();
+        private final ImmutableList.Builder<TypeNode> innerTypes = ImmutableList.builder();
 
         private Builder() {
         }
@@ -43,6 +44,10 @@ public class TypeDeclarationBody {
             this.methods.add(method);
         }
 
+        public void addInnerType(TypeNode typeDeclaration) {
+            this.innerTypes.add(typeDeclaration);
+        }
+
         public TypeDeclarationBody build() {
             return new TypeDeclarationBody(
                 fields.build(),
@@ -50,7 +55,9 @@ public class TypeDeclarationBody {
                 ConstructorNode.constructor(
                     constructor.getArguments(),
                     ExtraLists.concat(instanceInitializers.build(), constructor.getBody())),
-                methods.build());
+                methods.build(),
+                innerTypes.build()
+            );
         }
     }
 
@@ -58,16 +65,21 @@ public class TypeDeclarationBody {
     private final List<StatementNode> staticConstructor;
     private final ConstructorNode constructor;
     private final List<MethodNode> methods;
+    private final List<TypeNode> innerTypes;
 
     public TypeDeclarationBody(
         List<FieldDeclarationNode> fields,
-        List<StatementNode> staticConstructor, ConstructorNode constructor,
-        List<MethodNode> methods)
+        List<StatementNode> staticConstructor,
+        ConstructorNode constructor,
+        List<MethodNode> methods,
+        List<TypeNode> innerTypes
+    )
     {
         this.fields = fields;
         this.staticConstructor = staticConstructor;
         this.constructor = constructor;
         this.methods = methods;
+        this.innerTypes = innerTypes;
     }
 
     public List<FieldDeclarationNode> getFields() {
@@ -84,5 +96,9 @@ public class TypeDeclarationBody {
 
     public List<MethodNode> getMethods() {
         return methods;
+    }
+
+    public List<TypeNode> getInnerTypes() {
+        return innerTypes;
     }
 }

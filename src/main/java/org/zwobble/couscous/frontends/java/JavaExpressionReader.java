@@ -290,6 +290,7 @@ public class JavaExpressionReader {
                 return methodCall(
                     thisReference(typeOf(declaringClass.getDeclaringClass())),
                     // TODO: remove duplication with JavaReader in name generation
+                    // TODO: handle this when hoisting (i.e. in HoistNestedTypes)
                     "create_" + declaringClass.getName(),
                     arguments,
                     type);

@@ -2,6 +2,8 @@ package org.zwobble.couscous.types;
 
 import org.zwobble.couscous.ast.identifiers.Identifier;
 
+import java.util.function.Function;
+
 public class TypeParameter implements Type {
     public static TypeParameter typeParameter(Identifier declaringScope, String name) {
         return new TypeParameter(declaringScope, name);
@@ -26,6 +28,11 @@ public class TypeParameter implements Type {
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Type transformSubTypes(Function<Type, Type> transform) {
+        return this;
     }
 
     @Override

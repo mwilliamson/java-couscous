@@ -40,6 +40,10 @@ public class GeneratedClosure {
             concat(capturedVariables, arguments));
     }
 
+    public boolean hasCaptures() {
+        return !capturedTypes.isEmpty() || !capturedVariables.isEmpty();
+    }
+
     private ScalarType getType() {
         return classNode.getName();
     }

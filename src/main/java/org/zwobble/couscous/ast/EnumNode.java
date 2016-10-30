@@ -50,6 +50,11 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
+    public List<TypeNode> getInnerTypes() {
+        return list();
+    }
+
+    @Override
     public int nodeType() {
         return NodeTypes.ENUM;
     }
@@ -64,6 +69,11 @@ public class EnumNode implements TypeNode {
         return new EnumNode(
             transformer.transform(name),
             eagerMap(values, transformer::transformFieldName));
+    }
+
+    @Override
+    public TypeNode stripInnerTypes() {
+        return this;
     }
 
     @Override
