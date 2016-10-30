@@ -59,6 +59,10 @@ public class FreeVariables {
         public Stream<TypeParameter> visit(MethodNode methodNode) {
             return methodNode.getTypeParameters().stream().map(parameter -> parameter.getType());
         }
+
+        public Stream<TypeParameter> visit(ClassNode classNode) {
+            return classNode.getTypeParameters().stream().map(parameter -> parameter.getType());
+        }
     }
 
     public static Set<TypeParameter> findFreeTypeParameters(Node root) {

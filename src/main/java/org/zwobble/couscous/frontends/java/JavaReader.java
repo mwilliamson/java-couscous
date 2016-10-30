@@ -8,8 +8,6 @@ import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
-import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.transforms.ClosureGenerator;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraLists;
@@ -39,8 +37,8 @@ import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraIterables.only;
 import static org.zwobble.couscous.util.ExtraLists.*;
-import static org.zwobble.couscous.util.ExtraMaps.map;
 
 public class JavaReader {
     public static List<TypeNode> readClassesFromFiles(List<Path> sourcePaths, List<Path> sourceFiles) throws IOException {
@@ -143,32 +141,30 @@ public class JavaReader {
             parameter -> formalTypeParameter(declaringScope, parameter.getName()));
     }
 
-    GeneratedClosure readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
+    AnonymousClass readExpressionMethodReference(Scope outerScope, ExpressionMethodReference expression) {
         return readLambda(
             outerScope,
             expression,
             scope -> new JavaMethodReferenceReader(this).toLambda(scope, expression));
     }
 
-    GeneratedClosure readCreationReference(Scope outerScope, CreationReference expression) {
+    AnonymousClass readCreationReference(Scope outerScope, CreationReference expression) {
         return readLambda(
             outerScope,
             expression,
             scope -> new JavaMethodReferenceReader(this).toLambda(scope, expression));
     }
 
-    GeneratedClosure readLambda(Scope outerScope, LambdaExpression expression) {
+    AnonymousClass readLambda(Scope outerScope, LambdaExpression expression) {
         return readLambda(
             outerScope,
             expression,
             scope -> new JavaLambdaExpressionReader(this).toLambda(scope, expression));
     }
 
-    private GeneratedClosure readLambda(Scope outerScope, Expression expression, Function<Scope, Lambda> lambda) {
-        ScalarType name = generateAnonymousName(expression);
-        Scope scope = outerScope.enterClass(name);
+    private AnonymousClass readLambda(Scope outerScope, Expression expression, Function<Scope, Lambda> lambda) {
         IMethodBinding functionalInterfaceMethod = expression.resolveTypeBinding().getFunctionalInterfaceMethod();
-        return generateClosure(scope, name, toAnonymousClass(functionalInterfaceMethod, lambda.apply(scope)));
+        return toAnonymousClass(functionalInterfaceMethod, lambda.apply(outerScope));
     }
 
     private AnonymousClass toAnonymousClass(IMethodBinding functionalInterfaceMethod, Lambda lambda) {
@@ -186,74 +182,24 @@ public class JavaReader {
 
         return new AnonymousClass(
             Optional.empty(),
-            superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass()),
+            only(superTypesAndSelf(functionalInterfaceMethod.getDeclaringClass())),
             list(),
             list(method));
     }
 
-    GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
-        ScalarType className = generateAnonymousName(declaration);
-        Scope scope = outerScope.enterClass(className);
-        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, className, declaration.bodyDeclarations(), false);
-        AnonymousClass anonymousClass = new AnonymousClass(
-            Optional.of((AnonymousType) typeOf(declaration.resolveBinding())),
-            superTypes(declaration),
+    AnonymousClass readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
+        AnonymousType type = (AnonymousType) typeOf(declaration.resolveBinding());
+        Scope scope = outerScope.enterType(type);
+        TypeDeclarationBody bodyDeclarations = readTypeDeclarationBody(scope, type, declaration.bodyDeclarations(), false);
+        return new AnonymousClass(
+            Optional.of(type),
+            only(superTypes(declaration)),
             bodyDeclarations.getFields(),
-            bodyDeclarations.getMethods());
-        return generateClosure(scope, className, anonymousClass);
-    }
-
-    GeneratedClosure generateClosure(Scope scope, ScalarType className, AnonymousClass anonymousClass) {
-        GeneratedClosure closure = classWithCapture(scope, className, anonymousClass);
-        classes.add(closure.getClassNode());
-        return closure;
-    }
-
-    private GeneratedClosure classWithCapture(
-        Scope scope,
-        ScalarType className,
-        AnonymousClass anonymousClass
-    ) {
-        ClassNode classNode = ClassNode.declareClass(
-            className,
-            list(),
-            anonymousClass.getSuperTypes(),
-            anonymousClass.getFields(),
-            list(),
-            ConstructorNode.DEFAULT,
-            anonymousClass.getMethods(),
-            list()
+            bodyDeclarations.getMethods()
         );
-        if (anonymousClass.getType().isPresent()) {
-            NodeTransformer nodeTransformer = NodeTransformer.replaceExpressions(map(
-                thisReference(anonymousClass.getType().get()),
-                thisReference(className)
-            ));
-            classNode = nodeTransformer.transformClass(classNode);
-        }
-        return ClosureGenerator.classWithCapture(scope, classNode);
     }
 
-    private ScalarType generateAnonymousName(ASTNode node) {
-        ITypeBinding type = findDeclaringClass(node);
-        while (type.isAnonymous()) {
-            type = type.getDeclaringClass();
-        }
-        ScalarType typeName = erasure(typeOf(type));
-        while (typeName.outerType().isPresent()) {
-            typeName = typeName.outerType().get();
-        }
-        return ScalarType.topLevel(typeName.getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
-    }
-
-    private ITypeBinding findDeclaringClass(ASTNode node) {
-        while (!(node instanceof AbstractTypeDeclaration)) {
-            node = node.getParent();
-        }
-        return ((AbstractTypeDeclaration)node).resolveBinding();
-    }
-
-    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, ScalarType type, List<Object> bodyDeclarations, boolean isInterface) {
+    private TypeDeclarationBody readTypeDeclarationBody(Scope scope, Type type, List<Object> bodyDeclarations, boolean isInterface) {
         TypeDeclarationBody.Builder body = TypeDeclarationBody.builder();
 
         for (Object declaration : bodyDeclarations) {
@@ -274,7 +220,7 @@ public class JavaReader {
         return body.build();
     }
 
-    private void readField(TypeDeclarationBody.Builder builder, Scope scope, ScalarType declaringType, FieldDeclaration field, boolean isInterface) {
+    private void readField(TypeDeclarationBody.Builder builder, Scope scope, Type declaringType, FieldDeclaration field, boolean isInterface) {
         @SuppressWarnings("unchecked")
         List<VariableDeclarationFragment> fragments = field.fragments();
         boolean isStatic = isInterface || Modifier.isStatic(field.getModifiers());
@@ -284,8 +230,9 @@ public class JavaReader {
             if (fragment.getInitializer() != null) {
                 ExpressionNode value = readExpression(scope, type, fragment.getInitializer());
                 String name = fragment.getName().getIdentifier();
+                // TODO: support static values for anonymous classes
                 Receiver receiver = isStatic
-                    ? staticReceiver(declaringType)
+                    ? staticReceiver((ScalarType)declaringType)
                     : instanceReceiver(thisReference(declaringType));
 
                 StatementNode assignment = assignStatement(fieldAccess(receiver, name, type), value);

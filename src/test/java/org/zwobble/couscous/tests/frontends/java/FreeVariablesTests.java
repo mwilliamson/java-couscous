@@ -58,13 +58,24 @@ public class FreeVariablesTests {
     }
 
     @Test
-    public void typeParameterIsNotFreeIfItIsDeclared() {
+    public void typeParameterIsNotFreeIfItIsDeclaredByMethod() {
         TypeParameter typeParameter = new TypeParameter(TestIds.ANY_ID, "T");
         MethodNode method = MethodNode.builder("f")
             .typeParameter(formalTypeParameter(typeParameter))
             .argument(argOfType(typeParameter))
             .build();
         Set<TypeParameter> freeTypeParameters = FreeVariables.findFreeTypeParameters(method);
+        assertEquals(set(), freeTypeParameters);
+    }
+
+    @Test
+    public void typeParameterIsNotFreeIfItIsDeclaredByClass() {
+        TypeParameter typeParameter = new TypeParameter(TestIds.ANY_ID, "T");
+        ClassNode node = ClassNode.builder("T")
+            .addTypeParameter(typeParameter)
+            .field("value", typeParameter)
+            .build();
+        Set<TypeParameter> freeTypeParameters = FreeVariables.findFreeTypeParameters(node);
         assertEquals(set(), freeTypeParameters);
     }
 

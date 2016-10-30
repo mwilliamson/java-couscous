@@ -281,9 +281,7 @@ public class JavaExpressionReader {
 
         ITypeBinding declaringClass = constructor.getDeclaringClass();
         if (declaringClass.isAnonymous()) {
-            GeneratedClosure closure =
-                javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
-            return closure.generateConstructor(arguments);
+            return javaReader.readAnonymousClass(scope, expression.getAnonymousClassDeclaration());
         } else {
             if (expression.getExpression() != null) {
                 throw new UnsupportedOperationException();
@@ -293,18 +291,15 @@ public class JavaExpressionReader {
     }
 
     private ExpressionNode readLambdaExpression(LambdaExpression expression) {
-        GeneratedClosure closure = javaReader.readLambda(scope, expression);
-        return closure.generateConstructor();
+        return javaReader.readLambda(scope, expression);
     }
 
     private ExpressionNode readExpressionMethodReference(ExpressionMethodReference expression) {
-        GeneratedClosure closure = javaReader.readExpressionMethodReference(scope, expression);
-        return closure.generateConstructor();
+        return javaReader.readExpressionMethodReference(scope, expression);
     }
 
     private ExpressionNode readCreationReference(CreationReference expression) {
-        GeneratedClosure closure = javaReader.readCreationReference(scope, expression);
-        return closure.generateConstructor();
+        return javaReader.readCreationReference(scope, expression);
     }
 
     private List<ExpressionNode> readArguments(IMethodBinding method, List<Expression> javaArguments) {

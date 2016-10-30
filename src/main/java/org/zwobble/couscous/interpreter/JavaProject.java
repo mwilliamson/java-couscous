@@ -8,13 +8,14 @@ import org.zwobble.couscous.interpreter.types.IntrinsicInterpreterType;
 import org.zwobble.couscous.interpreter.types.UserDefinedInterpreterType;
 import org.zwobble.couscous.interpreter.values.BoxedIntegerInterpreterValue;
 import org.zwobble.couscous.interpreter.values.InternalCouscousInterpreterValue;
+import org.zwobble.couscous.transforms.AnonymousClassToInnerClass;
 import org.zwobble.couscous.transforms.DesugarForToWhile;
 import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
 import org.zwobble.couscous.transforms.HoistNestedTypes;
 
 import java.util.List;
 
-import static org.zwobble.couscous.util.ExtraLists.list;
+import static org.zwobble.couscous.util.ExtraLists.*;
 
 public class JavaProject {
     private static final InterpreterType OBJECT_TYPE = IntrinsicInterpreterType.classBuilder("java.lang.Object")
@@ -32,7 +33,10 @@ public class JavaProject {
         NodeTransformer forTransformer = DesugarForToWhile.transformer();
         Iterable<InterpreterType> concreteTypes = Iterables.transform(
             HoistNestedTypes.hoist(
-                NodeTransformer.applyAll(list(switchTransformer, forTransformer), classNodes)
+                eagerMap(
+                    NodeTransformer.applyAll(list(switchTransformer, forTransformer), classNodes),
+                    AnonymousClassToInnerClass::transform
+                )
             ),
             UserDefinedInterpreterType::new
         );

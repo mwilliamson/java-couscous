@@ -15,6 +15,10 @@ public class AnonymousType implements Type {
         this.key = key;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     @Override
     public <T> T accept(Visitor<T> visitor) {
         throw new UnsupportedOperationException();
@@ -22,7 +26,7 @@ public class AnonymousType implements Type {
 
     @Override
     public Type transformSubTypes(Function<Type, Type> transform) {
-        throw new UnsupportedOperationException();
+        return this;
     }
 
     @Override

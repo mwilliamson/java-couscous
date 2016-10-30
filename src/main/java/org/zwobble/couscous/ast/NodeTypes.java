@@ -1,5 +1,6 @@
 package org.zwobble.couscous.ast;
 
+import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.SwitchCaseNode;
 import org.zwobble.couscous.ast.sugar.SwitchNode;
 
@@ -51,6 +52,7 @@ public class NodeTypes {
     public static final int FOR = register(ForNode.class);
     public static final int FOR_EACH = register(ForEachNode.class);
     public static final int STATEMENT_BLOCK = register(StatementBlockNode.class);
+    public static final int ANONYMOUS_CLASS = register(AnonymousClass.class);
 
     private NodeTypes() {
     }

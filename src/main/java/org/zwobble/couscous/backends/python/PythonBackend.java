@@ -5,10 +5,7 @@ import com.google.common.io.Resources;
 import org.zwobble.couscous.Backend;
 import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
-import org.zwobble.couscous.transforms.DesugarForEachToFor;
-import org.zwobble.couscous.transforms.DesugarForToWhile;
-import org.zwobble.couscous.transforms.DesugarSwitchToIfElse;
-import org.zwobble.couscous.transforms.HoistNestedTypes;
+import org.zwobble.couscous.transforms.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +16,7 @@ import java.util.List;
 
 import static org.zwobble.couscous.backends.python.PythonCodeGenerator.generateCode;
 import static org.zwobble.couscous.backends.python.PythonSerializer.serialize;
+import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class PythonBackend implements Backend {
@@ -51,14 +49,14 @@ public class PythonBackend implements Backend {
     }
 
     private List<TypeNode> desugar(List<TypeNode> classes) {
-        return HoistNestedTypes.hoist(
-            NodeTransformer.applyAll(
-                list(
-                    DesugarSwitchToIfElse.transformer(),
-                    DesugarForEachToFor.transformer(),
-                    DesugarForToWhile.transformer()
-                ),
-                classes
+        return NodeTransformer.applyAll(
+            list(
+                DesugarSwitchToIfElse.transformer(),
+                DesugarForEachToFor.transformer(),
+                DesugarForToWhile.transformer()
+            ),
+            HoistNestedTypes.hoist(
+                eagerMap(classes, AnonymousClassToInnerClass::transform)
             )
         );
     }

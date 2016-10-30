@@ -5,10 +5,7 @@ import org.zwobble.couscous.ast.TypeNode;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.backends.csharp.primitives.CsharpPrimitiveMethods;
 import org.zwobble.couscous.backends.naming.Naming;
-import org.zwobble.couscous.transforms.DesugarForEachToFor;
-import org.zwobble.couscous.transforms.DesugarForToWhile;
-import org.zwobble.couscous.transforms.HoistNestedTypes;
-import org.zwobble.couscous.transforms.SplitStaticsFromInterface;
+import org.zwobble.couscous.transforms.*;
 import org.zwobble.couscous.types.*;
 
 import java.util.List;
@@ -57,7 +54,7 @@ public class CsharpCodeGenerator {
                     CsharpPrimitiveMethods.TRANSFORMER,
                     nodeTransformer
                 ),
-                HoistNestedTypes.hoist(types)
+                HoistNestedTypes.hoist(eagerMap(types, AnonymousClassToInnerClass::transform))
             )
         );
     }

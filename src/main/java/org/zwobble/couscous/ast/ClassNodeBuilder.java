@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import org.zwobble.couscous.ast.identifiers.Identifier;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
+import org.zwobble.couscous.types.TypeParameter;
 import org.zwobble.couscous.types.Types;
 
 import java.util.List;
@@ -46,6 +47,11 @@ public class ClassNodeBuilder {
         return this;
     }
 
+    public ClassNodeBuilder addTypeParameter(TypeParameter typeParameter) {
+        this.typeParameters.add(formalTypeParameter(typeParameter));
+        return this;
+    }
+
     public ClassNodeBuilder addSuperType(String type) {
         this.superTypes.add(ScalarType.topLevel(type));
         return this;
@@ -55,7 +61,7 @@ public class ClassNodeBuilder {
         return field(FieldDeclarationNode.staticField(name, type));
     }
 
-    public ClassNodeBuilder field(String name, ScalarType type) {
+    public ClassNodeBuilder field(String name, Type type) {
         return field(FieldDeclarationNode.field(name, type));
     }
 

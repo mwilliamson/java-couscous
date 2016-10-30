@@ -9,6 +9,7 @@ import org.zwobble.couscous.util.ExtraIterables;
 import java.util.List;
 import java.util.Set;
 
+import static org.zwobble.couscous.util.ExtraLists.concat;
 import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -138,6 +139,15 @@ public class ClassNode implements TypeNode {
 
     @Override
     public TypeNode stripInnerTypes() {
+        return withInnerTypes(list());
+    }
+
+    @Override
+    public TypeNode addInnerTypes(List<TypeNode> types) {
+        return withInnerTypes(concat(innerTypes, types));
+    }
+
+    private TypeNode withInnerTypes(List<TypeNode> types) {
         return new ClassNode(
             name,
             typeParameters,
@@ -146,7 +156,7 @@ public class ClassNode implements TypeNode {
             staticConstructor,
             constructor,
             methods,
-            list()
+            types
         );
     }
 

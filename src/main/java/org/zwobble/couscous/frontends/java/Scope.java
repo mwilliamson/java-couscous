@@ -51,6 +51,10 @@ public class Scope {
         return enter(identifier.type(className.getQualifiedName()));
     }
 
+    public Scope enterType(AnonymousType type) {
+        return enter(identifier.type(type.getKey()));
+    }
+
     public Scope enterConstructor() {
         return enter(identifier.constructor());
     }
