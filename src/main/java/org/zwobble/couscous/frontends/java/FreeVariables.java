@@ -14,8 +14,6 @@ import java.util.stream.Stream;
 import static org.zwobble.couscous.ast.structure.NodeStructure.descendantNodesAndSelf;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraIterables.iterable;
-import static org.zwobble.couscous.util.ExtraIterables.lazyFlatMap;
-import static org.zwobble.couscous.util.ExtraLists.list;
 import static org.zwobble.couscous.util.ExtraStreams.toStream;
 
 public class FreeVariables {
@@ -50,32 +48,52 @@ public class FreeVariables {
         }
     }
 
+    public static class FindDeclaredTypes {
+        private static final Function<Node, Stream<TypeParameter>> VISITOR =
+            DynamicNodeMapper.instantiate(new FindDeclaredTypes(), "visit");
+
+        public Stream<TypeParameter> visit(Node node) {
+            return Stream.empty();
+        }
+
+        public Stream<TypeParameter> visit(MethodNode methodNode) {
+            return methodNode.getTypeParameters().stream().map(parameter -> parameter.getType());
+        }
+    }
+
     public static Set<TypeParameter> findFreeTypeParameters(Node root) {
+        // TODO: test removal of declared types
+        Set<TypeParameter> declaredTypes = descendantNodesAndSelf(root)
+            .flatMap(FindDeclaredTypes.VISITOR)
+            .collect(Collectors.toSet());
+
         // TODO: this assumes that *all* type parameters are free, which is often but not always true in inner types
-        Iterable<Type> types = iterable(() -> descendantNodesAndSelf(root)
-            .flatMap(FindReferencedTypes.VISITOR));
+        Stream<TypeParameter> types = descendantNodesAndSelf(root)
+            .flatMap(FindReferencedTypes.VISITOR)
+            .flatMap(type -> type.accept(new Type.Visitor<Stream<TypeParameter>>() {
+                @Override
+                public Stream<TypeParameter> visit(ScalarType type) {
+                    return Stream.empty();
+                }
 
-        return ImmutableSet.copyOf(lazyFlatMap(types, type -> type.accept(new Type.Visitor<Iterable<TypeParameter>>() {
-            @Override
-            public Iterable<TypeParameter> visit(ScalarType type) {
-                return list();
-            }
+                @Override
+                public Stream<TypeParameter> visit(TypeParameter parameter) {
+                    return Stream.of(parameter);
+                }
 
-            @Override
-            public Iterable<TypeParameter> visit(TypeParameter parameter) {
-                return list(parameter);
-            }
+                @Override
+                public Stream<TypeParameter> visit(ParameterizedType type) {
+                    return type.getParameters().stream().flatMap(parameter -> parameter.accept(this));
+                }
 
-            @Override
-            public Iterable<TypeParameter> visit(ParameterizedType type) {
-                return lazyFlatMap(type.getParameters(), parameter -> parameter.accept(this));
-            }
+                @Override
+                public Stream<TypeParameter> visit(BoundTypeParameter type) {
+                    return type.getValue().accept(this);
+                }
+            }))
+            .filter(type -> !declaredTypes.contains(type));
 
-            @Override
-            public Iterable<TypeParameter> visit(BoundTypeParameter type) {
-                return type.getValue().accept(this);
-            }
-        })));
+        return ImmutableSet.copyOf(iterable(() -> types));
     }
 
     public static List<ReferenceNode> findFreeVariables(List<? extends Node> body) {
