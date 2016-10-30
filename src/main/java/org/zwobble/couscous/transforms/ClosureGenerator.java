@@ -29,8 +29,7 @@ import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariable
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
-import static org.zwobble.couscous.util.ExtraIterables.only;
-import static org.zwobble.couscous.util.ExtraLists.*;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClosureGenerator {
     public static GeneratedClosure classWithCapture(
@@ -59,7 +58,7 @@ public class ClosureGenerator {
 
         NodeTransformer transformer = replaceCaptureReferencesTransformer(classNode.getName(), capturedVariables);
 
-        ClassNode generatedClass = new ClassNode(
+        ClassNode generatedClass = transformer.transformClass(new ClassNode(
             classNode.getName(),
             // TODO: generate fresh type parameter and replace in body
             ExtraLists.concat(lazyMap(freeTypeParameters, parameter -> formalTypeParameter(parameter)), classNode.getTypeParameters()),
@@ -67,11 +66,9 @@ public class ClosureGenerator {
             fields,
             list(),
             buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
-            eagerMap(classNode.getMethods(), method ->
-                method.mapBody(body -> transformer.transformStatements(body))),
-            // TODO: should just call replaceCaptureReferences over entire class?
-            eagerMap(classNode.getInnerTypes(), type -> only(transformer.transformTypeDeclaration(type)))
-        );
+            classNode.getMethods(),
+            classNode.getInnerTypes()
+        ));
         return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
     }
 
