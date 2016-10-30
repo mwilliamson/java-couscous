@@ -52,7 +52,7 @@ public class ScalarType implements Type {
         return getLast(typeNames);
     }
 
-    public Optional<Type> outerType() {
+    public Optional<ScalarType> outerType() {
         if (typeNames.size() < 2) {
             return Optional.empty();
         } else {
