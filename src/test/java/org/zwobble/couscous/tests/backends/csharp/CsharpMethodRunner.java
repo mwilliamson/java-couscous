@@ -140,13 +140,14 @@ public class CsharpMethodRunner implements MethodRunner {
 
     private static String compileFiles(List<String> paths, Path workingDirectory) throws IOException, InterruptedException {
         Path executablePath = workingDirectory.resolve("Program.cs");
-        Processes.run(
+        ExecutionResult result = Processes.run(
             ExtraLists.concat(
                 list("mcs", "-out:" + executablePath),
                 paths
             ),
             workingDirectory
         );
+        result.assertSuccess();
         return executablePath.toString();
     }
 
