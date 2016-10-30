@@ -258,7 +258,7 @@ public class JavaReader {
 
         for (Object declaration : bodyDeclarations) {
             tryCast(MethodDeclaration.class, declaration)
-                .ifPresent(method -> readMethod(body, scope, type, method));
+                .ifPresent(method -> readMethod(body, scope, method));
 
             tryCast(Initializer.class, declaration)
                 .ifPresent(initializer -> body.addInitializer(
@@ -295,7 +295,7 @@ public class JavaReader {
 
     }
 
-    private void readMethod(TypeDeclarationBody.Builder builder, Scope outerScope, ScalarType type, MethodDeclaration method) {
+    private void readMethod(TypeDeclarationBody.Builder builder, Scope outerScope, MethodDeclaration method) {
         String methodName = method.getName().getIdentifier();
         Scope scope = outerScope.enterMethod(methodName);
 
@@ -365,11 +365,6 @@ public class JavaReader {
     List<StatementNode> readStatementBody(Scope scope, Statement statement) {
         JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), Optional.empty());
         return statementReader.readBody(statement);
-    }
-
-    List<StatementNode> readStatement(Scope scope, Statement statement) {
-        JavaStatementReader statementReader = new JavaStatementReader(scope, expressionReader(scope), Optional.empty());
-        return statementReader.readStatement(statement);
     }
 
     List<StatementNode> readStatements(Scope scope, List<Statement> body, Optional<Type> returnType) {
