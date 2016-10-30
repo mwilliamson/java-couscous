@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.zwobble.couscous.util.ExtraLists.eagerFlatMap;
+import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class ClassNode implements TypeNode {
     public static ClassNodeBuilder builder(ScalarType name) {
@@ -95,6 +96,7 @@ public class ClassNode implements TypeNode {
         return methods;
     }
 
+    @Override
     public List<TypeNode> getInnerTypes() {
         return innerTypes;
     }
@@ -132,7 +134,7 @@ public class ClassNode implements TypeNode {
     }
 
     @Override
-    public TypeNode rename(ScalarType name) {
+    public TypeNode stripInnerTypes() {
         return new ClassNode(
             name,
             typeParameters,
@@ -141,7 +143,7 @@ public class ClassNode implements TypeNode {
             staticConstructor,
             constructor,
             methods,
-            innerTypes
+            list()
         );
     }
 

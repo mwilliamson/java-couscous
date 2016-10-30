@@ -133,7 +133,8 @@ public class ClassNodeBuilder {
             superTypes.build(),
             fields.build(),
             staticConstructor,
-            methods.build()
+            methods.build(),
+            innerTypes.build()
         );
     }
 

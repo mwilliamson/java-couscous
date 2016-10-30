@@ -1,8 +1,6 @@
 package org.zwobble.couscous.frontends.java;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
@@ -11,21 +9,19 @@ import org.zwobble.couscous.ast.sugar.AnonymousClass;
 import org.zwobble.couscous.ast.sugar.Lambda;
 import org.zwobble.couscous.ast.sugar.TypeDeclarationBody;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
+import org.zwobble.couscous.transforms.ClosureGenerator;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.util.ExtraLists;
-import org.zwobble.couscous.util.InsertionOrderSet;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.transform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -39,14 +35,10 @@ import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParamet
 import static org.zwobble.couscous.ast.InstanceReceiver.instanceReceiver;
 import static org.zwobble.couscous.ast.StaticReceiver.staticReceiver;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
-import static org.zwobble.couscous.ast.VariableReferenceNode.reference;
-import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeTypeParameters;
-import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.frontends.java.JavaMethods.signature;
 import static org.zwobble.couscous.frontends.java.JavaTypes.*;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
-import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.*;
 import static org.zwobble.couscous.util.ExtraMaps.map;
 
@@ -124,7 +116,8 @@ public class JavaReader {
                 superTypes,
                 body.getFields(),
                 body.getStaticConstructor(),
-                body.getMethods()
+                body.getMethods(),
+                body.getInnerTypes()
             );
         } else {
             return ClassNode.declareClass(
@@ -198,46 +191,6 @@ public class JavaReader {
             list(method));
     }
 
-    private List<StatementNode> replaceCaptureReferences(
-        ScalarType className,
-        List<StatementNode> body,
-        InsertionOrderSet<CapturedVariable> freeVariables)
-    {
-        Map<ExpressionNode, ExpressionNode> replacements = Maps.transformValues(
-            Maps.uniqueIndex(freeVariables, variable -> variable.freeVariable),
-            freeVariable -> captureAccess(className, freeVariable));
-        NodeTransformer transformer = NodeTransformer.replaceExpressions(replacements);
-        return eagerFlatMap(body, transformer::transformStatement);
-    }
-
-    private ConstructorNode buildConstructor(
-        Scope outerScope,
-        ScalarType type,
-        InsertionOrderSet<CapturedVariable> freeVariables,
-        ConstructorNode existing)
-    {
-        Scope scope = outerScope.enterConstructor();
-
-        ImmutableList.Builder<FormalArgumentNode> arguments = ImmutableList.builder();
-        ImmutableList.Builder<StatementNode> body = ImmutableList.builder();
-
-        for (CapturedVariable variable : freeVariables) {
-            FormalArgumentNode argument = scope.formalArgument(variable.field.getName(), variable.field.getType());
-            arguments.add(argument);
-            body.add(assignStatement(captureAccess(type, variable), reference(argument)));
-        }
-
-        arguments.addAll(existing.getArguments());
-        body.addAll(existing.getBody());
-
-        return new ConstructorNode(arguments.build(), body.build());
-    }
-
-    private FieldAccessNode captureAccess(ScalarType type, CapturedVariable freeVariable) {
-        FieldDeclarationNode field = freeVariable.field;
-        return fieldAccess(thisReference(type), field.getName(), field.getType());
-    }
-
     GeneratedClosure readAnonymousClass(Scope outerScope, AnonymousClassDeclaration declaration) {
         ScalarType className = generateAnonymousName(declaration);
         Scope scope = outerScope.enterClass(className);
@@ -254,63 +207,6 @@ public class JavaReader {
         GeneratedClosure closure = classWithCapture(scope, className, anonymousClass);
         classes.add(closure.getClassNode());
         return closure;
-    }
-
-    private static class CapturedVariable {
-        private final ReferenceNode freeVariable;
-        private final FieldDeclarationNode field;
-
-        public CapturedVariable(ReferenceNode freeVariable, FieldDeclarationNode field) {
-            this.freeVariable = freeVariable;
-            this.field = field;
-        }
-    }
-
-    private GeneratedClosure classWithCapture(
-        Scope scope,
-        ClassNode classNode
-    ) {
-        InsertionOrderSet<org.zwobble.couscous.types.TypeParameter> freeTypeParameters = InsertionOrderSet.copyOf(
-            findFreeTypeParameters(classNode));
-
-        InsertionOrderSet<ReferenceNode> freeVariables = InsertionOrderSet.copyOf(Iterables.filter(
-            findFreeVariables(ExtraLists.concat(
-                classNode.getFields(),
-                classNode.getMethods())),
-            // TODO: check this references work correctly in anonymous classes
-            variable -> !isThisReference(classNode.getName(), variable)));
-        InsertionOrderSet<CapturedVariable> capturedVariables = InsertionOrderSet.copyOf(transform(
-            freeVariables,
-            freeVariable -> new CapturedVariable(freeVariable, fieldForCapture(freeVariable))));
-        Iterable<FieldDeclarationNode> captureFields = transform(capturedVariables, capture -> capture.field);
-
-        List<FieldDeclarationNode> fields = ImmutableList.copyOf(concat(
-            classNode.getFields(),
-            captureFields));
-
-        if (!classNode.getStaticConstructor().isEmpty()) {
-            throw new RuntimeException("Class has unexpected static constructor");
-        }
-
-        ClassNode generatedClass = new ClassNode(
-            classNode.getName(),
-            // TODO: generate fresh type parameter and replace in body
-            ExtraLists.concat(lazyMap(freeTypeParameters, parameter -> formalTypeParameter(parameter)), classNode.getTypeParameters()),
-            classNode.getSuperTypes(),
-            fields,
-            list(),
-            buildConstructor(scope, classNode.getName(), capturedVariables, classNode.getConstructor()),
-            eagerMap(classNode.getMethods(), method ->
-                method.mapBody(body -> replaceCaptureReferences(classNode.getName(), body, capturedVariables))),
-            list()
-        );
-        return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
-    }
-
-    private boolean isThisReference(ScalarType name, ReferenceNode reference) {
-        return tryCast(ThisReferenceNode.class, reference)
-            .map(node -> node.getType().equals(name))
-            .orElse(false);
     }
 
     private GeneratedClosure classWithCapture(
@@ -335,23 +231,7 @@ public class JavaReader {
             ));
             classNode = nodeTransformer.transformClass(classNode);
         }
-        return classWithCapture(scope, classNode);
-    }
-
-    private FieldDeclarationNode fieldForCapture(ReferenceNode freeVariable) {
-        return freeVariable.accept(new ReferenceNode.Visitor<FieldDeclarationNode>() {
-            @Override
-            public FieldDeclarationNode visit(VariableReferenceNode reference) {
-                return field(reference.getReferent().getName(), reference.getType());
-            }
-
-            @Override
-            public FieldDeclarationNode visit(ThisReferenceNode thisReference) {
-                Type type = thisReference.getType();
-                String name = "this_" + erasure(type).getQualifiedName().replace(".", "__");
-                return field(name, type);
-            }
-        });
+        return ClosureGenerator.classWithCapture(scope, classNode);
     }
 
     private ScalarType generateAnonymousName(ASTNode node) {

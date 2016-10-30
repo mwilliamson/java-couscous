@@ -1,5 +1,7 @@
 package org.zwobble.couscous.types;
 
+import java.util.function.Function;
+
 public class BoundTypeParameter implements Type {
     public static BoundTypeParameter boundTypeParameter(TypeParameter parameter, Type value) {
         return new BoundTypeParameter(parameter, value);
@@ -24,6 +26,14 @@ public class BoundTypeParameter implements Type {
     @Override
     public <T> T accept(Visitor<T> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public Type transformSubTypes(Function<Type, Type> transform) {
+        return new BoundTypeParameter(
+            (TypeParameter) transform.apply(parameter),
+            transform.apply(value)
+        );
     }
 
     @Override

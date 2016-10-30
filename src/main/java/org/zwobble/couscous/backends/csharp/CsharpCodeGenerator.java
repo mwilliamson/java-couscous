@@ -50,16 +50,14 @@ public class CsharpCodeGenerator {
 
     private List<TypeNode> generateCode(List<TypeNode> types) {
         return SplitStaticsFromInterface.transform(
-            HoistNestedTypes.hoist(
-                NodeTransformer.applyAll(
-                    list(
-                        DesugarForEachToFor.transformer(),
-                        DesugarForToWhile.transformer(),
-                        CsharpPrimitiveMethods.TRANSFORMER,
-                        nodeTransformer
-                    ),
-                    types
-                )
+            NodeTransformer.applyAll(
+                list(
+                    DesugarForEachToFor.transformer(),
+                    DesugarForToWhile.transformer(),
+                    CsharpPrimitiveMethods.TRANSFORMER,
+                    nodeTransformer
+                ),
+                HoistNestedTypes.hoist(types)
             )
         );
     }

@@ -50,6 +50,11 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
+    public List<TypeNode> getInnerTypes() {
+        return list();
+    }
+
+    @Override
     public int nodeType() {
         return NodeTypes.ENUM;
     }
@@ -67,11 +72,8 @@ public class EnumNode implements TypeNode {
     }
 
     @Override
-    public TypeNode rename(ScalarType name) {
-        return new EnumNode(
-            name,
-            values
-        );
+    public TypeNode stripInnerTypes() {
+        return this;
     }
 
     @Override

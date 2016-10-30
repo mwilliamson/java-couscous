@@ -36,7 +36,8 @@ public class SplitStaticsFromInterface {
                     interfaceNode.getSuperTypes(),
                     list(),
                     list(),
-                    eagerFilter(interfaceNode.getMethods(), method -> !method.isStatic())
+                    eagerFilter(interfaceNode.getMethods(), method -> !method.isStatic()),
+                    interfaceNode.getInnerTypes()
                 ));
             } else {
                 result.add(typeNode);
