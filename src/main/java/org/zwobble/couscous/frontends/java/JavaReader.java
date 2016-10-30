@@ -239,7 +239,7 @@ public class JavaReader {
         while (type.isAnonymous()) {
             type = type.getDeclaringClass();
         }
-        return ScalarType.of(erasure(typeOf(type)).getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
+        return ScalarType.topLevel(erasure(typeOf(type)).getQualifiedName() + "_Anonymous_" + (anonymousClassCount++));
     }
 
     private ITypeBinding findDeclaringClass(ASTNode node) {

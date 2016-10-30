@@ -178,7 +178,7 @@ public class EvaluatorTests extends BackendEvalTests {
 
     @Test
     public void cannotSetValueOfInstanceFieldAsThoughItIsAStaticField() {
-        ScalarType type = ScalarType.of("com.example.Example");
+        ScalarType type = ScalarType.topLevel("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
             .field("value", Types.INT)
             .constructor(constructor -> constructor
@@ -253,7 +253,7 @@ public class EvaluatorTests extends BackendEvalTests {
 
     @Test
     public void typeOfValueCanBeParameterisedType() {
-        ScalarType rawType = ScalarType.of("Box");
+        ScalarType rawType = ScalarType.topLevel("Box");
         ClassNode classNode = ClassNode.builder(rawType)
             .addTypeParameter("T")
             .build();

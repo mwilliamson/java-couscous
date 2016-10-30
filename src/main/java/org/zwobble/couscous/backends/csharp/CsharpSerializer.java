@@ -596,7 +596,7 @@ public class CsharpSerializer {
     }
 
     private void writeInNamespace(TypeNode typeNode, Action writeBody) {
-        writeInNamespace(typeNode.getName().getQualifier().get(), writeBody);
+        writeInNamespace(typeNode.getName().getPackage().get(), writeBody);
     }
 
     private void writeInNamespace(String namespace, Action writeBody) {

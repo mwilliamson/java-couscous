@@ -65,7 +65,7 @@ public class ExpressionReadingTests {
     @Test
     public void canReadThisReference() {
         assertEquals(
-            thisReference(ScalarType.of("com.example.Example")),
+            thisReference(ScalarType.topLevel("com.example.Example")),
             readExpressionInInstanceMethod("com.example.Example", "this"));
     }
 
@@ -81,7 +81,7 @@ public class ExpressionReadingTests {
             "private String name;");
 
         assertEquals(
-            list(field("name", ScalarType.of("java.lang.String"))),
+            list(field("name", ScalarType.topLevel("java.lang.String"))),
             classNode.getFields());
     }
 
@@ -91,7 +91,7 @@ public class ExpressionReadingTests {
             "private static String name;");
 
         assertEquals(
-            list(staticField("name", ScalarType.of("java.lang.String"))),
+            list(staticField("name", ScalarType.topLevel("java.lang.String"))),
             classNode.getFields());
     }
 
@@ -115,7 +115,7 @@ public class ExpressionReadingTests {
         ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
-                thisReference(ScalarType.of("com.example.Example")),
+                thisReference(ScalarType.topLevel("com.example.Example")),
                 "name",
                 Types.STRING),
             returnNode.getValue());
@@ -132,7 +132,7 @@ public class ExpressionReadingTests {
 
         ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(1);
         assertThat(returnNode.getValue(), isFieldAccess(
-            fieldHasReceiver(isVariableReference("self", ScalarType.of("com.example.Example"))),
+            fieldHasReceiver(isVariableReference("self", ScalarType.topLevel("com.example.Example"))),
             fieldHasName("name"),
             expressionHasType(Types.STRING)));
     }
@@ -167,7 +167,7 @@ public class ExpressionReadingTests {
         ReturnNode returnNode = (ReturnNode) classNode.getMethods().get(0).getBody().get().get(0);
         assertEquals(
             fieldAccess(
-                ScalarType.of("com.example.Example"),
+                ScalarType.topLevel("com.example.Example"),
                 "name",
                 Types.STRING),
             returnNode.getValue());
@@ -197,7 +197,7 @@ public class ExpressionReadingTests {
 
         assertEquals(
             methodCall(
-                ThisReferenceNode.thisReference(ScalarType.of("com.example.Example")),
+                ThisReferenceNode.thisReference(ScalarType.topLevel("com.example.Example")),
                 "loop",
                 list(),
                 Types.STRING),
@@ -208,7 +208,7 @@ public class ExpressionReadingTests {
     public void canReadStaticMethodCalls() {
         assertEquals(
             staticMethodCall(
-                ScalarType.of("java.lang.Integer"),
+                ScalarType.topLevel("java.lang.Integer"),
                 "parseInt",
                 list(literal("42")),
                 Types.INT),
@@ -225,7 +225,7 @@ public class ExpressionReadingTests {
 
         assertEquals(
             staticMethodCall(
-                ScalarType.of("com.example.Example"),
+                ScalarType.topLevel("com.example.Example"),
                 "loop",
                 list(),
                 Types.STRING),
@@ -241,12 +241,12 @@ public class ExpressionReadingTests {
                 "asList",
                 list(Types.STRING),
                 list(array(Types.STRING, list())),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                parameterizedType(ScalarType.topLevel("java.util.List"), list(Types.STRING)),
                 signature(
                     "asList",
                     list(typeParameter),
                     list(Types.array(typeParameter)),
-                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+                    parameterizedType(ScalarType.topLevel("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Arrays.asList()"));
     }
 
@@ -259,12 +259,12 @@ public class ExpressionReadingTests {
                 "asList",
                 list(Types.STRING),
                 list(array(Types.STRING, list(literal("one"), literal("two")))),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                parameterizedType(ScalarType.topLevel("java.util.List"), list(Types.STRING)),
                 signature(
                     "asList",
                     list(typeParameter),
                     list(Types.array(typeParameter)),
-                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+                    parameterizedType(ScalarType.topLevel("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Arrays.asList(\"one\", \"two\")"));
     }
 
@@ -277,12 +277,12 @@ public class ExpressionReadingTests {
                 "asList",
                 list(Types.STRING),
                 list(array(Types.STRING, list())),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                parameterizedType(ScalarType.topLevel("java.util.List"), list(Types.STRING)),
                 signature(
                     "asList",
                     list(typeParameter),
                     list(Types.array(typeParameter)),
-                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+                    parameterizedType(ScalarType.topLevel("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Arrays.asList(new String[]{})"));
     }
 
@@ -295,12 +295,12 @@ public class ExpressionReadingTests {
                 "emptyList",
                 list(Types.STRING),
                 list(),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                parameterizedType(ScalarType.topLevel("java.util.List"), list(Types.STRING)),
                 signature(
                     "emptyList",
                     list(typeParameter),
                     list(),
-                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+                    parameterizedType(ScalarType.topLevel("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Collections.<String>emptyList()"));
     }
 
@@ -313,19 +313,19 @@ public class ExpressionReadingTests {
                 "emptyList",
                 list(Types.STRING),
                 list(),
-                parameterizedType(ScalarType.of("java.util.List"), list(Types.STRING)),
+                parameterizedType(ScalarType.topLevel("java.util.List"), list(Types.STRING)),
                 signature(
                     "emptyList",
                     list(typeParameter),
                     list(),
-                    parameterizedType(ScalarType.of("java.util.List"), list(typeParameter)))),
+                    parameterizedType(ScalarType.topLevel("java.util.List"), list(typeParameter)))),
             readExpression("java.util.List<String>", "java.util.Collections.emptyList()"));
     }
 
     @Test
     public void canReadConstructorCalls() {
         assertEquals(
-            constructorCall(ScalarType.of("java.lang.String"), list(literal("_"))),
+            constructorCall(ScalarType.topLevel("java.lang.String"), list(literal("_"))),
             readExpression("String", "new String(\"_\")"));
     }
 
@@ -343,20 +343,20 @@ public class ExpressionReadingTests {
     public void canUseOperatorsOnReferences() {
         assertEquals(
             same(
-                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
-                constructorCall(ScalarType.of("java.lang.Object"), emptyList())),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), emptyList()),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), emptyList())),
             readBooleanExpression("new Object() == new Object()"));
 
         assertEquals(
             not(same(
-                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
-                constructorCall(ScalarType.of("java.lang.Object"), emptyList()))),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), emptyList()),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), emptyList()))),
             readBooleanExpression("new Object() != new Object()"));
 
         assertEquals(
             instanceOf(
-                constructorCall(ScalarType.of("java.lang.Object"), emptyList()),
-                ScalarType.of("java.lang.Object")),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), emptyList()),
+                ScalarType.topLevel("java.lang.Object")),
             readBooleanExpression("new Object() instanceof Object"));
     }
 
@@ -417,13 +417,13 @@ public class ExpressionReadingTests {
         assertEquals(
             equal(
                 literal(1),
-                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1))))),
+                unboxInt(constructorCall(ScalarType.topLevel("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 == new Integer(1)"));
 
         assertEquals(
             notEqual(
                 literal(1),
-                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1))))),
+                unboxInt(constructorCall(ScalarType.topLevel("java.lang.Integer"), list(literal(1))))),
             readBooleanExpression("1 != new Integer(1)"));
     }
 
@@ -446,8 +446,8 @@ public class ExpressionReadingTests {
     public void integerOperatorUnboxesWhenBothOperandsAreBoxed() {
         assertEquals(
             integerAdd(
-                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(1)))),
-                unboxInt(constructorCall(ScalarType.of("java.lang.Integer"), list(literal(2))))),
+                unboxInt(constructorCall(ScalarType.topLevel("java.lang.Integer"), list(literal(1)))),
+                unboxInt(constructorCall(ScalarType.topLevel("java.lang.Integer"), list(literal(2))))),
             readIntExpression("new Integer(1) + new Integer(2)"));
     }
 
@@ -470,7 +470,7 @@ public class ExpressionReadingTests {
         assertEquals(
             assign(
                 fieldAccess(
-                    thisReference(ScalarType.of("com.example.Example")),
+                    thisReference(ScalarType.topLevel("com.example.Example")),
                     "name",
                     Types.STRING),
                 literal("blah")),
@@ -489,7 +489,7 @@ public class ExpressionReadingTests {
         assertEquals(
             assign(
                 fieldAccess(
-                    thisReference(ScalarType.of("com.example.Example")),
+                    thisReference(ScalarType.topLevel("com.example.Example")),
                     "value",
                     Types.OBJECT),
                 typeCoercion(literal(4), Types.OBJECT)),

@@ -28,7 +28,7 @@ public class IntrinsicInterpreterType implements InterpreterType {
     }
 
     public static <T> Builder<T> builder(Class<T> interpreterValueType, String name) {
-        return builder(interpreterValueType, ScalarType.of(name));
+        return builder(interpreterValueType, ScalarType.topLevel(name));
     }
 
     public static Builder<ObjectInterpreterValue> classBuilder(String name) {

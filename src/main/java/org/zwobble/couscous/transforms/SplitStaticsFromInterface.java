@@ -57,7 +57,7 @@ public class SplitStaticsFromInterface {
     }
 
     private static ScalarType staticTypeFor(ScalarType name) {
-        return ScalarType.of(name.getQualifiedName() + "_static");
+        return ScalarType.topLevel(name.getQualifiedName() + "_static");
     }
 
     private static boolean isSplittable(TypeNode typeNode) {

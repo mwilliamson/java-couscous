@@ -42,8 +42,8 @@ public abstract class BackendEvalTests {
         assertEquals(
             value(false),
             evalExpression(same(
-                constructorCall(ScalarType.of("java.lang.Object"), Collections.emptyList()),
-                constructorCall(ScalarType.of("java.lang.Object"), Collections.emptyList()))));
+                constructorCall(ScalarType.topLevel("java.lang.Object"), Collections.emptyList()),
+                constructorCall(ScalarType.topLevel("java.lang.Object"), Collections.emptyList()))));
     }
     
     @Test
@@ -228,7 +228,7 @@ public abstract class BackendEvalTests {
 
     @Test
     public void staticConstructorIsExecutedOnReference() {
-        ScalarType type = ScalarType.of("com.example.Example");
+        ScalarType type = ScalarType.topLevel("com.example.Example");
         ClassNode classNode = ClassNode.builder(type)
             .staticField("value", Types.INT)
             .staticConstructor(list(

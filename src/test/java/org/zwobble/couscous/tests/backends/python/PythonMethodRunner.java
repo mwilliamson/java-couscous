@@ -86,7 +86,7 @@ public class PythonMethodRunner implements MethodRunner {
             case "<class 'type'>":
                 String typeName = value.substring(value.indexOf("'") + 1, value.lastIndexOf("'"));
                 assertThat(typeName, Matchers.startsWith(PACKAGE_PREFIX));
-                return value(ScalarType.of(typeName.substring(PACKAGE_PREFIX.length(), typeName.lastIndexOf("."))));
+                return value(ScalarType.topLevel(typeName.substring(PACKAGE_PREFIX.length(), typeName.lastIndexOf("."))));
             default:
                 throw new RuntimeException("Unhandled type: " + type);
         }

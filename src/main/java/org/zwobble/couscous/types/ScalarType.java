@@ -2,40 +2,61 @@ package org.zwobble.couscous.types;
 
 import com.google.common.base.Strings;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.zwobble.couscous.util.ExtraLists.*;
+
 public class ScalarType implements Type {
-    public static ScalarType of(String qualifiedName) {
+    public static ScalarType topLevel(String qualifiedName) {
         if (Strings.isNullOrEmpty(qualifiedName)) {
             throw new IllegalArgumentException("qualifiedName cannot be blank");
         }
         if (qualifiedName.contains("<")) {
             throw new IllegalArgumentException(qualifiedName + " contains <");
         }
-        return new ScalarType(qualifiedName);
+        int lastDot = qualifiedName.lastIndexOf('.');
+        String className = qualifiedName.substring(lastDot + 1);
+        Optional<String> packageName = lastDot == -1 ? Optional.empty() : Optional.of(qualifiedName.substring(0, lastDot));
+        return new ScalarType(packageName, list(className));
     }
-    
+
+    public static ScalarType innerType(ScalarType outerType, String name) {
+        return new ScalarType(outerType.packageName, append(outerType.typeNames, name));
+    }
+
+    private final Optional<String> packageName;
+    private final List<String> typeNames;
     private final String qualifiedName;
-    
-    private ScalarType(String qualifiedName) {
-        this.qualifiedName = qualifiedName;
+
+    public ScalarType(Optional<String> packageName, List<String> typeNames) {
+        this.packageName = packageName;
+        this.typeNames = typeNames;
+        this.qualifiedName = packageName.map(p -> p + ".").orElse("") + String.join(".", typeNames);
+    }
+
+    public Optional<String> getPackage() {
+        return packageName;
+    }
+
+    public List<String> getTypeNames() {
+        return typeNames;
     }
     
     public String getQualifiedName() {
         return qualifiedName;
     }
-    
+
     public String getSimpleName() {
-        return qualifiedName.substring(qualifiedName.lastIndexOf(".") + 1);
+        return getLast(typeNames);
     }
 
-    public Optional<String> getQualifier() {
-        int lastDot = qualifiedName.lastIndexOf(".");
-        if (lastDot == -1) {
+    public Optional<Type> outerType() {
+        if (typeNames.size() < 2) {
             return Optional.empty();
         } else {
-            return Optional.of(qualifiedName.substring(0, lastDot));
+            return Optional.of(new ScalarType(packageName, typeNames.subList(0, typeNames.size() - 1)));
         }
     }
 

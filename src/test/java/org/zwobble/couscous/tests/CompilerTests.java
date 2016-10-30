@@ -54,7 +54,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "recursive-factorial",
-                ScalarType.of("com.example.RecursiveFactorial"),
+                ScalarType.topLevel("com.example.RecursiveFactorial"),
                 "factorial",
                 list(value(6)),
                 Types.INT));
@@ -66,7 +66,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "while-factorial",
-                ScalarType.of("com.example.WhileFactorial"),
+                ScalarType.topLevel("com.example.WhileFactorial"),
                 "factorial",
                 list(value(6)),
                 Types.INT));
@@ -78,7 +78,7 @@ public abstract class CompilerTests {
             value(720),
             execTestProgram(
                 "for-factorial",
-                ScalarType.of("com.example.ForFactorial"),
+                ScalarType.topLevel("com.example.ForFactorial"),
                 "factorial",
                 list(value(6)),
                 Types.INT));
@@ -90,7 +90,7 @@ public abstract class CompilerTests {
             value("abc"),
             execTestProgram(
                 "for-each",
-                ScalarType.of("com.example.ForEach"),
+                ScalarType.topLevel("com.example.ForEach"),
                 "value",
                 list(),
                 Types.STRING));
@@ -102,7 +102,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "static-nested-class",
-                ScalarType.of("com.example.StaticNestedClass"),
+                ScalarType.topLevel("com.example.StaticNestedClass"),
                 "value",
                 list(),
                 Types.INT));
@@ -114,7 +114,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "inner-class",
-                ScalarType.of("com.example.InnerClass"),
+                ScalarType.topLevel("com.example.InnerClass"),
                 "run",
                 list(),
                 Types.INT));
@@ -126,7 +126,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "inner-class-with-constructor-args",
-                ScalarType.of("com.example.InnerClass"),
+                ScalarType.topLevel("com.example.InnerClass"),
                 "run",
                 list(),
                 Types.INT));
@@ -138,7 +138,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "implement-user-interface",
-                ScalarType.of("com.example.ConstantIntSupplier"),
+                ScalarType.topLevel("com.example.ConstantIntSupplier"),
                 "value",
                 list(),
                 Types.INT));
@@ -150,7 +150,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "anonymous-class",
-                ScalarType.of("com.example.AnonymousClass"),
+                ScalarType.topLevel("com.example.AnonymousClass"),
                 "value",
                 list(),
                 Types.INT));
@@ -162,7 +162,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "anonymous-class-this-reference",
-                ScalarType.of("com.example.AnonymousClass"),
+                ScalarType.topLevel("com.example.AnonymousClass"),
                 "value",
                 list(),
                 Types.INT));
@@ -174,7 +174,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "anonymous-class-capture",
-                ScalarType.of("com.example.AnonymousClass"),
+                ScalarType.topLevel("com.example.AnonymousClass"),
                 "value",
                 list(value(42)),
                 Types.INT));
@@ -186,7 +186,7 @@ public abstract class CompilerTests {
             value("Hello"),
             execTestProgram(
                 "anonymous-class-type-capture",
-                ScalarType.of("com.example.AnonymousClass"),
+                ScalarType.topLevel("com.example.AnonymousClass"),
                 "value",
                 list(),
                 Types.STRING));
@@ -198,7 +198,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda",
-                ScalarType.of("com.example.Lambda"),
+                ScalarType.topLevel("com.example.Lambda"),
                 "value",
                 list(),
                 Types.INT));
@@ -210,7 +210,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda-capture",
-                ScalarType.of("com.example.Lambda"),
+                ScalarType.topLevel("com.example.Lambda"),
                 "value",
                 list(value(2)),
                 Types.INT));
@@ -222,7 +222,7 @@ public abstract class CompilerTests {
             value(84),
             execTestProgram(
                 "lambda-multiple-capture",
-                ScalarType.of("com.example.Lambda"),
+                ScalarType.topLevel("com.example.Lambda"),
                 "value",
                 list(value(2)),
                 Types.INT));
@@ -234,7 +234,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "lambda-this-capture",
-                ScalarType.of("com.example.Lambda"),
+                ScalarType.topLevel("com.example.Lambda"),
                 "value",
                 list(value(2)),
                 Types.INT));
@@ -246,7 +246,7 @@ public abstract class CompilerTests {
             value("two"),
             execTestProgram(
                 "generic-method",
-                ScalarType.of("com.example.GenericMethod"),
+                ScalarType.topLevel("com.example.GenericMethod"),
                 "value",
                 list(),
                 Types.STRING));
@@ -258,7 +258,7 @@ public abstract class CompilerTests {
             value("Hello"),
             execTestProgram(
                 "generic-interface-return-type",
-                ScalarType.of("com.example.GenericInterface"),
+                ScalarType.topLevel("com.example.GenericInterface"),
                 "value",
                 list(),
                 Types.STRING));
@@ -270,7 +270,7 @@ public abstract class CompilerTests {
             value("Hello"),
             execTestProgram(
                 "generic-interface-non-generic-methods",
-                ScalarType.of("com.example.GenericInterface"),
+                ScalarType.topLevel("com.example.GenericInterface"),
                 "value",
                 list(),
                 Types.STRING));
@@ -282,7 +282,7 @@ public abstract class CompilerTests {
             value(42),
             execTestProgram(
                 "static-method-overloads",
-                ScalarType.of("com.example.StaticMethodOverloads"),
+                ScalarType.topLevel("com.example.StaticMethodOverloads"),
                 "value",
                 list(),
                 Types.INT));
@@ -306,7 +306,7 @@ public abstract class CompilerTests {
             value(expected),
             execTestProgram(
                 "switch-statements",
-                ScalarType.of("com.example.SwitchStatements"),
+                ScalarType.topLevel("com.example.SwitchStatements"),
                 methodName,
                 list(value(input)),
                 Types.INT));
@@ -374,7 +374,7 @@ public abstract class CompilerTests {
                 Files.write(directoryPath.resolve("com/example/Example.java"), list(javaClass));
                 return execProgram(
                     directoryPath,
-                    ScalarType.of("com.example.Example"),
+                    ScalarType.topLevel("com.example.Example"),
                     "main",
                     list(),
                     returnType);

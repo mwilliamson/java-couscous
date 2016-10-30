@@ -12,7 +12,6 @@ import org.zwobble.couscous.util.ExtraSets;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
@@ -81,25 +80,22 @@ public class HoistNestedTypes {
         }
     }
 
-    private static final Pattern INNER_TYPE_QUALIFIER_REGEX = Pattern.compile(".*\\.[A-Z][^.]*$");
-
     private boolean isInnerType(Type type) {
-        // TODO: implement separate type classes for top-level and inner types rather than using this heuristic
-
         return tryCast(ScalarType.class, type)
-            .flatMap(scalarType -> scalarType.getQualifier())
-            .map(qualifier -> INNER_TYPE_QUALIFIER_REGEX.matcher(qualifier).matches())
+            .map(scalarType -> scalarType.outerType().isPresent())
             .orElse(false);
     }
 
     private Type outerType(ScalarType type) {
-        // TODO: implement separate type classes for top-level and inner types
-
-        return ScalarType.of(type.getQualifier().get());
+        return type.outerType().get();
     }
 
     private static Type hoistedTypeName(ScalarType type) {
-        return ScalarType.of(type.getQualifier().get() + "__" + type.getSimpleName());
+        List<String> typeNames = type.getTypeNames();
+        return new ScalarType(
+            type.getPackage(),
+            cons(typeNames.get(0) + "__" + typeNames.get(1), typeNames.subList(2, typeNames.size()))
+        );
     }
 
     private HoistResult hoistInnerTypes(TypeNode declaration) {

@@ -13,7 +13,7 @@ import static org.zwobble.couscous.types.TypeParameter.typeParameter;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaTypesTests {
-    private static final ScalarType INT_TYPE = ScalarType.of("int");
+    private static final ScalarType INT_TYPE = ScalarType.topLevel("int");
 
     @Test
     public void bindingTypeToItselfReturnsType() {
@@ -32,7 +32,7 @@ public class JavaTypesTests {
 
     @Test
     public void bindingTypeToParameterizedTypeBindsParameters() {
-        ScalarType rawList = ScalarType.of("List");
+        ScalarType rawList = ScalarType.topLevel("List");
         TypeParameter typeParameter = typeParameter(Identifier.forType("List"), "T");
         assertEquals(
             parameterizedType(rawList, list(boundTypeParameter(typeParameter, INT_TYPE))),

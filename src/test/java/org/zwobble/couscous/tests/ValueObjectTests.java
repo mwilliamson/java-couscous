@@ -67,7 +67,6 @@ public class ValueObjectTests {
             {OperationNode.class},
             {ParameterizedType.class},
             {ReturnNode.class},
-            {ScalarType.class},
             {StaticReceiver.class},
             {TernaryConditionalNode.class},
             {ThisReferenceNode.class},
@@ -75,7 +74,6 @@ public class ValueObjectTests {
             {TryNode.class},
             {TypeCoercionNode.class},
             {TypeParameter.class},
-            {ScalarType.class},
             {VariableDeclaration.class},
             {VariableReferenceNode.class},
             {WhileNode.class}
@@ -166,6 +164,8 @@ public class ValueObjectTests {
             return generateFirstInstance(VariableReferenceNode.class);
         } else if (type.equals(Type.class)) {
             return generateFirstInstance(ScalarType.class);
+        } else if (type.equals(ScalarType.class)) {
+            return ScalarType.topLevel("T1");
         } else {
             return generateValue(type, ValueObjectTests::generateFirstInstance).instance;         
         }
@@ -196,6 +196,8 @@ public class ValueObjectTests {
             return generateSecondInstance(VariableReferenceNode.class);
         } else if (type.equals(Type.class)) {
             return generateSecondInstance(ScalarType.class);
+        } else if (type.equals(ScalarType.class)) {
+            return ScalarType.topLevel("T2");
         } else {
             return generateValue(type, ValueObjectTests::generateSecondInstance).instance;           
         }
@@ -226,6 +228,8 @@ public class ValueObjectTests {
             return generateInstance(VariableReferenceNode.class);
         } else if (type.equals(Type.class)) {
             return generateInstance(ScalarType.class);
+        } else if (type.equals(ScalarType.class)) {
+            return ScalarType.topLevel("T");
         } else {
             return generateValue(type, ValueObjectTests::generateInstance).instance;
         }

@@ -230,7 +230,7 @@ public class JavaExpressionReader {
 
     private Receiver toReceiver(IBinding binding) {
         if (binding instanceof ITypeBinding) {
-            ScalarType receiver = ScalarType.of(((ITypeBinding) binding).getQualifiedName());
+            ScalarType receiver = ScalarType.topLevel(((ITypeBinding) binding).getQualifiedName());
             return staticReceiver(receiver);
         } else if (binding instanceof IVariableBinding) {
             return instanceReceiver(readVariableBinding((IVariableBinding) binding));

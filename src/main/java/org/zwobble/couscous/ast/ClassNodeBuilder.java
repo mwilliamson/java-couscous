@@ -38,7 +38,7 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder(String name) {
-        this(ScalarType.of(name));
+        this(ScalarType.topLevel(name));
     }
 
     public ClassNodeBuilder addTypeParameter(String name) {
@@ -47,7 +47,7 @@ public class ClassNodeBuilder {
     }
 
     public ClassNodeBuilder addSuperType(String type) {
-        this.superTypes.add(ScalarType.of(type));
+        this.superTypes.add(ScalarType.topLevel(type));
         return this;
     }
 

@@ -135,10 +135,10 @@ public class CsharpPrimitiveMethods {
 
             .put("parseInt", new PrimitiveStaticMethod(
                 arguments -> staticMethodCall(
-                    ScalarType.of("int"),
+                    ScalarType.topLevel("int"),
                     "Parse",
                     list(arguments.get(0)),
-                    ScalarType.of("int")
+                    ScalarType.topLevel("int")
                 ),
                 Types.INT
             ))
@@ -155,7 +155,7 @@ public class CsharpPrimitiveMethods {
 
             .put("join", new PrimitiveStaticMethod(
                 arguments -> staticMethodCall(
-                    ScalarType.of("java.lang.String"),
+                    ScalarType.topLevel("java.lang.String"),
                     "join",
                     arguments,
                     Types.STRING

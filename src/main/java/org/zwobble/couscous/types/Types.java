@@ -8,16 +8,16 @@ import static org.zwobble.couscous.util.ExtraLists.eagerMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class Types {
-    public static final ScalarType VOID = ScalarType.of("void");
-    public static final ScalarType BOOLEAN = ScalarType.of("boolean");
-    public static final ScalarType INT = ScalarType.of("int");
-    public static final ScalarType CHAR = ScalarType.of("char");
-    public static final ScalarType STRING = ScalarType.of("java.lang.String");
-    public static final ScalarType CLASS = ScalarType.of("java.lang.Class");
-    public static final ScalarType OBJECT = ScalarType.of("java.lang.Object");
-    public static final ScalarType BOXED_INT = ScalarType.of("java.lang.Integer");
-    public static final ScalarType BOXED_BOOLEAN = ScalarType.of("java.lang.Boolean");
-    public static final ScalarType ARRAY = ScalarType.of("array");
+    public static final ScalarType VOID = ScalarType.topLevel("void");
+    public static final ScalarType BOOLEAN = ScalarType.topLevel("boolean");
+    public static final ScalarType INT = ScalarType.topLevel("int");
+    public static final ScalarType CHAR = ScalarType.topLevel("char");
+    public static final ScalarType STRING = ScalarType.topLevel("java.lang.String");
+    public static final ScalarType CLASS = ScalarType.topLevel("java.lang.Class");
+    public static final ScalarType OBJECT = ScalarType.topLevel("java.lang.Object");
+    public static final ScalarType BOXED_INT = ScalarType.topLevel("java.lang.Integer");
+    public static final ScalarType BOXED_BOOLEAN = ScalarType.topLevel("java.lang.Boolean");
+    public static final ScalarType ARRAY = ScalarType.topLevel("array");
 
     public static Type addTypeParameters(ScalarType rawType, List<Type> typeParameters) {
         if (typeParameters.isEmpty()) {

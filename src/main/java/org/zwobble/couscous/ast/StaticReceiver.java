@@ -6,7 +6,7 @@ import org.zwobble.couscous.util.ExtraIterables;
 
 public class StaticReceiver implements Receiver {
     public static Receiver staticReceiver(String type) {
-        return new StaticReceiver(ScalarType.of(type));
+        return new StaticReceiver(ScalarType.topLevel(type));
     }
 
     public static Receiver staticReceiver(ScalarType type) {

@@ -92,7 +92,7 @@ public class JavaReaderTests {
             "}");
         
         MethodNode method = classNode.getMethods().get(0);
-        assertThat(method.getArguments(), contains(isFormalArgument("value", ScalarType.of("int"))));
+        assertThat(method.getArguments(), contains(isFormalArgument("value", ScalarType.topLevel("int"))));
         
         ReturnNode returnNode = (ReturnNode)method.getBody().get().get(0);
         assertEquals(reference(method.getArguments().get(0)), returnNode.getValue());
@@ -119,7 +119,7 @@ public class JavaReaderTests {
     public void canReadThrowStatements() {
         assertEquals(
             throwNode(
-                constructorCall(ScalarType.of("java.lang.RuntimeException"), list())),
+                constructorCall(ScalarType.topLevel("java.lang.RuntimeException"), list())),
             readStatement("void", "throw new RuntimeException();"));
     }
     
@@ -128,7 +128,7 @@ public class JavaReaderTests {
         assertEquals(
             expressionStatement(
                 staticMethodCall(
-                    ScalarType.of("java.lang.Integer"),
+                    ScalarType.topLevel("java.lang.Integer"),
                     "parseInt",
                     list(literal("42")),
                     Types.INT)),
@@ -224,7 +224,7 @@ public class JavaReaderTests {
             isTryStatement(
                 hasTryBody(list(returns(literal(1)))),
                 hasExceptionHandlers(
-                    isExceptionHandler(ScalarType.of("java.lang.Exception"), "exception", list(returns(literal(2)))))));
+                    isExceptionHandler(ScalarType.topLevel("java.lang.Exception"), "exception", list(returns(literal(2)))))));
     }
 
     @Test
@@ -249,7 +249,7 @@ public class JavaReaderTests {
 
     @Test
     public void canReadTryWithResourceWithoutOtherClauses() {
-        ScalarType type = ScalarType.of("java.io.ByteArrayOutputStream");
+        ScalarType type = ScalarType.topLevel("java.io.ByteArrayOutputStream");
         Identifier identifier = MAIN_IDENTIFIER.variable("closeable");
         LocalVariableDeclarationNode expectedResource = localVariableDeclaration(identifier, "closeable", type, constructorCall(type, list()));
         assertThat(
@@ -292,7 +292,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    thisReference(ScalarType.of("com.example.Example")),
+                    thisReference(ScalarType.topLevel("com.example.Example")),
                     "name",
                     Types.STRING),
                 literal("Flaws"))),
@@ -315,13 +315,13 @@ public class JavaReaderTests {
             list(
                 assignStatement(
                     fieldAccess(
-                        thisReference(ScalarType.of("com.example.Example")),
+                        thisReference(ScalarType.topLevel("com.example.Example")),
                         "year",
                         Types.INT),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
-                        thisReference(ScalarType.of("com.example.Example")),
+                        thisReference(ScalarType.topLevel("com.example.Example")),
                         "name",
                         Types.STRING),
                     literal("Flaws"))),
@@ -343,13 +343,13 @@ public class JavaReaderTests {
             list(
                 assignStatement(
                     fieldAccess(
-                        thisReference(ScalarType.of("com.example.Example")),
+                        thisReference(ScalarType.topLevel("com.example.Example")),
                         "year",
                         Types.INT),
                     literal(2013)),
                 assignStatement(
                     fieldAccess(
-                        thisReference(ScalarType.of("com.example.Example")),
+                        thisReference(ScalarType.topLevel("com.example.Example")),
                         "name",
                         Types.STRING),
                     literal("Flaws"))),
@@ -369,7 +369,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    ScalarType.of("com.example.Example"),
+                    ScalarType.topLevel("com.example.Example"),
                     "name",
                     Types.STRING),
                 literal("Flaws"))),
@@ -386,7 +386,7 @@ public class JavaReaderTests {
         assertEquals(
             list(assignStatement(
                 fieldAccess(
-                    ScalarType.of("com.example.Example"),
+                    ScalarType.topLevel("com.example.Example"),
                     "name",
                     Types.STRING),
                 literal("Flaws"))),
@@ -400,7 +400,7 @@ public class JavaReaderTests {
         
         MethodNode method = classNode.getMethods().get(0);
         assertEquals(
-            list(annotation(ScalarType.of("java.lang.Deprecated"))),
+            list(annotation(ScalarType.topLevel("java.lang.Deprecated"))),
             method.getAnnotations());
     }
 
@@ -422,7 +422,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
         assertEquals(set(), classNode.getSuperTypes());
         assertEquals(list(), classNode.getTypeParameters());
@@ -435,7 +435,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         ClassNode classNode = (ClassNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), classNode.getName());
         assertEquals(list(formalTypeParameter(Identifier.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
@@ -446,7 +446,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), classNode.getName());
         assertEquals(list(formalTypeParameter(Identifier.forType("com.example.Example"), "T")), classNode.getTypeParameters());
     }
 
@@ -457,9 +457,9 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         InterfaceNode classNode = (InterfaceNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), classNode.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), classNode.getName());
         assertEquals(list(), classNode.getMethods());
-        assertThat(classNode.getSuperTypes(), contains(ScalarType.of("java.util.function.IntSupplier")));
+        assertThat(classNode.getSuperTypes(), contains(ScalarType.topLevel("java.util.function.IntSupplier")));
     }
 
     @Test
@@ -493,7 +493,7 @@ public class JavaReaderTests {
         assertEquals(
             list(
                 assignStatement(
-                    FieldAccessNode.fieldAccess(ScalarType.of("com.example.Example"), "VALUE", Types.INT),
+                    FieldAccessNode.fieldAccess(ScalarType.topLevel("com.example.Example"), "VALUE", Types.INT),
                     literal(1)
                 )
             ),
@@ -508,7 +508,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         EnumNode node = (EnumNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), node.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), node.getName());
     }
 
     @Test
@@ -518,7 +518,7 @@ public class JavaReaderTests {
         List<TypeNode> classes = readSource("com/example/Example.java", source);
         assertThat(classes, hasSize(1));
         EnumNode node = (EnumNode) classes.get(0);
-        assertEquals(ScalarType.of("com.example.Example"), node.getName());
+        assertEquals(ScalarType.topLevel("com.example.Example"), node.getName());
         assertEquals(list("ONE", "TWO"), node.getValues());
     }
 

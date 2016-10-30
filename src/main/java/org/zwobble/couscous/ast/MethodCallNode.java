@@ -19,7 +19,7 @@ public class MethodCallNode implements ExpressionNode {
         List<ExpressionNode> arguments,
         Type type)
     {
-        return staticMethodCall(ScalarType.of(className), methodName, arguments, type);
+        return staticMethodCall(ScalarType.topLevel(className), methodName, arguments, type);
     }
 
     public static ExpressionNode staticMethodCall(
@@ -29,7 +29,7 @@ public class MethodCallNode implements ExpressionNode {
         Type returnType,
         MethodSignature signature)
     {
-        return staticMethodCall(ScalarType.of(className), methodName, arguments, returnType, signature);
+        return staticMethodCall(ScalarType.topLevel(className), methodName, arguments, returnType, signature);
     }
 
     public static ExpressionNode staticMethodCall(

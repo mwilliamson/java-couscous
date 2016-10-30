@@ -47,12 +47,10 @@ public class JavaTypes {
             Identifier declaringScope = getDeclaringScope(typeBinding);
             return new TypeParameter(declaringScope, typeBinding.getName());
         }
-        // TODO: tidy-up
-//        ScalarType rawType = outerClass == null
-//            ? ScalarType.of(typeBinding.getErasure().getQualifiedName())
-//            // TODO: test for erasure of inner type name
-//            : ScalarType.of(erasure(typeOf(outerClass)).getQualifiedName() + "__" + typeBinding.getErasure().getName());
-        ScalarType rawType = ScalarType.of(typeBinding.getErasure().getQualifiedName());
+        ScalarType rawType = outerClass == null
+            ? ScalarType.topLevel(typeBinding.getErasure().getQualifiedName())
+            // TODO: test for erasure of inner type name
+            : ScalarType.innerType(erasure(typeOf(outerClass)), typeBinding.getErasure().getName());
         if (typeBinding.isParameterizedType()) {
             List<Type> typeParameters = eagerMap(
                 asList(typeBinding.getTypeArguments()),
@@ -141,10 +139,10 @@ public class JavaTypes {
     }
 
     public static Type iterable(Type elementType) {
-        return parameterizedType(ScalarType.of("java.lang.Iterable"), list(elementType));
+        return parameterizedType(ScalarType.topLevel("java.lang.Iterable"), list(elementType));
     }
 
-    private static final ScalarType RAW_ITERATOR = ScalarType.of("java.util.Iterator");
+    private static final ScalarType RAW_ITERATOR = ScalarType.topLevel("java.util.Iterator");
     public static final TypeParameter ITERATOR_TYPE_PARAMETER = typeParameter(Identifier.TOP.type(RAW_ITERATOR.getQualifiedName()), "T");
 
     public static Type iterator(Type elementType) {

@@ -75,7 +75,7 @@ public class CsharpMethodRunner implements MethodRunner {
         String csharpMethodName = CsharpCodeGenerator.NAMING.methodName(signature);
         String value = CsharpSerializer.serialize(
             staticMethodCall(
-                ScalarType.of(NAMESPACE + "." + className.getQualifiedName()),
+                ScalarType.topLevel(NAMESPACE + "." + className.getQualifiedName()),
                 csharpMethodName,
                 eagerMap(arguments, LiteralNode::literal),
                 returnType));
@@ -200,7 +200,7 @@ public class CsharpMethodRunner implements MethodRunner {
                     return value(Types.STRING);
                 } else {
                     assertThat(value, Matchers.startsWith(NAMESPACE_PREFIX));
-                    return value(ScalarType.of(value.substring(NAMESPACE_PREFIX.length())));
+                    return value(ScalarType.topLevel(value.substring(NAMESPACE_PREFIX.length())));
                 }
             default:
                 throw new RuntimeException("Unhandled type: " + type);
