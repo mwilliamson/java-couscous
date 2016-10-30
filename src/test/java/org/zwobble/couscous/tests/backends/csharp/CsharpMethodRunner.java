@@ -195,6 +195,7 @@ public class CsharpMethodRunner implements MethodRunner {
             case "System.Boolean":
                 return value(value.equals("True"));
             case "System.MonoType":
+            case "System.RuntimeType":
                 if (value.equals("System.String")) {
                     return value(Types.STRING);
                 } else {
