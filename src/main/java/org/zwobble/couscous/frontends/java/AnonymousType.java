@@ -30,6 +30,13 @@ public class AnonymousType implements Type {
     }
 
     @Override
+    public String toString() {
+        return "AnonymousType(" +
+            "key='" + key + '\'' +
+            ')';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
