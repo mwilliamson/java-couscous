@@ -1,6 +1,5 @@
 package org.zwobble.couscous.frontends.java;
 
-import com.google.common.collect.ImmutableList;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.zwobble.couscous.ast.*;
@@ -14,6 +13,7 @@ import org.zwobble.couscous.util.ExtraLists;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,6 +44,9 @@ public class JavaReader {
     public static List<TypeNode> readClassesFromFiles(List<Path> sourcePaths, List<Path> sourceFiles) throws IOException {
         JavaParser parser = new JavaParser();
         JavaReader reader = new JavaReader();
+
+        List<TypeNode> types = new ArrayList<>();
+
         for (Path sourceFile : sourceFiles) {
             CompilationUnit ast = parser.parseCompilationUnit(sourcePaths, sourceFile);
 
@@ -52,12 +55,12 @@ public class JavaReader {
                 throw new RuntimeException("Errors during parsing:\n\n" + describe(errors));
             }
             try {
-                reader.readCompilationUnit(ast);
+                types.add(reader.readCompilationUnit(ast));
             } catch (Exception exception) {
                 throw new RuntimeException("Error reading " + sourceFile, exception);
             }
         }
-        return reader.types();
+        return types;
     }
 
     private static String describe(List<IProblem> errors) {
@@ -70,27 +73,17 @@ public class JavaReader {
             error.getMessage();
     }
 
-    private final ImmutableList.Builder<TypeNode> classes;
-    private int anonymousClassCount = 0;
     private final Scope topScope = Scope.create();
 
-    private JavaReader() {
-        classes = ImmutableList.builder();
-    }
-
-    private void readCompilationUnit(CompilationUnit ast) {
+    private TypeNode readCompilationUnit(CompilationUnit ast) {
         AbstractTypeDeclaration type = (AbstractTypeDeclaration) ast.types().get(0);
         if (type instanceof TypeDeclaration) {
-            classes.add(readTypeDeclaration((TypeDeclaration) type));
+            return readTypeDeclaration((TypeDeclaration) type);
         } else if (type instanceof EnumDeclaration) {
-            classes.add(readEnumDeclaration((EnumDeclaration)type));
+            return readEnumDeclaration((EnumDeclaration)type);
         } else {
             throw new UnsupportedOperationException();
         }
-    }
-
-    private List<TypeNode> types() {
-        return this.classes.build();
     }
 
     private TypeNode readEnumDeclaration(EnumDeclaration type) {
