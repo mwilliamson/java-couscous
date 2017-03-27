@@ -14,6 +14,10 @@ public class ParameterizedType implements Type {
     private final List<Type> parameters;
 
     public ParameterizedType(ScalarType rawType, List<Type> parameters) {
+        if (parameters.isEmpty()) {
+            throw new RuntimeException("parameters cannot be empty");
+        }
+
         this.rawType = rawType;
         this.parameters = parameters;
     }
