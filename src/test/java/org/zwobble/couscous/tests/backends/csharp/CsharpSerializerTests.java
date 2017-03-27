@@ -63,6 +63,13 @@ public class CsharpSerializerTests {
     }
 
     @Test
+    public void charLiteralsAreEscaped() {
+        assertEquals("'\\n'", serialize(literal('\n')));
+        assertEquals("'\\r'", serialize(literal('\r')));
+        assertEquals("'\\t'", serialize(literal('\t')));
+    }
+
+    @Test
     public void stringLiteralsUseDoubleQuotes() {
         String output = serialize(literal("blah"));
         assertEquals("\"blah\"", output);

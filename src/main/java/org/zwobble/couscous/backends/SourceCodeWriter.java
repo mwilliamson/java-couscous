@@ -40,9 +40,17 @@ public class SourceCodeWriter {
     public void writeChar(char value) {
         builder.append("'");
         if (value == '\'') {
-            builder.append("\\");
+            builder.append("\\'");
+        } else if (value == '\n') {
+            builder.append("\\n");
+        } else if (value == '\r') {
+            builder.append("\\r");
+        } else if (value == '\t') {
+            builder.append("\\t");
+        } else {
+            builder.append(value);
         }
-        builder.append(value).append("'");
+        builder.append("'");
     }
 
     public void writeStringLiteral(String value) {
