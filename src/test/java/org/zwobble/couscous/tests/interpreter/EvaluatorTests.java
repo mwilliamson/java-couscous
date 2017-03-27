@@ -13,6 +13,7 @@ import org.zwobble.couscous.interpreter.values.InterpreterValue;
 import org.zwobble.couscous.interpreter.values.StringInterpreterValue;
 import org.zwobble.couscous.tests.BackendEvalTests;
 import org.zwobble.couscous.types.ScalarType;
+import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
 import org.zwobble.couscous.values.PrimitiveValue;
 
@@ -268,7 +269,7 @@ public class EvaluatorTests extends BackendEvalTests {
             equalTo(parameterizedType(rawType, list(Types.STRING))));
     }
 
-    private Matcher<InterpreterValue> isArrayInterpreterValue(ScalarType elementType, List<InterpreterValue> elements) {
+    private Matcher<InterpreterValue> isArrayInterpreterValue(Type elementType, List<InterpreterValue> elements) {
         return isInstance(
             ArrayInterpreterValue.class,
             allOf(
