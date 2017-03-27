@@ -51,7 +51,7 @@ public class JavaTypes {
             ? ScalarType.topLevel(typeBinding.getErasure().getQualifiedName())
             // TODO: test for erasure of inner type name
             : ScalarType.innerType(erasure(typeOf(outerClass)), typeBinding.getErasure().getName());
-        if (typeBinding.isParameterizedType()) {
+        if (typeBinding.isParameterizedType() && typeBinding.getTypeArguments().length > 0) {
             List<Type> typeParameters = eagerMap(
                 asList(typeBinding.getTypeArguments()),
                 JavaTypes::typeOf);
