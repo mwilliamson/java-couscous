@@ -42,42 +42,56 @@ class JavaStatementReader {
     }
 
     List<StatementNode> readStatement(Statement statement) {
-        switch (statement.getNodeType()) {
-            case ASTNode.BLOCK:
-                return readBlock((Block)statement);
+        try {
+            switch (statement.getNodeType()) {
+                case ASTNode.BLOCK:
+                    return readBlock((Block)statement);
 
-            case ASTNode.RETURN_STATEMENT:
-                return list(readReturnStatement((ReturnStatement)statement));
+                case ASTNode.RETURN_STATEMENT:
+                    return list(readReturnStatement((ReturnStatement)statement));
 
-            case ASTNode.THROW_STATEMENT:
-                return list(readThrowStatement((ThrowStatement)statement));
+                case ASTNode.THROW_STATEMENT:
+                    return list(readThrowStatement((ThrowStatement)statement));
 
-            case ASTNode.EXPRESSION_STATEMENT:
-                return list(readExpressionStatement((ExpressionStatement)statement));
+                case ASTNode.EXPRESSION_STATEMENT:
+                    return list(readExpressionStatement((ExpressionStatement)statement));
 
-            case ASTNode.IF_STATEMENT:
-                return list(readIfStatement((IfStatement)statement));
+                case ASTNode.IF_STATEMENT:
+                    return list(readIfStatement((IfStatement)statement));
 
-            case ASTNode.WHILE_STATEMENT:
-                return list(readWhileStatement((WhileStatement)statement));
+                case ASTNode.WHILE_STATEMENT:
+                    return list(readWhileStatement((WhileStatement)statement));
 
-            case ASTNode.FOR_STATEMENT:
-                return readForStatement((ForStatement)statement);
+                case ASTNode.FOR_STATEMENT:
+                    return readForStatement((ForStatement)statement);
 
-            case ASTNode.ENHANCED_FOR_STATEMENT:
-                return readEnhancedForStatement((EnhancedForStatement)statement);
+                case ASTNode.ENHANCED_FOR_STATEMENT:
+                    return readEnhancedForStatement((EnhancedForStatement)statement);
 
-            case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-                return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
+                case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+                    return readVariableDeclarationStatement((VariableDeclarationStatement)statement);
 
-            case ASTNode.SWITCH_STATEMENT:
-                return readSwitchStatement((SwitchStatement)statement);
+                case ASTNode.SWITCH_STATEMENT:
+                    return readSwitchStatement((SwitchStatement)statement);
 
-            case ASTNode.TRY_STATEMENT:
-                return readTryStatement((TryStatement)statement);
+                case ASTNode.TRY_STATEMENT:
+                    return readTryStatement((TryStatement)statement);
 
-            default:
-                throw new RuntimeException("Unsupported statement: " + statement.getClass());
+                default:
+                    throw new RuntimeException("Unsupported statement: " + statement.getClass());
+            }
+        } catch (Exception exception) {
+            if (statement == null || exception instanceof ReadError) {
+                throw exception;
+            } else {
+                CompilationUnit root = (CompilationUnit) statement.getRoot();
+                int lineNumber = root.getLineNumber(statement.getStartPosition());
+                int columnNumber = root.getColumnNumber(statement.getStartPosition());
+                throw new ReadError(
+                    "Failed to read statement at " + lineNumber + ":" + columnNumber,
+                    exception
+                );
+            }
         }
     }
 

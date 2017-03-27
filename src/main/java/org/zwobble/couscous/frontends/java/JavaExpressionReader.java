@@ -131,13 +131,13 @@ public class JavaExpressionReader {
 
             }
         } catch (Exception exception) {
-            if (exception instanceof ExpressionReadError) {
+            if (expression == null || exception instanceof ReadError) {
                 throw exception;
             } else {
                 CompilationUnit root = (CompilationUnit) expression.getRoot();
                 int lineNumber = root.getLineNumber(expression.getStartPosition());
                 int columnNumber = root.getColumnNumber(expression.getStartPosition());
-                throw new ExpressionReadError(
+                throw new ReadError(
                     "Failed to read expression at " + lineNumber + ":" + columnNumber,
                     exception);
             }
