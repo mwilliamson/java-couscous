@@ -78,7 +78,11 @@ public class EnumNode implements TypeNode {
 
     @Override
     public TypeNode addInnerTypes(List<TypeNode> types) {
-        throw new UnsupportedOperationException();
+        if (types.size() == 0) {
+            return this;
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
