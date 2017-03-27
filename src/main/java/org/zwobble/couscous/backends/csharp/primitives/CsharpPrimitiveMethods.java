@@ -81,14 +81,24 @@ public class CsharpPrimitiveMethods {
         methods.put("substring", new PrimitiveInstanceMethod(
             (receiver, arguments) -> {
                 ExpressionNode startIndex = arguments.get(0);
-                ExpressionNode endIndex = arguments.get(1);
-                ExpressionNode length = integerSubtract(endIndex, startIndex);
-                // TODO: handle length going beyond end-of-string
-                return methodCall(
-                    receiver,
-                    "Substring",
-                    list(startIndex, length),
-                    Types.STRING);
+                if (arguments.size() == 1) {
+                    return methodCall(
+                        receiver,
+                        "Substring",
+                        list(startIndex),
+                        Types.STRING
+                    );
+                } else {
+                    ExpressionNode endIndex = arguments.get(1);
+                    ExpressionNode length = integerSubtract(endIndex, startIndex);
+                    // TODO: handle length going beyond end-of-string
+                    return methodCall(
+                        receiver,
+                        "Substring",
+                        list(startIndex, length),
+                        Types.STRING
+                    );
+                }
             },
             Types.STRING
         ));
