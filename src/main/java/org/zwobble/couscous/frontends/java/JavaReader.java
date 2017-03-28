@@ -77,6 +77,10 @@ public class JavaReader {
 
     private TypeNode readCompilationUnit(CompilationUnit ast) {
         AbstractTypeDeclaration type = (AbstractTypeDeclaration) ast.types().get(0);
+        return readAbstractTypeDeclaration(type);
+    }
+
+    private TypeNode readAbstractTypeDeclaration(AbstractTypeDeclaration type) {
         if (type instanceof TypeDeclaration) {
             return readTypeDeclaration((TypeDeclaration) type);
         } else if (type instanceof EnumDeclaration) {
@@ -207,8 +211,8 @@ public class JavaReader {
             tryCast(FieldDeclaration.class, declaration)
                 .ifPresent(field -> readField(body, scope, type, field, isInterface));
 
-            tryCast(TypeDeclaration.class, declaration)
-                .ifPresent(typeDeclaration -> body.addInnerType(readTypeDeclaration(typeDeclaration)));
+            tryCast(AbstractTypeDeclaration.class, declaration)
+                .ifPresent(typeDeclaration -> body.addInnerType(readAbstractTypeDeclaration(typeDeclaration)));
         }
         return body.build();
     }
