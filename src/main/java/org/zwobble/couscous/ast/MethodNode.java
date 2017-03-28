@@ -55,6 +55,11 @@ public class MethodNode implements Node {
             return this;
         }
 
+        public Builder typeParameters(Iterable<FormalTypeParameterNode> additionalParameters) {
+            parameters.addAll(additionalParameters);
+            return this;
+        }
+
         public Builder typeParameter(FormalTypeParameterNode parameter) {
             parameters.add(parameter);
             return this;

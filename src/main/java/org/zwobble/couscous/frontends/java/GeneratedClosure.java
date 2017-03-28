@@ -47,4 +47,8 @@ public class GeneratedClosure {
     private ScalarType getType() {
         return classNode.getName();
     }
+
+    public InsertionOrderSet<TypeParameter> getCapturedTypes() {
+        return capturedTypes;
+    }
 }
