@@ -105,7 +105,7 @@ public class ClosureGenerator {
 
     private static boolean isThisReference(ScalarType name, ReferenceNode reference) {
         return tryCast(ThisReferenceNode.class, reference)
-            .map(node -> node.getType().equals(name))
+            .map(node -> erasure(node.getType()).equals(name))
             .orElse(false);
     }
 
