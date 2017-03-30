@@ -45,8 +45,8 @@ public class ExtraLists {
         return ImmutableList.copyOf(Iterables.concat(first, second));
     }
 
-    public static <T> List<T> concat(List<? extends T> first, List<? extends T> second, List<? extends T> third) {
-        return Stream.concat(Stream.concat(first.stream(), second.stream()), third.stream()).collect(Collectors.toList());
+    public static <T> List<T> concat(Iterable<? extends T> first, Iterable<? extends T> second, Iterable<? extends T> third) {
+        return ImmutableList.copyOf(Iterables.concat(first, second, third));
     }
 
     @SuppressWarnings("unchecked")

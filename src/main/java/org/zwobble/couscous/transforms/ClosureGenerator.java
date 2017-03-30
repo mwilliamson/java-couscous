@@ -7,9 +7,8 @@ import org.zwobble.couscous.ast.*;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.frontends.java.GeneratedClosure;
 import org.zwobble.couscous.frontends.java.Scope;
-import org.zwobble.couscous.types.ScalarType;
-import org.zwobble.couscous.types.Type;
-import org.zwobble.couscous.types.TypeParameter;
+import org.zwobble.couscous.types.*;
+import org.zwobble.couscous.util.ExtraIterables;
 import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.util.InsertionOrderSet;
 
@@ -28,6 +27,7 @@ import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeTypePara
 import static org.zwobble.couscous.frontends.java.FreeVariables.findFreeVariables;
 import static org.zwobble.couscous.types.Types.erasure;
 import static org.zwobble.couscous.util.Casts.tryCast;
+import static org.zwobble.couscous.util.ExtraIterables.lazyFlatMap;
 import static org.zwobble.couscous.util.ExtraIterables.lazyMap;
 import static org.zwobble.couscous.util.ExtraLists.list;
 
@@ -36,8 +36,6 @@ public class ClosureGenerator {
         Scope scope,
         ClassNode classNode
     ) {
-        InsertionOrderSet<TypeParameter> freeTypeParameters = InsertionOrderSet.copyOf(
-            findFreeTypeParameters(classNode));
 
         InsertionOrderSet<ReferenceNode> freeVariables = InsertionOrderSet.copyOf(Iterables.filter(
             findFreeVariables(ExtraLists.copyOf(classNode.childNodes())),
@@ -58,10 +56,19 @@ public class ClosureGenerator {
 
         NodeTransformer transformer = replaceCaptureReferencesTransformer(classNode.getName(), capturedVariables);
 
+
+        InsertionOrderSet<TypeParameter> freeTypeParameters = InsertionOrderSet.copyOf(
+            findFreeTypeParameters(classNode));
+        List<FormalTypeParameterNode> typeParameters = InsertionOrderSet.copyOf(ExtraLists.concat(
+            lazyMap(freeTypeParameters, parameter -> formalTypeParameter(parameter)),
+            lazyMap(lazyFlatMap(capturedVariables, variable -> findTypeParameters(variable.field.getType())), parameter -> formalTypeParameter(parameter)),
+            classNode.getTypeParameters()
+        )).asList();
+
         ClassNode generatedClass = transformer.transformClass(new ClassNode(
             classNode.getName(),
             // TODO: generate fresh type parameter and replace in body
-            ExtraLists.concat(lazyMap(freeTypeParameters, parameter -> formalTypeParameter(parameter)), classNode.getTypeParameters()),
+            typeParameters,
             classNode.getSuperTypes(),
             fields,
             list(),
@@ -69,7 +76,31 @@ public class ClosureGenerator {
             classNode.getMethods(),
             classNode.getInnerTypes()
         ));
-        return new GeneratedClosure(generatedClass, freeTypeParameters, freeVariables);
+        return new GeneratedClosure(generatedClass, freeVariables);
+    }
+
+    private static Iterable<TypeParameter> findTypeParameters(Type type) {
+        return type.accept(new Type.Visitor<Iterable<TypeParameter>>() {
+            @Override
+            public Iterable<TypeParameter> visit(ScalarType type) {
+                return ExtraIterables.empty();
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(TypeParameter parameter) {
+                return ExtraIterables.of(parameter);
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(ParameterizedType type) {
+                return lazyFlatMap(type.getParameters(), parameter -> parameter.accept(this));
+            }
+
+            @Override
+            public Iterable<TypeParameter> visit(BoundTypeParameter type) {
+                return type.getValue().accept(this);
+            }
+        });
     }
 
     private static boolean isThisReference(ScalarType name, ReferenceNode reference) {

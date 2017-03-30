@@ -7,14 +7,12 @@ import org.zwobble.couscous.frontends.java.Scope;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Type;
 import org.zwobble.couscous.types.Types;
-import org.zwobble.couscous.util.ExtraLists;
 import org.zwobble.couscous.util.ExtraSets;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.zwobble.couscous.ast.FormalTypeParameterNode.formalTypeParameter;
 import static org.zwobble.couscous.ast.MethodCallNode.methodCall;
 import static org.zwobble.couscous.ast.ReturnNode.returns;
 import static org.zwobble.couscous.ast.ThisReferenceNode.thisReference;
@@ -156,11 +154,10 @@ public class HoistNestedTypes {
                         // TODO: use scope of outer class
                         argument -> scope.formalArgument(argument.getName(), argument.getType()));
                     // TODO: test addition of type parameters (both captured and on type)
-                    List<FormalTypeParameterNode> typeParameters = ExtraLists.concat(lazyMap(closure.getCapturedTypes(), parameter -> formalTypeParameter(parameter)), node.getTypeParameters());
                     MethodNode method = MethodNode.builder(createMethodName(type))
                         .arguments(methodArguments)
-                        .typeParameters(typeParameters)
-                        .returns(addTypeParameters(type, eagerMap(typeParameters, parameter -> parameter.getType())))
+                        .typeParameters(node.getTypeParameters())
+                        .returns(addTypeParameters(type, eagerMap(node.getTypeParameters(), parameter -> parameter.getType())))
                         .statement(returns(closure.generateConstructor(lazyMap(methodArguments, argument -> reference(argument)))))
                         .build();
                     return Optional.of(new HoistedType(
