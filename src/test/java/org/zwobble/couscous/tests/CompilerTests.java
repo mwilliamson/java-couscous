@@ -325,6 +325,18 @@ public abstract class CompilerTests {
     }
 
     @Test
+    public void nestedEnum() throws Exception {
+        assertEquals(
+            value(42),
+            execTestProgram(
+                "nested-enum",
+                ScalarType.topLevel("com.example.NestedEnum"),
+                "value",
+                list(),
+                Types.INT));
+    }
+
+    @Test
     public void stringAdd() throws Exception {
         assertEquals(value("42"), evalExpression(Types.STRING, "\"4\" + \"2\""));
     }

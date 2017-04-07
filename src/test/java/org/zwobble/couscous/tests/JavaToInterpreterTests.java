@@ -32,6 +32,11 @@ public class JavaToInterpreterTests extends CompilerTests {
     public void forEach() throws Exception {
     }
 
+    @Test
+    @Ignore("WIP")
+    public void nestedEnum() throws Exception {
+    }
+
     @Override
     protected PrimitiveValue execProgram(
         Path directory,
