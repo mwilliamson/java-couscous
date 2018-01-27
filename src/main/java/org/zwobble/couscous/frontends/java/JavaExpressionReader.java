@@ -374,6 +374,8 @@ public class JavaExpressionReader {
     private ExpressionNode readPrefixExpression(PrefixExpression expression) {
         if (expression.getOperator() == PrefixExpression.Operator.NOT) {
             return not(readExpression(Types.BOOLEAN, expression.getOperand()));
+        } else if (expression.getOperator() == PrefixExpression.Operator.MINUS) {
+            return Operations.integerNegation(readExpression(Types.INT, expression.getOperand()));
         } else {
             Operator operator = readOperator(expression.getOperator());
             return AssignmentNode.assign(

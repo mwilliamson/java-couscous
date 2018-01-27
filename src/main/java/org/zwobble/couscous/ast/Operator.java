@@ -5,6 +5,7 @@ public enum Operator {
     BOOLEAN_OR("||", true, OperatorType.INFIX),
     BOOLEAN_NOT("!", true, OperatorType.PREFIX),
 
+    INTEGER_NEGATION("-", false, OperatorType.PREFIX),
     ADD("+", false, OperatorType.INFIX),
     SUBTRACT("-", false, OperatorType.INFIX),
     MULTIPLY("*", false, OperatorType.INFIX),

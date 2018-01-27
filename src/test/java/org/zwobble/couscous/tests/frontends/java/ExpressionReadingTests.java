@@ -522,6 +522,41 @@ public class ExpressionReadingTests {
     }
 
     @Test
+    public void canReadPrefixDecrement() {
+        ClassNode classNode = readClass(
+            "public void go(int value) {" +
+                "    --value;" +
+                "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
+        ExpressionStatementNode statement = (ExpressionStatementNode)
+            classNode.getMethods().get(0).getBody().get().get(0);
+        assertEquals(
+            assign(
+                reference(argument),
+                integerSubtract(reference(argument), literal(1))),
+            statement.getExpression());
+    }
+
+    @Test
+    public void canReadIntegerNegation() {
+        ClassNode classNode = readClass(
+            "public int go(int value) {" +
+                "    return -value;" +
+                "}");
+
+        MethodNode method = classNode.getMethods().get(0);
+        FormalArgumentNode argument = method.getArguments().get(0);
+        ReturnNode statement = (ReturnNode)
+            classNode.getMethods().get(0).getBody().get().get(0);
+        assertEquals(
+            integerNegation(reference(argument)),
+            statement.getValue()
+        );
+    }
+
+    @Test
     public void canReadCompoundAssignmentOperations() {
         canReadCompoundAssignmentOperation("+=", Operator.ADD);
         canReadCompoundAssignmentOperation("-=", Operator.SUBTRACT);
@@ -582,24 +617,6 @@ public class ExpressionReadingTests {
             assign(
                 reference(left),
                 boxInt(integerAdd(unboxInt(reference(left)), reference(right)))),
-            statement.getExpression());
-    }
-
-    @Test
-    public void canReadPrefixDecrement() {
-        ClassNode classNode = readClass(
-            "public void go(int value) {" +
-                "    --value;" +
-                "}");
-
-        MethodNode method = classNode.getMethods().get(0);
-        FormalArgumentNode argument = method.getArguments().get(0);
-        ExpressionStatementNode statement = (ExpressionStatementNode)
-            classNode.getMethods().get(0).getBody().get().get(0);
-        assertEquals(
-            assign(
-                reference(argument),
-                integerSubtract(reference(argument), literal(1))),
             statement.getExpression());
     }
 }

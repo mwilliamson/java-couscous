@@ -33,6 +33,10 @@ public class Operations {
         return booleanOperation(Operator.BOOLEAN_OR, left, right);
     }
 
+    public static ExpressionNode integerNegation(ExpressionNode value) {
+        return OperationNode.operation(Operator.INTEGER_NEGATION, list(value), Types.INT);
+    }
+
     public static ExpressionNode integerAdd(ExpressionNode left, ExpressionNode right) {
         return integerOperation(Operator.ADD, left, right);
     }
