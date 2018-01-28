@@ -778,6 +778,7 @@ public class CsharpSerializer {
         public Integer visit(OperationNode operation) {
             switch (operation.getOperator()) {
                 case BOOLEAN_NOT:
+                case INTEGER_NEGATION:
                     return 14;
                 case MULTIPLY:
                 case DIVIDE:
