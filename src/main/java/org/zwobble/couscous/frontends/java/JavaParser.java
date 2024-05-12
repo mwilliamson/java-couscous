@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -19,11 +20,11 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaParser {
     private final ASTParser parser;
-    
+
     public JavaParser() {
         parser = ASTParser.newParser(AST.JLS8);
     }
-    
+
     public CompilationUnit parseCompilationUnit(List<Path> sourcePaths, Path sourcePath) throws IOException {
         parser.setBindingsRecovery(false);
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -38,17 +39,21 @@ public class JavaParser {
 
         String[] sourcePathArguments = Iterables.toArray(
             concat(
-                list("/usr/lib/jvm/java-8-openjdk-amd64/jre/src.zip"),
+                list(jrePath("src.zip")),
                 transform(sourcePaths, Object::toString)),
             String.class);
 
         parser.setEnvironment(
-            new String[]{"/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar"},
+            new String[]{jrePath("lib/rt.jar")},
             sourcePathArguments,
             Iterables.toArray(transform(asList(sourcePathArguments), argument -> "UTF-8"), String.class),
             false);
         final byte[] javaFileBytes = Files.readAllBytes(sourcePath);
         parser.setSource(new String(javaFileBytes, "UTF-8").toCharArray());
         return (CompilationUnit)parser.createAST(null);
+    }
+
+    private String jrePath(String path) {
+        return Paths.get("/usr/lib/jvm/java-8-openjdk-amd64/jre", path).toString();
     }
 }
