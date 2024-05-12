@@ -39,12 +39,12 @@ public class JavaParser {
 
         String[] sourcePathArguments = Iterables.toArray(
             concat(
-                list(jrePath("src.zip")),
+                list(jdkPath("src.zip")),
                 transform(sourcePaths, Object::toString)),
             String.class);
 
         parser.setEnvironment(
-            new String[]{jrePath("lib/rt.jar")},
+            new String[]{jdkPath("jre/lib/rt.jar")},
             sourcePathArguments,
             Iterables.toArray(transform(asList(sourcePathArguments), argument -> "UTF-8"), String.class),
             false);
@@ -53,8 +53,9 @@ public class JavaParser {
         return (CompilationUnit)parser.createAST(null);
     }
 
-    private String jrePath(String relativePath) {
-        Path fullPath = Paths.get("/usr/lib/jvm/java-8-openjdk-amd64/jre", relativePath);
+    private String jdkPath(String relativePath) {
+        // TODO: allow this to be configured
+        Path fullPath = Paths.get("/usr/lib/jvm/temurin-8-jdk-amd64", relativePath);
         if (!fullPath.toFile().exists()) {
             throw new RuntimeException("Missing JRE file: " + fullPath);
         }
