@@ -53,7 +53,11 @@ public class JavaParser {
         return (CompilationUnit)parser.createAST(null);
     }
 
-    private String jrePath(String path) {
-        return Paths.get("/usr/lib/jvm/java-8-openjdk-amd64/jre", path).toString();
+    private String jrePath(String relativePath) {
+        Path fullPath = Paths.get("/usr/lib/jvm/java-8-openjdk-amd64/jre", relativePath);
+        if (!fullPath.toFile().exists()) {
+            throw new RuntimeException("Missing JRE file: " + fullPath);
+        }
+        return fullPath.toString();
     }
 }
