@@ -43,6 +43,8 @@ public class JavaTypes {
             return Types.array(typeOf(typeBinding.getElementType()));
         }
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
+        if (outerClass == null) outerClass = typeBinding.getErasure().getDeclaringClass();
+        
         if (typeBinding.isTypeVariable()) {
             Identifier declaringScope = getDeclaringScope(typeBinding);
             return new TypeParameter(declaringScope, typeBinding.getName());
