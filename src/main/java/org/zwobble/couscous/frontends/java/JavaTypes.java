@@ -42,9 +42,14 @@ public class JavaTypes {
         if (typeBinding.isArray()) {
             return Types.array(typeOf(typeBinding.getElementType()));
         }
+
+        if (typeBinding.isCapture()) {
+            typeBinding = typeBinding.getErasure();
+        }
+
         ITypeBinding outerClass = typeBinding.getDeclaringClass();
         if (outerClass == null) outerClass = typeBinding.getErasure().getDeclaringClass();
-        
+
         if (typeBinding.isTypeVariable()) {
             Identifier declaringScope = getDeclaringScope(typeBinding);
             return new TypeParameter(declaringScope, typeBinding.getName());
