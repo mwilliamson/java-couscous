@@ -20,9 +20,18 @@ import static org.zwobble.couscous.util.ExtraLists.list;
 
 public class JavaParser {
     private final ASTParser parser;
+    private final String javaDir;
 
     public JavaParser() {
         parser = ASTParser.newParser(AST.JLS8);
+
+        String java = System.getenv("JAVA_HOME");
+        if (java == null || java.isEmpty()) {
+            java = "/usr/lib/jvm/temurin-8-jdk-amd64";
+        }
+
+        System.out.println("Using JAVA_HOME: '" + java + "'");
+        javaDir = java;
     }
 
     public CompilationUnit parseCompilationUnit(List<Path> sourcePaths, Path sourcePath) throws IOException {
@@ -54,8 +63,7 @@ public class JavaParser {
     }
 
     private String jdkPath(String relativePath) {
-        // TODO: allow this to be configured
-        Path fullPath = Paths.get("/usr/lib/jvm/temurin-8-jdk-amd64", relativePath);
+        Path fullPath = Paths.get(javaDir, relativePath);
         if (!fullPath.toFile().exists()) {
             throw new RuntimeException("Missing JRE file: " + fullPath);
         }
