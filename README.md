@@ -104,7 +104,7 @@ Operator | Precedence (serialisation)
 `and` | 20
 `not x`  | 40
 `in`, `not in`, `is`, `is not`, `<`, `<=`, `>`, `>=`, `!=`, `==` | 50
-`|` | 60
+`\|` | 60
 `^` | 70
 `&` | 80
 `<<`, `>>` | 90
@@ -114,4 +114,4 @@ Operator | Precedence (serialisation)
 `**` | 130
 `await x` | 140
 `x[index]`, `x[index:index]`, `x(arguments...)`, `x.attribute` | 150
-`(expressions...)`, `[expressions...]`, `{key: value...}`, `{expressions...}`` | 160
+`(expressions...)`, `[expressions...]`, `{key: value...}`, `{expressions...}` | 160
