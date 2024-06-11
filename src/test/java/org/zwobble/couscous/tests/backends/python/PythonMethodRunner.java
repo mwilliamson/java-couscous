@@ -53,7 +53,7 @@ public class PythonMethodRunner implements MethodRunner {
             List<PrimitiveValue> arguments,
             Type returnType)
             throws IOException, InterruptedException {
-        
+
         String argumentsString = Joiner.on(", ").join(arguments.stream().map(PythonCodeGenerator::generateCode).map(PythonSerializer::serialize).iterator());
         MethodSignature signature = signature(
             methodName,
@@ -63,7 +63,7 @@ public class PythonMethodRunner implements MethodRunner {
         String program = "from couscous." + className.getQualifiedName() + " import " + className.getSimpleName() + ";" +
             "value = " + className.getSimpleName() + "." + pythonMethodName + "(" + argumentsString + ");" +
             "print(type(value)); print(value)";
-        ExecutionResult result = Processes.run(list("python3.4", "-c", program), directoryPath);
+        ExecutionResult result = Processes.run(list("python3.11", "-c", program), directoryPath);
         result.assertSuccess();
         return readPrimitive(result.getStdout());
     }
