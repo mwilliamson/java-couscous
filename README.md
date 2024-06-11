@@ -2,6 +2,9 @@
 
 Convert Java source code to other languages. C# and Python currently supported.
 
+This project was intended as a fun side project, and has many oddities.
+Using it in production is not recommended!
+
 ## Hello world: Java to C#
 
 1.  Build the JAR:
