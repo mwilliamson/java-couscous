@@ -1,7 +1,10 @@
 package org.zwobble.couscous.backends.csharp.primitives;
 
 import com.google.common.collect.ImmutableMap;
-import org.zwobble.couscous.ast.*;
+import org.zwobble.couscous.ast.ExpressionNode;
+import org.zwobble.couscous.ast.MethodCallNode;
+import org.zwobble.couscous.ast.Operator;
+import org.zwobble.couscous.ast.Receiver;
 import org.zwobble.couscous.ast.visitors.NodeTransformer;
 import org.zwobble.couscous.types.ScalarType;
 import org.zwobble.couscous.types.Types;
@@ -144,12 +147,18 @@ public class CsharpPrimitiveMethods {
             ))
 
             .put("parseInt", new PrimitiveStaticMethod(
-                arguments -> staticMethodCall(
-                    ScalarType.topLevel("int"),
-                    "Parse",
-                    list(arguments.get(0)),
-                    ScalarType.topLevel("int")
-                ),
+                arguments -> {
+                    if (arguments.size() == 1 || arguments.size() == 2) {
+                        return staticMethodCall(
+                            ScalarType.topLevel("System.Convert"),
+                            "ToInt32",
+                            arguments,
+                            ScalarType.topLevel("int")
+                        );
+                    } else {
+                        throw new IllegalArgumentException();
+                    }
+                },
                 Types.INT
             ))
 
