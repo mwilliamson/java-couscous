@@ -119,7 +119,8 @@ public class ClosureGenerator {
             @Override
             public FieldDeclarationNode visit(ThisReferenceNode thisReference) {
                 Type type = thisReference.getType();
-                String name = "this_" + erasure(type).getQualifiedName().replace(".", "__");
+                String name = String.join("__", erasure(type).getTypeNames()).replace(".", "__");
+                name = name.substring(0, 1).toLowerCase() + name.substring(1);
                 return field(name, type);
             }
         });
